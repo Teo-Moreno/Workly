@@ -1,0 +1,30 @@
+@model Oferta
+@{
+    var seleccionada = ViewData["Seleccionada"] is true;
+    var oculta = ViewData["Oculta"] is true;
+}
+@* Tarjeta de resultado (Figma › Media · WF 02 › Resultados) *@
+<article class="oferta-tarjeta @(seleccionada ? "es-seleccionada" : "")" data-oferta="@Model.Id" hidden="@oculta">
+    <div class="oferta-tarjeta__cabecera">
+        <span class="logo-empresa" aria-hidden="true">@Model.Iniciales</span>
+        <div class="oferta-tarjeta__datos">
+            <h3 class="oferta-tarjeta__puesto">
+                <a asp-controller="Empleos" asp-action="Detalle" asp-route-id="@Model.Id" data-oferta-enlace>@Model.Puesto</a>
+            </h3>
+            <p class="oferta-tarjeta__meta">@Model.Empresa · @Model.Ubicacion</p>
+        </div>
+        <span class="match @(Model.Match < 80 ? "match--media" : "")"><icono nombre="circle-check" />@Model.Match% match</span>
+    </div>
+    <div class="lista-tags">
+        <span class="tag tag--borde">@Model.Modalidad</span>
+        <span class="tag tag--borde">@Model.Nivel</span>
+        @foreach (var tecnologia in Model.Tecnologias.Take(2))
+        {
+            <span class="tag">@tecnologia</span>
+        }
+    </div>
+    <div class="oferta-tarjeta__pie">
+        <span class="oferta-tarjeta__salario">@Model.Salario</span>
+        <span class="oferta-tarjeta__fecha">@Model.Publicado</span>
+    </div>
+</article>

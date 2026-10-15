@@ -1,0 +1,44 @@
+@model Postulacion
+@* Tarjeta del tablero (Figma › Media · WF 03 › Tablero) *@
+<article class="postulacion" draggable="true" data-postulacion="@Model.Id" aria-label="@Model.Puesto en @Model.Empresa">
+    <div class="postulacion__cabecera">
+        <span class="logo-empresa logo-empresa--sm" aria-hidden="true">@Model.Iniciales</span>
+        <div class="postulacion__datos">
+            <h3 class="postulacion__puesto">@Model.Puesto</h3>
+            <p class="postulacion__empresa">@Model.Empresa · @Model.Ubicacion</p>
+        </div>
+        <span class="postulacion__arrastre" aria-hidden="true"><icono nombre="drag" tamano="18" /></span>
+    </div>
+
+    <span class="etiqueta etiqueta--@Model.Tono">@Model.Etapa</span>
+
+    @if (Model.DestacadoTitulo != null)
+    {
+        <div class="postulacion__destacado postulacion__destacado--@Model.Tono">
+            @if (Model.Estado == EstadoPostulacion.Entrevista)
+            {
+                <icono nombre="video" tamano="18" />
+            }
+            else
+            {
+                <icono nombre="circle-check-outline" tamano="18" />
+            }
+            <div>
+                <strong>@Model.DestacadoTitulo</strong>
+                <span>@Model.DestacadoTexto</span>
+            </div>
+        </div>
+    }
+
+    <div class="postulacion__pie">
+        <span>@Model.Actualizado</span>
+        @if (Model.OfertaId.HasValue)
+        {
+            <a class="enlace enlace--principal" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@Model.OfertaId">Ver detalle</a>
+        }
+        else
+        {
+            <a class="enlace enlace--principal" href="#" data-sin-detalle>Ver detalle</a>
+        }
+    </div>
+</article>

@@ -1,0 +1,117 @@
+@{
+    var notificaciones = DatosDeEjemplo.Notificaciones;
+    var sinLeer = notificaciones.Count(n => !n.Leida);
+}
+@functions {
+    private string? Actual(string controlador) =>
+        string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), controlador, StringComparison.OrdinalIgnoreCase)
+            ? "page"
+            : null;
+
+    private string Activo(string controlador) => Actual(controlador) != null ? "esta-activo" : "";
+}
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <partial name="_Head" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="es-app @ViewData["ClaseBody"]">
+    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+
+    <header class="navbar navbar--app" data-navbar>
+        <div class="contenedor navbar__interior">
+            <a class="logo" asp-controller="Panel" asp-action="Index" aria-label="Workly, ir a tu inicio">
+                <span class="logo__isotipo" aria-hidden="true">W<span class="logo__acento"></span></span>
+                <span class="logo__texto">Workly</span>
+            </a>
+
+            <nav class="navbar__links" aria-label="Principal">
+                <a class="navbar__link @Activo("Panel")" aria-current="@Actual("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a>
+                <a class="navbar__link @Activo("Empleos")" aria-current="@Actual("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+                <a class="navbar__link @Activo("Postulaciones")" aria-current="@Actual("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
+                <a class="navbar__link @Activo("Empresas")" aria-current="@Actual("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+                <a class="navbar__link @Activo("Perfil")" aria-current="@Actual("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
+            </nav>
+
+            <div class="navbar__acciones">
+                <div class="desplegable" data-desplegable>
+                    <button class="boton-notificaciones" type="button" aria-expanded="false" aria-controls="panel-notificaciones" data-desplegable-boton>
+                        <icono nombre="notification" />
+                        <span class="boton-notificaciones__texto"><span data-contador-notificaciones>@sinLeer</span> notificaciones</span>
+                        <span class="boton-notificaciones__contador" data-contador-notificaciones data-cantidad="@sinLeer">@sinLeer</span>
+                        <span class="solo-lectores">Abrir notificaciones</span>
+                    </button>
+                    <div class="desplegable__panel panel-notificaciones" id="panel-notificaciones" data-desplegable-panel>
+                        <partial name="_PanelNotificaciones" model="notificaciones" />
+                    </div>
+                </div>
+
+                <div class="desplegable" data-desplegable>
+                    <button class="boton-usuario" type="button" aria-expanded="false" aria-controls="menu-usuario" data-desplegable-boton>
+                        <span class="avatar" aria-hidden="true">SM</span>
+                        <span class="boton-usuario__datos">
+                            <span class="boton-usuario__nombre">Sofía Martínez</span>
+                            <span class="boton-usuario__rol">Frontend Jr</span>
+                        </span>
+                        <icono nombre="chevron-down" />
+                        <span class="solo-lectores">Abrir menú de cuenta</span>
+                    </button>
+                    <div class="desplegable__panel" id="menu-usuario" data-desplegable-panel>
+                        <div class="menu__cabecera">
+                            <strong class="boton-usuario__nombre">Sofía Martínez</strong>
+                            <span class="boton-usuario__rol">sofia.martinez@mail.com</span>
+                        </div>
+                        <ul class="menu" role="list">
+                            <li><a class="menu__item" asp-controller="Perfil" asp-action="Index"><icono nombre="user-square" />Mi perfil</a></li>
+                            <li><a class="menu__item" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="settings" />Configuración</a></li>
+                            <li><a class="menu__item" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias"><icono nombre="slider-03" />Preferencias</a></li>
+                            <li><a class="menu__item" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a></li>
+                            <li class="menu__separador" role="separator"></li>
+                            <li><a class="menu__item menu__item--peligro" asp-controller="Home" asp-action="Index"><icono nombre="log-out" />Cerrar sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button class="navbar__hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
+                    <icono nombre="menu" etiqueta="Abrir menú" />
+                </button>
+            </div>
+        </div>
+
+        <nav class="navbar__movil" id="menu-movil" aria-label="Menú móvil">
+            <a class="navbar__link @Activo("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a>
+            <a class="navbar__link @Activo("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+            <a class="navbar__link @Activo("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
+            <a class="navbar__link @Activo("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+            <a class="navbar__link @Activo("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
+        </nav>
+    </header>
+
+    <main id="contenido">
+        @RenderBody()
+    </main>
+
+    <footer class="pie pie--app">
+        <div class="contenedor pie__interior">
+            <a class="logo logo--chico" asp-controller="Panel" asp-action="Index" aria-label="Workly, ir a tu inicio">
+                <span class="logo__isotipo" aria-hidden="true">W<span class="logo__acento"></span></span>
+                <span class="logo__texto">Workly</span>
+            </a>
+            <p class="pie__copy">© 2026 Workly · Hecho en Buenos Aires, Argentina</p>
+            <nav class="pie__links" aria-label="Legales y ayuda">
+                <a asp-controller="Home" asp-action="Terminos">Términos</a>
+                <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                <a asp-controller="Perfil" asp-action="Ayuda">Ayuda</a>
+                <a href="mailto:hola@workly.com.ar"><icono nombre="mail" />Contacto</a>
+            </nav>
+        </div>
+    </footer>
+
+    <partial name="_ModalPostular" />
+    <div class="snackbars" aria-live="polite" data-snackbars></div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

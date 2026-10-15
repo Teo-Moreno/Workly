@@ -1,0 +1,167 @@
+@model PostulacionesViewModel
+@{
+    ViewData["Title"] = "Mis postulaciones";
+    var columnas = new[]
+    {
+        (Estado: EstadoPostulacion.Enviada, Nombre: "Enviadas", Color: "info"),
+        (Estado: EstadoPostulacion.EnRevision, Nombre: "En revisión", Color: "advertencia"),
+        (Estado: EstadoPostulacion.Entrevista, Nombre: "Entrevistas", Color: "secundario"),
+        (Estado: EstadoPostulacion.Finalizada, Nombre: "Finalizadas", Color: "exito")
+    };
+}
+@* Mis postulaciones (Figma › Media · WF 03 · Postulaciones) *@
+
+<div class="contenedor seccion-app">
+    <header class="encabezado-pagina">
+        <div class="encabezado-pagina__fila">
+            <div>
+                <h1 class="encabezado-pagina__titulo">Mis postulaciones</h1>
+                <p class="encabezado-pagina__bajada">Seguí el estado de cada proceso y tus próximos pasos en un solo lugar.</p>
+            </div>
+            <div class="encabezado-pagina__acciones">
+                <button class="boton boton--contorno" type="button" data-confirmar-accion="Descargamos tus postulaciones en un archivo CSV.">
+                    <icono nombre="download" />Exportar
+                </button>
+                <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar más ofertas</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="resumen" aria-label="Resumen de tus postulaciones">
+        <article class="resumen__item">
+            <div class="resumen__cabecera"><span>Postulaciones enviadas</span><span class="punto resumen__punto--info"></span></div>
+            <strong class="resumen__valor">11</strong>
+            <span class="resumen__detalle"><icono nombre="trending-up" tamano="16" />+3 esta semana</span>
+        </article>
+        <article class="resumen__item">
+            <div class="resumen__cabecera"><span>En revisión</span><span class="punto resumen__punto--advertencia"></span></div>
+            <strong class="resumen__valor">3</strong>
+            <span class="resumen__detalle"><icono nombre="alarm" tamano="16" />Respuesta promedio: 6 días</span>
+        </article>
+        <article class="resumen__item">
+            <div class="resumen__cabecera"><span>Entrevistas agendadas</span><span class="punto resumen__punto--secundario"></span></div>
+            <strong class="resumen__valor">2</strong>
+            <span class="resumen__detalle"><icono nombre="calendar" tamano="16" />Próxima: jue 1 oct, 15:00</span>
+        </article>
+        <article class="resumen__item resumen__item--destacado">
+            <div class="resumen__cabecera"><span>Oferta recibida</span><span class="punto resumen__punto--exito"></span></div>
+            <strong class="resumen__valor">1</strong>
+            <span class="resumen__detalle"><icono nombre="warning-outline" tamano="16" />Respondé antes del vie 2 oct</span>
+        </article>
+    </section>
+
+    <div data-pestanas data-pestanas-hash>
+        <div class="postulaciones-barra">
+            <div class="segmentado" role="tablist" aria-label="Vista de postulaciones">
+                <button class="segmentado__boton esta-activa" type="button" role="tab" aria-selected="true" data-pestana="tablero"><icono nombre="grid" />Tablero</button>
+                <button class="segmentado__boton" type="button" role="tab" aria-selected="false" data-pestana="lista"><icono nombre="list" />Lista</button>
+                <button class="segmentado__boton" type="button" role="tab" aria-selected="false" data-pestana="guardadas"><icono nombre="bookmark" />Guardadas <span class="segmentado__contador">@Model.Guardadas.Count</span></button>
+                <button class="segmentado__boton" type="button" role="tab" aria-selected="false" data-pestana="archivadas"><icono nombre="archive" />Archivadas <span class="segmentado__contador">@Model.Archivadas.Count</span></button>
+            </div>
+            <p class="postulaciones-barra__orden">
+                <icono nombre="drag" tamano="18" />Arrastrá las tarjetas para moverlas · Ordenado por última actualización
+            </p>
+        </div>
+
+        @* Tablero *@
+        <div class="tablero" role="tabpanel" data-panel="tablero">
+            @foreach (var columna in columnas)
+            {
+                var postulaciones = Model.PorEstado(columna.Estado).ToList();
+                <section class="tablero__columna" data-columna aria-label="@columna.Nombre">
+                    <header class="tablero__cabecera">
+                        <span class="punto resumen__punto--@columna.Color"></span>
+                        <h2 class="tablero__titulo" data-columna-nombre>@columna.Nombre</h2>
+                        <span class="tablero__contador" data-columna-contador>@postulaciones.Count</span>
+                    </header>
+                    <div class="tablero__lista" data-columna-lista>
+                        @foreach (var postulacion in postulaciones)
+                        {
+                            <partial name="_PostulacionTarjeta" model="postulacion" />
+                        }
+                    </div>
+                    <p class="tablero__vacio">Soltá acá una postulación</p>
+                </section>
+            }
+        </div>
+
+        @* Lista *@
+        <div class="tabla-contenedor" role="tabpanel" data-panel="lista" hidden>
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th scope="col">Puesto</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Etapa</th>
+                        <th scope="col">Última actualización</th>
+                        <th scope="col"><span class="solo-lectores">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var postulacion in Model.Activas)
+                    {
+                        <tr>
+                            <td>
+                                <div class="tabla__puesto">
+                                    <span class="logo-empresa logo-empresa--sm" aria-hidden="true">@postulacion.Iniciales</span>
+                                    <span><strong>@postulacion.Puesto</strong><span>@postulacion.Empresa · @postulacion.Ubicacion</span></span>
+                                </div>
+                            </td>
+                            <td>@postulacion.EstadoTexto</td>
+                            <td><span class="etiqueta etiqueta--@postulacion.Tono">@postulacion.Etapa</span></td>
+                            <td class="texto-suave">@postulacion.Actualizado</td>
+                            <td class="tabla__accion">
+                                @if (postulacion.OfertaId.HasValue)
+                                {
+                                    <a class="enlace enlace--principal" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@postulacion.OfertaId">Ver detalle</a>
+                                }
+                                else
+                                {
+                                    <a class="enlace enlace--principal" href="#" data-sin-detalle>Ver detalle</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Guardadas *@
+        <div role="tabpanel" data-panel="guardadas" hidden>
+            <div class="grilla-ofertas">
+                @foreach (var oferta in Model.Guardadas)
+                {
+                    <partial name="_OfertaTarjeta" model="oferta" />
+                }
+            </div>
+        </div>
+
+        @* Archivadas *@
+        <div class="tabla-contenedor" role="tabpanel" data-panel="archivadas" hidden>
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th scope="col">Puesto</th>
+                        <th scope="col">Resultado</th>
+                        <th scope="col">Cierre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var postulacion in Model.Archivadas)
+                    {
+                        <tr>
+                            <td>
+                                <div class="tabla__puesto">
+                                    <span class="logo-empresa logo-empresa--sm logo-empresa--principal" aria-hidden="true">@postulacion.Iniciales</span>
+                                    <span><strong>@postulacion.Puesto</strong><span>@postulacion.Empresa · @postulacion.Ubicacion</span></span>
+                                </div>
+                            </td>
+                            <td><span class="etiqueta etiqueta--@postulacion.Tono">@postulacion.Etapa</span></td>
+                            <td class="texto-suave">@postulacion.Actualizado</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
