@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+@section Barra {
+    <p class="texto-suave">¿No tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a></p>
+}
+
+<div class="cuenta-tarjeta">
+    <h1 class="cuenta-tarjeta__titulo">Iniciá sesión</h1>
+    <p class="cuenta-tarjeta__bajada">Seguí tu búsqueda donde la dejaste.</p>
+
+    <form class="formulario" data-demo-form="¡Hola de nuevo, Sofía!" data-redirigir="@Url.Action("Index", "Panel")" novalidate>
+        <div class="campo">
+            <label class="campo__etiqueta" for="login-email">Email</label>
+            <div class="control-con-icono">
+                <icono nombre="mail" />
+                <input class="campo__control" id="login-email" type="email" autocomplete="email" placeholder="tu@mail.com" value="sofia.martinez@mail.com" required />
+            </div>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="login-clave">Contraseña</label>
+            <div class="control-con-icono">
+                <icono nombre="lock" />
+                <input class="campo__control" id="login-clave" type="password" autocomplete="current-password" placeholder="Tu contraseña" required />
+                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+            </div>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá tu contraseña</span>
+        </div>
+
+        <div class="fila fila--entre fila--envolver">
+            <label class="casilla casilla--sm">
+                <input type="checkbox" checked />
+                <span class="casilla__caja"><icono nombre="check" /></span>
+                Recordarme
+            </label>
+            <a class="enlace" asp-controller="Cuenta" asp-action="RecuperarClave">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button class="boton boton--lg boton--bloque" type="submit">Iniciar sesión</button>
+    </form>
+
+    <div class="separador"><span>o</span></div>
+
+    <a class="boton boton--contorno boton--bloque" asp-controller="Cuenta" asp-action="CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
+
+    <p class="cuenta-tarjeta__legal">Al ingresar aceptás los <a class="enlace" asp-controller="Home" asp-action="Terminos">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy">Política de privacidad</a> de Workly.</p>
+</div>

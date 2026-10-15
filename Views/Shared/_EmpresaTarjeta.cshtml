@@ -1,0 +1,36 @@
+@model Empresa
+@* Tarjeta de empresa (Figma › Media · WF 04 › Grilla de empresas) *@
+<article class="empresa-tarjeta" data-empresa data-categorias="@string.Join("|", Model.Categorias)" data-nombre="@Model.Nombre.ToLowerInvariant()">
+    <div class="empresa-tarjeta__cabecera">
+        <span class="logo-empresa logo-empresa--md" aria-hidden="true">@Model.Iniciales</span>
+        <div class="empresa-tarjeta__datos">
+            <h3 class="empresa-tarjeta__nombre">
+                <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.Id">@Model.Nombre</a>
+            </h3>
+            <p class="empresa-tarjeta__industria">@Model.Industria · @Model.Ubicacion</p>
+        </div>
+        <button class="boton boton--contorno boton--sm" type="button" aria-pressed="false" data-seguir>
+            <icono nombre="plus" /><span data-seguir-texto>Seguir</span>
+        </button>
+    </div>
+
+    <p class="empresa-tarjeta__descripcion">@Model.Descripcion</p>
+
+    <dl class="empresa-tarjeta__datos-clave">
+        <div><dt>empleados</dt><dd>@Model.Empleados</dd></div>
+        <div><dt>búsquedas activas</dt><dd>@Model.BusquedasActivas</dd></div>
+        <div><dt>valoración</dt><dd>@Model.Valoracion / 5</dd></div>
+    </dl>
+
+    <div class="lista-tags">
+        @foreach (var beneficio in Model.Beneficios)
+        {
+            <span class="tag tag--borde tag--lg">@beneficio</span>
+        }
+    </div>
+
+    <div class="empresa-tarjeta__pie">
+        <a class="enlace" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.Id" asp-fragment="ofertas">Ver @Model.BusquedasActivas búsquedas →</a>
+        <span class="empresa-tarjeta__responde"><icono nombre="alarm" tamano="16" />Responde en @Model.RespondeEn</span>
+    </div>
+</article>

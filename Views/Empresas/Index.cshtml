@@ -1,0 +1,107 @@
+@model List<Empresa>
+@{
+    ViewData["Title"] = "Empresas";
+    var industrias = new[] { "Todas", "Tecnología", "Fintech", "E-commerce", "Consultoría", "Turismo", "Logística", "Salud" };
+}
+@* Empresas (Figma › Media · WF 04 · Empresas) *@
+
+<div class="contenedor seccion-app">
+    <header class="empresas-encabezado">
+        <span class="etiqueta">Empresas</span>
+        <h1 class="texto-titulo-2">Conocé las empresas que están contratando</h1>
+        <p class="encabezado-pagina__bajada">Mirá su cultura, beneficios y búsquedas abiertas antes de postularte.</p>
+    </header>
+
+    <form class="buscador-empresas" role="search" aria-label="Buscar empresas">
+        <div class="control-con-icono buscador-empresas__nombre">
+            <icono nombre="search" />
+            <label class="solo-lectores" for="buscar-empresa">Buscar por nombre de empresa</label>
+            <input class="campo__control" id="buscar-empresa" type="search" placeholder="Buscar por nombre de empresa…" autocomplete="off" data-buscar-empresa />
+        </div>
+        <label class="solo-lectores" for="filtro-industria">Industria</label>
+        <select class="campo__control" id="filtro-industria">
+            <option>Industria: Todas</option>
+            <option>Tecnología</option>
+            <option>Fintech</option>
+            <option>E-commerce</option>
+        </select>
+        <label class="solo-lectores" for="filtro-ubicacion">Ubicación</label>
+        <select class="campo__control" id="filtro-ubicacion">
+            <option>Ubicación: Argentina</option>
+            <option>CABA</option>
+            <option>Córdoba</option>
+            <option>Rosario</option>
+        </select>
+        <button class="boton" type="submit">Buscar</button>
+    </form>
+
+    <div class="chips-industria" aria-label="Filtrar por industria">
+        @foreach (var industria in industrias)
+        {
+            <button class="chip" type="button" aria-pressed="@(industria == "Todas" ? "true" : "false")" data-industria="@industria">@industria</button>
+        }
+    </div>
+
+    <div class="empresas-barra">
+        <p><strong>1.850 empresas</strong> · Mostrando las que más contratan esta semana</p>
+        <div class="ordenar">
+            <span>Ordenar por:</span>
+            <div class="desplegable" data-desplegable>
+                <button class="ordenar__boton" type="button" aria-expanded="false" aria-controls="menu-ordenar-empresas" data-desplegable-boton>
+                    <span data-ordenar-valor>Más búsquedas activas</span><icono nombre="chevron-down" />
+                </button>
+                <div class="desplegable__panel" id="menu-ordenar-empresas" data-desplegable-panel>
+                    <ul class="menu" role="list" data-ordenar>
+                        <li><button class="menu__item esta-activo" type="button">Más búsquedas activas</button></li>
+                        <li><button class="menu__item" type="button">Mejor valoración</button></li>
+                        <li><button class="menu__item" type="button">Responden más rápido</button></li>
+                        <li><button class="menu__item" type="button">A-Z</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grilla-empresas" data-grilla-empresas>
+        @foreach (var empresa in Model)
+        {
+            <partial name="_EmpresaTarjeta" model="empresa" />
+        }
+    </div>
+
+    <div class="estado-vacio" hidden data-empresas-vacio>
+        <span class="caja-icono caja-icono--acento"><icono nombre="building" /></span>
+        <h2 class="texto-titulo-4">No encontramos empresas con ese filtro</h2>
+        <p class="texto-suave">Probá con otra industria o buscá por otro nombre.</p>
+    </div>
+
+    <div class="paginacion-contenedor">
+        <nav class="paginacion" aria-label="Paginación">
+            <a class="paginacion__item" href="#" aria-label="Página anterior"><icono nombre="chevron-left" /></a>
+            <a class="paginacion__item" href="#" aria-current="page">1</a>
+            <a class="paginacion__item" href="#">2</a>
+            <a class="paginacion__item" href="#">3</a>
+            <a class="paginacion__item" href="#">4</a>
+            <span class="paginacion__item" aria-hidden="true">…</span>
+            <a class="paginacion__item" href="#">62</a>
+            <a class="paginacion__item" href="#" aria-label="Página siguiente"><icono nombre="chevron-right" /></a>
+        </nav>
+    </div>
+
+    <section class="para-empresas" id="para-empresas" aria-labelledby="para-empresas-titulo">
+        <div class="para-empresas__texto">
+            <span class="etiqueta etiqueta--acento">Para empresas</span>
+            <h2 class="para-empresas__titulo" id="para-empresas-titulo">¿Buscás talento? Publicá tu búsqueda y recibí candidatos compatibles.</h2>
+            <p class="para-empresas__bajada">Workly ordena a los postulantes según las habilidades, experiencia y expectativas que definas. Menos CVs para filtrar, mejores entrevistas.</p>
+            <div class="fila fila--envolver">
+                <button class="boton boton--acento" type="button" data-confirmar-accion="¡Gracias! Un asesor de Workly se va a comunicar con vos." data-tipo="exito">Publicar una búsqueda</button>
+                <a class="boton boton--contorno-blanco" href="#para-empresas">Ver planes</a>
+            </div>
+        </div>
+        <ul class="para-empresas__datos" role="list">
+            <li><strong>+320.000</strong><span>candidatos con perfil completo</span></li>
+            <li><strong>72 hs</strong><span>promedio para recibir los primeros 10 postulantes</span></li>
+            <li><strong>3x</strong><span>más entrevistas con candidatos compatibles</span></li>
+        </ul>
+    </section>
+</div>
