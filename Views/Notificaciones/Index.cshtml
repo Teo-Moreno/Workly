@@ -1,0 +1,44 @@
+@model List<Notificacion>
+@{
+    ViewData["Title"] = "Notificaciones";
+    var sinLeer = Model.Where(n => !n.Leida).ToList();
+    var leidas = Model.Where(n => n.Leida).ToList();
+}
+@* Notificaciones (Figma › Guidelines › 07. Notificaciones), versión página completa *@
+
+<div class="contenedor contenedor--angosto seccion-app">
+    <header class="encabezado-pagina">
+        <div class="encabezado-pagina__fila">
+            <div>
+                <h1 class="encabezado-pagina__titulo">Notificaciones</h1>
+                <p class="encabezado-pagina__bajada">Todo lo que pasó con tus búsquedas y postulaciones.</p>
+            </div>
+            <div class="encabezado-pagina__acciones">
+                <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="notificaciones"><icono nombre="settings" />Ajustes</a>
+                <button class="boton" type="button" data-marcar-leidas><icono nombre="check" />Marcar todas como leídas</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="tarjeta tarjeta--lg" data-pestanas>
+        <div class="segmentado" role="tablist" aria-label="Filtrar notificaciones">
+            <button class="segmentado__boton esta-activa" type="button" role="tab" aria-selected="true" data-pestana="todas">Todas <span class="segmentado__contador">@Model.Count</span></button>
+            <button class="segmentado__boton" type="button" role="tab" aria-selected="false" data-pestana="no-leidas">No leídas <span class="segmentado__contador">@sinLeer.Count</span></button>
+            <button class="segmentado__boton" type="button" role="tab" aria-selected="false" data-pestana="leidas">Leídas <span class="segmentado__contador">@leidas.Count</span></button>
+        </div>
+
+        @foreach (var (panel, lista) in new[] { ("todas", Model), ("no-leidas", sinLeer), ("leidas", leidas) })
+        {
+            <div class="lista-notificaciones" role="tabpanel" data-panel="@panel" hidden="@(panel != "todas")">
+                @foreach (var notificacion in lista)
+                {
+                    <a class="notificacion notificacion--grande @(notificacion.Leida ? "" : "es-no-leida")" href="@notificacion.Enlace" data-notificacion>
+                        <span class="notificacion__titulo">@notificacion.Titulo</span>
+                        <span class="notificacion__texto">@notificacion.Texto</span>
+                        <span class="notificacion__fecha">@notificacion.Fecha</span>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>

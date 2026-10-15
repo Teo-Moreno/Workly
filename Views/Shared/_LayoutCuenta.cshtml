@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <partial name="_Head" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="es-blanco">
+    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+
+    <div class="cuenta">
+        <aside class="cuenta__marca">
+            <a class="logo logo--claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
+                <span class="logo__isotipo" aria-hidden="true">W<span class="logo__acento"></span></span>
+                <span class="logo__texto">Workly</span>
+            </a>
+
+            <div class="cuenta__mensaje">
+                <span class="etiqueta etiqueta--acento">Por qué Workly</span>
+                <p class="cuenta__titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></p>
+                <ul class="cuenta__lista" role="list">
+                    <li>
+                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="circle-check-outline" /></span>
+                        <span><strong>Más simple.</strong> Puesto, modalidad, requisitos y salario claros en cada oferta.</span>
+                    </li>
+                    <li>
+                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="settings" /></span>
+                        <span><strong>Más personalizado.</strong> Oportunidades ordenadas según tu perfil y expectativas.</span>
+                    </li>
+                    <li>
+                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="checkbox-checked" /></span>
+                        <span><strong>Más organizado.</strong> Todas tus postulaciones y próximos pasos en un solo tablero.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cuenta__datos">
+                <div><strong>12.400+</strong><span>ofertas activas</span></div>
+                <div><strong>1.850</strong><span>empresas contratando</span></div>
+                <div><strong>4 min</strong><span>para crear tu perfil</span></div>
+            </div>
+        </aside>
+
+        <main class="cuenta__contenido" id="contenido">
+            <div class="cuenta__barra">
+                <a class="enlace enlace--principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
+                @await RenderSectionAsync("Barra", required: false)
+            </div>
+            <div class="cuenta__formulario">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <div class="snackbars" aria-live="polite" data-snackbars></div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
