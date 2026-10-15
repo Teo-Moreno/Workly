@@ -1,0 +1,131 @@
+@model PanelViewModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+@* Inicio de la persona logueada: resume coincidencias, entrevistas y progreso.
+   Reutiliza los componentes de la landing Alta y del UI Kit. *@
+
+<div class="contenedor seccion-app">
+    <header class="panel-saludo">
+        <div>
+            <p class="panel-saludo__fecha">Jueves 15 de octubre</p>
+            <h1 class="encabezado-pagina__titulo">Hola, Sofía</h1>
+            <p class="encabezado-pagina__bajada">Tenés <strong class="texto-negrita">3 nuevas coincidencias</strong> y <strong class="texto-negrita">2 entrevistas</strong> agendadas. ¡Vas avanzando!</p>
+        </div>
+        <form class="panel-saludo__buscador" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+            <div class="control-con-icono">
+                <icono nombre="search" />
+                <label class="solo-lectores" for="panel-busqueda">Buscar trabajo</label>
+                <input class="campo__control" id="panel-busqueda" type="search" name="q" placeholder="Puesto, empresa o palabra clave" />
+            </div>
+            <button class="boton" type="submit">Buscar</button>
+        </form>
+    </header>
+
+    <div class="snackbar snackbar--advertencia aviso" role="status">
+        <icono nombre="warning" />
+        <span class="snackbar__texto">Tu perfil está incompleto. <a class="enlace" asp-controller="Perfil" asp-action="Index">Sumá un proyecto destacado</a> para recibir mejores coincidencias.</span>
+        <button class="snackbar__cerrar" type="button" aria-label="Cerrar aviso" data-cerrar-aviso><icono nombre="close-big" tamano="20" /></button>
+    </div>
+
+    <div class="panel-grilla">
+        <div class="panel-grilla__principal">
+            <section class="coincidencias coincidencias--panel" aria-labelledby="panel-coincidencias">
+                <div class="coincidencias__encabezado">
+                    <h2 class="coincidencias__titulo" id="panel-coincidencias">
+                        <icono nombre="notification" tamano="22" />Tus mejores coincidencias hoy
+                    </h2>
+                    <span class="etiqueta etiqueta--acento">3 nuevas</span>
+                </div>
+                @foreach (var oferta in Model.Coincidencias)
+                {
+                    <partial name="_OfertaCoincidencia" model="oferta" />
+                }
+                <a class="boton boton--contorno-blanco boton--bloque" asp-controller="Empleos" asp-action="Index">Ver todas las ofertas compatibles</a>
+            </section>
+
+            <section class="tarjeta">
+                <div class="tarjeta__encabezado">
+                    <h2 class="tarjeta__titulo">Tus postulaciones</h2>
+                    <a class="enlace" asp-controller="Postulaciones" asp-action="Index">Ir al tablero →</a>
+                </div>
+                <div class="panel-embudo">
+                    <a class="panel-embudo__paso" asp-controller="Postulaciones" asp-action="Index">
+                        <span class="punto resumen__punto--info"></span><strong>4</strong><span>Enviadas</span>
+                    </a>
+                    <a class="panel-embudo__paso" asp-controller="Postulaciones" asp-action="Index">
+                        <span class="punto resumen__punto--advertencia"></span><strong>3</strong><span>En revisión</span>
+                    </a>
+                    <a class="panel-embudo__paso" asp-controller="Postulaciones" asp-action="Index">
+                        <span class="punto resumen__punto--secundario"></span><strong>2</strong><span>Entrevistas</span>
+                    </a>
+                    <a class="panel-embudo__paso panel-embudo__paso--exito" asp-controller="Postulaciones" asp-action="Index">
+                        <span class="punto resumen__punto--exito"></span><strong>1</strong><span>Oferta recibida</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <aside class="panel-grilla__lateral">
+            <section class="tarjeta">
+                <div class="tarjeta__encabezado">
+                    <h2 class="tarjeta__titulo">Próximas entrevistas</h2>
+                    <span class="etiqueta">@Model.Entrevistas.Count</span>
+                </div>
+                <ul class="entrevistas" role="list">
+                    @foreach (var entrevista in Model.Entrevistas)
+                    {
+                        var partes = (entrevista.DestacadoTexto ?? "").Split(" · ");
+                        var fecha = partes.Length > 0 ? partes[0].Split(' ') : Array.Empty<string>();
+                        <li class="entrevista">
+                            <span class="entrevista__fecha" aria-hidden="true">
+                                <span>@(fecha.Length > 2 ? fecha[2] : "")</span>
+                                <strong>@(fecha.Length > 1 ? fecha[1] : "")</strong>
+                            </span>
+                            <div class="entrevista__datos">
+                                <strong>@entrevista.Puesto</strong>
+                                <span>@entrevista.Empresa · @entrevista.Etapa</span>
+                                <span class="entrevista__hora"><icono nombre="video" tamano="16" />@string.Join(" · ", partes.Skip(1))</span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <button class="boton boton--contorno boton--sm boton--bloque" type="button" data-confirmar-accion="Agregamos tus entrevistas a tu calendario.">
+                    <icono nombre="calendar" />Agregar a mi calendario
+                </button>
+            </section>
+
+            <section class="tarjeta">
+                <div class="tarjeta__encabezado">
+                    <h2 class="tarjeta__titulo">Perfil completo al 85%</h2>
+                </div>
+                <div class="progreso progreso--principal" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo">
+                    <span class="progreso__barra" style="--valor: 85%"></span>
+                </div>
+                <p class="perfil-ayuda">Te faltan tu proyecto destacado y referencias para aparecer primero en las búsquedas.</p>
+                <a class="boton boton--sm boton--bloque" asp-controller="Perfil" asp-action="Index">Completar mi perfil</a>
+            </section>
+
+            <section class="tarjeta">
+                <div class="tarjeta__encabezado">
+                    <h2 class="tarjeta__titulo">Empresas para seguir</h2>
+                </div>
+                <ul class="empresas-sugeridas" role="list">
+                    @foreach (var empresa in Model.EmpresasSugeridas)
+                    {
+                        <li class="empresa-sugerida">
+                            <span class="logo-empresa" aria-hidden="true">@empresa.Iniciales</span>
+                            <a class="empresa-sugerida__datos" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">
+                                <strong>@empresa.Nombre</strong>
+                                <span>@empresa.BusquedasActivas búsquedas activas</span>
+                            </a>
+                            <button class="boton boton--contorno boton--sm" type="button" aria-pressed="false" data-seguir>
+                                <icono nombre="plus" /><span data-seguir-texto>Seguir</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </section>
+        </aside>
+    </div>
+</div>
