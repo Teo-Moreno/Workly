@@ -1,0 +1,173 @@
+@model BuscarTrabajoViewModel
+@{
+    ViewData["Title"] = "Buscar trabajo";
+    var visibles = 5;
+}
+@* Buscar trabajo (Figma › Media · WF 02 · Buscar trabajo) *@
+
+@functions {
+    // Casilla de un grupo de filtros. El valor se usa para armar los chips de "Filtros activos".
+    private void Filtro(string grupo, string texto, int cantidad, bool marcada)
+    {
+        <label class="filtros__opcion">
+            <span class="casilla casilla--sm">
+                <input type="checkbox" name="@grupo" value="@texto" checked="@marcada" data-filtro-casilla />
+                @* SVG directo (no el TagHelper <icono>) porque este método es sincrónico *@
+                <span class="casilla__caja"><svg class="icono" width="24" height="24" aria-hidden="true" focusable="false"><use href="/img/iconos.svg#check"></use></svg></span>
+                @texto
+            </span>
+            <span class="filtros__cantidad">@cantidad</span>
+        </label>
+    }
+}
+
+<div class="contenedor seccion-app">
+    <header class="encabezado-pagina">
+        <h1 class="encabezado-pagina__titulo">Buscar trabajo</h1>
+        <p class="encabezado-pagina__bajada">Ofertas ordenadas según tu perfil: <strong class="texto-negrita">Frontend Developer · Junior / Semi Senior</strong></p>
+    </header>
+
+    <form class="buscador buscador--app" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+        <label class="buscador__campo">
+            <icono nombre="filter-outline" />
+            <span class="buscador__textos">
+                <span class="buscador__etiqueta">Puesto o palabra clave</span>
+                <input class="buscador__input" type="text" name="q" value="@Model.Busqueda" autocomplete="off" />
+            </span>
+        </label>
+        <span class="buscador__divisor" aria-hidden="true"></span>
+        <label class="buscador__campo">
+            <icono nombre="near-me" />
+            <span class="buscador__textos">
+                <span class="buscador__etiqueta">Ubicación</span>
+                <input class="buscador__input" type="text" name="ubicacion" value="Buenos Aires, AR" autocomplete="off" />
+            </span>
+        </label>
+        <span class="buscador__divisor" aria-hidden="true"></span>
+        <label class="buscador__campo">
+            <icono nombre="briefcase" />
+            <span class="buscador__textos">
+                <span class="buscador__etiqueta">Modalidad</span>
+                <select class="buscador__input buscador__select" name="modalidad">
+                    <option>Remoto, Híbrido</option>
+                    <option>Remoto</option>
+                    <option>Híbrido</option>
+                    <option>Presencial</option>
+                    <option>Todas</option>
+                </select>
+            </span>
+        </label>
+        <button class="boton boton--lg buscador__boton" type="submit"><icono nombre="search" />Buscar</button>
+    </form>
+
+    <div class="filtros-activos" data-filtros-activos>
+        <span class="filtros-activos__titulo">Filtros activos:</span>
+        <div class="filtros-activos__lista" data-filtros-activos-lista>
+            @foreach (var filtro in new[] { "Remota", "Híbrida", "Junior", "Semi Senior", "Relación de dependencia", "CABA" })
+            {
+                <span class="chip" data-chip="@filtro">@filtro<button class="chip__quitar" type="button" aria-label="Quitar filtro @filtro" data-chip-quitar><icono nombre="close-big" /></button></span>
+            }
+        </div>
+        <button class="boton boton--texto" type="button" data-limpiar-filtros>Limpiar todo</button>
+    </div>
+
+    <div class="buscar">
+        <button class="boton boton--contorno buscar__ver-filtros" type="button" aria-expanded="false" aria-controls="filtros" data-alternar="filtros">
+            <icono nombre="slider-03" />Filtros
+        </button>
+
+        <aside class="filtros" id="filtros" aria-label="Filtros de búsqueda" data-filtros>
+            <div class="filtros__cabecera">
+                <h2 class="filtros__titulo">Filtros</h2>
+                <button class="boton boton--texto" type="button" data-limpiar-filtros>Limpiar</button>
+            </div>
+
+            <fieldset class="filtros__grupo">
+                <legend class="filtros__subtitulo">Modalidad</legend>
+                @{ Filtro("modalidad", "Remota", 96, true); }
+                @{ Filtro("modalidad", "Híbrida", 84, true); }
+                @{ Filtro("modalidad", "Presencial", 68, false); }
+            </fieldset>
+
+            <fieldset class="filtros__grupo">
+                <legend class="filtros__subtitulo">Experiencia</legend>
+                @{ Filtro("experiencia", "Sin experiencia", 22, false); }
+                @{ Filtro("experiencia", "Junior", 74, true); }
+                @{ Filtro("experiencia", "Semi Senior", 102, true); }
+                @{ Filtro("experiencia", "Senior", 50, false); }
+            </fieldset>
+
+            <fieldset class="filtros__grupo">
+                <legend class="filtros__subtitulo">Tipo de contratación</legend>
+                @{ Filtro("contratacion", "Relación de dependencia", 190, true); }
+                @{ Filtro("contratacion", "Contractor", 38, false); }
+                @{ Filtro("contratacion", "Pasantía", 20, false); }
+            </fieldset>
+
+            <fieldset class="filtros__grupo">
+                <legend class="filtros__subtitulo">Rango salarial (bruto)</legend>
+                <div class="rango" data-rango>
+                    <span class="rango__pista"></span>
+                    <span class="rango__relleno"></span>
+                    <input type="range" min="500000" max="3500000" step="100000" value="1000000" aria-label="Salario mínimo" data-rango-min />
+                    <input type="range" min="500000" max="3500000" step="100000" value="2500000" aria-label="Salario máximo" data-rango-max />
+                </div>
+                <div class="rango__valores">
+                    <span data-rango-texto-min>$1.000.000</span>
+                    <span data-rango-texto-max>$2.500.000</span>
+                </div>
+            </fieldset>
+
+            <fieldset class="filtros__grupo">
+                <legend class="filtros__subtitulo">Ubicación</legend>
+                @{ Filtro("ubicacion", "CABA", 142, true); }
+                @{ Filtro("ubicacion", "GBA Norte", 31, false); }
+                @{ Filtro("ubicacion", "Córdoba", 28, false); }
+                @{ Filtro("ubicacion", "Rosario", 19, false); }
+            </fieldset>
+        </aside>
+
+        <section class="resultados" aria-labelledby="resultados-titulo">
+            <div class="resultados__cabecera">
+                <h2 class="resultados__titulo" id="resultados-titulo">248 ofertas encontradas</h2>
+                <div class="ordenar">
+                    <span>Ordenar por:</span>
+                    <div class="desplegable" data-desplegable>
+                        <button class="ordenar__boton" type="button" aria-expanded="false" aria-controls="menu-ordenar" data-desplegable-boton>
+                            <span data-ordenar-valor>Mayor compatibilidad</span><icono nombre="chevron-down" />
+                        </button>
+                        <div class="desplegable__panel" id="menu-ordenar" data-desplegable-panel>
+                            <ul class="menu" role="list" data-ordenar>
+                                <li><button class="menu__item esta-activo" type="button">Mayor compatibilidad</button></li>
+                                <li><button class="menu__item" type="button">Más recientes</button></li>
+                                <li><button class="menu__item" type="button">Mayor salario</button></li>
+                                <li><button class="menu__item" type="button">A-Z</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resultados__lista" data-resultados>
+                @for (var i = 0; i < Model.Ofertas.Count; i++)
+                {
+                    var oferta = Model.Ofertas[i];
+                    <partial name="_OfertaTarjeta" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Seleccionada", oferta.Id == Model.Seleccionada.Id }, { "Oculta", i >= visibles } }' />
+                }
+            </div>
+
+            <div class="resultados__mas">
+                <button class="boton boton--contorno" type="button" data-cargar-mas>
+                    <span class="spinner spinner--sm" hidden data-cargar-mas-spinner></span>Cargar más ofertas
+                </button>
+            </div>
+        </section>
+
+        <div class="buscar__detalle" data-detalles>
+            @foreach (var oferta in Model.Ofertas)
+            {
+                <partial name="_OfertaDetallePanel" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Visible", oferta.Id == Model.Seleccionada.Id } }' />
+            }
+        </div>
+    </div>
+</div>

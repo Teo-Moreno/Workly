@@ -13,13 +13,28 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    // Landing pública (Figma › Alta · Landing)
     public IActionResult Index()
     {
+        ViewBag.Coincidencias = DatosDeEjemplo.Coincidencias();
+        ViewBag.Empresas = DatosDeEjemplo.Empresas;
         return View();
     }
 
     public IActionResult Privacy()
     {
+        return View();
+    }
+
+    public IActionResult Terminos()
+    {
+        return View();
+    }
+
+    // Guía visual del UI Kit (Figma › Guidelines) implementado en HTML/CSS
+    public IActionResult UiKit()
+    {
+        ViewBag.Ofertas = DatosDeEjemplo.Coincidencias(1);
         return View();
     }
 
