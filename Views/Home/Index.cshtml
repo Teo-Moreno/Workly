@@ -1,8 +1,183 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "";
+    var coincidencias = (List<Oferta>)ViewBag.Coincidencias;
+    var empresas = (List<Empresa>)ViewBag.Empresas;
 }
+@* Landing pública (Figma › Alta · Landing) *@
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <div class="contenedor hero__interior">
+        <div class="hero__texto">
+            <p class="badge-novedad">
+                <span class="badge-novedad__nuevo">Nuevo</span>
+                Más de 12.400 ofertas activas en Argentina
+            </p>
+
+            <h1 class="hero__titulo texto-display">Encontrá el trabajo que <span class="texto-secundario">encaja</span> con vos.</h1>
+
+            <p class="hero__bajada texto-bajada">
+                Workly analiza tu experiencia, habilidades y expectativas para mostrarte solo las
+                oportunidades que tienen sentido para vos. Menos CVs al vacío, más entrevistas.
+            </p>
+
+            <form class="buscador" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+                <label class="buscador__campo">
+                    <icono nombre="filter-outline" />
+                    <span class="buscador__textos">
+                        <span class="buscador__etiqueta">Puesto o palabra clave</span>
+                        <input class="buscador__input" type="text" name="q" value="Frontend Developer" autocomplete="off" />
+                    </span>
+                </label>
+                <span class="buscador__divisor" aria-hidden="true"></span>
+                <label class="buscador__campo">
+                    <icono nombre="near-me" />
+                    <span class="buscador__textos">
+                        <span class="buscador__etiqueta">Ubicación</span>
+                        <input class="buscador__input" type="text" name="ubicacion" value="Buenos Aires, AR" autocomplete="off" />
+                    </span>
+                </label>
+                <button class="boton boton--lg buscador__boton" type="submit">Buscar trabajo</button>
+            </form>
+
+            <div class="hero__populares">
+                <span>Búsquedas populares:</span>
+                <a class="chip" asp-controller="Empleos" asp-action="Index" asp-route-q="Data Analyst">Data Analyst</a>
+                <a class="chip" asp-controller="Empleos" asp-action="Index" asp-route-q="Diseño UX">Diseño UX</a>
+                <a class="chip" asp-controller="Empleos" asp-action="Index" asp-route-q="Soporte IT">Soporte IT</a>
+                <a class="chip" asp-controller="Empleos" asp-action="Index" asp-route-q="Ventas">Ventas</a>
+            </div>
+        </div>
+
+        <aside class="coincidencias" aria-labelledby="coincidencias-titulo">
+            <div class="coincidencias__encabezado">
+                <h2 class="coincidencias__titulo" id="coincidencias-titulo">
+                    <icono nombre="notification" tamano="22" />Tus mejores coincidencias hoy
+                </h2>
+                <span class="etiqueta etiqueta--acento">3 nuevas</span>
+            </div>
+            @foreach (var oferta in coincidencias)
+            {
+                <partial name="_OfertaCoincidencia" model="oferta" />
+            }
+        </aside>
+    </div>
+</section>
+
+<section class="contenedor datos-landing" aria-label="Workly en números">
+    <div class="dato">
+        <span class="caja-icono"><icono nombre="home-alt-outline" /></span>
+        <p><strong class="dato__valor">12.400+</strong><span class="dato__texto">ofertas activas</span></p>
+    </div>
+    <div class="dato">
+        <span class="caja-icono"><icono nombre="user-square" /></span>
+        <p><strong class="dato__valor">1.850</strong><span class="dato__texto">empresas contratando</span></p>
+    </div>
+    <div class="dato">
+        <span class="caja-icono"><icono nombre="circle-check-outline" /></span>
+        <p><strong class="dato__valor">68%</strong><span class="dato__texto">consigue entrevista en 30 días</span></p>
+    </div>
+    <div class="dato">
+        <span class="caja-icono"><icono nombre="alarm" /></span>
+        <p><strong class="dato__valor">4 min</strong><span class="dato__texto">para crear tu perfil</span></p>
+    </div>
+</section>
+
+<section class="como-funciona" id="como-funciona" aria-labelledby="como-funciona-titulo">
+    <div class="contenedor">
+        <header class="seccion-encabezado">
+            <span class="etiqueta">Cómo funciona</span>
+            <h2 class="texto-titulo-1" id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
+        </header>
+
+        <ol class="pasos-landing" role="list">
+            <li class="paso-landing">
+                <div class="paso-landing__cabecera">
+                    <span class="caja-icono caja-icono--principal paso-landing__icono"><icono nombre="user-square" /></span>
+                    <span class="paso-landing__numero" aria-hidden="true">01</span>
+                </div>
+                <h3 class="paso-landing__titulo">Creá tu perfil laboral</h3>
+                <p class="paso-landing__texto">Cargá tu experiencia, estudios, habilidades y el tipo de trabajo que buscás. Te lleva menos de 5 minutos.</p>
+            </li>
+            <li class="paso-landing">
+                <div class="paso-landing__cabecera">
+                    <span class="caja-icono caja-icono--principal paso-landing__icono"><icono nombre="notification" /></span>
+                    <span class="paso-landing__numero" aria-hidden="true">02</span>
+                </div>
+                <h3 class="paso-landing__titulo">Recibí ofertas compatibles</h3>
+                <p class="paso-landing__texto">Ordenamos las búsquedas según tu perfil, con modalidad, requisitos y rango salarial a la vista.</p>
+            </li>
+            <li class="paso-landing">
+                <div class="paso-landing__cabecera">
+                    <span class="caja-icono caja-icono--principal paso-landing__icono"><icono nombre="circle-check" /></span>
+                    <span class="paso-landing__numero" aria-hidden="true">03</span>
+                </div>
+                <h3 class="paso-landing__titulo">Postulate y hacé seguimiento</h3>
+                <p class="paso-landing__texto">Enviá tu postulación en un clic y seguí cada proceso desde un solo tablero, sin planillas ni mails perdidos.</p>
+            </li>
+        </ol>
+    </div>
+</section>
+
+<section class="diferenciales" aria-labelledby="diferenciales-titulo">
+    <div class="contenedor diferenciales__interior">
+        <div class="diferenciales__texto">
+            <span class="etiqueta etiqueta--acento">Por qué Workly</span>
+            <h2 class="diferenciales__titulo" id="diferenciales-titulo">No es otra página de avisos.</h2>
+            <p class="diferenciales__bajada">Construimos la búsqueda alrededor tuyo: tu perfil, tus tiempos y lo que realmente querés hacer.</p>
+            <a class="boton boton--acento" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil</a>
+        </div>
+
+        <ul class="diferenciales__grilla" role="list">
+            <li class="diferencial">
+                <span class="caja-icono caja-icono--secundario diferencial__icono"><icono nombre="circle-check-outline" /></span>
+                <h3 class="diferencial__titulo">Más simple</h3>
+                <p class="diferencial__texto">Información clara y fácil de entender en cada oferta: puesto, modalidad, requisitos y salario.</p>
+            </li>
+            <li class="diferencial">
+                <span class="caja-icono caja-icono--secundario diferencial__icono"><icono nombre="alarm" /></span>
+                <h3 class="diferencial__titulo">Más rápido</h3>
+                <p class="diferencial__texto">Menos tiempo scrolleando avisos irrelevantes. Vas directo a lo que encaja con vos.</p>
+            </li>
+            <li class="diferencial">
+                <span class="caja-icono caja-icono--secundario diferencial__icono"><icono nombre="settings" /></span>
+                <h3 class="diferencial__titulo">Más personalizado</h3>
+                <p class="diferencial__texto">Oportunidades ordenadas según tus habilidades, experiencia, ubicación y expectativas.</p>
+            </li>
+            <li class="diferencial">
+                <span class="caja-icono caja-icono--secundario diferencial__icono"><icono nombre="checkbox-checked" /></span>
+                <h3 class="diferencial__titulo">Más organizado</h3>
+                <p class="diferencial__texto">Seguí todas tus postulaciones y próximos pasos desde un solo lugar.</p>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="empresas-landing" id="para-empresas" aria-labelledby="empresas-landing-titulo">
+    <div class="contenedor">
+        <h2 class="empresas-landing__titulo" id="empresas-landing-titulo">Empresas que ya publican sus búsquedas en Workly</h2>
+        <ul class="empresas-landing__lista" role="list">
+            @foreach (var empresa in empresas)
+            {
+                <li>
+                    <a class="empresas-landing__item" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">
+                        <span class="logo-empresa logo-empresa--sm logo-empresa--principal" aria-hidden="true">@empresa.Iniciales</span>
+                        @empresa.Nombre
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</section>
+
+<section class="contenedor cta" aria-labelledby="cta-titulo">
+    <div class="cta__tarjeta">
+        <div class="cta__texto">
+            <h2 class="cta__titulo" id="cta-titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></h2>
+            <p class="cta__bajada">Creá tu perfil gratis y empezá a recibir ofertas compatibles hoy.</p>
+        </div>
+        <div class="cta__acciones">
+            <a class="boton boton--acento" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil gratis</a>
+            <a class="boton boton--contorno-blanco" asp-controller="Empresas" asp-action="Index" asp-fragment="para-empresas">Soy empresa</a>
+        </div>
+    </div>
+</section>

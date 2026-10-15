@@ -1,0 +1,151 @@
+@model OfertaDetalleViewModel
+@{
+    var oferta = Model.Oferta;
+    var empresa = Model.Empresa;
+    ViewData["Title"] = $"{oferta.Puesto} en {oferta.Empresa}";
+}
+@* Detalle de oferta (Figma › Media · 06, 07 y 08 · Detalle) *@
+
+<div class="contenedor seccion-app">
+    <div class="barra-volver">
+        <nav class="migas" aria-label="Estás en">
+            <a class="migas__inicio" asp-controller="Panel" asp-action="Index"><icono nombre="home-alt-fill" etiqueta="Inicio" /></a>
+            <icono nombre="chevron-right" />
+            <a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+            <icono nombre="chevron-right" />
+            <span aria-current="page">@oferta.Puesto</span>
+        </nav>
+        <a class="enlace enlace--principal" asp-controller="Empleos" asp-action="Index" asp-route-id="@oferta.Id"><icono nombre="arrow-left" tamano="18" />Volver a resultados</a>
+    </div>
+
+    <header class="oferta-cabecera">
+        <div class="oferta-cabecera__principal">
+            <span class="logo-empresa logo-empresa--lg" aria-hidden="true">@oferta.Iniciales</span>
+            <div class="oferta-cabecera__textos">
+                <h1 class="oferta-cabecera__titulo">@oferta.Puesto</h1>
+                <p class="oferta-cabecera__meta">
+                    <a class="enlace enlace--principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">@oferta.Empresa</a>
+                    · @oferta.Ubicacion · @oferta.PublicadoTexto
+                </p>
+                <div class="lista-tags">
+                    <span class="tag tag--borde tag--lg">@oferta.ModalidadDetalle</span>
+                    <span class="tag tag--borde tag--lg">@oferta.Nivel</span>
+                    <span class="tag tag--borde tag--lg">@oferta.Contratacion</span>
+                    <span class="tag tag--borde tag--lg">@oferta.Jornada</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="oferta-cabecera__acciones">
+            <div class="fila">
+                <button class="boton boton--contorno boton--sm" type="button" data-compartir>
+                    <icono nombre="share" />Compartir
+                </button>
+                <button class="boton boton--contorno boton--sm @(oferta.Guardada ? "esta-activo" : "")" type="button" aria-pressed="@(oferta.Guardada ? "true" : "false")" data-guardar>
+                    <icono nombre="@(oferta.Guardada ? "bookmark-fill" : "bookmark")" /><span data-guardar-texto>@(oferta.Guardada ? "Guardada" : "Guardar")</span>
+                </button>
+            </div>
+            <button class="boton boton--lg boton--bloque" type="button" data-postular data-puesto="@oferta.Puesto" data-empresa="@oferta.Empresa">Postularme ahora</button>
+        </div>
+    </header>
+
+    <div class="oferta-cuerpo">
+        <article class="oferta-principal">
+            <div class="cajas-dato cajas-dato--grande">
+                <div class="caja-dato">
+                    <span class="caja-dato__etiqueta">Rango salarial</span>
+                    <strong class="caja-dato__valor">@oferta.Salario</strong>
+                    <span class="caja-dato__detalle">bruto mensual</span>
+                </div>
+                <div class="caja-dato">
+                    <span class="caja-dato__etiqueta">Experiencia</span>
+                    <strong class="caja-dato__valor">@oferta.Experiencia</strong>
+                    <span class="caja-dato__detalle">@oferta.ExperienciaDetalle</span>
+                </div>
+            </div>
+
+            <partial name="_Compatibilidad" model="oferta" />
+
+            <section class="oferta-seccion">
+                <h2 class="oferta-seccion__titulo">Sobre el puesto</h2>
+                <p>@oferta.SobrePuesto</p>
+            </section>
+
+            <section class="oferta-seccion">
+                <h2 class="oferta-seccion__titulo">Requisitos</h2>
+                <ul class="lista-puntos" role="list">
+                    @foreach (var requisito in oferta.Requisitos)
+                    {
+                        <li>@requisito</li>
+                    }
+                </ul>
+            </section>
+
+            <section class="oferta-seccion">
+                <h2 class="oferta-seccion__titulo">Beneficios</h2>
+                <div class="lista-tags">
+                    @foreach (var beneficio in oferta.Beneficios)
+                    {
+                        <span class="tag tag--borde tag--lg"><icono nombre="star" />@beneficio</span>
+                    }
+                </div>
+            </section>
+
+            <section class="oferta-seccion">
+                <h2 class="oferta-seccion__titulo">Habilidades</h2>
+                <partial name="_HabilidadesOferta" model="oferta" />
+            </section>
+
+            <section class="oferta-seccion">
+                <h2 class="oferta-seccion__titulo">Sobre la empresa</h2>
+                <p>@empresa.Descripcion</p>
+                <a class="enlace" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">Ver perfil de la empresa →</a>
+            </section>
+        </article>
+
+        <aside class="oferta-lateral">
+            <section class="tarjeta">
+                <div class="empresa-mini">
+                    <span class="logo-empresa logo-empresa--md" aria-hidden="true">@empresa.Iniciales</span>
+                    <div>
+                        <h2 class="empresa-mini__nombre">@empresa.Nombre</h2>
+                        <p class="empresa-mini__industria">@empresa.Industria · @empresa.Ubicacion</p>
+                    </div>
+                </div>
+                <dl class="lista-clave-valor">
+                    <div><dt>Empleados</dt><dd>@empresa.Empleados</dd></div>
+                    <div><dt>Búsquedas activas</dt><dd>@empresa.BusquedasActivas</dd></div>
+                    <div><dt>Valoración</dt><dd><icono nombre="star-fill" tamano="16" class="texto-acento" />@empresa.Valoracion / 5</dd></div>
+                    <div><dt>Responde en</dt><dd>@empresa.RespondeEn</dd></div>
+                </dl>
+                <a class="boton boton--contorno boton--bloque" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">Ver perfil de la empresa</a>
+            </section>
+
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Ofertas similares</h2>
+                <ul class="ofertas-similares" role="list">
+                    @foreach (var similar in Model.Similares)
+                    {
+                        <li>
+                            <a class="oferta-similar" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@similar.Id">
+                                <span class="logo-empresa" aria-hidden="true">@similar.Iniciales</span>
+                                <span class="oferta-similar__textos">
+                                    <strong class="oferta-similar__puesto">@similar.Puesto</strong>
+                                    <span class="oferta-similar__meta">@similar.Empresa · @similar.Ubicacion</span>
+                                    <span class="oferta-similar__salario">@similar.Salario</span>
+                                </span>
+                                <span class="match @(similar.Match < 80 ? "match--media" : "")">@similar.Match%</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+
+            <section class="tarjeta tarjeta--oscura tarjeta-cta">
+                <h2 class="tarjeta__titulo">¿Te copó esta oferta?</h2>
+                <p>Postulate ahora y seguí el proceso desde tu tablero de postulaciones.</p>
+                <button class="boton boton--acento boton--bloque" type="button" data-postular data-puesto="@oferta.Puesto" data-empresa="@oferta.Empresa">Postularme ahora</button>
+            </section>
+        </aside>
+    </div>
+</div>

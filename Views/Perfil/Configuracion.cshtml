@@ -1,0 +1,412 @@
+@{
+    ViewData["Title"] = "Configuración";
+    var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js", "Testing (Jest)", "Vue.js", "Angular" };
+    var marcadas = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js" };
+}
+@* Configuración y preferencias (Miro › Mapa de sitio › Perfil). Usa los campos,
+   desplegables, casillas, botones de opción e interruptores del UI Kit. *@
+
+<div class="contenedor seccion-app">
+    <header class="encabezado-pagina">
+        <nav class="migas migas--chica" aria-label="Estás en">
+            <a asp-controller="Perfil" asp-action="Index">Mi perfil</a>
+            <icono nombre="chevron-right" />
+            <span aria-current="page">Configuración</span>
+        </nav>
+        <h1 class="encabezado-pagina__titulo">Configuración</h1>
+        <p class="encabezado-pagina__bajada">Actualizá tus datos, tus preferencias de búsqueda y cómo querés que te avisemos.</p>
+    </header>
+
+    <div class="configuracion" data-pestanas data-pestanas-hash>
+        <nav class="configuracion__menu" aria-label="Secciones de configuración">
+            <a class="configuracion__opcion esta-activa" href="#cuenta" data-pestana="cuenta" aria-current="true"><icono nombre="user-square" />Cuenta</a>
+            <a class="configuracion__opcion" href="#preferencias" data-pestana="preferencias"><icono nombre="slider-03" />Preferencias laborales</a>
+            <a class="configuracion__opcion" href="#notificaciones" data-pestana="notificaciones"><icono nombre="notification-outline" />Notificaciones</a>
+            <a class="configuracion__opcion" href="#privacidad" data-pestana="privacidad"><icono nombre="lock" />Privacidad y seguridad</a>
+            <a class="configuracion__opcion" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a>
+        </nav>
+
+        @* ---------------- Cuenta ---------------- *@
+        <section class="configuracion__panel" data-panel="cuenta" aria-labelledby="titulo-cuenta">
+            <form class="formulario" data-demo-form="Guardamos los cambios de tu cuenta." novalidate>
+                <div class="configuracion__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-cuenta">Datos personales</h2>
+                    <p class="texto-suave">Estos datos los ven las empresas cuando te postulás.</p>
+                </div>
+
+                <div class="configuracion__foto">
+                    <span class="avatar avatar--xl" aria-hidden="true">SM</span>
+                    <div class="pila" style="--pila-espacio: 8px">
+                        <strong>Foto de perfil</strong>
+                        <span class="texto-chico texto-suave">JPG o PNG de hasta 5 MB. Se ve mejor si es cuadrada.</span>
+                        <div class="fila">
+                            <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />Subir foto<input type="file" accept="image/*" /></label>
+                            <button class="boton boton--texto" type="button" data-confirmar-accion="Quitamos tu foto de perfil." data-tipo="">Quitar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-nombre">Nombre</label>
+                        <input class="campo__control" id="cfg-nombre" type="text" value="Sofía" required />
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu nombre</span>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-apellido">Apellido</label>
+                        <input class="campo__control" id="cfg-apellido" type="text" value="Martínez" required />
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu apellido</span>
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo campo--exito">
+                        <label class="campo__etiqueta" for="cfg-email">Email</label>
+                        <div class="control-con-icono">
+                            <icono nombre="mail" />
+                            <input class="campo__control" id="cfg-email" type="email" value="sofia.martinez@mail.com" required />
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--exito"><icono nombre="circle-check" />Email verificado</span>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
+                        <input class="campo__control" id="cfg-telefono" type="tel" placeholder="Escribí acá" value="+54 11 5555-1234" />
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-ubicacion">Ubicación</label>
+                        <select class="campo__control" id="cfg-ubicacion">
+                            <option selected>Palermo, CABA</option>
+                            <option>Belgrano, CABA</option>
+                            <option>GBA Norte</option>
+                            <option>Córdoba</option>
+                            <option>Rosario</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-nacimiento">Fecha de nacimiento</label>
+                        <input class="campo__control" id="cfg-nacimiento" type="date" value="2002-05-14" />
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-web">Sitio web o portfolio</label>
+                        <div class="control-con-icono">
+                            <icono nombre="globe" />
+                            <input class="campo__control" id="cfg-web" type="text" value="sofiamartinez.dev" />
+                        </div>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-github">GitHub</label>
+                        <div class="control-con-icono">
+                            <icono nombre="code" />
+                            <input class="campo__control" id="cfg-github" type="text" value="github.com/sofimartinez" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <span class="campo__etiqueta">CV</span>
+                    <label class="zona-archivo zona-archivo--fila tiene-archivo" data-zona-archivo>
+                        <span class="caja-icono caja-icono--sm"><icono nombre="upload" /></span>
+                        <span>
+                            <span class="zona-archivo__nombre" data-zona-archivo-nombre>CV-Sofia-Martinez-2026.pdf</span>
+                            <span class="texto-chico texto-suave"> · Arrastrá un archivo o hacé clic para reemplazarlo (PDF, hasta 5 MB)</span>
+                        </span>
+                        <input type="file" accept=".pdf,.doc,.docx" />
+                    </label>
+                </div>
+
+                <div class="formulario__acciones">
+                    <button class="boton boton--contorno" type="reset">Descartar</button>
+                    <button class="boton" type="submit">Guardar cambios</button>
+                </div>
+            </form>
+        </section>
+
+        @* ---------------- Preferencias laborales ---------------- *@
+        <section class="configuracion__panel" data-panel="preferencias" aria-labelledby="titulo-preferencias" hidden>
+            <form class="formulario" data-demo-form="Actualizamos tus preferencias. Vas a ver nuevas coincidencias." novalidate>
+                <div class="configuracion__cabecera configuracion__cabecera--fila">
+                    <div>
+                        <h2 class="formulario__subtitulo" id="titulo-preferencias">Preferencias laborales</h2>
+                        <p class="texto-suave">Las usamos para ordenar las ofertas según lo que buscás.</p>
+                    </div>
+                    <label class="interruptor">
+                        <input type="checkbox" checked />
+                        <span class="interruptor__pista"></span>
+                        Buscando activamente
+                    </label>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="pref-puesto">Puesto buscado</label>
+                        <div class="control-con-icono">
+                            <icono nombre="briefcase" />
+                            <input class="campo__control" id="pref-puesto" type="text" value="Frontend Developer" required />
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Contanos qué puesto buscás</span>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="pref-disponibilidad">Disponibilidad</label>
+                        <select class="campo__control" id="pref-disponibilidad">
+                            <option selected>Inmediata</option>
+                            <option>En 15 días</option>
+                            <option>En 30 días</option>
+                            <option>A convenir</option>
+                        </select>
+                    </div>
+                </div>
+
+                <fieldset class="formulario__grupo">
+                    <legend class="campo__etiqueta">Nivel</legend>
+                    <div class="opciones-fila">
+                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Sin experiencia</label>
+                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Junior</label>
+                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Semi Senior</label>
+                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Senior</label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="formulario__grupo">
+                    <legend class="campo__etiqueta">Modalidad</legend>
+                    <div class="opciones-tarjeta">
+                        <label class="opcion-tarjeta">
+                            <input type="checkbox" checked />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="home-alt-outline" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Remota</span><span class="opcion-tarjeta__texto">Desde tu casa o donde quieras</span></span>
+                        </label>
+                        <label class="opcion-tarjeta">
+                            <input type="checkbox" checked />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="calendar" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Híbrida</span><span class="opcion-tarjeta__texto">Algunos días en la oficina</span></span>
+                        </label>
+                        <label class="opcion-tarjeta">
+                            <input type="checkbox" />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="building" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Presencial</span><span class="opcion-tarjeta__texto">Todos los días en la oficina</span></span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="formulario__fila">
+                    <fieldset class="formulario__grupo">
+                        <legend class="campo__etiqueta">Jornada</legend>
+                        <div class="opciones-fila">
+                            <label class="opcion"><input type="radio" name="jornada" checked /><span class="opcion__circulo"></span>Full-time</label>
+                            <label class="opcion"><input type="radio" name="jornada" /><span class="opcion__circulo"></span>Part-time</label>
+                            <label class="opcion"><input type="radio" name="jornada" disabled /><span class="opcion__circulo"></span>Por proyecto</label>
+                        </div>
+                    </fieldset>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="pref-contratacion">Contratación</label>
+                        <select class="campo__control" id="pref-contratacion">
+                            <option selected>Relación de dependencia</option>
+                            <option>Contractor</option>
+                            <option>Pasantía</option>
+                            <option>Cualquiera</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="pref-ubicacion">Ubicaciones</label>
+                        <select class="campo__control" id="pref-ubicacion">
+                            <option selected>CABA y GBA Norte</option>
+                            <option>Solo CABA</option>
+                            <option>Todo el país</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <span class="campo__etiqueta">Expectativa salarial (bruta mensual)</span>
+                        <div class="rango-campos">
+                            <label class="solo-lectores" for="pref-salario-min">Mínimo</label>
+                            <input class="campo__control" id="pref-salario-min" type="text" inputmode="numeric" value="$1.400.000" />
+                            <span aria-hidden="true">–</span>
+                            <label class="solo-lectores" for="pref-salario-max">Máximo</label>
+                            <input class="campo__control" id="pref-salario-max" type="text" inputmode="numeric" value="$1.800.000" />
+                        </div>
+                    </div>
+                </div>
+
+                <fieldset class="formulario__grupo">
+                    <legend class="campo__etiqueta">Habilidades</legend>
+                    <div class="lista-tags lista-tags--holgada">
+                        @foreach (var habilidad in habilidades)
+                        {
+                            <label class="chip-seleccion">
+                                <input type="checkbox" checked="@marcadas.Contains(habilidad)" />
+                                <span>@habilidad</span>
+                            </label>
+                        }
+                    </div>
+                    <div class="campo-agregar">
+                        <label class="solo-lectores" for="pref-nueva-habilidad">Agregar habilidad</label>
+                        <input class="campo__control" id="pref-nueva-habilidad" type="text" placeholder="Agregá otra habilidad" />
+                        <button class="boton boton--icono" type="button" data-confirmar-accion="Sumamos la habilidad a tu perfil."><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
+                    </div>
+                </fieldset>
+
+                <div class="formulario__acciones">
+                    <button class="boton boton--contorno" type="reset">Descartar</button>
+                    <button class="boton" type="submit">Guardar preferencias</button>
+                </div>
+            </form>
+        </section>
+
+        @* ---------------- Notificaciones ---------------- *@
+        <section class="configuracion__panel" data-panel="notificaciones" aria-labelledby="titulo-notificaciones" hidden>
+            <form class="formulario" data-demo-form="Guardamos tus preferencias de notificaciones." novalidate>
+                <div class="configuracion__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-notificaciones">Notificaciones</h2>
+                    <p class="texto-suave">Elegí qué avisos querés recibir en Workly y por mail.</p>
+                </div>
+
+                <ul class="lista-ajustes" role="list">
+                    <li class="ajuste">
+                        <div><strong>Nuevas coincidencias</strong><span>Ofertas que encajan con tu perfil.</span></div>
+                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Nuevas coincidencias</span></label>
+                    </li>
+                    <li class="ajuste">
+                        <div><strong>Cambios en mis postulaciones</strong><span>Cuando una empresa ve tu CV o te cambia de etapa.</span></div>
+                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Cambios en mis postulaciones</span></label>
+                    </li>
+                    <li class="ajuste">
+                        <div><strong>Mensajes de empresas</strong><span>Consultas y novedades de los procesos.</span></div>
+                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Mensajes de empresas</span></label>
+                    </li>
+                    <li class="ajuste">
+                        <div><strong>Recordatorios de entrevistas</strong><span>Te avisamos 1 hora antes.</span></div>
+                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Recordatorios de entrevistas</span></label>
+                    </li>
+                    <li class="ajuste">
+                        <div><strong>Novedades de Workly</strong><span>Consejos para tu búsqueda y nuevas funciones.</span></div>
+                        <label class="interruptor"><input type="checkbox" /><span class="interruptor__pista"></span><span class="solo-lectores">Novedades de Workly</span></label>
+                    </li>
+                    <li class="ajuste">
+                        <div><strong>Notificaciones por SMS</strong><span>Disponible próximamente.</span></div>
+                        <label class="interruptor"><input type="checkbox" disabled /><span class="interruptor__pista"></span><span class="solo-lectores">Notificaciones por SMS</span></label>
+                    </li>
+                </ul>
+
+                <div class="formulario__fila">
+                    <fieldset class="formulario__grupo">
+                        <legend class="campo__etiqueta">Resumen por mail</legend>
+                        <div class="opciones-columna">
+                            <label class="opcion"><input type="radio" name="resumen" /><span class="opcion__circulo"></span>Diario</label>
+                            <label class="opcion"><input type="radio" name="resumen" checked /><span class="opcion__circulo"></span>Semanal</label>
+                            <label class="opcion"><input type="radio" name="resumen" /><span class="opcion__circulo"></span>Nunca</label>
+                        </div>
+                    </fieldset>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="notif-horario">Horario para recibir alertas</label>
+                        <input class="campo__control" id="notif-horario" type="time" value="09:00" />
+                        <span class="campo__ayuda">Fuera de ese horario agrupamos los avisos.</span>
+                    </div>
+                </div>
+
+                <div class="formulario__acciones">
+                    <button class="boton" type="submit">Guardar notificaciones</button>
+                </div>
+            </form>
+        </section>
+
+        @* ---------------- Privacidad y seguridad ---------------- *@
+        <section class="configuracion__panel" data-panel="privacidad" aria-labelledby="titulo-privacidad" hidden>
+            <form class="formulario" data-demo-form="Actualizamos tu privacidad y seguridad." novalidate>
+                <div class="configuracion__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-privacidad">Privacidad y seguridad</h2>
+                    <p class="texto-suave">Decidí quién puede ver tu perfil y cuidá el acceso a tu cuenta.</p>
+                </div>
+
+                <fieldset class="formulario__grupo">
+                    <legend class="campo__etiqueta">Visibilidad del perfil</legend>
+                    <div class="opciones-tarjeta opciones-tarjeta--columna">
+                        <label class="opcion-tarjeta">
+                            <input type="radio" name="visibilidad" checked />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="eye" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Visible para empresas</span><span class="opcion-tarjeta__texto">Las empresas pueden encontrarte y contactarte.</span></span>
+                        </label>
+                        <label class="opcion-tarjeta">
+                            <input type="radio" name="visibilidad" />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="send" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Solo donde me postulo</span><span class="opcion-tarjeta__texto">Tu perfil lo ven solo las empresas a las que te postulás.</span></span>
+                        </label>
+                        <label class="opcion-tarjeta">
+                            <input type="radio" name="visibilidad" />
+                            <span class="caja-icono caja-icono--sm"><icono nombre="eye-off" /></span>
+                            <span><span class="opcion-tarjeta__titulo">Oculto</span><span class="opcion-tarjeta__texto">Pausá tu búsqueda sin perder tus datos.</span></span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="ajuste">
+                    <div><strong>Ocultar mi perfil a mi empleador actual</strong><span>Accenture Argentina no va a poder ver que estás buscando.</span></div>
+                    <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Ocultar mi perfil a mi empleador actual</span></label>
+                </div>
+
+                <div class="formulario__seccion">
+                    <h3 class="formulario__subtitulo">Cambiar contraseña</h3>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="clave-actual">Contraseña actual</label>
+                        <div class="control-con-icono">
+                            <icono nombre="lock" />
+                            <input class="campo__control" id="clave-actual" type="password" placeholder="••••••••" />
+                            <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                        </div>
+                    </div>
+                    <div class="formulario__fila">
+                        <div class="campo">
+                            <label class="campo__etiqueta" for="clave-nueva">Nueva contraseña</label>
+                            <div class="control-con-icono">
+                                <icono nombre="lock" />
+                                <input class="campo__control" id="clave-nueva" type="password" placeholder="Mínimo 8 caracteres" />
+                                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            </div>
+                        </div>
+                        <div class="campo">
+                            <label class="campo__etiqueta" for="clave-repetir">Repetí la contraseña</label>
+                            <div class="control-con-icono">
+                                <icono nombre="lock" />
+                                <input class="campo__control" id="clave-repetir" type="password" placeholder="Mínimo 8 caracteres" />
+                                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formulario__acciones">
+                    <button class="boton" type="submit">Guardar cambios</button>
+                </div>
+
+                <div class="zona-peligro">
+                    <div>
+                        <strong>Eliminar cuenta</strong>
+                        <span>Se borran tu perfil, tus postulaciones y tus alertas. No se puede deshacer.</span>
+                    </div>
+                    <button class="boton boton--contorno boton--peligro" type="button" data-modal-abrir="modal-eliminar"><icono nombre="trash-full" />Eliminar cuenta</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<dialog class="modal" id="modal-eliminar" aria-labelledby="modal-eliminar-titulo">
+    <form class="modal__contenido" method="dialog">
+        <div class="modal__cabecera">
+            <h2 class="modal__titulo" id="modal-eliminar-titulo">¿Querés eliminar tu cuenta?</h2>
+            <button class="modal__cerrar" value="cancelar" aria-label="Cerrar"><icono nombre="close-big" /></button>
+        </div>
+        <p class="modal__descripcion">Vamos a borrar tu perfil, tus 11 postulaciones y tus alertas. Si solo querés pausar tu búsqueda, podés ocultar tu perfil.</p>
+        <div class="modal__acciones">
+            <button class="boton boton--gris" value="cancelar">Cancelar</button>
+            <button class="boton boton--peligro-lleno" value="eliminar">Eliminar</button>
+        </div>
+    </form>
+</dialog>

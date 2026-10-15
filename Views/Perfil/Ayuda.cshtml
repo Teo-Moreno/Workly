@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Ayuda y soporte";
+    var preguntas = new[]
+    {
+        (Categoria: "Postulaciones", Pregunta: "¿Cómo sé en qué etapa está mi postulación?", Respuesta: "En Mis postulaciones vas a ver cada proceso en un tablero con cuatro columnas: Enviadas, En revisión, Entrevistas y Finalizadas. Cada vez que la empresa avanza, te avisamos con una notificación."),
+        (Categoria: "Postulaciones", Pregunta: "¿Puedo retirar una postulación?", Respuesta: "Sí. Entrá al detalle de la postulación y elegí \"Retirar postulación\". La empresa deja de ver tu perfil para esa búsqueda y la tarjeta pasa a Archivadas."),
+        (Categoria: "Perfil", Pregunta: "¿Cómo calculan el porcentaje de compatibilidad?", Respuesta: "Comparamos tus habilidades, experiencia, ubicación, modalidad y expectativa salarial con lo que pide cada oferta. Cuanto más completo esté tu perfil, más preciso es el porcentaje."),
+        (Categoria: "Perfil", Pregunta: "¿Mi empleador actual puede ver que estoy buscando trabajo?", Respuesta: "No, si activás \"Ocultar mi perfil a mi empleador actual\" en Configuración › Privacidad y seguridad."),
+        (Categoria: "Cuenta", Pregunta: "Olvidé mi contraseña, ¿qué hago?", Respuesta: "Desde Iniciar sesión tocá \"¿Olvidaste tu contraseña?\" y te enviamos un link para crear una nueva."),
+        (Categoria: "Empresas", Pregunta: "¿Cómo publico una búsqueda para mi empresa?", Respuesta: "Desde Empresas › Para empresas podés dejarnos tus datos y un asesor te ayuda a publicar tu primera búsqueda.")
+    };
+}
+@* Ayuda y soporte (Miro › Mapa de sitio › Perfil) *@
+
+<section class="ayuda-hero">
+    <div class="contenedor ayuda-hero__interior">
+        <span class="etiqueta etiqueta--acento">Centro de ayuda</span>
+        <h1 class="ayuda-hero__titulo">¿En qué te podemos ayudar?</h1>
+        <form class="ayuda-hero__buscador" role="search" data-filtrar-form>
+            <div class="control-con-icono">
+                <icono nombre="search" />
+                <label class="solo-lectores" for="buscar-ayuda">Buscar en la ayuda</label>
+                <input class="campo__control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: compatibilidad, contraseña, postulación…" data-filtrar-preguntas />
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="contenedor seccion-app">
+    <ul class="ayuda-categorias" role="list">
+        <li>
+            <a class="ayuda-categoria" href="#preguntas">
+                <span class="caja-icono"><icono nombre="send" /></span>
+                <strong>Postulaciones</strong>
+                <span>Seguimiento, etapas y entrevistas</span>
+            </a>
+        </li>
+        <li>
+            <a class="ayuda-categoria" href="#preguntas">
+                <span class="caja-icono"><icono nombre="user-square" /></span>
+                <strong>Mi perfil</strong>
+                <span>CV, habilidades y compatibilidad</span>
+            </a>
+        </li>
+        <li>
+            <a class="ayuda-categoria" href="#preguntas">
+                <span class="caja-icono"><icono nombre="lock" /></span>
+                <strong>Cuenta y seguridad</strong>
+                <span>Contraseña, privacidad y datos</span>
+            </a>
+        </li>
+        <li>
+            <a class="ayuda-categoria" href="#preguntas">
+                <span class="caja-icono"><icono nombre="building" /></span>
+                <strong>Empresas</strong>
+                <span>Publicar búsquedas y planes</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="ayuda-cuerpo">
+        <section class="ayuda-preguntas" id="preguntas" aria-labelledby="preguntas-titulo">
+            <h2 class="texto-titulo-4" id="preguntas-titulo">Preguntas frecuentes</h2>
+            <div class="acordeon" data-acordeon>
+                @foreach (var item in preguntas)
+                {
+                    <details class="acordeon__item">
+                        <summary class="acordeon__pregunta">
+                            <span>
+                                <span class="acordeon__categoria">@item.Categoria</span>
+                                @item.Pregunta
+                            </span>
+                            <icono nombre="chevron-down" />
+                        </summary>
+                        <p class="acordeon__respuesta">@item.Respuesta</p>
+                    </details>
+                }
+            </div>
+            <p class="estado-vacio" hidden data-acordeon-vacio>No encontramos preguntas con esas palabras. Escribinos y te ayudamos.</p>
+        </section>
+
+        <aside class="ayuda-contacto" id="contacto">
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Escribinos</h2>
+                <p class="texto-suave ayuda-contacto__bajada">Te respondemos en menos de 24 horas hábiles.</p>
+                <form class="formulario" data-demo-form="Recibimos tu consulta. Te respondemos por mail." data-limpiar novalidate>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="ayuda-asunto">Asunto</label>
+                        <select class="campo__control" id="ayuda-asunto" required>
+                            <option value="">Elegí una opción</option>
+                            <option>Tengo un problema con una postulación</option>
+                            <option>Quiero cambiar mis datos</option>
+                            <option>Encontré un error</option>
+                            <option>Otra consulta</option>
+                        </select>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Elegí un asunto</span>
+                    </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="ayuda-mensaje">Mensaje</label>
+                        <textarea class="campo__control" id="ayuda-mensaje" rows="5" placeholder="Contanos qué pasó" required></textarea>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Escribí tu consulta</span>
+                    </div>
+                    <button class="boton boton--bloque" type="submit"><icono nombre="send" />Enviar consulta</button>
+                </form>
+            </section>
+
+            <section class="tarjeta ayuda-canales">
+                <a href="mailto:hola@workly.com.ar"><span class="caja-icono caja-icono--sm"><icono nombre="mail" /></span><span><strong>hola@workly.com.ar</strong><span>Soporte por mail</span></span></a>
+                <a href="#"><span class="caja-icono caja-icono--sm"><icono nombre="message-writing" /></span><span><strong>Chat en vivo</strong><span>Lunes a viernes de 9 a 18 hs</span></span></a>
+            </section>
+        </aside>
+    </div>
+</div>
