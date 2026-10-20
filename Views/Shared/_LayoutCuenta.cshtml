@@ -51,7 +51,7 @@
         </main>
     </div>
 
-    <div class="snackbars" aria-live="polite" data-snackbars></div>
+    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]"></div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

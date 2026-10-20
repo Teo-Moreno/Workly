@@ -1,5 +1,13 @@
+@model MiPerfilViewModel
 @{
     ViewData["Title"] = "Configuración";
+    var usuario = Model.Usuario;
+    var perfil = Model.Perfil;
+    var ubicaciones = RegistroViewModel.Ubicaciones.ToList();
+    if (!string.IsNullOrEmpty(perfil.Ubicacion) && !ubicaciones.Contains(perfil.Ubicacion))
+    {
+        ubicaciones.Insert(0, perfil.Ubicacion);
+    }
     var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js", "Testing (Jest)", "Vue.js", "Angular" };
     var marcadas = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js" };
 }
@@ -28,20 +36,28 @@
 
         @* ---------------- Cuenta ---------------- *@
         <section class="configuracion__panel" data-panel="cuenta" aria-labelledby="titulo-cuenta">
-            <form class="formulario" data-demo-form="Guardamos los cambios de tu cuenta." novalidate>
+            <form class="formulario" data-demo-form="Editar tus datos llega en la próxima etapa: por ahora se muestran tal como están en tu cuenta." data-demo-tipo="advertencia" novalidate>
                 <div class="configuracion__cabecera">
                     <h2 class="formulario__subtitulo" id="titulo-cuenta">Datos personales</h2>
                     <p class="texto-suave">Estos datos los ven las empresas cuando te postulás.</p>
                 </div>
 
                 <div class="configuracion__foto">
-                    <span class="avatar avatar--xl" aria-hidden="true">SM</span>
+                    <span class="avatar avatar--xl" aria-hidden="true">
+                        @if (!string.IsNullOrEmpty(perfil.Foto))
+                        {
+                            <img src="@perfil.Foto" alt="" />
+                        }
+                        else
+                        {
+                            @UsuarioActual.Iniciales(usuario.Nombre, usuario.Apellido)
+                        }
+                    </span>
                     <div class="pila" style="--pila-espacio: 8px">
                         <strong>Foto de perfil</strong>
-                        <span class="texto-chico texto-suave">JPG o PNG de hasta 5 MB. Se ve mejor si es cuadrada.</span>
+                        <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB. Se ve mejor si es cuadrada.</span>
                         <div class="fila">
-                            <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />Subir foto<input type="file" accept="image/*" /></label>
-                            <button class="boton boton--texto" type="button" data-confirmar-accion="Quitamos tu foto de perfil." data-tipo="">Quitar</button>
+                            <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />Subir foto<input type="file" accept=".jpg,.jpeg,.png,.webp" /></label>
                         </div>
                     </div>
                 </div>
@@ -49,29 +65,28 @@
                 <div class="formulario__fila">
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-nombre">Nombre</label>
-                        <input class="campo__control" id="cfg-nombre" type="text" value="Sofía" required />
+                        <input class="campo__control" id="cfg-nombre" type="text" value="@usuario.Nombre" maxlength="50" required />
                         <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu nombre</span>
                     </div>
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-apellido">Apellido</label>
-                        <input class="campo__control" id="cfg-apellido" type="text" value="Martínez" required />
+                        <input class="campo__control" id="cfg-apellido" type="text" value="@usuario.Apellido" maxlength="50" required />
                         <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu apellido</span>
                     </div>
                 </div>
 
                 <div class="formulario__fila">
-                    <div class="campo campo--exito">
+                    <div class="campo">
                         <label class="campo__etiqueta" for="cfg-email">Email</label>
                         <div class="control-con-icono">
                             <icono nombre="mail" />
-                            <input class="campo__control" id="cfg-email" type="email" value="sofia.martinez@mail.com" required />
+                            <input class="campo__control" id="cfg-email" type="email" value="@usuario.Email" maxlength="100" required />
                         </div>
-                        <span class="campo__mensaje campo__mensaje--exito"><icono nombre="circle-check" />Email verificado</span>
                         <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
                     </div>
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
-                        <input class="campo__control" id="cfg-telefono" type="tel" placeholder="Escribí acá" value="+54 11 5555-1234" />
+                        <input class="campo__control" id="cfg-telefono" type="tel" placeholder="+54 11 5555-1234" value="@perfil.Telefono" maxlength="30" />
                     </div>
                 </div>
 
@@ -79,46 +94,35 @@
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-ubicacion">Ubicación</label>
                         <select class="campo__control" id="cfg-ubicacion">
-                            <option selected>Palermo, CABA</option>
-                            <option>Belgrano, CABA</option>
-                            <option>GBA Norte</option>
-                            <option>Córdoba</option>
-                            <option>Rosario</option>
+                            @foreach (var ubicacion in ubicaciones)
+                            {
+                                <option selected="@(ubicacion == perfil.Ubicacion)">@ubicacion</option>
+                            }
                         </select>
                     </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-nacimiento">Fecha de nacimiento</label>
-                        <input class="campo__control" id="cfg-nacimiento" type="date" value="2002-05-14" />
-                    </div>
-                </div>
-
-                <div class="formulario__fila">
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-web">Sitio web o portfolio</label>
                         <div class="control-con-icono">
                             <icono nombre="globe" />
-                            <input class="campo__control" id="cfg-web" type="text" value="sofiamartinez.dev" />
-                        </div>
-                    </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-github">GitHub</label>
-                        <div class="control-con-icono">
-                            <icono nombre="code" />
-                            <input class="campo__control" id="cfg-github" type="text" value="github.com/sofimartinez" />
+                            <input class="campo__control" id="cfg-web" type="text" value="@Model.CV?.Sitio_Web" placeholder="tusitio.com" maxlength="200" />
                         </div>
                     </div>
                 </div>
 
                 <div class="campo">
                     <span class="campo__etiqueta">CV</span>
-                    <label class="zona-archivo zona-archivo--fila tiene-archivo" data-zona-archivo>
+                    <label class="zona-archivo zona-archivo--fila @(string.IsNullOrEmpty(Model.CV?.Nombre_Archivo) ? "" : "tiene-archivo")" data-zona-archivo>
                         <span class="caja-icono caja-icono--sm"><icono nombre="upload" /></span>
                         <span>
-                            <span class="zona-archivo__nombre" data-zona-archivo-nombre>CV-Sofia-Martinez-2026.pdf</span>
-                            <span class="texto-chico texto-suave"> · Arrastrá un archivo o hacé clic para reemplazarlo (PDF, hasta 5 MB)</span>
+                            <span class="zona-archivo__nombre" data-zona-archivo-nombre>@(Model.CV?.NombreOriginal ?? "Todavía no subiste tu CV")</span>
+                            <span class="texto-chico texto-suave"> · Arrastrá un archivo o hacé clic para elegirlo (PDF, DOC o DOCX, hasta 5 MB)</span>
                         </span>
                         <input type="file" accept=".pdf,.doc,.docx" />
                     </label>
+                    @if (!string.IsNullOrEmpty(Model.CV?.Nombre_Archivo))
+                    {
+                        <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV"><icono nombre="download" tamano="16" />Descargar mi CV actual</a>
+                    }
                 </div>
 
                 <div class="formulario__acciones">

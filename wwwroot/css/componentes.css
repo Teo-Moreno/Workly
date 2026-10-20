@@ -2648,3 +2648,44 @@ select.campo__control {
     font-size: 26px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Sesión: avatar con foto, subida de foto y errores de login
+   ------------------------------------------------------------------------- */
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar--mini {
+  width: 26px;
+  height: 26px;
+  font-size: var(--texto-13);
+}
+
+.campo--sin-mensaje .campo__mensaje {
+  display: none !important;
+}
+
+.subir-foto {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.subir-foto__vista {
+  width: 88px;
+  height: 88px;
+  background: var(--color-neutro-claro);
+  color: var(--gris-5);
+  box-shadow: 0 0 0 2px var(--color-borde);
+}
+
+.navbar__movil-salir {
+  padding-top: 12px;
+}
+
+.menu form {
+  margin: 0;
+}

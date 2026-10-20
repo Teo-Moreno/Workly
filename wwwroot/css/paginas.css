@@ -3603,3 +3603,10 @@
     align-items: center;
   }
 }
+
+.perfil-vacio {
+  padding: 16px;
+  border: 1.5px dashed var(--gris-6);
+  border-radius: 12px;
+  color: var(--color-texto-suave);
+}

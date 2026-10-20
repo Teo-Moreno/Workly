@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workly.Models;
 
 namespace Workly.Controllers;
 
+[Authorize]
 public class EmpleosController : Controller
 {
     // Buscar trabajo (Figma › Media · WF 02)
