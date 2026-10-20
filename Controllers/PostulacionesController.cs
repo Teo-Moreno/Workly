@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workly.Models;
 
 namespace Workly.Controllers;
 
 // Mis postulaciones (Figma › Media · WF 03)
+[Authorize]
 public class PostulacionesController : Controller
 {
     public IActionResult Index()

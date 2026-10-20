@@ -1,5 +1,7 @@
+@model LoginViewModel
 @{
     ViewData["Title"] = "Iniciar sesión";
+    var hayErrorGeneral = Html.ErroresGenerales().Any();
 }
 @section Barra {
     <p class="texto-suave">¿No tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a></p>
@@ -9,29 +11,33 @@
     <h1 class="cuenta-tarjeta__titulo">Iniciá sesión</h1>
     <p class="cuenta-tarjeta__bajada">Seguí tu búsqueda donde la dejaste.</p>
 
-    <form class="formulario" data-demo-form="¡Hola de nuevo, Sofía!" data-redirigir="@Url.Action("Index", "Panel")" novalidate>
-        <div class="campo">
-            <label class="campo__etiqueta" for="login-email">Email</label>
+    <partial name="_ErroresFormulario" />
+
+    <form class="formulario" asp-controller="Cuenta" asp-action="IniciarSesion" method="post" novalidate data-formulario-real>
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="campo @Html.ClaseError(nameof(Model.Email)) @(hayErrorGeneral ? "campo--error campo--sin-mensaje" : "")">
+            <label class="campo__etiqueta" asp-for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
-                <input class="campo__control" id="login-email" type="email" autocomplete="email" placeholder="tu@mail.com" value="sofia.martinez@mail.com" required />
+                <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
         </div>
 
-        <div class="campo">
-            <label class="campo__etiqueta" for="login-clave">Contraseña</label>
+        <div class="campo @Html.ClaseError(nameof(Model.Contrasena)) @(hayErrorGeneral ? "campo--error campo--sin-mensaje" : "")">
+            <label class="campo__etiqueta" asp-for="Contrasena">Contraseña</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
-                <input class="campo__control" id="login-clave" type="password" autocomplete="current-password" placeholder="Tu contraseña" required />
+                <input class="campo__control" asp-for="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
                 <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
-            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá tu contraseña</span>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Contrasena), "Ingresá tu contraseña")</span>
         </div>
 
         <div class="fila fila--entre fila--envolver">
             <label class="casilla casilla--sm">
-                <input type="checkbox" checked />
+                <input asp-for="Recordarme" type="checkbox" />
                 <span class="casilla__caja"><icono nombre="check" /></span>
                 Recordarme
             </label>

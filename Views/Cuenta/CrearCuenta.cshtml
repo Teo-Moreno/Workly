@@ -1,14 +1,15 @@
+@model RegistroViewModel
 @{
     ViewData["Title"] = "Crear cuenta";
-    var habilidades = new[] { "HTML", "CSS", "JavaScript", "React", "TypeScript", "Git", "Figma", "Node.js", "Python", "SQL", "Excel", "Atención al cliente" };
 }
 @section Barra {
     <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
-@* Registro en 3 pasos. Usa la "Barra de progreso" de Figma › Guidelines › 08. Selectores y elementos *@
+@* Registro en 3 pasos (tablas Usuario, Perfil y CV). Usa la "Barra de progreso"
+   de Figma › Guidelines › 08. Selectores y elementos. *@
 
 <div class="cuenta-tarjeta cuenta-tarjeta--ancha">
-    <h1 class="cuenta-tarjeta__titulo">Creá tu perfil laboral</h1>
+    <h1 class="cuenta-tarjeta__titulo">Creá tu cuenta</h1>
     <p class="cuenta-tarjeta__bajada">Te lleva menos de 4 minutos. Paso <strong data-paso-actual>1</strong> de 3.</p>
 
     <ol class="pasos registro__pasos" aria-label="Progreso del registro">
@@ -18,102 +19,112 @@
         </li>
         <li class="pasos__item" data-paso-indicador>
             <span class="pasos__circulo"><span class="pasos__numero">2</span><icono nombre="check" /></span>
-            Perfil laboral
+            Tu perfil
         </li>
         <li class="pasos__item" data-paso-indicador>
             <span class="pasos__circulo"><span class="pasos__numero">3</span><icono nombre="check" /></span>
-            Preferencias
+            Tu CV
         </li>
     </ol>
 
-    <form class="registro" data-pasos-form data-demo-form="¡Listo! Creamos tu cuenta." data-redirigir="@Url.Action("Index", "Panel")" novalidate>
-        @* Paso 1 *@
+    <partial name="_ErroresFormulario" />
+
+    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuenta" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+        @* ---------------- Paso 1 · Tus datos (Usuario) ---------------- *@
         <fieldset class="formulario registro__paso" data-paso>
             <legend class="solo-lectores">Paso 1: tus datos</legend>
             <div class="formulario__fila">
-                <div class="campo">
-                    <label class="campo__etiqueta" for="reg-nombre">Nombre</label>
-                    <input class="campo__control" id="reg-nombre" type="text" autocomplete="given-name" placeholder="Escribí acá" required />
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu nombre</span>
+                <div class="campo @Html.ClaseError(nameof(Model.Nombre))">
+                    <label class="campo__etiqueta" asp-for="Nombre">Nombre</label>
+                    <input class="campo__control" asp-for="Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Nombre), "Completá tu nombre")</span>
                 </div>
-                <div class="campo">
-                    <label class="campo__etiqueta" for="reg-apellido">Apellido</label>
-                    <input class="campo__control" id="reg-apellido" type="text" autocomplete="family-name" placeholder="Escribí acá" required />
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu apellido</span>
+                <div class="campo @Html.ClaseError(nameof(Model.Apellido))">
+                    <label class="campo__etiqueta" asp-for="Apellido">Apellido</label>
+                    <input class="campo__control" asp-for="Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Apellido), "Completá tu apellido")</span>
                 </div>
             </div>
-            <div class="campo">
-                <label class="campo__etiqueta" for="reg-email">Email</label>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Email))">
+                <label class="campo__etiqueta" asp-for="Email">Email</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
-                    <input class="campo__control" id="reg-email" type="email" autocomplete="email" placeholder="tu@mail.com" required />
+                    <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required />
                 </div>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
             </div>
-            <div class="campo">
-                <label class="campo__etiqueta" for="reg-clave">Contraseña</label>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Contrasena))">
+                <label class="campo__etiqueta" asp-for="Contrasena">Contraseña</label>
                 <div class="control-con-icono">
                     <icono nombre="lock" />
-                    <input class="campo__control" id="reg-clave" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres" minlength="8" required />
+                    <input class="campo__control" asp-for="Contrasena" type="password" value="" autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+                           minlength="8" maxlength="100" pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
                     <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
                 </div>
-                <span class="campo__ayuda">Usá al menos 8 caracteres, con letras y números.</span>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />La contraseña debe tener al menos 8 caracteres</span>
+                <span class="campo__ayuda">Al menos 8 caracteres, con letras y números.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Contrasena), "Usá al menos 8 caracteres, con una letra y un número")</span>
             </div>
-            <div class="campo">
+
+            <div class="campo @Html.ClaseError(nameof(Model.AceptaTerminos))">
                 <label class="casilla casilla--sm">
-                    <input type="checkbox" required />
+                    <input asp-for="AceptaTerminos" type="checkbox" required />
                     <span class="casilla__caja"><icono nombre="check" /></span>
-                    Acepto los <a class="enlace" asp-controller="Home" asp-action="Terminos" target="_blank">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy" target="_blank">Política de privacidad</a>
+                    <span>Acepto los <a class="enlace" asp-controller="Home" asp-action="Terminos" target="_blank">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy" target="_blank">Política de privacidad</a></span>
                 </label>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Tenés que aceptar los términos para continuar</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.AceptaTerminos), "Tenés que aceptar los términos para continuar")</span>
             </div>
+
             <div class="registro__acciones">
                 <span></span>
                 <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
             </div>
         </fieldset>
 
-        @* Paso 2 *@
+        @* ---------------- Paso 2 · Tu perfil (Perfil) ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
-            <legend class="solo-lectores">Paso 2: perfil laboral</legend>
-            <div class="campo">
-                <label class="campo__etiqueta" for="reg-puesto">¿Qué puesto buscás?</label>
-                <div class="control-con-icono">
-                    <icono nombre="briefcase" />
-                    <input class="campo__control" id="reg-puesto" type="text" placeholder="Por ejemplo: Frontend Developer" required />
+            <legend class="solo-lectores">Paso 2: tu perfil</legend>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Foto))">
+                <span class="campo__etiqueta">Foto de perfil <span class="campo__opcional">(opcional)</span></span>
+                <div class="subir-foto">
+                    <span class="avatar avatar--xl subir-foto__vista" data-vista-foto aria-hidden="true"><icono nombre="user" tamano="40" /></span>
+                    <div class="pila" style="--pila-espacio: 8px">
+                        <label class="boton boton--contorno boton--sm boton--archivo">
+                            <icono nombre="upload" />Elegir foto
+                            <input asp-for="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada />
+                        </label>
+                        <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB.</span>
+                    </div>
                 </div>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Contanos qué puesto buscás</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Foto), "Subí una imagen JPG, PNG o WEBP")</span>
             </div>
 
-            <fieldset class="formulario__grupo">
-                <legend class="campo__etiqueta">Tu experiencia</legend>
-                <div class="opciones-tarjeta opciones-tarjeta--cuatro">
-                    <label class="opcion-tarjeta"><input type="radio" name="nivel" /><span><span class="opcion-tarjeta__titulo">Sin experiencia</span><span class="opcion-tarjeta__texto">Busco mi primer trabajo</span></span></label>
-                    <label class="opcion-tarjeta"><input type="radio" name="nivel" checked /><span><span class="opcion-tarjeta__titulo">Junior</span><span class="opcion-tarjeta__texto">Menos de 2 años</span></span></label>
-                    <label class="opcion-tarjeta"><input type="radio" name="nivel" /><span><span class="opcion-tarjeta__titulo">Semi Senior</span><span class="opcion-tarjeta__texto">De 2 a 5 años</span></span></label>
-                    <label class="opcion-tarjeta"><input type="radio" name="nivel" /><span><span class="opcion-tarjeta__titulo">Senior</span><span class="opcion-tarjeta__texto">Más de 5 años</span></span></label>
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.Ubicacion))">
+                    <label class="campo__etiqueta" asp-for="Ubicacion">¿Dónde vivís?</label>
+                    <select class="campo__control" asp-for="Ubicacion" required>
+                        <option value="">Elegí una opción</option>
+                        @foreach (var ubicacion in RegistroViewModel.Ubicaciones)
+                        {
+                            <option value="@ubicacion">@ubicacion</option>
+                        }
+                    </select>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Ubicacion), "Elegí dónde vivís")</span>
                 </div>
-            </fieldset>
-
-            <fieldset class="formulario__grupo">
-                <legend class="campo__etiqueta">Habilidades <span class="campo__opcional">(elegí todas las que quieras)</span></legend>
-                <div class="lista-tags lista-tags--holgada">
-                    @foreach (var habilidad in habilidades)
-                    {
-                        <label class="chip-seleccion"><input type="checkbox" /><span>@habilidad</span></label>
-                    }
+                <div class="campo @Html.ClaseError(nameof(Model.Telefono))">
+                    <label class="campo__etiqueta" asp-for="Telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
+                    <input class="campo__control" asp-for="Telefono" type="tel" autocomplete="tel" placeholder="+54 11 5555-1234" maxlength="30" pattern="[0-9+\(\)\s\-]{6,30}" />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Telefono), "Ingresá solo números, espacios y + ( ) -")</span>
                 </div>
-            </fieldset>
+            </div>
 
-            <div class="campo">
-                <span class="campo__etiqueta">CV <span class="campo__opcional">(opcional)</span></span>
-                <label class="zona-archivo" data-zona-archivo>
-                    <span class="caja-icono"><icono nombre="upload" /></span>
-                    <strong class="zona-archivo__nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
-                    <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
-                    <input type="file" accept=".pdf,.doc,.docx" />
-                </label>
+            <div class="campo @Html.ClaseError(nameof(Model.Descripcion))">
+                <label class="campo__etiqueta" asp-for="Descripcion">Contanos sobre vos <span class="campo__opcional">(opcional)</span></label>
+                <textarea class="campo__control" asp-for="Descripcion" rows="4" maxlength="500" placeholder="Qué hacés, qué te gusta y qué tipo de trabajo estás buscando."></textarea>
+                <span class="campo__ayuda">Aparece en la sección "Sobre mí" de tu perfil. Hasta 500 caracteres.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Descripcion), "Usá hasta 500 caracteres")</span>
             </div>
 
             <div class="registro__acciones">
@@ -122,60 +133,34 @@
             </div>
         </fieldset>
 
-        @* Paso 3 *@
+        @* ---------------- Paso 3 · Tu CV (CV) ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
-            <legend class="solo-lectores">Paso 3: preferencias</legend>
-            <fieldset class="formulario__grupo">
-                <legend class="campo__etiqueta">Modalidad</legend>
-                <div class="opciones-tarjeta">
-                    <label class="opcion-tarjeta"><input type="checkbox" checked /><span class="caja-icono caja-icono--sm"><icono nombre="home-alt-outline" /></span><span><span class="opcion-tarjeta__titulo">Remota</span></span></label>
-                    <label class="opcion-tarjeta"><input type="checkbox" checked /><span class="caja-icono caja-icono--sm"><icono nombre="calendar" /></span><span><span class="opcion-tarjeta__titulo">Híbrida</span></span></label>
-                    <label class="opcion-tarjeta"><input type="checkbox" /><span class="caja-icono caja-icono--sm"><icono nombre="building" /></span><span><span class="opcion-tarjeta__titulo">Presencial</span></span></label>
-                </div>
-            </fieldset>
+            <legend class="solo-lectores">Paso 3: tu CV</legend>
 
-            <div class="formulario__fila">
-                <div class="campo">
-                    <label class="campo__etiqueta" for="reg-ubicacion">¿Dónde querés trabajar?</label>
-                    <select class="campo__control" id="reg-ubicacion">
-                        <option>CABA</option>
-                        <option>CABA y GBA</option>
-                        <option>Córdoba</option>
-                        <option>Rosario</option>
-                        <option>Todo el país</option>
-                    </select>
-                </div>
-                <div class="campo">
-                    <label class="campo__etiqueta" for="reg-jornada">Jornada</label>
-                    <select class="campo__control" id="reg-jornada">
-                        <option>Full-time</option>
-                        <option>Part-time</option>
-                        <option>Indistinto</option>
-                    </select>
-                </div>
+            <div class="campo @Html.ClaseError(nameof(Model.ArchivoCV))">
+                <span class="campo__etiqueta">CV <span class="campo__opcional">(opcional, lo podés subir después)</span></span>
+                <label class="zona-archivo" data-zona-archivo>
+                    <span class="caja-icono"><icono nombre="upload" /></span>
+                    <strong class="zona-archivo__nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
+                    <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
+                    <input asp-for="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                </label>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.ArchivoCV), "Subí un archivo PDF, DOC o DOCX")</span>
             </div>
 
-            <div class="campo">
-                <span class="campo__etiqueta">Expectativa salarial (bruta mensual)</span>
-                <div>
-                    <div class="rango" data-rango>
-                        <span class="rango__pista"></span>
-                        <span class="rango__relleno"></span>
-                        <input type="range" min="500000" max="3500000" step="100000" value="1200000" aria-label="Salario mínimo" data-rango-min />
-                        <input type="range" min="500000" max="3500000" step="100000" value="1800000" aria-label="Salario máximo" data-rango-max />
-                    </div>
-                    <div class="rango__valores">
-                        <span data-rango-texto-min>$1.200.000</span>
-                        <span data-rango-texto-max>$1.800.000</span>
-                    </div>
+            <div class="campo @Html.ClaseError(nameof(Model.SitioWeb))">
+                <label class="campo__etiqueta" asp-for="SitioWeb">Sitio web, portfolio o LinkedIn <span class="campo__opcional">(opcional)</span></label>
+                <div class="control-con-icono">
+                    <icono nombre="globe" />
+                    <input class="campo__control" asp-for="SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="tusitio.com" maxlength="200" />
                 </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.SitioWeb), "Usá hasta 200 caracteres")</span>
             </div>
 
-            <label class="interruptor">
-                <input type="checkbox" checked />
-                <span class="interruptor__pista"></span>
-                Avisame por mail cuando haya ofertas compatibles
-            </label>
+            @if (Model.Foto != null || Model.ArchivoCV != null)
+            {
+                <p class="texto-chico texto-suave">Por seguridad, si hubo un error tenés que volver a elegir la foto y el CV.</p>
+            }
 
             <div class="registro__acciones">
                 <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
