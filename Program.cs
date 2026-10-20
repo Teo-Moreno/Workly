@@ -36,14 +36,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-// Las fotos de perfil se suben mientras la app corre (wwwroot/uploads): MapStaticAssets
-// solo conoce los archivos del build, así que estas se sirven con UseStaticFiles.
-app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Las fotos de perfil se suben mientras la app corre (wwwroot/uploads): MapStaticAssets
+// solo conoce los archivos del build, así que estas se sirven con UseStaticFiles.
+// Va después de UseRouting para que el CSS y el JS sigan saliendo por MapStaticAssets
+// (comprimidos y con caché); UseStaticFiles solo atiende lo que no tiene endpoint.
+app.UseStaticFiles();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
