@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workly.Models;
 
 namespace Workly.Controllers;
 
+[Authorize]
 public class EmpresasController : Controller
 {
     // Empresas (Figma › Media · WF 04)

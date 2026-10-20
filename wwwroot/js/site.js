@@ -487,12 +487,28 @@
      data-demo-form="Mensaje"            → muestra un snackbar al enviar
      data-redirigir="/Panel"            → navega luego de "enviar"
      ---------------------------------------------------------------------- */
+  // Valida los campos visibles: obligatorios vacíos y valores con formato inválido
+  // (email, patrón, largo). Marca cada campo con .campo--error del UI Kit.
+  // El contenedor puede estar oculto (un paso del registro que no se está viendo).
   function validar(formulario) {
     let valido = true;
-    $$("[required]", formulario).forEach((control) => {
-      if (control.closest("[hidden]")) return;
+    $$("input, select, textarea", formulario).forEach((control) => {
+      const oculto = control.closest("[hidden]");
+      if ((oculto && oculto !== formulario) || ["hidden", "file", "submit", "button"].includes(control.type)) return;
       const campo = control.closest(".campo");
-      const ok = control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
+      let ok;
+      if (control.type === "checkbox" || control.type === "radio") {
+        if (!control.required) return;
+        ok = control.checked;
+      } else if (control.value.trim() === "") {
+        if (!control.required) {
+          campo?.classList.remove("campo--error");
+          return;
+        }
+        ok = false;
+      } else {
+        ok = control.checkValidity();
+      }
       campo?.classList.toggle("campo--error", !ok);
       if (!ok && valido) {
         control.focus();
@@ -502,11 +518,17 @@
     return valido;
   }
 
-  $$("form [required]").forEach((control) => {
-    control.addEventListener("input", () => {
+  // Al corregir un campo marcado en rojo, se quita el error
+  $$("form .campo input, form .campo select, form .campo textarea").forEach((control) => {
+    const quitarError = () => {
       const campo = control.closest(".campo");
-      if (campo?.classList.contains("campo--error") && control.value.trim() !== "") campo.classList.remove("campo--error");
-    });
+      if (!campo?.classList.contains("campo--error")) return;
+      campo.classList.remove("campo--sin-mensaje");
+      const ok = control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
+      if (ok) campo.classList.remove("campo--error");
+    };
+    control.addEventListener("input", quitarError);
+    control.addEventListener("change", quitarError);
   });
 
   $$("form[data-demo-form]").forEach((formulario) => {
@@ -528,7 +550,7 @@
           boton.classList.remove("esta-cargando");
           $("[data-temporal]", boton)?.remove();
         }
-        if (mensaje) snackbar(mensaje, "exito");
+        if (mensaje) snackbar(mensaje, formulario.dataset.demoTipo || "exito");
         if (destino) setTimeout(() => (location.href = destino), mensaje ? 700 : 0);
         else if (formulario.hasAttribute("data-limpiar")) formulario.reset();
       }, 700);
@@ -567,7 +589,10 @@
     );
     zona.addEventListener("drop", (evento) => {
       evento.preventDefault();
-      mostrar(evento.dataTransfer.files[0]);
+      const archivos = evento.dataTransfer.files;
+      // El archivo soltado se pasa al input para que se envíe con el formulario.
+      if (input && archivos.length) input.files = archivos;
+      mostrar(archivos[0]);
     });
     input?.addEventListener("change", () => mostrar(input.files[0]));
   });
@@ -580,7 +605,7 @@
     const indicadores = $$("[data-paso-indicador]");
     let actual = 0;
 
-    const mostrar = (indice) => {
+    const mostrar = (indice, enfocar = true) => {
       actual = indice;
       pasos.forEach((paso, i) => (paso.hidden = i !== indice));
       indicadores.forEach((indicador, i) => {
@@ -590,8 +615,12 @@
         else indicador.removeAttribute("aria-current");
       });
       $("[data-paso-actual]")?.replaceChildren(String(indice + 1));
-      pasos[indice].querySelector("input, select, textarea")?.focus({ preventScroll: true });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (enfocar) {
+        const primerCampo = $(".campo--error .campo__control, .campo--error input", pasos[indice]) ||
+          pasos[indice].querySelector("input:not([type=hidden]), select, textarea");
+        primerCampo?.focus({ preventScroll: true });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     };
 
     formulario.addEventListener("click", (evento) => {
@@ -605,7 +634,60 @@
       }
     });
 
-    mostrar(0);
+    // Antes de enviar se revisan todos los pasos (no solo el visible) y se abre el primero con errores.
+    formulario.addEventListener("submit", (evento) => {
+      const pasoInvalido = pasos.findIndex((paso) => !validar(paso));
+      if (pasoInvalido === -1) return;
+      evento.preventDefault();
+      evento.stopImmediatePropagation();
+      mostrar(pasoInvalido);
+      snackbar("Revisá los campos marcados en rojo.", "error");
+    });
+
+    // Si el servidor devolvió errores, se abre el primer paso que tiene alguno.
+    const pasoConError = pasos.findIndex((paso) => paso.querySelector(".campo--error"));
+    mostrar(Math.max(pasoConError, 0), pasoConError >= 0);
+  });
+
+  /* ------------------------------------------------------------------------
+     Formularios que se envían al servidor (iniciar sesión, crear cuenta)
+     Se validan en el navegador antes de enviar y se evita el doble envío.
+     ---------------------------------------------------------------------- */
+  $$("form[data-formulario-real]").forEach((formulario) => {
+    formulario.addEventListener("submit", (evento) => {
+      const pasoVisible = $$("[data-paso]", formulario).find((paso) => !paso.hidden);
+      if (!validar(pasoVisible || formulario)) {
+        evento.preventDefault();
+        snackbar("Revisá los campos marcados en rojo.", "error");
+        return;
+      }
+      const boton = evento.submitter || $("button[type=submit]", formulario);
+      if (boton) {
+        boton.classList.add("esta-cargando");
+        boton.setAttribute("aria-disabled", "true");
+        boton.insertAdjacentHTML("afterbegin", '<span class="spinner spinner--sm spinner--claro" aria-hidden="true"></span>');
+      }
+      // Un segundo envío mientras se procesa el primero se ignora.
+      formulario.addEventListener("submit", (e) => e.preventDefault(), { once: true });
+    });
+  });
+
+  // Vista previa de la foto de perfil elegida
+  $$("[data-foto-entrada]").forEach((entrada) => {
+    const vista = $("[data-vista-foto]");
+    entrada.addEventListener("change", () => {
+      const archivo = entrada.files?.[0];
+      if (!vista || !archivo || !archivo.type.startsWith("image/")) return;
+      const imagen = document.createElement("img");
+      imagen.alt = "";
+      imagen.src = URL.createObjectURL(archivo);
+      vista.replaceChildren(imagen);
+    });
+  });
+
+  // Aviso que deja el servidor después de una acción (TempData["Mensaje"])
+  $$("[data-snackbars][data-mensaje]").forEach((contenedor) => {
+    if (contenedor.dataset.mensaje) snackbar(contenedor.dataset.mensaje, contenedor.dataset.mensajeTipo || "exito");
   });
 
   /* ------------------------------------------------------------------------
