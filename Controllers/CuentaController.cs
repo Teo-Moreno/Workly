@@ -101,6 +101,18 @@ public class CuentaController : Controller
         modelo.Nombre = modelo.Nombre?.Trim() ?? "";
         modelo.Apellido = modelo.Apellido?.Trim() ?? "";
 
+        // El navegador cuenta cada salto de línea como 1 carácter pero envía "\r\n" (2):
+        // se normaliza antes de medir para que el límite de 500 coincida con el del formulario.
+        if (modelo.Descripcion != null)
+        {
+            modelo.Descripcion = modelo.Descripcion.Replace("\r\n", "\n");
+            ModelState.Remove(nameof(modelo.Descripcion));
+            if (modelo.Descripcion.Length > 500)
+            {
+                ModelState.AddModelError(nameof(modelo.Descripcion), "Usá hasta 500 caracteres");
+            }
+        }
+
         if (!string.IsNullOrEmpty(modelo.Ubicacion) && !RegistroViewModel.Ubicaciones.Contains(modelo.Ubicacion))
         {
             ModelState.AddModelError(nameof(modelo.Ubicacion), "Elegí una ubicación de la lista");
