@@ -8,6 +8,49 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 - **Media**: wireframes de cada pantalla.
 - **Alta**: landing a color, usada como referencia visual para todas las vistas.
 
+## Cómo correrlo
+
+1. **Crear la base de datos.** Abrir `BaseDeDatos/script.sql` en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
+2. **Revisar la cadena de conexión** en `appsettings.json` (`ConnectionStrings › Workly`). Por defecto usa la instancia local con autenticación de Windows:
+   ```json
+   "Workly": "Server=localhost;Database=Workly;Trusted_Connection=True;TrustServerCertificate=True;"
+   ```
+   - Con SQL Server Express: `Server=localhost\\SQLEXPRESS;...` (en el JSON la barra va doble).
+   - Con usuario y contraseña de SQL Server: `Server=localhost;Database=Workly;User Id=sa;Password=...;TrustServerCertificate=True;`
+3. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio). Los paquetes `Dapper` y `Microsoft.Data.SqlClient` se descargan solos.
+
+**Cuenta de prueba:** `sofia.martinez@mail.com` / `Workly2026`
+
+### Qué funciona con la base
+
+- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
+- **Iniciar sesión** (`/Cuenta/IniciarSesion`) con "Recordarme" (sesión de 14 días) y vuelta a la página que se quería ver.
+- **Cerrar sesión** desde el menú de usuario.
+- **Páginas protegidas:** todo lo que está dentro de la app (panel, empleos, postulaciones, empresas, notificaciones, perfil) pide iniciar sesión.
+- **Mi perfil** y la pestaña **Cuenta** de Configuración muestran los datos reales: nombre, email, ubicación, teléfono, descripción, foto, sitio web, CV (descarga privada en `/Perfil/DescargarCV`), experiencia y formación.
+- La navbar muestra el nombre, la ubicación y la foto (o las iniciales) de quien inició sesión.
+
+Las contraseñas se guardan con hash PBKDF2-SHA256 (600.000 iteraciones y sal aleatoria), nunca en texto plano. Las fotos se guardan en `wwwroot/uploads/fotos` y los CV en `ArchivosPrivados/cv`, fuera de `wwwroot`, así solo los descarga su dueño. Las dos carpetas están en `.gitignore`.
+
+### Qué sigue siendo visual
+
+Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idiomas y la edición del perfil todavía usan `Models/DatosDeEjemplo.cs`. Las tablas `OfertaLaboral`, `Empresa`, `Postulacion`, `Favorito` y `FavoritoOferta` ya existen en la base y tienen datos de ejemplo para conectarlas en la próxima etapa.
+
+## Base de datos
+
+`BaseDeDatos/script.sql` sigue el diagrama de la base (DER):
+
+| Tabla | Para qué |
+| --- | --- |
+| `Usuario` | Nombre, apellido, email (único), contraseña (hash) y fecha de registro |
+| `Perfil` | Foto, descripción, ubicación y teléfono (uno por usuario) |
+| `CV` | Archivo del CV y sitio web (uno por usuario) |
+| `Educacion` / `UsuarioEducacion` | Instituciones y la formación de cada usuario |
+| `Empresa` / `ExperienciaLaboral` | Empresas y la experiencia de cada usuario |
+| `OfertaLaboral` | Ofertas publicadas por las empresas |
+| `Favorito` / `FavoritoOferta` | Ofertas guardadas |
+| `Postulacion` | Postulaciones de cada usuario (una por oferta) |
+
 ## Vistas
 
 | Ruta | Vista | Referencia |
@@ -31,6 +74,10 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 
 ## Estructura
 
+- `Models/BD.cs`: acceso a SQL Server con Dapper (consultas con parámetros).
+- `Models/Usuario.cs`, `Perfil.cs`, `CV.cs`: una clase por tabla. `Models/CuentaViewModels.cs`: modelos de los formularios y de "Mi perfil".
+- `Servicios/Contrasenas.cs`: hash y verificación de contraseñas. `Servicios/Archivos.cs`: validación y guardado de la foto y el CV.
+- `Helpers/UsuarioActual.cs`: datos de quien inició sesión en las vistas (`User.Nombre()`, `User.Iniciales()`…). `Helpers/ValidacionHtml.cs`: errores del servidor con el estilo del UI Kit.
 - `Models/DatosDeEjemplo.cs`: datos de ejemplo (ofertas, empresas, postulaciones y notificaciones) tomados de los wireframes. Reemplazar por la base de datos manteniendo los mismos métodos.
 - `Views/Shared/_Layout.cshtml`: layout público (landing y legales).
 - `Views/Shared/_LayoutApp.cshtml`: layout de la app (navbar con notificaciones y menú de usuario).

@@ -1,6 +1,8 @@
 @model PanelViewModel
 @{
     ViewData["Title"] = "Inicio";
+    var hoy = DateTime.Today.ToString("dddd d 'de' MMMM", new System.Globalization.CultureInfo("es-AR"));
+    hoy = char.ToUpper(hoy[0]) + hoy[1..];
 }
 @* Inicio de la persona logueada: resume coincidencias, entrevistas y progreso.
    Reutiliza los componentes de la landing Alta y del UI Kit. *@
@@ -8,8 +10,8 @@
 <div class="contenedor seccion-app">
     <header class="panel-saludo">
         <div>
-            <p class="panel-saludo__fecha">Jueves 15 de octubre</p>
-            <h1 class="encabezado-pagina__titulo">Hola, Sofía</h1>
+            <p class="panel-saludo__fecha">@hoy</p>
+            <h1 class="encabezado-pagina__titulo">Hola, @User.Nombre()</h1>
             <p class="encabezado-pagina__bajada">Tenés <strong class="texto-negrita">3 nuevas coincidencias</strong> y <strong class="texto-negrita">2 entrevistas</strong> agendadas. ¡Vas avanzando!</p>
         </div>
         <form class="panel-saludo__buscador" asp-controller="Empleos" asp-action="Index" method="get" role="search">
