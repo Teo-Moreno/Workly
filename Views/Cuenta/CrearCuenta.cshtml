@@ -93,7 +93,8 @@
                     <div class="pila" style="--pila-espacio: 8px">
                         <label class="boton boton--contorno boton--sm boton--archivo">
                             <icono nombre="upload" />Elegir foto
-                            <input asp-for="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada />
+                            <input asp-for="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                                   data-tamano-maximo="@Workly.Servicios.Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
                         </label>
                         <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB.</span>
                     </div>
@@ -143,7 +144,8 @@
                     <span class="caja-icono"><icono nombre="upload" /></span>
                     <strong class="zona-archivo__nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
                     <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
-                    <input asp-for="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                    <input asp-for="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                           data-tamano-maximo="@Workly.Servicios.Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
                 </label>
                 <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.ArchivoCV), "Subí un archivo PDF, DOC o DOCX")</span>
             </div>

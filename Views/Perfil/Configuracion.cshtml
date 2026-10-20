@@ -117,8 +117,9 @@
                             <span class="zona-archivo__nombre" data-zona-archivo-nombre>@(Model.CV?.NombreOriginal ?? "Todavía no subiste tu CV")</span>
                             <span class="texto-chico texto-suave"> · Arrastrá un archivo o hacé clic para elegirlo (PDF, DOC o DOCX, hasta 5 MB)</span>
                         </span>
-                        <input type="file" accept=".pdf,.doc,.docx" />
+                        <input type="file" accept=".pdf,.doc,.docx" data-tamano-maximo="@Workly.Servicios.Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
                     </label>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Subí un archivo PDF, DOC o DOCX</span>
                     @if (!string.IsNullOrEmpty(Model.CV?.Nombre_Archivo))
                     {
                         <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV"><icono nombre="download" tamano="16" />Descargar mi CV actual</a>
