@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workly.Models;
 
 namespace Workly.Controllers;
 
 // "Inicio" de la persona logueada
+[Authorize]
 public class PanelController : Controller
 {
     public IActionResult Index()
