@@ -600,10 +600,11 @@
     const input = $("input[type=file]", zona);
     const nombre = $("[data-zona-archivo-nombre]", zona);
     const textoInicial = nombre?.textContent;
+    const teniaArchivo = zona.classList.contains("tiene-archivo"); // p. ej. el CV ya guardado
     const mostrar = (archivo) => {
       if (!archivo) return;
       if (input && !archivoValido(input, archivo)) {
-        zona.classList.remove("tiene-archivo");
+        zona.classList.toggle("tiene-archivo", teniaArchivo);
         if (nombre) nombre.textContent = textoInicial;
         return;
       }
