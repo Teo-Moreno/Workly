@@ -22,8 +22,18 @@
             </nav>
 
             <div class="navbar__acciones">
-                <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                @if (User.EstaLogueado())
+                {
+                    <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Index">
+                        <span class="avatar avatar--mini" aria-hidden="true">@User.Iniciales()</span>@User.Nombre()
+                    </a>
+                    <a class="boton" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
+                }
+                else
+                {
+                    <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                }
                 <button class="navbar__hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
                     <icono nombre="menu" etiqueta="Abrir menú" />
                 </button>
@@ -36,8 +46,16 @@
             <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
             <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
             <div class="navbar__movil-acciones">
-                <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                @if (User.EstaLogueado())
+                {
+                    <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Index">Mi perfil</a>
+                    <a class="boton" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
+                }
+                else
+                {
+                    <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                }
             </div>
         </nav>
     </header>
@@ -62,7 +80,7 @@
         </div>
     </footer>
 
-    <div class="snackbars" aria-live="polite" data-snackbars></div>
+    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]"></div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

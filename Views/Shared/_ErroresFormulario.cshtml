@@ -1,0 +1,12 @@
+@* Errores generales del formulario (por ejemplo, "El email o la contraseña no son correctos"),
+   con el estilo de snackbar de error del UI Kit. *@
+@{
+    var errores = Html.ErroresGenerales().ToList();
+}
+@if (errores.Count > 0)
+{
+    <div class="snackbar snackbar--error aviso" role="alert" data-error-formulario>
+        <icono nombre="error" />
+        <span class="snackbar__texto">@string.Join(" ", errores)</span>
+    </div>
+}

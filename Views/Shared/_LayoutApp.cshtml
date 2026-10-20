@@ -1,6 +1,8 @@
 @{
     var notificaciones = DatosDeEjemplo.Notificaciones;
     var sinLeer = notificaciones.Count(n => !n.Leida);
+    var logueado = User.EstaLogueado();
+    var foto = User.Foto();
 }
 @functions {
     private string? Actual(string controlador) =>
@@ -35,6 +37,8 @@
             </nav>
 
             <div class="navbar__acciones">
+                @if (logueado)
+                {
                 <div class="desplegable" data-desplegable>
                     <button class="boton-notificaciones" type="button" aria-expanded="false" aria-controls="panel-notificaciones" data-desplegable-boton>
                         <icono nombre="notification" />
@@ -49,18 +53,27 @@
 
                 <div class="desplegable" data-desplegable>
                     <button class="boton-usuario" type="button" aria-expanded="false" aria-controls="menu-usuario" data-desplegable-boton>
-                        <span class="avatar" aria-hidden="true">SM</span>
+                        <span class="avatar" aria-hidden="true">
+                            @if (!string.IsNullOrEmpty(foto))
+                            {
+                                <img src="@foto" alt="" />
+                            }
+                            else
+                            {
+                                @User.Iniciales()
+                            }
+                        </span>
                         <span class="boton-usuario__datos">
-                            <span class="boton-usuario__nombre">Sofía Martínez</span>
-                            <span class="boton-usuario__rol">Frontend Jr</span>
+                            <span class="boton-usuario__nombre">@User.NombreCompleto()</span>
+                            <span class="boton-usuario__rol">@(User.Ubicacion() ?? "Mi cuenta")</span>
                         </span>
                         <icono nombre="chevron-down" />
                         <span class="solo-lectores">Abrir menú de cuenta</span>
                     </button>
                     <div class="desplegable__panel" id="menu-usuario" data-desplegable-panel>
                         <div class="menu__cabecera">
-                            <strong class="boton-usuario__nombre">Sofía Martínez</strong>
-                            <span class="boton-usuario__rol">sofia.martinez@mail.com</span>
+                            <strong class="boton-usuario__nombre">@User.NombreCompleto()</strong>
+                            <span class="boton-usuario__rol">@User.Email()</span>
                         </div>
                         <ul class="menu" role="list">
                             <li><a class="menu__item" asp-controller="Perfil" asp-action="Index"><icono nombre="user-square" />Mi perfil</a></li>
@@ -68,10 +81,20 @@
                             <li><a class="menu__item" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias"><icono nombre="slider-03" />Preferencias</a></li>
                             <li><a class="menu__item" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a></li>
                             <li class="menu__separador" role="separator"></li>
-                            <li><a class="menu__item menu__item--peligro" asp-controller="Home" asp-action="Index"><icono nombre="log-out" />Cerrar sesión</a></li>
+                            <li>
+                                <form asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
+                                    <button class="menu__item menu__item--peligro" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                                </form>
+                            </li>
                         </ul>
                     </div>
                 </div>
+                }
+                else
+                {
+                    <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                }
 
                 <button class="navbar__hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
                     <icono nombre="menu" etiqueta="Abrir menú" />
@@ -85,6 +108,12 @@
             <a class="navbar__link @Activo("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
             <a class="navbar__link @Activo("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
             <a class="navbar__link @Activo("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
+            @if (logueado)
+            {
+                <form class="navbar__movil-salir" asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
+                    <button class="boton boton--contorno boton--peligro boton--bloque" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                </form>
+            }
         </nav>
     </header>
 
@@ -109,7 +138,7 @@
     </footer>
 
     <partial name="_ModalPostular" />
-    <div class="snackbars" aria-live="polite" data-snackbars></div>
+    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]"></div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
