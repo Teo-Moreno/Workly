@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace Workly.Helpers;
+namespace Workly.Models;
 
 /// <summary>
 /// Atajos para leer los datos de la persona logueada desde la cookie de sesión.
