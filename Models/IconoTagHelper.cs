@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace Workly.TagHelpers;
+namespace Workly.Models;
 
 /// <summary>
 /// Dibuja un ícono del sprite wwwroot/img/iconos.svg.

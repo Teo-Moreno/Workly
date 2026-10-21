@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Workly.Helpers;
 using Workly.Models;
-using Workly.Servicios;
 
 namespace Workly.Controllers;
 
