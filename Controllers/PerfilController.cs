@@ -27,7 +27,13 @@ public class PerfilController : Controller
     public async Task<IActionResult> Configuracion()
     {
         var modelo = ObtenerMiPerfil();
-        return modelo == null ? await SesionInvalida() : View(modelo);
+        if (modelo == null)
+        {
+            return await SesionInvalida();
+        }
+        modelo.Paises = BD.ObtenerPaises();
+        modelo.Provincias = BD.ObtenerProvincias();
+        return View(modelo);
     }
 
     // Descarga el CV de la persona logueada (los CV no son públicos)
