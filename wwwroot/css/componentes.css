@@ -2689,3 +2689,99 @@ select.campo__control {
 .menu form {
   margin: 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Campo con prefijo (teléfono: "+54" según el país elegido)
+   ------------------------------------------------------------------------- */
+.control-con-prefijo {
+  display: flex;
+  align-items: stretch;
+}
+
+.control-con-prefijo__prefijo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid var(--gris-5);
+  border-right: 0;
+  border-radius: var(--radio-campo) 0 0 var(--radio-campo);
+  background: var(--color-neutro-claro);
+  color: var(--color-principal);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.control-con-prefijo .campo__control {
+  flex: 1;
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.campo--error .control-con-prefijo__prefijo {
+  border-color: var(--color-error);
+}
+
+/* ---------------------------------------------------------------------------
+   Hover del header (navbar pública y de la app)
+   ------------------------------------------------------------------------- */
+.navbar .logo {
+  transition: opacity var(--transicion);
+}
+
+.navbar .logo:hover {
+  opacity: 0.8;
+}
+
+/* Navbar pública: subrayado amarillo que crece desde la izquierda */
+.navbar__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-acento);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transicion);
+}
+
+.navbar__link:hover::after,
+.navbar__link:focus-visible::after,
+.navbar__link.esta-activo::after {
+  transform: scaleX(1);
+}
+
+/* Navbar de la app y menú mobile: píldora con fondo */
+.navbar--app .navbar__link::after,
+.navbar__movil .navbar__link::after {
+  display: none;
+}
+
+.navbar--app .navbar__link:hover,
+.navbar__movil .navbar__link:hover {
+  background: var(--color-principal-tenue);
+  color: var(--color-principal);
+}
+
+.navbar--app .navbar__link.esta-activo:hover {
+  background: rgba(19, 52, 97, 0.14);
+}
+
+.boton-notificaciones:hover,
+.boton-notificaciones[aria-expanded="true"],
+.boton-usuario:hover,
+.boton-usuario[aria-expanded="true"],
+.navbar__hamburguesa:hover {
+  background: var(--color-principal-tenue);
+}
+
+/* La provincia puede ser larga ("Ciudad Autónoma de Buenos Aires") */
+.navbar .boton-usuario__rol {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -3,11 +3,8 @@
     ViewData["Title"] = "Configuración";
     var usuario = Model.Usuario;
     var perfil = Model.Perfil;
-    var ubicaciones = RegistroViewModel.Ubicaciones.ToList();
-    if (!string.IsNullOrEmpty(perfil.Ubicacion) && !ubicaciones.Contains(perfil.Ubicacion))
-    {
-        ubicaciones.Insert(0, perfil.Ubicacion);
-    }
+    var idPais = perfil.IDPais ?? Model.Paises.FirstOrDefault()?.ID;
+    var codigoPais = Model.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
     var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js", "Testing (Jest)", "Vue.js", "Angular" };
     var marcadas = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js" };
 }
@@ -86,20 +83,38 @@
                     </div>
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
-                        <input class="campo__control" id="cfg-telefono" type="tel" placeholder="+54 11 5555-1234" value="@perfil.Telefono" maxlength="30" />
+                        <div class="control-con-prefijo">
+                            <span class="control-con-prefijo__prefijo" data-prefijo-telefono>@codigoPais</span>
+                            <input class="campo__control" id="cfg-telefono" type="tel" inputmode="numeric" placeholder="11 5555-1234" value="@Telefonos.ParteLocal(perfil.Telefono, perfil.Codigo_Telefono)"
+                                   maxlength="12" pattern="[0-9]{2,4} [0-9]{2,4}-[0-9]{4}" data-telefono data-codigos-area="@string.Join(",", Telefonos.CodigosDeArea3)" />
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá el código de área y el número: 10 números</span>
                     </div>
                 </div>
 
                 <div class="formulario__fila">
                     <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-ubicacion">Ubicación</label>
-                        <select class="campo__control" id="cfg-ubicacion">
-                            @foreach (var ubicacion in ubicaciones)
+                        <label class="campo__etiqueta" for="cfg-pais">País</label>
+                        <select class="campo__control" id="cfg-pais" data-selector-pais>
+                            @foreach (var pais in Model.Paises)
                             {
-                                <option selected="@(ubicacion == perfil.Ubicacion)">@ubicacion</option>
+                                <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == idPais)">@pais.Nombre</option>
                             }
                         </select>
                     </div>
+                    <div class="campo">
+                        <label class="campo__etiqueta" for="cfg-provincia">Provincia</label>
+                        <select class="campo__control" id="cfg-provincia" data-selector-provincia>
+                            <option value="">Elegí tu provincia</option>
+                            @foreach (var provincia in Model.Provincias)
+                            {
+                                <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == perfil.IDProvincia)">@provincia.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="formulario__fila">
                     <div class="campo">
                         <label class="campo__etiqueta" for="cfg-web">Sitio web o portfolio</label>
                         <div class="control-con-icono">
