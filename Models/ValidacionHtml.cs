@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Workly.Helpers;
+namespace Workly.Models;
 
 /// <summary>
 /// Conecta los errores de validación del servidor (ModelState) con los estilos

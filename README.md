@@ -76,8 +76,8 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 
 - `Models/BD.cs`: acceso a SQL Server con Dapper (consultas con parámetros).
 - `Models/Usuario.cs`, `Perfil.cs`, `CV.cs`: una clase por tabla. `Models/CuentaViewModels.cs`: modelos de los formularios y de "Mi perfil".
-- `Servicios/Contrasenas.cs`: hash y verificación de contraseñas. `Servicios/Archivos.cs`: validación y guardado de la foto y el CV.
-- `Helpers/UsuarioActual.cs`: datos de quien inició sesión en las vistas (`User.Nombre()`, `User.Iniciales()`…). `Helpers/ValidacionHtml.cs`: errores del servidor con el estilo del UI Kit.
+- `Models/Contrasenas.cs`: hash y verificación de contraseñas. `Models/Archivos.cs`: validación y guardado de la foto y el CV.
+- `Models/UsuarioActual.cs`: datos de quien inició sesión en las vistas (`User.Nombre()`, `User.Iniciales()`…). `Models/ValidacionHtml.cs`: errores del servidor con el estilo del UI Kit.
 - `Models/DatosDeEjemplo.cs`: datos de ejemplo (ofertas, empresas, postulaciones y notificaciones) tomados de los wireframes. Reemplazar por la base de datos manteniendo los mismos métodos.
 - `Views/Shared/_Layout.cshtml`: layout público (landing y legales).
 - `Views/Shared/_LayoutApp.cshtml`: layout de la app (navbar con notificaciones y menú de usuario).
