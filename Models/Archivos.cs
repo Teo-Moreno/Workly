@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Workly.Servicios;
+namespace Workly.Models;
 
 /// <summary>
 /// Validación y guardado de archivos subidos (foto de perfil y CV).

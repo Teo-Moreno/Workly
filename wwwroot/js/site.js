@@ -510,6 +510,7 @@
         ok = control.checkValidity();
       }
       campo?.classList.toggle("campo--error", !ok);
+      if (!ok) campo?.classList.remove("campo--sin-mensaje");
       if (!ok && valido) {
         control.focus();
         valido = false;
@@ -569,12 +570,44 @@
     });
   });
 
+  // Revisa tamaño y formato de un archivo elegido antes de enviarlo (el servidor también lo valida).
+  // Si no sirve, vacía el input y marca el campo con el error del UI Kit.
+  // Usa accept="…" del input y data-tamano-maximo / data-error-formato.
+  function archivoValido(input, archivo) {
+    const campo = input.closest(".campo");
+    const extensiones = input.accept.split(",").map((e) => e.trim().toLowerCase()).filter((e) => e.startsWith("."));
+    const extension = archivo.name.includes(".") ? archivo.name.slice(archivo.name.lastIndexOf(".")).toLowerCase() : "";
+    const maximo = Number(input.dataset.tamanoMaximo) || Infinity;
+    let error = "";
+    if (extensiones.length && !extensiones.includes(extension)) error = input.dataset.errorFormato || "Formato no permitido";
+    else if (archivo.size > maximo) error = `El archivo pesa más de ${Math.round(maximo / 1024 / 1024)} MB`;
+
+    campo?.classList.toggle("campo--error", Boolean(error));
+    campo?.classList.remove("campo--sin-mensaje");
+    if (!error) return true;
+
+    input.value = "";
+    const mensaje = campo && $(".campo__mensaje--error", campo);
+    if (mensaje) {
+      [...mensaje.childNodes].filter((nodo) => nodo.nodeType === Node.TEXT_NODE).forEach((nodo) => nodo.remove());
+      mensaje.append(error);
+    }
+    return false;
+  }
+
   // Zona de arrastrar y soltar archivos (CV)
   $$("[data-zona-archivo]").forEach((zona) => {
     const input = $("input[type=file]", zona);
     const nombre = $("[data-zona-archivo-nombre]", zona);
+    const textoInicial = nombre?.textContent;
+    const teniaArchivo = zona.classList.contains("tiene-archivo"); // p. ej. el CV ya guardado
     const mostrar = (archivo) => {
       if (!archivo) return;
+      if (input && !archivoValido(input, archivo)) {
+        zona.classList.toggle("tiene-archivo", teniaArchivo);
+        if (nombre) nombre.textContent = textoInicial;
+        return;
+      }
       zona.classList.add("tiene-archivo");
       if (nombre) nombre.textContent = archivo.name;
     };
@@ -590,8 +623,9 @@
     zona.addEventListener("drop", (evento) => {
       evento.preventDefault();
       const archivos = evento.dataTransfer.files;
+      if (!archivos.length) return;
       // El archivo soltado se pasa al input para que se envíe con el formulario.
-      if (input && archivos.length) input.files = archivos;
+      if (input) input.files = archivos;
       mostrar(archivos[0]);
     });
     input?.addEventListener("change", () => mostrar(input.files[0]));
@@ -634,8 +668,15 @@
       }
     });
 
-    // Antes de enviar se revisan todos los pasos (no solo el visible) y se abre el primero con errores.
+    // Enter en un paso intermedio funciona como "Siguiente". Desde el último paso se revisan
+    // todos los pasos (no solo el visible) y, si alguno tiene errores, se abre el primero.
     formulario.addEventListener("submit", (evento) => {
+      if (actual < pasos.length - 1) {
+        evento.preventDefault();
+        evento.stopImmediatePropagation();
+        if (validar(pasos[actual])) mostrar(actual + 1);
+        return;
+      }
       const pasoInvalido = pasos.findIndex((paso) => !validar(paso));
       if (pasoInvalido === -1) return;
       evento.preventDefault();
@@ -675,9 +716,14 @@
   // Vista previa de la foto de perfil elegida
   $$("[data-foto-entrada]").forEach((entrada) => {
     const vista = $("[data-vista-foto]");
+    const vistaInicial = vista?.innerHTML;
     entrada.addEventListener("change", () => {
       const archivo = entrada.files?.[0];
-      if (!vista || !archivo || !archivo.type.startsWith("image/")) return;
+      if (!vista || !archivo) return;
+      if (!archivoValido(entrada, archivo) || !archivo.type.startsWith("image/")) {
+        vista.innerHTML = vistaInicial;
+        return;
+      }
       const imagen = document.createElement("img");
       imagen.alt = "";
       imagen.src = URL.createObjectURL(archivo);

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace Workly.Servicios;
+namespace Workly.Models;
 
 /// <summary>
 /// Hash de contraseñas con PBKDF2-SHA256 (recomendación de OWASP: 600.000 iteraciones).

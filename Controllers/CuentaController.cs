@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Workly.Helpers;
 using Workly.Models;
-using Workly.Servicios;
 
 namespace Workly.Controllers;
 
@@ -100,6 +98,18 @@ public class CuentaController : Controller
         modelo.Email = NormalizarEmail(modelo.Email);
         modelo.Nombre = modelo.Nombre?.Trim() ?? "";
         modelo.Apellido = modelo.Apellido?.Trim() ?? "";
+
+        // El navegador cuenta cada salto de línea como 1 carácter pero envía "\r\n" (2):
+        // se normaliza antes de medir para que el límite de 500 coincida con el del formulario.
+        if (modelo.Descripcion != null)
+        {
+            modelo.Descripcion = modelo.Descripcion.Replace("\r\n", "\n");
+            ModelState.Remove(nameof(modelo.Descripcion));
+            if (modelo.Descripcion.Length > 500)
+            {
+                ModelState.AddModelError(nameof(modelo.Descripcion), "Usá hasta 500 caracteres");
+            }
+        }
 
         if (!string.IsNullOrEmpty(modelo.Ubicacion) && !RegistroViewModel.Ubicaciones.Contains(modelo.Ubicacion))
         {
