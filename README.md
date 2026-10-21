@@ -23,7 +23,7 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 
 ### Qué funciona con la base
 
-- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
+- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Se elige país y provincia (la lista de provincias depende del país) y el teléfono se escribe solo con números: el prefijo del país (+54) aparece solo y los espacios y el guion se ponen automáticamente. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
 - **Iniciar sesión** (`/Cuenta/IniciarSesion`) con "Recordarme" (sesión de 14 días) y vuelta a la página que se quería ver.
 - **Cerrar sesión** desde el menú de usuario.
 - **Páginas protegidas:** todo lo que está dentro de la app (panel, empleos, postulaciones, empresas, notificaciones, perfil) pide iniciar sesión.
@@ -38,18 +38,22 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 
 ## Base de datos
 
-`BaseDeDatos/script.sql` sigue el diagrama de la base (DER):
+`BaseDeDatos/script.sql` sigue el diagrama de la base (DLR):
 
 | Tabla | Para qué |
 | --- | --- |
+| `Pais` / `Provincia` | Países (con su prefijo telefónico, por ejemplo +54) y sus provincias. Por ahora, Argentina y sus 24 jurisdicciones |
 | `Usuario` | Nombre, apellido, email (único), contraseña (hash) y fecha de registro |
-| `Perfil` | Foto, descripción, ubicación y teléfono (uno por usuario) |
+| `Perfil` | Foto, descripción, provincia donde vive y teléfono con prefijo (uno por usuario) |
 | `CV` | Archivo del CV y sitio web (uno por usuario) |
 | `Educacion` / `UsuarioEducacion` | Instituciones y la formación de cada usuario |
 | `Empresa` / `ExperienciaLaboral` | Empresas y la experiencia de cada usuario |
-| `OfertaLaboral` | Ofertas publicadas por las empresas |
+| `OfertaLaboral` | Ofertas publicadas por las empresas, con la cantidad de puestos |
+| `Puesto` / `OfertaPuesto` | Puestos y a qué ofertas corresponden (N a N) |
 | `Favorito` / `FavoritoOferta` | Ofertas guardadas |
-| `Postulacion` | Postulaciones de cada usuario (una por oferta) |
+| `Postulacion` | Postulaciones de cada usuario (una por oferta) y su estado |
+
+Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se abren con draw.io). Si la base se creó con una versión anterior del script, volver a ejecutarlo la actualiza sin perder datos.
 
 ## Vistas
 

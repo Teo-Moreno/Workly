@@ -82,7 +82,14 @@ public class CuentaController : Controller
         {
             return RedirectToAction("Index", "Panel");
         }
-        return View(new RegistroViewModel());
+        var modelo = new RegistroViewModel();
+        CargarListas(modelo);
+        // Por ahora el único país es Argentina: se deja elegido para que aparezcan sus provincias
+        if (modelo.Paises.Count == 1)
+        {
+            modelo.IDPais = modelo.Paises[0].ID;
+        }
+        return View(modelo);
     }
 
     [HttpPost]
@@ -111,9 +118,37 @@ public class CuentaController : Controller
             }
         }
 
-        if (!string.IsNullOrEmpty(modelo.Ubicacion) && !RegistroViewModel.Ubicaciones.Contains(modelo.Ubicacion))
+        // País y provincia: tienen que existir y la provincia tiene que ser de ese país
+        CargarListas(modelo);
+        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais);
+        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia);
+        if (modelo.IDPais != null && pais == null)
         {
-            ModelState.AddModelError(nameof(modelo.Ubicacion), "Elegí una ubicación de la lista");
+            ModelState.AddModelError(nameof(modelo.IDPais), "Elegí un país de la lista");
+        }
+        if (modelo.IDProvincia != null && (provincia == null || provincia.IDPais != modelo.IDPais))
+        {
+            ModelState.AddModelError(nameof(modelo.IDProvincia), "Elegí una provincia de la lista");
+        }
+
+        // Teléfono: solo números; se guarda con el prefijo del país ("+54 11 5555-1234")
+        string? telefono = null;
+        if (!string.IsNullOrWhiteSpace(modelo.Telefono))
+        {
+            var digitos = Telefonos.SoloDigitos(modelo.Telefono);
+            if (modelo.Telefono.Any(c => !char.IsAsciiDigit(c) && c != ' ' && c != '-'))
+            {
+                ModelState.AddModelError(nameof(modelo.Telefono), "Ingresá solo números");
+            }
+            else if (digitos.Length != Telefonos.Digitos || digitos.StartsWith('0'))
+            {
+                ModelState.AddModelError(nameof(modelo.Telefono), "Ingresá el código de área y el número: 10 números, sin el 0 ni el 15");
+            }
+            else
+            {
+                modelo.Telefono = Telefonos.Formatear(digitos);
+                telefono = pais == null ? null : $"{pais.Codigo_Telefono} {modelo.Telefono}";
+            }
         }
 
         var errorFoto = Archivos.Validar(modelo.Foto, Archivos.ExtensionesFoto);
@@ -161,8 +196,9 @@ public class CuentaController : Controller
         {
             Foto = rutaFoto,
             Descripcion = Limpiar(modelo.Descripcion),
-            Ubicacion = modelo.Ubicacion,
-            Telefono = Limpiar(modelo.Telefono)
+            IDProvincia = provincia?.ID,
+            Provincia = provincia?.Nombre,
+            Telefono = telefono
         };
         var sitioWeb = Limpiar(modelo.SitioWeb);
         var cv = nombreCV != null || sitioWeb != null
@@ -226,9 +262,9 @@ public class CuentaController : Controller
             new(ClaimTypes.Surname, usuario.Apellido),
             new(ClaimTypes.Email, usuario.Email)
         };
-        if (!string.IsNullOrEmpty(perfil?.Ubicacion))
+        if (!string.IsNullOrEmpty(perfil?.Provincia))
         {
-            claims.Add(new Claim(UsuarioActual.ClaimUbicacion, perfil.Ubicacion));
+            claims.Add(new Claim(UsuarioActual.ClaimUbicacion, perfil.Provincia));
         }
         if (!string.IsNullOrEmpty(perfil?.Foto))
         {
@@ -242,6 +278,22 @@ public class CuentaController : Controller
             ExpiresUtc = recordarme ? DateTimeOffset.UtcNow.AddDays(14) : null
         };
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidad), propiedades);
+    }
+
+    // Opciones de las listas "País" y "Provincia". Si la base no responde, el formulario se
+    // muestra igual con el aviso de conexión.
+    private void CargarListas(RegistroViewModel modelo)
+    {
+        try
+        {
+            modelo.Paises = BD.ObtenerPaises();
+            modelo.Provincias = BD.ObtenerProvincias();
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "Error de base de datos al cargar países y provincias");
+            ModelState.AddModelError(string.Empty, ErrorConexion);
+        }
     }
 
     // La contraseña no se devuelve en el HTML: si hubo errores se pide escribirla de nuevo,

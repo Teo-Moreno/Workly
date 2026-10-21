@@ -713,6 +713,87 @@
     });
   });
 
+  /* ------------------------------------------------------------------------
+     País, provincia y teléfono (registro y configuración)
+     data-selector-pais      → al cambiar, muestra solo sus provincias y
+                               cambia el prefijo del teléfono (data-codigo)
+     data-selector-provincia → opciones con data-pais
+     data-telefono           → solo números; los espacios y el guion se
+                               ponen solos (data-codigos-area = áreas de 3)
+     ---------------------------------------------------------------------- */
+  $$("[data-selector-pais]").forEach((selectorPais) => {
+    const contenedor = selectorPais.closest("form") || document;
+    const selectorProvincia = $("[data-selector-provincia]", contenedor);
+    const prefijo = $("[data-prefijo-telefono]", contenedor);
+    const actualizar = () => {
+      const codigo = selectorPais.selectedOptions[0]?.dataset.codigo;
+      if (prefijo && codigo) prefijo.textContent = codigo;
+      if (!selectorProvincia) return;
+      [...selectorProvincia.options].forEach((opcion) => {
+        if (!opcion.value) return;
+        const esDelPais = opcion.dataset.pais === selectorPais.value;
+        opcion.hidden = !esDelPais;
+        opcion.disabled = !esDelPais;
+      });
+      if (selectorProvincia.selectedOptions[0]?.disabled) selectorProvincia.value = "";
+    };
+    selectorPais.addEventListener("change", actualizar);
+    actualizar();
+  });
+
+  $$("[data-telefono]").forEach((entrada) => {
+    const DIGITOS = 10;
+    const areas3 = (entrada.dataset.codigosArea || "").split(",");
+
+    // Mismo formato que Models/Telefonos.cs: "11 5555-1234", "351 555-1234", "2982 55-1234"
+    const formatear = (digitos) => {
+      const largoArea = digitos.startsWith("11") ? 2 : areas3.includes(digitos.slice(0, 3)) ? 3 : digitos.length >= 4 ? 4 : 0;
+      if (!largoArea || digitos.length <= largoArea) return digitos;
+      const area = digitos.slice(0, largoArea);
+      const numero = digitos.slice(largoArea);
+      const corte = DIGITOS - largoArea - 4;
+      return numero.length > corte ? `${area} ${numero.slice(0, corte)}-${numero.slice(corte)}` : `${area} ${numero}`;
+    };
+
+    // Si se pega un número completo ("+54 9 11 ...", "011 ..."), se quitan el país, el 9 y el 0.
+    const limpiar = (texto) => {
+      let digitos = texto.replace(/\D/g, "");
+      if (digitos.length > DIGITOS && digitos.startsWith("54")) digitos = digitos.slice(2);
+      if (digitos.length > DIGITOS && digitos.startsWith("9")) digitos = digitos.slice(1);
+      return digitos.replace(/^0+/, "").slice(0, DIGITOS);
+    };
+
+    const aplicar = (valor = entrada.value, cursor = entrada.selectionStart ?? valor.length) => {
+      const digitosAntes = limpiar(valor.slice(0, cursor)).length;
+      const nuevo = formatear(limpiar(valor));
+      entrada.value = nuevo;
+      if (document.activeElement !== entrada) return;
+      // El cursor queda después de la misma cantidad de números que antes
+      let posicion = 0;
+      for (let vistos = 0; posicion < nuevo.length && vistos < digitosAntes; posicion++) {
+        if (/\d/.test(nuevo[posicion])) vistos++;
+      }
+      entrada.setSelectionRange(posicion, posicion);
+    };
+
+    entrada.addEventListener("beforeinput", (evento) => {
+      // Solo números al escribir (pegar se limpia en "input")
+      if (evento.inputType === "insertText" && /\D/.test(evento.data || "")) {
+        evento.preventDefault();
+        return;
+      }
+      // Borrar sobre un espacio o el guion borra también el número anterior
+      const { selectionStart: inicio, selectionEnd: fin, value } = entrada;
+      if (evento.inputType === "deleteContentBackward" && inicio === fin && inicio > 0 && /\D/.test(value[inicio - 1])) {
+        evento.preventDefault();
+        aplicar(value.slice(0, inicio - 2) + value.slice(inicio), Math.max(inicio - 2, 0));
+        entrada.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+    entrada.addEventListener("input", () => aplicar());
+    aplicar();
+  });
+
   // Vista previa de la foto de perfil elegida
   $$("[data-foto-entrada]").forEach((entrada) => {
     const vista = $("[data-vista-foto]");
