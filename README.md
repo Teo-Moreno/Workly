@@ -19,6 +19,12 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
    - Con usuario y contraseña de SQL Server: `Server=localhost;Database=Workly;User Id=sa;Password=...;TrustServerCertificate=True;`
 3. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio). Los paquetes `Dapper` y `Microsoft.Data.SqlClient` se descargan solos.
 
+4. **Clave de JSearch** (ofertas de LinkedIn y otros sitios, vía RapidAPI). No está en el repositorio: cada integrante la guarda una vez en su compu desde la carpeta del proyecto:
+   ```
+   dotnet user-secrets set "JSearch:ApiKey" "<la clave del equipo>"
+   ```
+   Queda guardada fuera del proyecto y la app la lee como `JSearch:ApiKey`. En el servidor se usa la variable de entorno `JSearch__ApiKey`. El endpoint de búsqueda es `https://jsearch.p.rapidapi.com/search-v2`.
+
 **Cuenta de prueba:** `sofia.martinez@mail.com` / `Workly2026`
 
 ### Qué funciona con la base
