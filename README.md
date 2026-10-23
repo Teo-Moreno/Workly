@@ -59,6 +59,16 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 | `Favorito` / `FavoritoOferta` | Ofertas guardadas |
 | `Postulacion` | Postulaciones de cada usuario (una por oferta) y su estado |
 
+Para tenerlo más ordenado, el mismo script también está separado en tres archivos (se ejecutan en este orden):
+
+| Archivo | Contenido |
+| --- | --- |
+| `BaseDeDatos/1_Estructura.sql` | Crea la base, las tablas, sus claves, controles e índices |
+| `BaseDeDatos/2_DatosDePrueba.sql` | Países y provincias, y los datos de ejemplo con la cuenta de prueba |
+| `BaseDeDatos/3_StoredProcedures.sql` | Un stored procedure por cada consulta de `Models/BD.cs`, con el mismo nombre |
+
+`script.sql` sigue siendo el que se usa para crear y actualizar la base. Si se cambia algo en la estructura o en los datos, hay que cambiarlo en los dos lados.
+
 Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se abren con draw.io). Si la base se creó con una versión anterior del script, volver a ejecutarlo la actualiza sin perder datos.
 
 ## Vistas
