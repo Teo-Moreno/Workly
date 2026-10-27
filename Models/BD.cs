@@ -147,6 +147,17 @@ public static class BD
         return conexion.Query<FormacionItem>(sql, new { IDUsuario = idUsuario }).ToList();
     }
 
+    /// <summary>Cantidad de postulaciones y de ofertas guardadas del usuario.</summary>
+    public static (int Postulaciones, int Guardadas) ContarActividad(int idUsuario)
+    {
+        const string sql = @"SELECT (SELECT COUNT(*) FROM Postulacion WHERE IDUsuario = @IDUsuario) AS Postulaciones,
+                                    (SELECT COUNT(*) FROM FavoritoOferta fo
+                                     JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                     WHERE f.IDUsuario = @IDUsuario) AS Guardadas";
+        using var conexion = Conectar();
+        return conexion.QuerySingle<(int, int)>(sql, new { IDUsuario = idUsuario });
+    }
+
     /// <summary>Junta todo lo que necesitan "Mi perfil" y "Configuración".</summary>
     public static MiPerfilViewModel? ObtenerMiPerfil(int idUsuario)
     {
@@ -156,8 +167,11 @@ public static class BD
             return null;
         }
 
+        var (postulaciones, guardadas) = ContarActividad(idUsuario);
         return new MiPerfilViewModel
         {
+            CantidadPostulaciones = postulaciones,
+            CantidadGuardadas = guardadas,
             Usuario = usuario,
             Perfil = ObtenerPerfil(idUsuario) ?? new Perfil { IDUsuario = idUsuario },
             CV = ObtenerCV(idUsuario),
