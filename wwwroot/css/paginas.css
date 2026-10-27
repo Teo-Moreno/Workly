@@ -3610,3 +3610,13 @@
   border-radius: 12px;
   color: var(--color-texto-suave);
 }
+
+/* Actividad con dos números (postulaciones y ofertas guardadas) */
+.actividad--dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Preferencias: la ubicación arriba y el aviso para completar el resto */
+.lista-clave-valor--perfil + .perfil-vacio {
+  margin-top: 12px;
+}

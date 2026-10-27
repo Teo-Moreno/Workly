@@ -8,14 +8,6 @@
     var sitioWeb = Model.CV?.Sitio_Web;
     var enlaceSitio = string.IsNullOrEmpty(sitioWeb) ? null : (sitioWeb.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? sitioWeb : "https://" + sitioWeb);
     var tieneCV = !string.IsNullOrEmpty(Model.CV?.Nombre_Archivo);
-    var niveles = new[] { "Básico", "Intermedio", "Avanzado", "Fluido", "Nativo" };
-    var idiomas = new[]
-    {
-        (Idioma: "Español", Detalle: "Nativo", Nivel: 4),
-        (Idioma: "Inglés", Detalle: "B2 · First Certificate", Nivel: 2),
-        (Idioma: "Portugués", Detalle: "A2 · Básico", Nivel: 0)
-    };
-    var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js (básico)" };
 }
 @* Mi perfil (Figma › Media · WF 05 · Perfil) *@
 
@@ -39,7 +31,6 @@
         <div class="perfil-cabecera__datos">
             <div class="fila fila--envolver">
                 <h1 class="perfil-cabecera__nombre">@usuario.NombreCompleto</h1>
-                <span class="etiqueta etiqueta--exito"><span class="punto"></span>Buscando activamente</span>
             </div>
             <p class="perfil-cabecera__rol">En Workly desde @usuario.Fecha_Registro.ToString("MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-AR"))</p>
             <ul class="perfil-cabecera__contacto" role="list">
@@ -110,27 +101,23 @@
                     <h2 class="tarjeta__titulo">Preferencias laborales</h2>
                     <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias"><icono nombre="pen" tamano="16" />Editar</a>
                 </div>
-                <dl class="lista-clave-valor lista-clave-valor--perfil">
-                    <div><dt>Puesto buscado</dt><dd>Frontend Developer</dd></div>
-                    <div><dt>Nivel</dt><dd>Junior / Semi Senior</dd></div>
-                    <div><dt>Modalidad</dt><dd>Híbrida o remota</dd></div>
-                    <div><dt>Ubicación</dt><dd>@(perfil.Provincia ?? "Todo el país")</dd></div>
-                    <div><dt>Jornada</dt><dd>Full-time</dd></div>
-                    <div><dt>Contratación</dt><dd>Relación de dependencia</dd></div>
-                    <div><dt>Expectativa salarial</dt><dd>$1.400.000 – $1.800.000</dd></div>
-                    <div><dt>Disponibilidad</dt><dd>Inmediata</dd></div>
-                </dl>
+                @if (!string.IsNullOrEmpty(perfil.Provincia))
+                {
+                    <dl class="lista-clave-valor lista-clave-valor--perfil">
+                        <div><dt>Ubicación</dt><dd>@perfil.Provincia</dd></div>
+                    </dl>
+                }
+                <p class="perfil-vacio">Contanos qué puesto buscás, en qué modalidad y jornada, y tu expectativa salarial.
+                    <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias">Completar</a></p>
             </section>
 
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
                     <h2 class="tarjeta__titulo">Actividad</h2>
-                    <span class="texto-mini texto-suave">Últimos 30 días</span>
                 </div>
-                <div class="actividad">
-                    <div><strong>11</strong><span>postulaciones</span></div>
-                    <div><strong>2</strong><span>entrevistas</span></div>
-                    <div><strong>38</strong><span>vistas del perfil</span></div>
+                <div class="actividad actividad--dos">
+                    <div><strong>@Model.CantidadPostulaciones</strong><span>@(Model.CantidadPostulaciones == 1 ? "postulación" : "postulaciones")</span></div>
+                    <div><strong>@Model.CantidadGuardadas</strong><span>@(Model.CantidadGuardadas == 1 ? "oferta guardada" : "ofertas guardadas")</span></div>
                 </div>
             </section>
         </div>
@@ -215,12 +202,7 @@
                         <h2 class="tarjeta__titulo">Habilidades</h2>
                         <a class="enlace" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" tamano="16" />Editar</a>
                     </div>
-                    <div class="lista-tags lista-tags--holgada">
-                        @foreach (var habilidad in habilidades)
-                        {
-                            <span class="chip">@habilidad</span>
-                        }
-                    </div>
+                    <p class="perfil-vacio">Todavía no cargaste habilidades. Sumá las herramientas y tecnologías que manejás.</p>
                 </section>
 
                 <section class="tarjeta">
@@ -228,23 +210,7 @@
                         <h2 class="tarjeta__titulo">Idiomas</h2>
                         <a class="enlace" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" tamano="16" />Editar</a>
                     </div>
-                    <ul class="idiomas" role="list">
-                        @foreach (var idioma in idiomas)
-                        {
-                            <li class="idioma">
-                                <div class="idioma__cabecera">
-                                    <strong>@idioma.Idioma</strong>
-                                    <span>@idioma.Detalle</span>
-                                </div>
-                                <div class="valoracion" style="--nivel: @idioma.Nivel" role="img" aria-label="Nivel @niveles[idioma.Nivel].ToLowerInvariant()">
-                                    @for (var i = 0; i < niveles.Length; i++)
-                                    {
-                                        <span class="valoracion__punto @(i < idioma.Nivel ? "esta-lleno" : "") @(i == idioma.Nivel ? "esta-actual" : "")" title="@niveles[i]"></span>
-                                    }
-                                </div>
-                            </li>
-                        }
-                    </ul>
+                    <p class="perfil-vacio">Todavía no cargaste idiomas. Sumá los que hablás y tu nivel.</p>
                 </section>
             </div>
         </div>

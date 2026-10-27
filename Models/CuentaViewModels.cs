@@ -80,6 +80,10 @@ public class MiPerfilViewModel
     public List<ExperienciaItem> Experiencias { get; set; } = new();
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
+
+    // Actividad (tablas Postulacion y FavoritoOferta)
+    public int CantidadPostulaciones { get; set; }
+    public int CantidadGuardadas { get; set; }
     public List<FormacionItem> Formaciones { get; set; } = new();
 
     public List<(string Texto, bool Listo)> Checklist => new()
