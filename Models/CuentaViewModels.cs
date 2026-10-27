@@ -45,12 +45,14 @@ public class RegistroViewModel
     public bool AceptaTerminos { get; set; }
 
     // ---- Paso 2 · Tu perfil (tabla Perfil) ----
-    [Required(ErrorMessage = "Elegí dónde vivís")]
-    [StringLength(100)]
-    public string Ubicacion { get; set; } = "";
+    [Required(ErrorMessage = "Elegí tu país")]
+    public int? IDPais { get; set; }
 
-    [StringLength(30, ErrorMessage = "Usá hasta 30 caracteres")]
-    [RegularExpression(@"^[0-9+()\s-]{6,30}$", ErrorMessage = "Ingresá solo números, espacios y + ( ) -")]
+    [Required(ErrorMessage = "Elegí tu provincia")]
+    public int? IDProvincia { get; set; }
+
+    /// <summary>Sin el prefijo del país: "11 5555-1234". El controlador lo guarda como "+54 11 5555-1234".</summary>
+    [StringLength(20)]
     public string? Telefono { get; set; }
 
     [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
@@ -64,11 +66,9 @@ public class RegistroViewModel
     [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
     public string? SitioWeb { get; set; }
 
-    public static readonly string[] Ubicaciones =
-    {
-        "CABA", "GBA Norte", "GBA Oeste", "GBA Sur", "La Plata", "Córdoba", "Rosario",
-        "Mendoza", "Mar del Plata", "Tucumán", "Neuquén", "Otra ubicación"
-    };
+    // Opciones de las listas "País" y "Provincia" (tablas Pais y Provincia)
+    public List<Pais> Paises { get; set; } = new();
+    public List<Provincia> Provincias { get; set; } = new();
 }
 
 // Datos que se muestran en "Mi perfil" y "Configuración"
@@ -78,6 +78,8 @@ public class MiPerfilViewModel
     public Perfil Perfil { get; set; } = new();
     public CV? CV { get; set; }
     public List<ExperienciaItem> Experiencias { get; set; } = new();
+    public List<Pais> Paises { get; set; } = new();
+    public List<Provincia> Provincias { get; set; } = new();
     public List<FormacionItem> Formaciones { get; set; } = new();
 
     public List<(string Texto, bool Listo)> Checklist => new()
