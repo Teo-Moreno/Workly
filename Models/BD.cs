@@ -65,14 +65,14 @@ public static class BD
             Contrasena = usuario.Contraseña
         }, transaccion);
 
-        const string sqlPerfil = @"INSERT INTO Perfil (IDUsuario, Foto, Descripcion, Ubicacion, Telefono)
-                                   VALUES (@IDUsuario, @Foto, @Descripcion, @Ubicacion, @Telefono)";
+        const string sqlPerfil = @"INSERT INTO Perfil (IDUsuario, IDProvincia, Foto, Descripcion, Telefono)
+                                   VALUES (@IDUsuario, @IDProvincia, @Foto, @Descripcion, @Telefono)";
         conexion.Execute(sqlPerfil, new
         {
             IDUsuario = idUsuario,
             perfil.Foto,
             perfil.Descripcion,
-            perfil.Ubicacion,
+            perfil.IDProvincia,
             perfil.Telefono
         }, transaccion);
 
@@ -87,12 +87,32 @@ public static class BD
         return idUsuario;
     }
 
+    // ------------------------------------------------------------ Países y provincias
+
+    public static List<Pais> ObtenerPaises()
+    {
+        const string sql = "SELECT ID, Nombre, Codigo_Telefono FROM Pais ORDER BY Nombre";
+        using var conexion = Conectar();
+        return conexion.Query<Pais>(sql).ToList();
+    }
+
+    public static List<Provincia> ObtenerProvincias()
+    {
+        const string sql = "SELECT ID, IDPais, Nombre FROM Provincia ORDER BY Nombre";
+        using var conexion = Conectar();
+        return conexion.Query<Provincia>(sql).ToList();
+    }
+
     // ------------------------------------------------------------ Perfil y CV
 
     public static Perfil? ObtenerPerfil(int idUsuario)
     {
-        const string sql = @"SELECT ID, IDUsuario, Foto, Descripcion, Ubicacion, Telefono
-                             FROM Perfil WHERE IDUsuario = @IDUsuario";
+        const string sql = @"SELECT pe.ID, pe.IDUsuario, pe.IDProvincia, pe.Foto, pe.Descripcion, pe.Telefono,
+                                    pr.Nombre AS Provincia, pa.ID AS IDPais, pa.Nombre AS Pais, pa.Codigo_Telefono
+                             FROM Perfil pe
+                             LEFT JOIN Provincia pr ON pr.ID = pe.IDProvincia
+                             LEFT JOIN Pais pa ON pa.ID = pr.IDPais
+                             WHERE pe.IDUsuario = @IDUsuario";
         using var conexion = Conectar();
         return conexion.QueryFirstOrDefault<Perfil>(sql, new { IDUsuario = idUsuario });
     }

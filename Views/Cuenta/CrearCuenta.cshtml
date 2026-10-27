@@ -103,22 +103,39 @@
             </div>
 
             <div class="formulario__fila">
-                <div class="campo @Html.ClaseError(nameof(Model.Ubicacion))">
-                    <label class="campo__etiqueta" asp-for="Ubicacion">¿Dónde vivís?</label>
-                    <select class="campo__control" asp-for="Ubicacion" required>
-                        <option value="">Elegí una opción</option>
-                        @foreach (var ubicacion in RegistroViewModel.Ubicaciones)
+                <div class="campo @Html.ClaseError(nameof(Model.IDPais))">
+                    <label class="campo__etiqueta" asp-for="IDPais">País</label>
+                    <select class="campo__control" asp-for="IDPais" required data-selector-pais>
+                        <option value="">Elegí tu país</option>
+                        @foreach (var pais in Model.Paises)
                         {
-                            <option value="@ubicacion">@ubicacion</option>
+                            <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono">@pais.Nombre</option>
                         }
                     </select>
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Ubicacion), "Elegí dónde vivís")</span>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.IDPais), "Elegí tu país")</span>
                 </div>
-                <div class="campo @Html.ClaseError(nameof(Model.Telefono))">
-                    <label class="campo__etiqueta" asp-for="Telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
-                    <input class="campo__control" asp-for="Telefono" type="tel" autocomplete="tel" placeholder="+54 11 5555-1234" maxlength="30" pattern="[0-9+\(\)\s\-]{6,30}" />
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Telefono), "Ingresá solo números, espacios y + ( ) -")</span>
+                <div class="campo @Html.ClaseError(nameof(Model.IDProvincia))">
+                    <label class="campo__etiqueta" asp-for="IDProvincia">Provincia</label>
+                    <select class="campo__control" asp-for="IDProvincia" required data-selector-provincia>
+                        <option value="">Elegí tu provincia</option>
+                        @foreach (var provincia in Model.Provincias)
+                        {
+                            <option value="@provincia.ID" data-pais="@provincia.IDPais">@provincia.Nombre</option>
+                        }
+                    </select>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.IDProvincia), "Elegí tu provincia")</span>
                 </div>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Telefono))">
+                <label class="campo__etiqueta" asp-for="Telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
+                <div class="control-con-prefijo">
+                    <span class="control-con-prefijo__prefijo" data-prefijo-telefono>@(Model.Paises.FirstOrDefault(p => p.ID == Model.IDPais)?.Codigo_Telefono ?? "+54")</span>
+                    <input class="campo__control" asp-for="Telefono" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="11 5555-1234"
+                           maxlength="12" pattern="[0-9]{2,4} [0-9]{2,4}-[0-9]{4}" data-telefono data-codigos-area="@string.Join(",", Telefonos.CodigosDeArea3)" />
+                </div>
+                <span class="campo__ayuda">Código de área y número, sin el 0 ni el 15. Los espacios y el guion se ponen solos.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Telefono), "Ingresá el código de área y el número: 10 números")</span>
             </div>
 
             <div class="campo @Html.ClaseError(nameof(Model.Descripcion))">

@@ -10,7 +10,7 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 
 ## Cómo correrlo
 
-1. **Crear la base de datos.** Abrir `BaseDeDatos/script.sql` en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
+1. **Crear la base de datos.** Abrir `script.sql` (en la raíz del repositorio) en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
 2. **Revisar la cadena de conexión** en `appsettings.json` (`ConnectionStrings › Workly`). Por defecto usa la instancia local con autenticación de Windows:
    ```json
    "Workly": "Server=localhost;Database=Workly;Trusted_Connection=True;TrustServerCertificate=True;"
@@ -19,11 +19,17 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
    - Con usuario y contraseña de SQL Server: `Server=localhost;Database=Workly;User Id=sa;Password=...;TrustServerCertificate=True;`
 3. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio). Los paquetes `Dapper` y `Microsoft.Data.SqlClient` se descargan solos.
 
+4. **Clave de JSearch** (ofertas de LinkedIn y otros sitios, vía RapidAPI). No está en el repositorio: cada integrante la guarda una vez en su compu desde la carpeta del proyecto:
+   ```
+   dotnet user-secrets set "JSearch:ApiKey" "<la clave del equipo>"
+   ```
+   Queda guardada fuera del proyecto y la app la lee como `JSearch:ApiKey`. En el servidor se usa la variable de entorno `JSearch__ApiKey`. El endpoint de búsqueda es `https://jsearch.p.rapidapi.com/search-v2`.
+
 **Cuenta de prueba:** `sofia.martinez@mail.com` / `Workly2026`
 
 ### Qué funciona con la base
 
-- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
+- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Se elige país y provincia (la lista de provincias depende del país) y el teléfono se escribe solo con números: el prefijo del país (+54) aparece solo y los espacios y el guion se ponen automáticamente. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
 - **Iniciar sesión** (`/Cuenta/IniciarSesion`) con "Recordarme" (sesión de 14 días) y vuelta a la página que se quería ver.
 - **Cerrar sesión** desde el menú de usuario.
 - **Páginas protegidas:** todo lo que está dentro de la app (panel, empleos, postulaciones, empresas, notificaciones, perfil) pide iniciar sesión.
@@ -38,18 +44,32 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 
 ## Base de datos
 
-`BaseDeDatos/script.sql` sigue el diagrama de la base (DER):
+`script.sql` (en la raíz) sigue el diagrama de la base (DLR):
 
 | Tabla | Para qué |
 | --- | --- |
+| `Pais` / `Provincia` | Países (con su prefijo telefónico, por ejemplo +54) y sus provincias. Por ahora, Argentina y sus 24 jurisdicciones |
 | `Usuario` | Nombre, apellido, email (único), contraseña (hash) y fecha de registro |
-| `Perfil` | Foto, descripción, ubicación y teléfono (uno por usuario) |
+| `Perfil` | Foto, descripción, provincia donde vive y teléfono con prefijo (uno por usuario) |
 | `CV` | Archivo del CV y sitio web (uno por usuario) |
 | `Educacion` / `UsuarioEducacion` | Instituciones y la formación de cada usuario |
 | `Empresa` / `ExperienciaLaboral` | Empresas y la experiencia de cada usuario |
-| `OfertaLaboral` | Ofertas publicadas por las empresas |
+| `OfertaLaboral` | Ofertas publicadas por las empresas, con la cantidad de puestos |
+| `Puesto` / `OfertaPuesto` | Puestos y a qué ofertas corresponden (N a N) |
 | `Favorito` / `FavoritoOferta` | Ofertas guardadas |
-| `Postulacion` | Postulaciones de cada usuario (una por oferta) |
+| `Postulacion` | Postulaciones de cada usuario (una por oferta) y su estado |
+
+Para tenerlo más ordenado, el mismo script también está separado en tres archivos (se ejecutan en este orden):
+
+| Archivo | Contenido |
+| --- | --- |
+| `BaseDeDatos/1_Estructura.sql` | Crea la base, las tablas, sus claves, controles e índices |
+| `BaseDeDatos/2_DatosDePrueba.sql` | Países y provincias, y los datos de ejemplo con la cuenta de prueba |
+| `BaseDeDatos/3_StoredProcedures.sql` | Un stored procedure por cada consulta de `Models/BD.cs`, con el mismo nombre |
+
+`script.sql` sigue siendo el que se usa para crear y actualizar la base. Si se cambia algo en la estructura o en los datos, hay que cambiarlo en los dos lados.
+
+Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se abren con draw.io). Si la base se creó con una versión anterior del script, volver a ejecutarlo la actualiza sin perder datos.
 
 ## Vistas
 
