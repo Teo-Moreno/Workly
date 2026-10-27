@@ -236,11 +236,13 @@
 
                 <div class="formulario__fila">
                     <div class="campo">
-                        <label class="campo__etiqueta" for="pref-ubicacion">Ubicaciones</label>
+                        <label class="campo__etiqueta" for="pref-ubicacion">¿Dónde querés trabajar?</label>
                         <select class="campo__control" id="pref-ubicacion">
-                            <option selected>CABA y GBA Norte</option>
-                            <option>Solo CABA</option>
-                            <option>Todo el país</option>
+                            <option value="">Todo el país</option>
+                            @foreach (var provincia in Model.Provincias.Where(p => p.IDPais == idPais))
+                            {
+                                <option value="@provincia.ID" selected="@(provincia.ID == perfil.IDProvincia)">@provincia.Nombre</option>
+                            }
                         </select>
                     </div>
                     <div class="campo">
