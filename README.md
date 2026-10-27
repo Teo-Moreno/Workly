@@ -10,7 +10,7 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 
 ## Cómo correrlo
 
-1. **Crear la base de datos.** Abrir `BaseDeDatos/script.sql` en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
+1. **Crear la base de datos.** Abrir `script.sql` (en la raíz del repositorio) en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
 2. **Revisar la cadena de conexión** en `appsettings.json` (`ConnectionStrings › Workly`). Por defecto usa la instancia local con autenticación de Windows:
    ```json
    "Workly": "Server=localhost;Database=Workly;Trusted_Connection=True;TrustServerCertificate=True;"
@@ -44,7 +44,7 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 
 ## Base de datos
 
-`BaseDeDatos/script.sql` sigue el diagrama de la base (DLR):
+`script.sql` (en la raíz) sigue el diagrama de la base (DLR):
 
 | Tabla | Para qué |
 | --- | --- |
