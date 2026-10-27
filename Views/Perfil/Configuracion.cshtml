@@ -6,7 +6,6 @@
     var idPais = perfil.IDPais ?? Model.Paises.FirstOrDefault()?.ID;
     var codigoPais = Model.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
     var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js", "Testing (Jest)", "Vue.js", "Angular" };
-    var marcadas = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js" };
 }
 @* Configuración y preferencias (Miro › Mapa de sitio › Perfil). Usa los campos,
    desplegables, casillas, botones de opción e interruptores del UI Kit. *@
@@ -157,7 +156,7 @@
                         <p class="texto-suave">Las usamos para ordenar las ofertas según lo que buscás.</p>
                     </div>
                     <label class="interruptor">
-                        <input type="checkbox" checked />
+                        <input type="checkbox" />
                         <span class="interruptor__pista"></span>
                         Buscando activamente
                     </label>
@@ -168,14 +167,15 @@
                         <label class="campo__etiqueta" for="pref-puesto">Puesto buscado</label>
                         <div class="control-con-icono">
                             <icono nombre="briefcase" />
-                            <input class="campo__control" id="pref-puesto" type="text" value="Frontend Developer" required />
+                            <input class="campo__control" id="pref-puesto" type="text" placeholder="Ej.: Desarrollador/a frontend" required />
                         </div>
                         <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Contanos qué puesto buscás</span>
                     </div>
                     <div class="campo">
                         <label class="campo__etiqueta" for="pref-disponibilidad">Disponibilidad</label>
                         <select class="campo__control" id="pref-disponibilidad">
-                            <option selected>Inmediata</option>
+                            <option value="" selected>Elegí una opción</option>
+                            <option>Inmediata</option>
                             <option>En 15 días</option>
                             <option>En 30 días</option>
                             <option>A convenir</option>
@@ -187,8 +187,8 @@
                     <legend class="campo__etiqueta">Nivel</legend>
                     <div class="opciones-fila">
                         <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Sin experiencia</label>
-                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Junior</label>
-                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Semi Senior</label>
+                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Junior</label>
+                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Semi Senior</label>
                         <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Senior</label>
                     </div>
                 </fieldset>
@@ -197,12 +197,12 @@
                     <legend class="campo__etiqueta">Modalidad</legend>
                     <div class="opciones-tarjeta">
                         <label class="opcion-tarjeta">
-                            <input type="checkbox" checked />
+                            <input type="checkbox" />
                             <span class="caja-icono caja-icono--sm"><icono nombre="home-alt-outline" /></span>
                             <span><span class="opcion-tarjeta__titulo">Remota</span><span class="opcion-tarjeta__texto">Desde tu casa o donde quieras</span></span>
                         </label>
                         <label class="opcion-tarjeta">
-                            <input type="checkbox" checked />
+                            <input type="checkbox" />
                             <span class="caja-icono caja-icono--sm"><icono nombre="calendar" /></span>
                             <span><span class="opcion-tarjeta__titulo">Híbrida</span><span class="opcion-tarjeta__texto">Algunos días en la oficina</span></span>
                         </label>
@@ -218,7 +218,7 @@
                     <fieldset class="formulario__grupo">
                         <legend class="campo__etiqueta">Jornada</legend>
                         <div class="opciones-fila">
-                            <label class="opcion"><input type="radio" name="jornada" checked /><span class="opcion__circulo"></span>Full-time</label>
+                            <label class="opcion"><input type="radio" name="jornada" /><span class="opcion__circulo"></span>Full-time</label>
                             <label class="opcion"><input type="radio" name="jornada" /><span class="opcion__circulo"></span>Part-time</label>
                             <label class="opcion"><input type="radio" name="jornada" disabled /><span class="opcion__circulo"></span>Por proyecto</label>
                         </div>
@@ -226,7 +226,8 @@
                     <div class="campo">
                         <label class="campo__etiqueta" for="pref-contratacion">Contratación</label>
                         <select class="campo__control" id="pref-contratacion">
-                            <option selected>Relación de dependencia</option>
+                            <option value="" selected>Elegí una opción</option>
+                            <option>Relación de dependencia</option>
                             <option>Contractor</option>
                             <option>Pasantía</option>
                             <option>Cualquiera</option>
@@ -249,10 +250,10 @@
                         <span class="campo__etiqueta">Expectativa salarial (bruta mensual)</span>
                         <div class="rango-campos">
                             <label class="solo-lectores" for="pref-salario-min">Mínimo</label>
-                            <input class="campo__control" id="pref-salario-min" type="text" inputmode="numeric" value="$1.400.000" />
+                            <input class="campo__control" id="pref-salario-min" type="text" inputmode="numeric" placeholder="Mínimo" />
                             <span aria-hidden="true">–</span>
                             <label class="solo-lectores" for="pref-salario-max">Máximo</label>
-                            <input class="campo__control" id="pref-salario-max" type="text" inputmode="numeric" value="$1.800.000" />
+                            <input class="campo__control" id="pref-salario-max" type="text" inputmode="numeric" placeholder="Máximo" />
                         </div>
                     </div>
                 </div>
@@ -263,7 +264,7 @@
                         @foreach (var habilidad in habilidades)
                         {
                             <label class="chip-seleccion">
-                                <input type="checkbox" checked="@marcadas.Contains(habilidad)" />
+                                <input type="checkbox" />
                                 <span>@habilidad</span>
                             </label>
                         }
