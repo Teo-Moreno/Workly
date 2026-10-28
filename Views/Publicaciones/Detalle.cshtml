@@ -1,0 +1,87 @@
+@model PublicacionDetalleViewModel
+@{
+    var oferta = Model.Oferta;
+    ViewData["Title"] = oferta.Titulo;
+    var es = new System.Globalization.CultureInfo("es-AR");
+}
+@* Una búsqueda propia: estado, acciones y la lista de personas que se postularon *@
+
+<div class="contenedor seccion-app">
+    <header class="encabezado-pagina">
+        <nav class="migas migas--chica" aria-label="Estás en">
+            <a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
+            <icono nombre="chevron-right" />
+            <span aria-current="page">@oferta.Titulo</span>
+        </nav>
+        <div class="encabezado-pagina__fila">
+            <div>
+                <h1 class="encabezado-pagina__titulo">@oferta.Titulo</h1>
+                <p class="encabezado-pagina__bajada">@oferta.Empresa@(oferta.UbicacionVisible != null ? " · " + oferta.UbicacionVisible : "") · @oferta.PublicadaTexto</p>
+            </div>
+            <div class="encabezado-pagina__acciones">
+                <a class="boton boton--contorno" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
+                @if (oferta.Estado_Publicacion == "Aprobada" && !oferta.EstaCerrada)
+                {
+                    <form asp-controller="Publicaciones" asp-action="Cerrar" asp-route-id="@oferta.ID" method="post" data-confirmar="¿Cerramos la búsqueda? Deja de aparecer y de recibir postulaciones.">
+                        <button class="boton boton--contorno" type="submit">Cerrar búsqueda</button>
+                    </form>
+                }
+                <form asp-controller="Publicaciones" asp-action="Eliminar" asp-route-id="@oferta.ID" method="post" data-confirmar="¿Eliminamos la búsqueda y sus postulaciones? No se puede deshacer.">
+                    <button class="boton boton--peligro-contorno" type="submit"><icono nombre="trash-full" />Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    @if (oferta.Estado_Publicacion == "Pendiente")
+    {
+        <p class="aviso aviso--advertencia"><icono nombre="warning-outline" />Está en revisión: todavía no la ve nadie más que vos. Cuando la revisemos, acá vas a ver si se publicó.</p>
+    }
+    else if (oferta.Estado_Publicacion == "Rechazada")
+    {
+        <p class="aviso aviso--error"><icono nombre="error-outline" />No la pudimos publicar. Motivo: @oferta.Motivo_Rechazo</p>
+    }
+    else if (oferta.EstaCerrada)
+    {
+        <p class="aviso"><icono nombre="info" />Esta búsqueda está cerrada: ya no recibe postulaciones.</p>
+    }
+
+    <section aria-labelledby="postulantes-titulo">
+        <h2 class="texto-titulo-4" id="postulantes-titulo">Postulantes (@Model.Postulantes.Count)</h2>
+        @if (Model.Postulantes.Count == 0)
+        {
+            <div class="estado-vacio estado-vacio--chico">
+                <p>@(oferta.Estado_Publicacion == "Aprobada" ? "Todavía no se postuló nadie. Cuando alguien se postule, lo vas a ver acá con su perfil y su CV." : "Cuando la búsqueda esté publicada, acá vas a ver a quienes se postulen.")</p>
+            </div>
+        }
+        else
+        {
+            <ul class="lista-postulantes" role="list">
+                @foreach (var p in Model.Postulantes)
+                {
+                    <li class="postulante">
+                        <span class="avatar avatar--md" aria-hidden="true">
+                            @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt="" /> } else { @p.Iniciales }
+                        </span>
+                        <div class="postulante__datos">
+                            <h3 class="postulante__nombre"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h3>
+                            <p class="postulante__meta">@string.Join(" · ", new[] { p.Puesto_Buscado, p.Provincia }.Where(t => !string.IsNullOrEmpty(t)))</p>
+                            <p class="postulante__contacto">
+                                <a class="enlace" href="mailto:@p.Email">@p.Email</a>
+                                @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a class="enlace" href="tel:@p.Telefono.Replace(" ", "").Replace("-", "")">@p.Telefono</a></span> }
+                            </p>
+                        </div>
+                        <span class="texto-chico texto-suave">Se postuló el @p.Fecha.ToString("d 'de' MMMM", es)</span>
+                        <div class="fila">
+                            @if (p.TieneCV)
+                            {
+                                <a class="boton boton--contorno boton--sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion"><icono nombre="download" />CV</a>
+                            }
+                            <a class="boton boton--sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

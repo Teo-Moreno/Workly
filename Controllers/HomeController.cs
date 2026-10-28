@@ -7,18 +7,22 @@ namespace Workly.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly JSearch _jsearch;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, JSearch jsearch)
     {
         _logger = logger;
+        _jsearch = jsearch;
     }
 
     // Landing pública (Figma › Alta · Landing)
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        ViewBag.Coincidencias = DatosDeEjemplo.Coincidencias();
-        ViewBag.Empresas = DatosDeEjemplo.Empresas;
-        return View();
+        return View(new LandingViewModel
+        {
+            Puestos = await _jsearch.PuestosParaAnimacion(),
+            Empresas = BD.ObtenerEmpresasConBusquedas(12)
+        });
     }
 
     public IActionResult Privacy()
@@ -28,13 +32,6 @@ public class HomeController : Controller
 
     public IActionResult Terminos()
     {
-        return View();
-    }
-
-    // Guía visual del UI Kit (Figma › Guidelines) implementado en HTML/CSS
-    public IActionResult UiKit()
-    {
-        ViewBag.Ofertas = DatosDeEjemplo.Coincidencias(1);
         return View();
     }
 

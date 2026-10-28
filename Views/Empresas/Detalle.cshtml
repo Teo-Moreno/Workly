@@ -2,15 +2,15 @@
 @{
     var empresa = Model.Empresa;
     ViewData["Title"] = empresa.Nombre;
-    var promedio = empresa.Valoraciones.Count > 0 ? empresa.Valoraciones.Average(v => v.Puntaje) : 0;
+    var abiertas = Model.Ofertas.Where(o => !o.EstaCerrada).ToList();
 }
-@* Perfil de empresa + Ofertas disponibles (Miro › Mapa de sitio › Empresas) *@
+@* Perfil de empresa + búsquedas abiertas (Miro › Mapa de sitio › Empresas) *@
 
 <div class="empresa-portada" aria-hidden="true"></div>
 
 <div class="contenedor seccion-app">
     <header class="empresa-cabecera">
-        <span class="logo-empresa logo-empresa--xl" aria-hidden="true">@empresa.Iniciales</span>
+        <partial name="_LogoEmpresa" model='(empresa.Logo, empresa.Nombre, "logo-empresa--xl")' />
         <div class="empresa-cabecera__datos">
             <nav class="migas migas--chica" aria-label="Estás en">
                 <a asp-controller="Empresas" asp-action="Index">Empresas</a>
@@ -19,114 +19,58 @@
             </nav>
             <h1 class="empresa-cabecera__nombre">@empresa.Nombre</h1>
             <p class="empresa-cabecera__meta">
-                <span><icono nombre="building" tamano="18" />@empresa.Industria</span>
-                <span><icono nombre="near-me" tamano="18" />@empresa.Ubicacion</span>
-                <span><icono nombre="users" tamano="18" />@empresa.Empleados empleados</span>
-                <span><icono nombre="star-fill" tamano="18" class="texto-acento" />@empresa.Valoracion / 5</span>
+                @if (empresa.Rubro != null) { <span><icono nombre="building" tamano="18" />@empresa.Rubro</span> }
+                @if (empresa.UbicacionCompleta != null) { <span><icono nombre="near-me" tamano="18" />@empresa.UbicacionCompleta</span> }
+                @if (empresa.EnlaceSitio != null) { <span><icono nombre="globe" tamano="18" /><a class="enlace" href="@empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@empresa.Sitio_Web</a></span> }
             </p>
         </div>
-        <div class="empresa-cabecera__acciones">
-            <button class="boton boton--contorno" type="button" aria-pressed="false" data-seguir>
-                <icono nombre="plus" /><span data-seguir-texto>Seguir</span>
-            </button>
-            <a class="boton" href="#ofertas">Ver @empresa.BusquedasActivas búsquedas</a>
-        </div>
+        @if (Model.EsPropia)
+        {
+            <div class="empresa-cabecera__acciones">
+                <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar datos</a>
+                <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+            </div>
+        }
     </header>
 
     <div class="empresa-cuerpo">
-        <div class="empresa-cuerpo__principal">
-            <section class="tarjeta tarjeta--lg">
-                <h2 class="tarjeta__titulo">Sobre @empresa.Nombre</h2>
-                <p class="perfil-texto empresa-texto">@empresa.SobreNosotros</p>
-                <div class="lista-tags">
-                    @foreach (var categoria in empresa.Categorias)
+        <section class="tarjeta">
+            <h2 class="tarjeta__titulo">Sobre la empresa</h2>
+            @if (string.IsNullOrWhiteSpace(empresa.Descripcion))
+            {
+                <p class="perfil-vacio">La empresa todavía no contó a qué se dedica.</p>
+            }
+            else
+            {
+                <p class="perfil-texto">@empresa.Descripcion</p>
+            }
+            @if (empresa.TieneCuenta)
+            {
+                <p class="texto-chico texto-suave empresa-verificada"><icono nombre="circle-check" tamano="16" />Registrada en Workly con su CUIT</p>
+            }
+        </section>
+
+        <section class="empresa-ofertas" id="ofertas" aria-labelledby="ofertas-titulo">
+            <h2 class="texto-titulo-4" id="ofertas-titulo">Búsquedas abiertas (@abiertas.Count)</h2>
+            @if (abiertas.Count == 0)
+            {
+                <div class="estado-vacio estado-vacio--chico">
+                    <p>@(Model.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
+                    @if (Model.EsPropia)
                     {
-                        <span class="tag tag--lg">@categoria</span>
+                        <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
                     }
                 </div>
-            </section>
-
-            <section class="empresa-ofertas" id="ofertas" aria-labelledby="ofertas-titulo">
-                <div class="empresa-ofertas__cabecera">
-                    <h2 class="texto-titulo-4" id="ofertas-titulo">Ofertas disponibles</h2>
-                    <span class="etiqueta etiqueta--principal">@Model.Ofertas.Count en Workly · @empresa.BusquedasActivas en total</span>
-                </div>
-                @if (Model.Ofertas.Count > 0)
-                {
-                    <div class="resultados__lista">
-                        @foreach (var oferta in Model.Ofertas)
-                        {
-                            <partial name="_OfertaTarjeta" model="oferta" />
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="estado-vacio">
-                        <span class="caja-icono caja-icono--acento"><icono nombre="briefcase" /></span>
-                        <h3 class="texto-titulo-4">No hay ofertas compatibles por ahora</h3>
-                        <p class="texto-suave">Seguí a la empresa y te avisamos cuando publique una búsqueda para vos.</p>
-                    </div>
-                }
-            </section>
-
-            <section class="tarjeta tarjeta--lg">
-                <h2 class="tarjeta__titulo">Beneficios</h2>
-                <ul class="beneficios" role="list">
-                    @foreach (var beneficio in empresa.Beneficios)
+            }
+            else
+            {
+                <div class="resultados__lista">
+                    @foreach (var oferta in abiertas)
                     {
-                        <li class="beneficio">
-                            <span class="caja-icono caja-icono--sm"><icono nombre="circle-check-outline" /></span>
-                            @beneficio
-                        </li>
+                        <partial name="_OfertaTarjeta" model="oferta" />
                     }
-                </ul>
-            </section>
-        </div>
-
-        <aside class="empresa-cuerpo__lateral">
-            <section class="tarjeta">
-                <h2 class="tarjeta__titulo">Datos de la empresa</h2>
-                <dl class="lista-clave-valor">
-                    <div><dt>Empleados</dt><dd>@empresa.Empleados</dd></div>
-                    <div><dt>Búsquedas activas</dt><dd>@empresa.BusquedasActivas</dd></div>
-                    <div><dt>Responde en</dt><dd>@empresa.RespondeEn</dd></div>
-                    <div><dt>Fundada en</dt><dd>@empresa.Fundada</dd></div>
-                    <div><dt>Sitio web</dt><dd><a class="enlace" href="#">@empresa.SitioWeb <icono nombre="external-link" tamano="14" /></a></dd></div>
-                </dl>
-            </section>
-
-            <section class="tarjeta">
-                <div class="tarjeta__encabezado">
-                    <h2 class="tarjeta__titulo">Valoraciones</h2>
-                    <span class="valoracion-total"><icono nombre="star-fill" tamano="20" />@promedio.ToString("0.0", new System.Globalization.CultureInfo("es-AR"))</span>
                 </div>
-                <ul class="puntajes" role="list">
-                    @foreach (var valoracion in empresa.Valoraciones)
-                    {
-                        <li class="puntaje">
-                            <div class="puntaje__cabecera">
-                                <span>@valoracion.Aspecto</span>
-                                <strong>@valoracion.Puntaje.ToString("0.0", new System.Globalization.CultureInfo("es-AR"))</strong>
-                            </div>
-                            <div class="progreso progreso--fino progreso--acento" role="presentation">
-                                <span class="progreso__barra" style="--valor: @((valoracion.Puntaje / 5 * 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture))%"></span>
-                            </div>
-                        </li>
-                    }
-                </ul>
-                <p class="texto-mini texto-suave">Basado en reseñas anónimas de personas que trabajan o trabajaron en @empresa.Nombre.</p>
-            </section>
-
-            <section class="tarjeta tarjeta--oscura tarjeta-cta">
-                <h2 class="tarjeta__titulo">Alertas de @empresa.Nombre</h2>
-                <p>Te avisamos apenas publique una búsqueda compatible con tu perfil.</p>
-                <label class="interruptor interruptor--claro">
-                    <input type="checkbox" />
-                    <span class="interruptor__pista"></span>
-                    Activar alertas
-                </label>
-            </section>
-        </aside>
+            }
+        </section>
     </div>
 </div>

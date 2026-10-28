@@ -19,9 +19,9 @@ public class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
-public class RegistroViewModel
+// Datos comunes de los dos registros (persona y empresa)
+public abstract class RegistroBase
 {
-    // ---- Paso 1 · Tus datos (tabla Usuario) ----
     [Required(ErrorMessage = "Completá tu nombre")]
     [StringLength(50, ErrorMessage = "Usá hasta 50 caracteres")]
     public string Nombre { get; set; } = "";
@@ -35,41 +35,270 @@ public class RegistroViewModel
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string Email { get; set; } = "";
 
-    [Required(ErrorMessage = "Elegí una contraseña")]
+    // Obligatoria salvo que la persona venga de Google o LinkedIn (lo controla CuentaController)
     [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres")]
     [RegularExpression(@"^(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).+$", ErrorMessage = "Usá al menos una letra y un número")]
     [DataType(DataType.Password)]
-    public string Contrasena { get; set; } = "";
+    public string? Contrasena { get; set; }
 
     [Range(typeof(bool), "true", "true", ErrorMessage = "Tenés que aceptar los términos para continuar")]
     public bool AceptaTerminos { get; set; }
 
-    // ---- Paso 2 · Tu perfil (tabla Perfil) ----
-    [Required(ErrorMessage = "Elegí tu país")]
+    [Required(ErrorMessage = "Elegí el país")]
     public int? IDPais { get; set; }
 
-    [Required(ErrorMessage = "Elegí tu provincia")]
+    [Required(ErrorMessage = "Elegí la provincia")]
     public int? IDProvincia { get; set; }
 
-    /// <summary>Sin el prefijo del país: "11 5555-1234". El controlador lo guarda como "+54 11 5555-1234".</summary>
+    /// <summary>Sin el prefijo del país: "11 5555-1234".</summary>
     [StringLength(20)]
     public string? Telefono { get; set; }
+
+    // Opciones de las listas (no vienen del formulario)
+    public List<Pais> Paises { get; set; } = new();
+    public List<Provincia> Provincias { get; set; } = new();
+
+    /// <summary>"Google" o "LinkedIn" si la persona eligió registrarse con esa cuenta.</summary>
+    public string? ProveedorExterno { get; set; }
+}
+
+public class RegistroPersonaViewModel : RegistroBase
+{
+    // ---- Tu perfil ----
+    public IFormFile? Foto { get; set; }
 
     [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
     public string? Descripcion { get; set; }
 
-    public IFormFile? Foto { get; set; }
+    [Required(ErrorMessage = "Contanos si estás buscando trabajo")]
+    public string? EstadoBusqueda { get; set; }
 
-    // ---- Paso 3 · Tu CV (tabla CV) ----
+    // ---- Tu búsqueda (tabla Preferencia, habilidades e idiomas) ----
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string? PuestoBuscado { get; set; }
+
+    public List<string> Niveles { get; set; } = new();
+    public List<string> Modalidades { get; set; } = new();
+    public string? Jornada { get; set; }
+    public string? Contratacion { get; set; }
+    public int? IDProvinciaPreferida { get; set; }
+
+    [Range(0, 1_000_000_000, ErrorMessage = "Ingresá un monto válido")]
+    public int? SalarioMinimo { get; set; }
+
+    [Range(0, 1_000_000_000, ErrorMessage = "Ingresá un monto válido")]
+    public int? SalarioMaximo { get; set; }
+
+    public string? Disponibilidad { get; set; }
+    public List<string> Habilidades { get; set; } = new();
+    public List<int> IdiomaIds { get; set; } = new();
+    public List<string> IdiomaNiveles { get; set; } = new();
+
+    // ---- Experiencia y formación (filas que agrega la persona) ----
+    public List<string> ExpPuesto { get; set; } = new();
+    public List<string> ExpEmpresa { get; set; } = new();
+    public List<string> ExpInicio { get; set; } = new();
+    public List<string> ExpFin { get; set; } = new();
+    public List<string> ExpDescripcion { get; set; } = new();
+    public List<string> ForTitulo { get; set; } = new();
+    public List<string> ForInstitucion { get; set; } = new();
+    public List<string> ForInicio { get; set; } = new();
+    public List<string> ForFin { get; set; } = new();
+
+    // ---- Tu CV ----
     public IFormFile? ArchivoCV { get; set; }
 
     [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
     public string? SitioWeb { get; set; }
 
-    // Opciones de las listas "País" y "Provincia" (tablas Pais y Provincia)
-    public List<Pais> Paises { get; set; } = new();
-    public List<Provincia> Provincias { get; set; } = new();
+    // Catálogos para el formulario
+    public List<Habilidad> CatalogoHabilidades { get; set; } = new();
+    public List<Idioma> CatalogoIdiomas { get; set; } = new();
+    public List<string> Instituciones { get; set; } = new();
 }
+
+public class RegistroEmpresaViewModel : RegistroBase
+{
+    [Required(ErrorMessage = "Completá el nombre de la empresa")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string NombreEmpresa { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá la razón social")]
+    [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
+    public string RazonSocial { get; set; } = "";
+
+    [Required(ErrorMessage = "Ingresá el CUIT")]
+    public string CUIT { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí el rubro")]
+    public string? Rubro { get; set; }
+
+    [Required(ErrorMessage = "Ingresá el sitio web de la empresa")]
+    [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
+    public string SitioWeb { get; set; } = "";
+
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string? Ubicacion { get; set; }
+
+    [Required(ErrorMessage = "Contá en pocas líneas qué hace la empresa")]
+    [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
+    public string? Descripcion { get; set; }
+
+    public IFormFile? Logo { get; set; }
+}
+
+// ---------------------------------------------------------------- Configuración
+
+public class CuentaFormulario
+{
+    [Required(ErrorMessage = "Completá tu nombre")]
+    [StringLength(50, ErrorMessage = "Usá hasta 50 caracteres")]
+    public string Nombre { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá tu apellido")]
+    [StringLength(50, ErrorMessage = "Usá hasta 50 caracteres")]
+    public string Apellido { get; set; } = "";
+
+    [Required(ErrorMessage = "Ingresá tu email")]
+    [EmailAddress(ErrorMessage = "Ingresá un email válido")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string Email { get; set; } = "";
+
+    public int? IDPais { get; set; }
+
+    [Required(ErrorMessage = "Elegí tu provincia")]
+    public int? IDProvincia { get; set; }
+
+    [StringLength(20)]
+    public string? Telefono { get; set; }
+
+    [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
+    public string? SitioWeb { get; set; }
+
+    public IFormFile? Foto { get; set; }
+    public IFormFile? ArchivoCV { get; set; }
+}
+
+public class BusquedaFormulario
+{
+    public string? EstadoBusqueda { get; set; }
+
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string? PuestoBuscado { get; set; }
+
+    public List<string> Niveles { get; set; } = new();
+    public List<string> Modalidades { get; set; } = new();
+    public string? Jornada { get; set; }
+    public string? Contratacion { get; set; }
+    public int? IDProvinciaPreferida { get; set; }
+
+    [Range(0, 1_000_000_000, ErrorMessage = "Ingresá un monto válido")]
+    public int? SalarioMinimo { get; set; }
+
+    [Range(0, 1_000_000_000, ErrorMessage = "Ingresá un monto válido")]
+    public int? SalarioMaximo { get; set; }
+
+    public string? Disponibilidad { get; set; }
+    public List<string> Habilidades { get; set; } = new();
+    public List<int> IdiomaIds { get; set; } = new();
+    public List<string> IdiomaNiveles { get; set; } = new();
+}
+
+public class ClaveFormulario
+{
+    public string? Actual { get; set; }
+
+    [Required(ErrorMessage = "Elegí una contraseña nueva")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres")]
+    [RegularExpression(@"^(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).+$", ErrorMessage = "Usá al menos una letra y un número")]
+    public string Nueva { get; set; } = "";
+
+    [Required(ErrorMessage = "Repetí la contraseña nueva")]
+    [Compare(nameof(Nueva), ErrorMessage = "Las contraseñas no coinciden")]
+    public string Repetir { get; set; } = "";
+}
+
+public class EmpresaFormulario
+{
+    [Required(ErrorMessage = "Completá tu nombre")]
+    [StringLength(50, ErrorMessage = "Usá hasta 50 caracteres")]
+    public string Nombre { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá tu apellido")]
+    [StringLength(50, ErrorMessage = "Usá hasta 50 caracteres")]
+    public string Apellido { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá el nombre de la empresa")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string NombreEmpresa { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí el rubro")]
+    public string? Rubro { get; set; }
+
+    [Required(ErrorMessage = "Ingresá el sitio web de la empresa")]
+    [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
+    public string SitioWeb { get; set; } = "";
+
+    public int? IDPais { get; set; }
+
+    [Required(ErrorMessage = "Elegí la provincia")]
+    public int? IDProvincia { get; set; }
+
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string? Ubicacion { get; set; }
+
+    [StringLength(20)]
+    public string? Telefono { get; set; }
+
+    [Required(ErrorMessage = "Contá en pocas líneas qué hace la empresa")]
+    [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
+    public string? Descripcion { get; set; }
+
+    public IFormFile? Logo { get; set; }
+}
+
+// Pop ups "Agregar experiencia" y "Agregar formación" del perfil
+public class ExperienciaFormulario
+{
+    [Required(ErrorMessage = "Completá el puesto")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string Puesto { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá la empresa")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string Empresa { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí el mes y el año de inicio")]
+    public string Inicio { get; set; } = "";
+
+    public bool Actual { get; set; }
+    public string? Fin { get; set; }
+
+    [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
+    public string? Descripcion { get; set; }
+}
+
+public class FormacionFormulario
+{
+    [Required(ErrorMessage = "Completá el título o curso")]
+    [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
+    public string Titulo { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá la institución")]
+    [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
+    public string Institucion { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí el mes y el año de inicio")]
+    public string Inicio { get; set; } = "";
+
+    public bool EnCurso { get; set; }
+    public string? Fin { get; set; }
+}
+
+// ---------------------------------------------------------------- Mi perfil
+
+// Un paso del "perfil completo" con la acción para completarlo
+public record ItemPerfil(string Clave, string Texto, bool Listo, string Accion);
 
 // Datos que se muestran en "Mi perfil" y "Configuración"
 public class MiPerfilViewModel
@@ -77,20 +306,38 @@ public class MiPerfilViewModel
     public Usuario Usuario { get; set; } = new();
     public Perfil Perfil { get; set; } = new();
     public CV? CV { get; set; }
+    public Preferencia Preferencia { get; set; } = new();
+    public List<string> Habilidades { get; set; } = new();
+    public List<IdiomaElegido> Idiomas { get; set; } = new();
     public List<ExperienciaItem> Experiencias { get; set; } = new();
+    public List<FormacionItem> Formaciones { get; set; } = new();
+    public Dictionary<string, int> PostulacionesPorEstado { get; set; } = new();
+
+    // Para Configuración
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
-    public List<FormacionItem> Formaciones { get; set; } = new();
+    public List<Habilidad> CatalogoHabilidades { get; set; } = new();
+    public List<Idioma> CatalogoIdiomas { get; set; } = new();
+    public List<string> Instituciones { get; set; } = new();
+    public List<string> ProveedoresVinculados { get; set; } = new();
 
-    public List<(string Texto, bool Listo)> Checklist => new()
+    // Cuenta de empresa
+    public Empresa? Empresa { get; set; }
+
+    public int TotalPostulaciones => PostulacionesPorEstado.Values.Sum();
+    public bool TieneCV => !string.IsNullOrEmpty(CV?.Nombre_Archivo);
+
+    public List<ItemPerfil> Checklist => new()
     {
-        ("Datos personales", true),
-        ("Foto de perfil", !string.IsNullOrEmpty(Perfil.Foto)),
-        ("Sobre mí", !string.IsNullOrWhiteSpace(Perfil.Descripcion)),
-        ("Teléfono", !string.IsNullOrWhiteSpace(Perfil.Telefono)),
-        ("Experiencia laboral", Experiencias.Count > 0),
-        ("Formación", Formaciones.Count > 0),
-        ("CV", !string.IsNullOrEmpty(CV?.Nombre_Archivo))
+        new("foto", "Foto de perfil", !string.IsNullOrEmpty(Perfil.Foto), "Subir foto"),
+        new("sobre-mi", "Sobre mí", !string.IsNullOrWhiteSpace(Perfil.Descripcion), "Escribir"),
+        new("telefono", "Teléfono", !string.IsNullOrWhiteSpace(Perfil.Telefono), "Agregar"),
+        new("busqueda", "Qué estás buscando", Preferencia.TieneDatos, "Completar"),
+        new("habilidades", "Habilidades", Habilidades.Count > 0, "Agregar"),
+        new("idiomas", "Idiomas", Idiomas.Count > 0, "Agregar"),
+        new("experiencia", "Experiencia laboral", Experiencias.Count > 0, "Agregar"),
+        new("formacion", "Formación", Formaciones.Count > 0, "Agregar"),
+        new("cv", "CV", TieneCV, "Subir CV")
     };
 
     public int PorcentajeCompleto
@@ -101,6 +348,8 @@ public class MiPerfilViewModel
             return (int)Math.Round(items.Count(i => i.Listo) * 100.0 / items.Count);
         }
     }
+
+    public ItemPerfil? SiguientePaso => Checklist.FirstOrDefault(i => !i.Listo);
 }
 
 // ExperienciaLaboral + nombre de la Empresa
@@ -126,15 +375,30 @@ public class FormacionItem
     public DateTime? Fecha_Fin { get; set; }
 
     public string Periodo => Fecha_Fin.HasValue
-        ? $"{Fecha_Inicio.Year} – {Fecha_Fin.Value.Year} · {(Fecha_Fin.Value <= DateTime.Today ? "Finalizada" : "En curso")}"
-        : $"{Fecha_Inicio.Year} – Actualidad · En curso";
+        ? $"{Fechas.MesAnio(Fecha_Inicio)} – {Fechas.MesAnio(Fecha_Fin.Value)}"
+        : $"{Fechas.MesAnio(Fecha_Inicio)} – Actualidad · En curso";
 }
 
 public static class Fechas
 {
-    private static readonly string[] Meses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" };
+    private static readonly string[] Meses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic" };
 
     public static string MesAnio(DateTime fecha) => $"{Meses[fecha.Month - 1]} {fecha.Year}";
+
+    /// <summary>"06/2026" → 1/6/2026. Null si el texto no es un mes válido.</summary>
+    public static DateTime? ParsearMesAnio(string? texto)
+    {
+        var partes = (texto ?? "").Trim().Split('/');
+        if (partes.Length == 2 && int.TryParse(partes[0], out var mes) && int.TryParse(partes[1], out var anio) &&
+            mes is >= 1 and <= 12 && anio is >= 1950 and <= 2100)
+        {
+            return new DateTime(anio, mes, 1);
+        }
+        return null;
+    }
+
+    /// <summary>Primer día del mes actual (no se aceptan fechas de inicio a futuro).</summary>
+    public static DateTime MesActual => new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     // "Mar 2025 – Actualidad · 1 año 7 meses"
     public static string Periodo(DateTime inicio, DateTime? fin)

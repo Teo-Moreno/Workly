@@ -15,7 +15,7 @@
             </a>
 
             <nav class="navbar__links" aria-label="Principal">
-                <a class="navbar__link esta-activo" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+                <a class="navbar__link" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
                 <a class="navbar__link" asp-controller="Empresas" asp-action="Index">Empresas</a>
                 <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
                 <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
@@ -25,7 +25,7 @@
                 @if (User.EstaLogueado())
                 {
                     <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Index">
-                        <span class="avatar avatar--mini" aria-hidden="true">@User.Iniciales()</span>@User.Nombre()
+                        <span class="avatar avatar--mini" aria-hidden="true">@if (!string.IsNullOrEmpty(User.Foto())) {<img src="@User.Foto()" alt="" />} else {@User.Iniciales()}</span>@User.Nombre()
                     </a>
                     <a class="boton" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
                 }
@@ -70,17 +70,16 @@
                 <span class="logo__isotipo" aria-hidden="true">W</span>
                 <span class="logo__texto">Workly</span>
             </a>
-            <p class="pie__copy">© 2026 Workly · Hecho en Buenos Aires, Argentina</p>
+            <p class="pie__copy">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
             <nav class="pie__links" aria-label="Legales y ayuda">
                 <a asp-controller="Home" asp-action="Terminos">Términos</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 <a asp-controller="Perfil" asp-action="Ayuda">Ayuda</a>
-                <a href="mailto:hola@workly.com.ar"><icono nombre="mail" />Contacto</a>
             </nav>
         </div>
     </footer>
 
-    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]"></div>
+    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

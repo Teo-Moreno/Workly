@@ -1,30 +1,30 @@
 @model Oferta
 @{
     var seleccionada = ViewData["Seleccionada"] is true;
-    var oculta = ViewData["Oculta"] is true;
+    var enlace = ViewData["Enlace"] as string;
 }
-@* Tarjeta de resultado (Figma › Media · WF 02 › Resultados) *@
-<article class="oferta-tarjeta @(seleccionada ? "es-seleccionada" : "")" data-oferta="@Model.Id" hidden="@oculta">
+@* Tarjeta de resultado (Figma › Media · WF 02 › Resultados). Sirve para ofertas de Workly y de otros sitios. *@
+<article class="oferta-tarjeta @(seleccionada ? "es-seleccionada" : "")" data-oferta="@Model.Clave">
     <div class="oferta-tarjeta__cabecera">
-        <span class="logo-empresa" aria-hidden="true">@Model.Iniciales</span>
+        <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa--principal")' />
         <div class="oferta-tarjeta__datos">
             <h3 class="oferta-tarjeta__puesto">
-                <a asp-controller="Empleos" asp-action="Detalle" asp-route-id="@Model.Id" data-oferta-enlace>@Model.Puesto</a>
+                <a href="@(enlace ?? (Model.EsExterna ? Url.Action("Externa", "Empleos", new { id = Model.ID }) : Url.Action("Detalle", "Empleos", new { id = Model.ID })))" data-oferta-enlace>@Model.Titulo</a>
             </h3>
-            <p class="oferta-tarjeta__meta">@Model.Empresa · @Model.Ubicacion</p>
+            <p class="oferta-tarjeta__meta">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
         </div>
-        <span class="match @(Model.Match < 80 ? "match--media" : "")"><icono nombre="circle-check" />@Model.Match% match</span>
-    </div>
-    <div class="lista-tags">
-        <span class="tag tag--borde">@Model.Modalidad</span>
-        <span class="tag tag--borde">@Model.Nivel</span>
-        @foreach (var tecnologia in Model.Tecnologias.Take(2))
+        @if (Model.YaPostulado)
         {
-            <span class="tag">@tecnologia</span>
+            <span class="etiqueta etiqueta--exito"><icono nombre="circle-check" tamano="16" />Postulado</span>
         }
     </div>
+    <div class="lista-tags">
+        @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde">@Model.Modalidad</span> }
+        @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde">@Model.Tipo_Contrato</span> }
+        <span class="tag @(Model.EsExterna ? "" : "tag--principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>
+    </div>
     <div class="oferta-tarjeta__pie">
-        <span class="oferta-tarjeta__salario">@Model.Salario</span>
-        <span class="oferta-tarjeta__fecha">@Model.Publicado</span>
+        <span class="oferta-tarjeta__salario">@(Model.SalarioVisible ?? "")</span>
+        <span class="oferta-tarjeta__fecha">@Model.PublicadaTexto</span>
     </div>
 </article>

@@ -1,0 +1,232 @@
+@model RegistroPersonaViewModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+    var externo = Model.ProveedorExterno != null;
+    var prefijo = Model.Paises.FirstOrDefault(p => p.ID == Model.IDPais)?.Codigo_Telefono ?? "+54";
+    var pasos = new[] { "Tus datos", "Tu perfil", "Qué buscás", "Experiencia", "Tu CV" };
+}
+@section Barra {
+    <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+}
+@* Registro de una persona en 5 pasos (Usuario, Perfil, Preferencia, habilidades, idiomas,
+   experiencia, formación y CV). Usa la "Barra de progreso" de Figma › Guidelines. *@
+
+<div class="cuenta-tarjeta cuenta-tarjeta--ancha">
+    <h1 class="cuenta-tarjeta__titulo">Creá tu cuenta</h1>
+    <p class="cuenta-tarjeta__bajada">Paso <strong data-paso-actual>1</strong> de @pasos.Length. Todo lo que cargues después lo podés cambiar desde tu perfil.</p>
+
+    <partial name="_TipoCuenta" model='"persona"' />
+
+    <ol class="pasos registro__pasos" aria-label="Progreso del registro">
+        @for (var i = 0; i < pasos.Length; i++)
+        {
+            <li class="pasos__item @(i == 0 ? "esta-actual" : "")" data-paso-indicador>
+                <span class="pasos__circulo"><span class="pasos__numero">@(i + 1)</span><icono nombre="check" /></span>
+                @pasos[i]
+            </li>
+        }
+    </ol>
+
+    <partial name="_ErroresFormulario" />
+
+    @if (!externo)
+    {
+        <partial name="_BotonesExternos" model='("Registrarte", "persona", (string?)null)' />
+    }
+
+    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+        @* ---------------- Paso 1 · Tus datos ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso>
+            <legend class="solo-lectores">Paso 1: tus datos</legend>
+            @if (externo)
+            {
+                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @Model.ProveedorExterno. No necesitás contraseña.</p>
+            }
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.Nombre))">
+                    <label class="campo__etiqueta" asp-for="Nombre">Nombre</label>
+                    <input class="campo__control" asp-for="Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Nombre), "Completá tu nombre")</span>
+                </div>
+                <div class="campo @Html.ClaseError(nameof(Model.Apellido))">
+                    <label class="campo__etiqueta" asp-for="Apellido">Apellido</label>
+                    <input class="campo__control" asp-for="Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Apellido), "Completá tu apellido")</span>
+                </div>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Email))">
+                <label class="campo__etiqueta" asp-for="Email">Email</label>
+                <div class="control-con-icono">
+                    <icono nombre="mail" />
+                    <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@externo" />
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+            </div>
+
+            @if (!externo)
+            {
+                <partial name="_CampoContrasena" />
+            }
+
+            <partial name="_AceptaTerminos" />
+
+            <div class="registro__acciones">
+                <span></span>
+                <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+            </div>
+        </fieldset>
+
+        @* ---------------- Paso 2 · Tu perfil ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso hidden>
+            <legend class="solo-lectores">Paso 2: tu perfil</legend>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Foto))">
+                <span class="campo__etiqueta">Foto de perfil <span class="campo__opcional">(opcional)</span></span>
+                <div class="subir-foto">
+                    <span class="avatar avatar--xl subir-foto__vista" data-vista-foto aria-hidden="true"><icono nombre="user" tamano="40" /></span>
+                    <div class="pila" style="--pila-espacio: 8px">
+                        <label class="boton boton--contorno boton--sm boton--archivo">
+                            <icono nombre="upload" />Elegir foto
+                            <input asp-for="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                                   data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
+                        </label>
+                        <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB.</span>
+                    </div>
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Foto), "Subí una imagen JPG, PNG o WEBP")</span>
+            </div>
+
+            <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = Model.Paises, Provincias = Model.Provincias, IDPais = Model.IDPais, IDProvincia = Model.IDProvincia, EtiquetaProvincia = "Provincia donde vivís" }' />
+            <partial name="_CampoTelefono" model='new CampoTelefono { Valor = Model.Telefono, Prefijo = prefijo }' />
+
+            <fieldset class="formulario__grupo campo @Html.ClaseError(nameof(Model.EstadoBusqueda))">
+                <legend class="campo__etiqueta">¿Estás buscando trabajo?</legend>
+                <div class="opciones-tarjeta">
+                    @foreach (var estado in Catalogos.EstadosBusqueda)
+                    {
+                        <label class="opcion-tarjeta">
+                            <input type="radio" name="EstadoBusqueda" value="@estado" checked="@(Model.EstadoBusqueda == estado)" required />
+                            <span><span class="opcion-tarjeta__titulo">@estado</span></span>
+                        </label>
+                    }
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.EstadoBusqueda), "Elegí una opción")</span>
+            </fieldset>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Descripcion))">
+                <label class="campo__etiqueta" asp-for="Descripcion">Contanos sobre vos <span class="campo__opcional">(opcional)</span></label>
+                <textarea class="campo__control" asp-for="Descripcion" rows="4" maxlength="500" placeholder="Qué hacés, qué te gusta y qué tipo de trabajo estás buscando."></textarea>
+                <span class="campo__ayuda">Aparece en la sección "Sobre mí" de tu perfil. Hasta 500 caracteres.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Descripcion), "Usá hasta 500 caracteres")</span>
+            </div>
+
+            <div class="registro__acciones">
+                <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+            </div>
+        </fieldset>
+
+        @* ---------------- Paso 3 · Qué buscás ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso hidden>
+            <legend class="solo-lectores">Paso 3: qué buscás</legend>
+            <p class="texto-suave">Todo es opcional: completá lo que tengas claro.</p>
+            <partial name="_CamposBusqueda" model="CamposBusqueda.Desde(Model)" />
+            <div class="registro__acciones">
+                <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+            </div>
+        </fieldset>
+
+        @* ---------------- Paso 4 · Experiencia y formación ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso hidden>
+            <legend class="solo-lectores">Paso 4: experiencia y formación</legend>
+            <p class="texto-suave">Opcional: podés sumarlas ahora o más adelante desde tu perfil.</p>
+
+            <section class="lista-local campo @Html.ClaseError("Experiencias")" aria-labelledby="titulo-exp">
+                <div class="lista-local__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-exp">Experiencia laboral</h2>
+                    <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-experiencia"><icono nombre="plus" />Agregar experiencia</button>
+                </div>
+                <ul class="lista-local__items" role="list" data-lista-local="experiencia" data-vacio="Todavía no agregaste experiencias.">
+                    @for (var i = 0; i < Model.ExpPuesto.Count; i++)
+                    {
+                        string V(List<string> l) => i < l.Count ? l[i] : "";
+                        <li class="item-local" data-item-local>
+                            <div><strong>@V(Model.ExpPuesto)</strong><span>@V(Model.ExpEmpresa) · @V(Model.ExpInicio) – @(V(Model.ExpFin).Length > 0 ? V(Model.ExpFin) : "Actualidad")</span></div>
+                            <input type="hidden" name="ExpPuesto" value="@V(Model.ExpPuesto)" /><input type="hidden" name="ExpEmpresa" value="@V(Model.ExpEmpresa)" />
+                            <input type="hidden" name="ExpInicio" value="@V(Model.ExpInicio)" /><input type="hidden" name="ExpFin" value="@V(Model.ExpFin)" />
+                            <input type="hidden" name="ExpDescripcion" value="@V(Model.ExpDescripcion)" />
+                            <button class="boton boton--texto" type="button" data-quitar-item>Quitar</button>
+                        </li>
+                    }
+                </ul>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Experiencias", "Revisá las experiencias")</span>
+            </section>
+
+            <section class="lista-local campo @Html.ClaseError("Formaciones")" aria-labelledby="titulo-for">
+                <div class="lista-local__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-for">Formación</h2>
+                    <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-formacion"><icono nombre="plus" />Agregar formación</button>
+                </div>
+                <ul class="lista-local__items" role="list" data-lista-local="formacion" data-vacio="Todavía no agregaste estudios.">
+                    @for (var i = 0; i < Model.ForTitulo.Count; i++)
+                    {
+                        string V(List<string> l) => i < l.Count ? l[i] : "";
+                        <li class="item-local" data-item-local>
+                            <div><strong>@V(Model.ForTitulo)</strong><span>@V(Model.ForInstitucion) · @V(Model.ForInicio) – @(V(Model.ForFin).Length > 0 ? V(Model.ForFin) : "En curso")</span></div>
+                            <input type="hidden" name="ForTitulo" value="@V(Model.ForTitulo)" /><input type="hidden" name="ForInstitucion" value="@V(Model.ForInstitucion)" />
+                            <input type="hidden" name="ForInicio" value="@V(Model.ForInicio)" /><input type="hidden" name="ForFin" value="@V(Model.ForFin)" />
+                            <button class="boton boton--texto" type="button" data-quitar-item>Quitar</button>
+                        </li>
+                    }
+                </ul>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Formaciones", "Revisá la formación")</span>
+            </section>
+
+            <div class="registro__acciones">
+                <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+            </div>
+        </fieldset>
+
+        @* ---------------- Paso 5 · Tu CV ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso hidden>
+            <legend class="solo-lectores">Paso 5: tu CV</legend>
+
+            <div class="campo @Html.ClaseError(nameof(Model.ArchivoCV))">
+                <span class="campo__etiqueta">CV <span class="campo__opcional">(opcional, lo podés subir después)</span></span>
+                <label class="zona-archivo" data-zona-archivo>
+                    <span class="caja-icono"><icono nombre="upload" /></span>
+                    <strong class="zona-archivo__nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
+                    <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
+                    <input asp-for="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                           data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
+                </label>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.ArchivoCV), "Subí un archivo PDF, DOC o DOCX")</span>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.SitioWeb))">
+                <label class="campo__etiqueta" asp-for="SitioWeb">Sitio web, portfolio o LinkedIn <span class="campo__opcional">(opcional)</span></label>
+                <div class="control-con-icono">
+                    <icono nombre="globe" />
+                    <input class="campo__control" asp-for="SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="linkedin.com/in/tu-nombre" maxlength="200" />
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.SitioWeb), "Usá hasta 200 caracteres")</span>
+            </div>
+
+            @if (Model.Foto != null || Model.ArchivoCV != null)
+            {
+                <p class="texto-chico texto-suave">Por seguridad, si hubo un error tenés que volver a elegir la foto y el CV.</p>
+            }
+
+            <div class="registro__acciones">
+                <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="boton boton--acento boton--lg" type="submit">Crear mi cuenta</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<partial name="_ModalExperiencia" model="(false, (ExperienciaFormulario?)null)" />
+<partial name="_ModalFormacion" model="(false, (FormacionFormulario?)null, Model.Instituciones)" />
