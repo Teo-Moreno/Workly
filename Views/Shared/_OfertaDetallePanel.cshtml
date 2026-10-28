@@ -14,6 +14,7 @@
         <h2 class="detalle-panel__titulo" id="detalle-titulo-@Model.Clave">@Model.Titulo</h2>
         <p class="detalle-panel__meta">@string.Join(" · ", new[] { Model.Empresa, Model.UbicacionVisible, Model.PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)))</p>
         <div class="lista-tags">
+            <partial name="_SelloOficial" model="Model" />
             @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde tag--lg">@Model.Modalidad</span> }
             @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@Model.Tipo_Contrato</span> }
             @if (!Model.EsExterna && Model.Cantidad_Puestos > 1) { <span class="tag tag--borde tag--lg">@Model.Cantidad_Puestos vacantes</span> }
