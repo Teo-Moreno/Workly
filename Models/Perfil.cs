@@ -17,6 +17,9 @@ public class Perfil
     /// <summary>Con el prefijo del país, por ejemplo "+54 11 5555-1234".</summary>
     public string? Telefono { get; set; }
 
+    /// <summary>Buscando activamente, Abierto a propuestas o No estoy buscando (ver Catalogos).</summary>
+    public string? Estado_Busqueda { get; set; }
+
     // Datos de las tablas Provincia y Pais (se completan con un JOIN al leer el perfil)
     public string? Provincia { get; set; }
     public int? IDPais { get; set; }

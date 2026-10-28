@@ -1,0 +1,133 @@
+@model PostulanteViewModel
+@{
+    var m = Model.Perfil;
+    var usuario = m.Usuario;
+    var perfil = m.Perfil;
+    var pref = m.Preferencia;
+    ViewData["Title"] = usuario.NombreCompleto;
+    var sitio = Textos.Enlace(m.CV?.Sitio_Web);
+}
+@* Perfil completo de una persona que se postuló a una búsqueda propia *@
+
+<div class="contenedor seccion-app">
+    <nav class="migas migas--chica" aria-label="Estás en">
+        <a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
+        <icono nombre="chevron-right" />
+        <a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@Model.Oferta.ID">@Model.Oferta.Titulo</a>
+        <icono nombre="chevron-right" />
+        <span aria-current="page">@usuario.NombreCompleto</span>
+    </nav>
+
+    <section class="perfil-cabecera" aria-label="Datos principales">
+        <span class="avatar avatar--xl" aria-hidden="true">
+            @if (!string.IsNullOrEmpty(perfil.Foto)) { <img src="@perfil.Foto" alt="" /> } else { @UsuarioActual.Iniciales(usuario.Nombre, usuario.Apellido) }
+        </span>
+        <div class="perfil-cabecera__datos">
+            <h1 class="perfil-cabecera__nombre">@usuario.NombreCompleto</h1>
+            @if (!string.IsNullOrWhiteSpace(pref.Puesto_Buscado)) { <p class="perfil-cabecera__rol">Busca trabajo de @pref.Puesto_Buscado</p> }
+            <ul class="perfil-cabecera__contacto" role="list">
+                @if (perfil.Ubicacion != null) { <li><icono nombre="near-me" tamano="18" />@perfil.Ubicacion</li> }
+                <li><icono nombre="mail" tamano="18" /><a href="mailto:@usuario.Email">@usuario.Email</a></li>
+                @if (!string.IsNullOrEmpty(perfil.Telefono)) { <li><icono nombre="message-writing" tamano="18" /><a href="tel:@perfil.Telefono.Replace(" ", "").Replace("-", "")">@perfil.Telefono</a></li> }
+                @if (sitio != null) { <li><icono nombre="globe" tamano="18" /><a href="@sitio" target="_blank" rel="noopener noreferrer">@m.CV!.Sitio_Web</a></li> }
+            </ul>
+            @if (perfil.Estado_Busqueda != null) { <span class="etiqueta etiqueta--info">@perfil.Estado_Busqueda</span> }
+        </div>
+        <div class="perfil-cabecera__acciones">
+            @if (m.TieneCV)
+            {
+                <a class="boton" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@Model.IDPostulacion"><icono nombre="download" />Descargar CV</a>
+            }
+            else
+            {
+                <span class="texto-suave">No subió CV</span>
+            }
+        </div>
+    </section>
+
+    <div class="perfil-cuerpo">
+        <div class="perfil-columna">
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Qué busca</h2>
+                @if (pref.TieneDatos)
+                {
+                    <dl class="lista-clave-valor lista-clave-valor--perfil">
+                        @if (pref.ListaNiveles.Count > 0) { <div><dt>Nivel</dt><dd>@string.Join(", ", pref.ListaNiveles)</dd></div> }
+                        @if (pref.ListaModalidades.Count > 0) { <div><dt>Modalidad</dt><dd>@string.Join(", ", pref.ListaModalidades)</dd></div> }
+                        @if (pref.Jornada != null) { <div><dt>Jornada</dt><dd>@pref.Jornada</dd></div> }
+                        @if (pref.Contratacion != null) { <div><dt>Contratación</dt><dd>@pref.Contratacion</dd></div> }
+                        @if (pref.Disponibilidad != null) { <div><dt>Disponibilidad</dt><dd>@pref.Disponibilidad</dd></div> }
+                    </dl>
+                }
+                else
+                {
+                    <p class="perfil-vacio">No lo completó.</p>
+                }
+            </section>
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Habilidades</h2>
+                @if (m.Habilidades.Count == 0) { <p class="perfil-vacio">No cargó habilidades.</p> }
+                else
+                {
+                    <ul class="lista-tags" role="list">@foreach (var h in m.Habilidades) { <li class="tag">@h</li> }</ul>
+                }
+            </section>
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Idiomas</h2>
+                @if (m.Idiomas.Count == 0) { <p class="perfil-vacio">No cargó idiomas.</p> }
+                else
+                {
+                    <dl class="lista-clave-valor">@foreach (var i in m.Idiomas) { <div><dt>@i.Idioma</dt><dd>@i.Nivel</dd></div> }</dl>
+                }
+            </section>
+        </div>
+        <div class="perfil-columna">
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Sobre mí</h2>
+                @if (string.IsNullOrWhiteSpace(perfil.Descripcion)) { <p class="perfil-vacio">No escribió nada.</p> }
+                else { <p class="perfil-texto">@perfil.Descripcion</p> }
+            </section>
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Experiencia</h2>
+                @if (m.Experiencias.Count == 0) { <p class="perfil-vacio">No cargó experiencia laboral.</p> }
+                else
+                {
+                    <ol class="linea-tiempo" role="list">
+                        @foreach (var e in m.Experiencias)
+                        {
+                            <li class="linea-tiempo__item">
+                                <span class="logo-empresa logo-empresa--md logo-empresa--principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
+                                <div class="linea-tiempo__contenido">
+                                    <h3 class="linea-tiempo__titulo">@e.Puesto</h3>
+                                    <p class="linea-tiempo__lugar">@e.Empresa</p>
+                                    <p class="linea-tiempo__fecha">@e.Periodo</p>
+                                    @if (!string.IsNullOrWhiteSpace(e.Descripcion)) { <p class="linea-tiempo__texto">@e.Descripcion</p> }
+                                </div>
+                            </li>
+                        }
+                    </ol>
+                }
+            </section>
+            <section class="tarjeta">
+                <h2 class="tarjeta__titulo">Formación</h2>
+                @if (m.Formaciones.Count == 0) { <p class="perfil-vacio">No cargó formación.</p> }
+                else
+                {
+                    <ol class="linea-tiempo" role="list">
+                        @foreach (var f in m.Formaciones)
+                        {
+                            <li class="linea-tiempo__item">
+                                <span class="logo-empresa logo-empresa--md" aria-hidden="true"><icono nombre="book" /></span>
+                                <div class="linea-tiempo__contenido">
+                                    <h3 class="linea-tiempo__titulo">@f.Titulo</h3>
+                                    <p class="linea-tiempo__lugar">@f.Institucion</p>
+                                    <p class="linea-tiempo__fecha">@f.Periodo</p>
+                                </div>
+                            </li>
+                        }
+                    </ol>
+                }
+            </section>
+        </div>
+    </div>
+</div>

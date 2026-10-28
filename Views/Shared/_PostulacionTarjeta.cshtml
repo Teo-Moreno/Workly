@@ -1,44 +1,38 @@
-@model Postulacion
-@* Tarjeta del tablero (Figma › Media · WF 03 › Tablero) *@
-<article class="postulacion" draggable="true" data-postulacion="@Model.Id" aria-label="@Model.Puesto en @Model.Empresa">
+@model PostulacionItem
+@{
+    var enlace = Model.EsExterna
+        ? Url.Action("Externa", "Empleos", new { id = Model.IDOfertaExterna })
+        : Url.Action("Detalle", "Empleos", new { id = Model.IDOfertaLaboral });
+}
+@* Tarjeta del tablero (Figma › Media · WF 03 › Tablero). La persona la mueve arrastrándola o con el selector. *@
+<article class="postulacion" draggable="true" data-postulacion="@Model.ID" aria-label="@Model.Titulo en @Model.Empresa">
     <div class="postulacion__cabecera">
-        <span class="logo-empresa logo-empresa--sm" aria-hidden="true">@Model.Iniciales</span>
+        <partial name="_LogoEmpresa" model='((string?)null, Model.Empresa, "logo-empresa--sm")' />
         <div class="postulacion__datos">
-            <h3 class="postulacion__puesto">@Model.Puesto</h3>
-            <p class="postulacion__empresa">@Model.Empresa · @Model.Ubicacion</p>
+            <h3 class="postulacion__puesto"><a href="@enlace">@Model.Titulo</a></h3>
+            <p class="postulacion__empresa">@Model.Empresa@(string.IsNullOrEmpty(Model.Ubicacion) ? "" : " · " + Model.Ubicacion)</p>
         </div>
         <span class="postulacion__arrastre" aria-hidden="true"><icono nombre="drag" tamano="18" /></span>
     </div>
 
-    <span class="etiqueta etiqueta--@Model.Tono">@Model.Etapa</span>
+    <span class="tag">@(Model.EsExterna ? "Vía " + (string.IsNullOrWhiteSpace(Model.Publicador) ? "otro sitio" : Model.Publicador) : "En Workly")</span>
 
-    @if (Model.DestacadoTitulo != null)
-    {
-        <div class="postulacion__destacado postulacion__destacado--@Model.Tono">
-            @if (Model.Estado == EstadoPostulacion.Entrevista)
+    <form class="postulacion__estado" asp-controller="Postulaciones" asp-action="CambiarEstado" asp-route-id="@Model.ID" method="post" data-enviar-al-cambiar>
+        <label class="solo-lectores" for="estado-@Model.ID">Etapa de @Model.Titulo</label>
+        <select class="campo__control campo__control--sm" id="estado-@Model.ID" name="estado" data-estado-postulacion>
+            @foreach (var (estado, _, _) in Catalogos.EstadosPostulacion)
             {
-                <icono nombre="video" tamano="18" />
+                <option selected="@(estado == Model.Estado)">@estado</option>
             }
-            else
-            {
-                <icono nombre="circle-check-outline" tamano="18" />
-            }
-            <div>
-                <strong>@Model.DestacadoTitulo</strong>
-                <span>@Model.DestacadoTexto</span>
-            </div>
-        </div>
-    }
+        </select>
+        <noscript><button class="boton boton--sm" type="submit">Mover</button></noscript>
+    </form>
 
     <div class="postulacion__pie">
-        <span>@Model.Actualizado</span>
-        @if (Model.OfertaId.HasValue)
-        {
-            <a class="enlace enlace--principal" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@Model.OfertaId">Ver detalle</a>
-        }
-        else
-        {
-            <a class="enlace enlace--principal" href="#" data-sin-detalle>Ver detalle</a>
-        }
+        <span>@Model.FechaTexto</span>
+        <form asp-controller="Postulaciones" asp-action="Eliminar" asp-route-id="@Model.ID" method="post"
+              data-confirmar="@(Model.EsExterna ? "¿La sacamos de tu tablero?" : "¿La sacamos de tu tablero? Quien publicó la búsqueda deja de verte entre sus postulantes.")">
+            <button class="boton boton--texto boton--sm" type="submit">Quitar</button>
+        </form>
     </div>
 </article>

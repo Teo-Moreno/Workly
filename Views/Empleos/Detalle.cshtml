@@ -2,150 +2,196 @@
 @{
     var oferta = Model.Oferta;
     var empresa = Model.Empresa;
-    ViewData["Title"] = $"{oferta.Puesto} en {oferta.Empresa}";
+    ViewData["Title"] = $"{oferta.Titulo} en {oferta.Empresa}";
+    var es = new System.Globalization.CultureInfo("es-AR");
 }
-@* Detalle de oferta (Figma › Media · 06, 07 y 08 · Detalle) *@
+@* Detalle de oferta (Figma › Media · 06, 07 y 08 · Detalle). También es la vista previa de la moderación. *@
 
 <div class="contenedor seccion-app">
-    <div class="barra-volver">
-        <nav class="migas" aria-label="Estás en">
-            <a class="migas__inicio" asp-controller="Panel" asp-action="Index"><icono nombre="home-alt-fill" etiqueta="Inicio" /></a>
-            <icono nombre="chevron-right" />
-            <a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
-            <icono nombre="chevron-right" />
-            <span aria-current="page">@oferta.Puesto</span>
-        </nav>
-        <a class="enlace enlace--principal" asp-controller="Empleos" asp-action="Index" asp-route-id="@oferta.Id"><icono nombre="arrow-left" tamano="18" />Volver a resultados</a>
-    </div>
+    @if (Model.EsRevision)
+    {
+        <div class="barra-revision" role="region" aria-label="Revisión de la búsqueda">
+            <div>
+                <span class="etiqueta etiqueta--advertencia">@oferta.Estado_Publicacion</span>
+                <p class="barra-revision__texto">Así la van a ver las personas si la aceptás.</p>
+            </div>
+            @if (oferta.Estado_Publicacion == "Pendiente")
+            {
+                <div class="fila fila--envolver">
+                    <form asp-controller="Moderacion" asp-action="Aceptar" asp-route-id="@oferta.ID" method="post">
+                        <button class="boton" type="submit"><icono nombre="check" />Aceptar y publicar</button>
+                    </form>
+                    <button class="boton boton--peligro-contorno" type="button" data-modal-abrir="modal-rechazar">Rechazar</button>
+                </div>
+            }
+            <a class="enlace" asp-controller="Moderacion" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
+        </div>
+    }
+    else
+    {
+        <div class="barra-volver">
+            <nav class="migas" aria-label="Estás en">
+                <a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+                <icono nombre="chevron-right" />
+                <span aria-current="page">@oferta.Titulo</span>
+            </nav>
+        </div>
+    }
+
+    @if (Model.EsPropia && oferta.Estado_Publicacion != "Aprobada")
+    {
+        <p class="aviso @(oferta.Estado_Publicacion == "Rechazada" ? "aviso--error" : "aviso--advertencia")">
+            <icono nombre="warning-outline" />
+            @(oferta.Estado_Publicacion == "Pendiente"
+                ? "Esta búsqueda está en revisión: todavía no la ve nadie más que vos."
+                : $"Esta búsqueda no se publicó. Motivo: {oferta.Motivo_Rechazo}")
+        </p>
+    }
 
     <header class="oferta-cabecera">
         <div class="oferta-cabecera__principal">
-            <span class="logo-empresa logo-empresa--lg" aria-hidden="true">@oferta.Iniciales</span>
+            <partial name="_LogoEmpresa" model='(oferta.Logo, oferta.Empresa, "logo-empresa--lg")' />
             <div class="oferta-cabecera__textos">
-                <h1 class="oferta-cabecera__titulo">@oferta.Puesto</h1>
+                <h1 class="oferta-cabecera__titulo">@oferta.Titulo</h1>
                 <p class="oferta-cabecera__meta">
-                    <a class="enlace enlace--principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">@oferta.Empresa</a>
-                    · @oferta.Ubicacion · @oferta.PublicadoTexto
+                    @if (empresa?.TieneCuenta == true)
+                    {
+                        <a class="enlace enlace--principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">@oferta.Empresa</a>
+                    }
+                    else
+                    {
+                        @oferta.Empresa
+                    }
+                    @foreach (var dato in new[] { oferta.UbicacionVisible, oferta.PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)))
+                    {
+                        <text> · @dato</text>
+                    }
                 </p>
                 <div class="lista-tags">
-                    <span class="tag tag--borde tag--lg">@oferta.ModalidadDetalle</span>
-                    <span class="tag tag--borde tag--lg">@oferta.Nivel</span>
-                    <span class="tag tag--borde tag--lg">@oferta.Contratacion</span>
-                    <span class="tag tag--borde tag--lg">@oferta.Jornada</span>
+                    @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="tag tag--borde tag--lg">@oferta.Modalidad</span> }
+                    @if (!string.IsNullOrEmpty(oferta.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@oferta.Tipo_Contrato</span> }
+                    <span class="tag @(oferta.EsExterna ? "" : "tag--principal") tag--lg">@(oferta.EsExterna ? "Publicada en " + oferta.Fuente : "Publicada en Workly")</span>
                 </div>
             </div>
         </div>
 
-        <div class="oferta-cabecera__acciones">
-            <div class="fila">
-                <button class="boton boton--contorno boton--sm" type="button" data-compartir>
-                    <icono nombre="share" />Compartir
-                </button>
-                <button class="boton boton--contorno boton--sm @(oferta.Guardada ? "esta-activo" : "")" type="button" aria-pressed="@(oferta.Guardada ? "true" : "false")" data-guardar>
-                    <icono nombre="@(oferta.Guardada ? "bookmark-fill" : "bookmark")" /><span data-guardar-texto>@(oferta.Guardada ? "Guardada" : "Guardar")</span>
-                </button>
+        @if (!Model.EsRevision)
+        {
+            <div class="oferta-cabecera__acciones">
+                <partial name="_AccionesOferta" model="oferta" />
+                @if (Model.PuedePostular && User.EsPersona() && !Model.TieneCV)
+                {
+                    <p class="texto-chico texto-suave">Para postularte necesitás tu CV. <a class="enlace" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>
+                }
+                @if (oferta.EsExterna)
+                {
+                    <p class="texto-chico texto-suave">Te postulás en el sitio original. Después tocá "Ya me postulé" para seguirla en tu tablero.</p>
+                }
             </div>
-            <button class="boton boton--lg boton--bloque" type="button" data-postular data-puesto="@oferta.Puesto" data-empresa="@oferta.Empresa">Postularme ahora</button>
-        </div>
+        }
     </header>
 
     <div class="oferta-cuerpo">
         <article class="oferta-principal">
-            <div class="cajas-dato cajas-dato--grande">
-                <div class="caja-dato">
-                    <span class="caja-dato__etiqueta">Rango salarial</span>
-                    <strong class="caja-dato__valor">@oferta.Salario</strong>
-                    <span class="caja-dato__detalle">bruto mensual</span>
+            @{
+                var datos = new List<(string Etiqueta, string Valor)>();
+                if (oferta.SalarioVisible != null) datos.Add(("Salario", oferta.SalarioVisible));
+                if (!oferta.EsExterna) datos.Add(("Vacantes", oferta.Cantidad_Puestos.ToString()));
+                if (oferta.Fecha_Cierre.HasValue) datos.Add(("Recibe postulaciones hasta", oferta.Fecha_Cierre.Value.ToString("d 'de' MMMM", es)));
+            }
+            @if (datos.Count > 0)
+            {
+                <div class="cajas-dato cajas-dato--grande">
+                    @foreach (var (etiqueta, valor) in datos)
+                    {
+                        <div class="caja-dato">
+                            <span class="caja-dato__etiqueta">@etiqueta</span>
+                            <strong class="caja-dato__valor">@valor</strong>
+                        </div>
+                    }
                 </div>
-                <div class="caja-dato">
-                    <span class="caja-dato__etiqueta">Experiencia</span>
-                    <strong class="caja-dato__valor">@oferta.Experiencia</strong>
-                    <span class="caja-dato__detalle">@oferta.ExperienciaDetalle</span>
-                </div>
-            </div>
-
-            <partial name="_Compatibilidad" model="oferta" />
+            }
 
             <section class="oferta-seccion">
                 <h2 class="oferta-seccion__titulo">Sobre el puesto</h2>
-                <p>@oferta.SobrePuesto</p>
+                @if (string.IsNullOrWhiteSpace(oferta.Descripcion))
+                {
+                    <p class="texto-suave">@(oferta.EsExterna ? "El sitio original no mandó la descripción. Mirala en la publicación original." : "Sin descripción.")</p>
+                }
+                else
+                {
+                    <p class="texto-con-saltos">@oferta.Descripcion</p>
+                }
             </section>
 
-            <section class="oferta-seccion">
-                <h2 class="oferta-seccion__titulo">Requisitos</h2>
-                <ul class="lista-puntos" role="list">
-                    @foreach (var requisito in oferta.Requisitos)
-                    {
-                        <li>@requisito</li>
-                    }
-                </ul>
-            </section>
-
-            <section class="oferta-seccion">
-                <h2 class="oferta-seccion__titulo">Beneficios</h2>
-                <div class="lista-tags">
-                    @foreach (var beneficio in oferta.Beneficios)
-                    {
-                        <span class="tag tag--borde tag--lg"><icono nombre="star" />@beneficio</span>
-                    }
-                </div>
-            </section>
-
-            <section class="oferta-seccion">
-                <h2 class="oferta-seccion__titulo">Habilidades</h2>
-                <partial name="_HabilidadesOferta" model="oferta" />
-            </section>
-
-            <section class="oferta-seccion">
-                <h2 class="oferta-seccion__titulo">Sobre la empresa</h2>
-                <p>@empresa.Descripcion</p>
-                <a class="enlace" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">Ver perfil de la empresa →</a>
-            </section>
+            @if (!string.IsNullOrEmpty(oferta.Puestos))
+            {
+                <section class="oferta-seccion">
+                    <h2 class="oferta-seccion__titulo">Puesto</h2>
+                    <ul class="lista-tags" role="list">
+                        @foreach (var puesto in oferta.Puestos.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <li class="tag tag--borde">@puesto</li>
+                        }
+                    </ul>
+                </section>
+            }
         </article>
 
         <aside class="oferta-lateral">
-            <section class="tarjeta">
-                <div class="empresa-mini">
-                    <span class="logo-empresa logo-empresa--md" aria-hidden="true">@empresa.Iniciales</span>
-                    <div>
-                        <h2 class="empresa-mini__nombre">@empresa.Nombre</h2>
-                        <p class="empresa-mini__industria">@empresa.Industria · @empresa.Ubicacion</p>
+            @if (empresa != null && (empresa.TieneCuenta || !string.IsNullOrWhiteSpace(empresa.Descripcion) || empresa.UbicacionCompleta != null || empresa.EnlaceSitio != null))
+            {
+                <section class="tarjeta">
+                    <div class="fila">
+                        <partial name="_LogoEmpresa" model='(empresa.Logo, empresa.Nombre, "logo-empresa--md")' />
+                        <div>
+                            <h2 class="tarjeta__titulo">@empresa.Nombre</h2>
+                            @if (empresa.Rubro != null) { <p class="texto-chico texto-suave">@empresa.Rubro</p> }
+                        </div>
                     </div>
-                </div>
-                <dl class="lista-clave-valor">
-                    <div><dt>Empleados</dt><dd>@empresa.Empleados</dd></div>
-                    <div><dt>Búsquedas activas</dt><dd>@empresa.BusquedasActivas</dd></div>
-                    <div><dt>Valoración</dt><dd><icono nombre="star-fill" tamano="16" class="texto-acento" />@empresa.Valoracion / 5</dd></div>
-                    <div><dt>Responde en</dt><dd>@empresa.RespondeEn</dd></div>
-                </dl>
-                <a class="boton boton--contorno boton--bloque" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.Id">Ver perfil de la empresa</a>
-            </section>
-
-            <section class="tarjeta">
-                <h2 class="tarjeta__titulo">Ofertas similares</h2>
-                <ul class="ofertas-similares" role="list">
-                    @foreach (var similar in Model.Similares)
+                    @if (!string.IsNullOrWhiteSpace(empresa.Descripcion))
                     {
-                        <li>
-                            <a class="oferta-similar" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@similar.Id">
-                                <span class="logo-empresa" aria-hidden="true">@similar.Iniciales</span>
-                                <span class="oferta-similar__textos">
-                                    <strong class="oferta-similar__puesto">@similar.Puesto</strong>
-                                    <span class="oferta-similar__meta">@similar.Empresa · @similar.Ubicacion</span>
-                                    <span class="oferta-similar__salario">@similar.Salario</span>
-                                </span>
-                                <span class="match @(similar.Match < 80 ? "match--media" : "")">@similar.Match%</span>
-                            </a>
-                        </li>
+                        <p class="perfil-texto">@empresa.Descripcion</p>
                     }
-                </ul>
-            </section>
-
-            <section class="tarjeta tarjeta--oscura tarjeta-cta">
-                <h2 class="tarjeta__titulo">¿Te copó esta oferta?</h2>
-                <p>Postulate ahora y seguí el proceso desde tu tablero de postulaciones.</p>
-                <button class="boton boton--acento boton--bloque" type="button" data-postular data-puesto="@oferta.Puesto" data-empresa="@oferta.Empresa">Postularme ahora</button>
-            </section>
+                    <dl class="lista-clave-valor">
+                        @if (empresa.UbicacionCompleta != null) { <div><dt>Ubicación</dt><dd>@empresa.UbicacionCompleta</dd></div> }
+                        @if (empresa.EnlaceSitio != null) { <div><dt>Sitio web</dt><dd><a class="enlace" href="@empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@empresa.Sitio_Web</a></dd></div> }
+                    </dl>
+                    @if (empresa.TieneCuenta && !Model.EsRevision)
+                    {
+                        <a class="boton boton--contorno boton--bloque" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">Ver la empresa</a>
+                    }
+                </section>
+            }
+            else if (oferta.EsExterna)
+            {
+                <section class="tarjeta">
+                    <h2 class="tarjeta__titulo">De dónde sale esta oferta</h2>
+                    <p class="texto-suave">La encontramos en @oferta.Fuente. La postulación se hace en ese sitio.</p>
+                </section>
+            }
         </aside>
     </div>
 </div>
+
+@if (Model.EsRevision && oferta.Estado_Publicacion == "Pendiente")
+{
+    <dialog class="modal" id="modal-rechazar" aria-labelledby="modal-rechazar-titulo">
+        <form class="modal__contenido formulario" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@oferta.ID" method="post" novalidate data-formulario-real>
+            <div class="modal__cabecera">
+                <h2 class="modal__titulo" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
+                <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+            </div>
+            <p class="modal__descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones.</p>
+            <div class="campo @Html.ClaseError("motivo")">
+                <label class="campo__etiqueta" for="motivo-rechazo">Motivo</label>
+                <textarea class="campo__control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("motivo", "Escribí el motivo (entre 10 y 500 caracteres)")</span>
+            </div>
+            <div class="modal__acciones">
+                <button class="boton boton--gris" type="button" data-modal-cerrar>Cancelar</button>
+                <button class="boton boton--peligro-lleno" type="submit">Rechazar</button>
+            </div>
+        </form>
+    </dialog>
+}

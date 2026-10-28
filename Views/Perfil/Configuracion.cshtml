@@ -3,432 +3,332 @@
     ViewData["Title"] = "Configuración";
     var usuario = Model.Usuario;
     var perfil = Model.Perfil;
-    var idPais = perfil.IDPais ?? Model.Paises.FirstOrDefault()?.ID;
+    var empresa = Model.Empresa;
+    var esEmpresa = usuario.EsEmpresa;
+    var pestanas = esEmpresa ? new[] { "cuenta", "seguridad" } : new[] { "cuenta", "busqueda", "seguridad" };
+    var pedida = ViewBag.Pestana as string ?? Context.Request.Query["pestana"].ToString();
+    var activa = pestanas.Contains(pedida) ? pedida : "cuenta";
+
+    // Si se volvió con errores, se muestran los valores que la persona escribió
+    var fCuenta = ViewBag.Formulario as CuentaFormulario;
+    var fEmpresa = ViewBag.Formulario as EmpresaFormulario;
+    var fBusqueda = ViewBag.Formulario as BusquedaFormulario;
+
+    var idPais = fCuenta?.IDPais ?? fEmpresa?.IDPais ?? (esEmpresa ? empresa?.IDPais : perfil.IDPais) ?? Model.Paises.FirstOrDefault()?.ID;
     var codigoPais = Model.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
-    var habilidades = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js", "Testing (Jest)", "Vue.js", "Angular" };
-    var marcadas = new[] { "React", "TypeScript", "JavaScript (ES6+)", "HTML5", "CSS / BEM", "Sass", "Git & GitHub", "Figma", "Storybook", "APIs REST", "Node.js" };
+    var codigoGuardado = Model.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? empresa?.IDPais : perfil.IDPais))?.Codigo_Telefono;
+    var vinculados = Model.ProveedoresVinculados;
 }
-@* Configuración y preferencias (Miro › Mapa de sitio › Perfil). Usa los campos,
-   desplegables, casillas, botones de opción e interruptores del UI Kit. *@
+@* Configuración: datos de la cuenta, qué busca la persona y seguridad. Cada pestaña guarda en la base. *@
 
 <div class="contenedor seccion-app">
     <header class="encabezado-pagina">
         <nav class="migas migas--chica" aria-label="Estás en">
-            <a asp-controller="Perfil" asp-action="Index">Mi perfil</a>
+            @if (esEmpresa && empresa != null)
+            {
+                <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">@empresa.Nombre</a>
+            }
+            else
+            {
+                <a asp-controller="Perfil" asp-action="Index">Mi perfil</a>
+            }
             <icono nombre="chevron-right" />
             <span aria-current="page">Configuración</span>
         </nav>
         <h1 class="encabezado-pagina__titulo">Configuración</h1>
-        <p class="encabezado-pagina__bajada">Actualizá tus datos, tus preferencias de búsqueda y cómo querés que te avisemos.</p>
+        <p class="encabezado-pagina__bajada">@(esEmpresa ? "Actualizá los datos de la empresa y de tu cuenta." : "Actualizá tus datos, lo que estás buscando y tu contraseña.")</p>
     </header>
 
     <div class="configuracion" data-pestanas data-pestanas-hash>
         <nav class="configuracion__menu" aria-label="Secciones de configuración">
-            <a class="configuracion__opcion esta-activa" href="#cuenta" data-pestana="cuenta" aria-current="true"><icono nombre="user-square" />Cuenta</a>
-            <a class="configuracion__opcion" href="#preferencias" data-pestana="preferencias"><icono nombre="slider-03" />Preferencias laborales</a>
-            <a class="configuracion__opcion" href="#notificaciones" data-pestana="notificaciones"><icono nombre="notification-outline" />Notificaciones</a>
-            <a class="configuracion__opcion" href="#privacidad" data-pestana="privacidad"><icono nombre="lock" />Privacidad y seguridad</a>
+            <a class="configuracion__opcion @(activa == "cuenta" ? "esta-activa" : "")" href="#cuenta" data-pestana="cuenta" aria-current="@(activa == "cuenta" ? "true" : null)"><icono nombre="@(esEmpresa ? "building" : "user-square")" />@(esEmpresa ? "Empresa" : "Cuenta")</a>
+            @if (!esEmpresa)
+            {
+                <a class="configuracion__opcion @(activa == "busqueda" ? "esta-activa" : "")" href="#busqueda" data-pestana="busqueda" aria-current="@(activa == "busqueda" ? "true" : null)"><icono nombre="briefcase" />Qué busco</a>
+            }
+            <a class="configuracion__opcion @(activa == "seguridad" ? "esta-activa" : "")" href="#seguridad" data-pestana="seguridad" aria-current="@(activa == "seguridad" ? "true" : null)"><icono nombre="lock" />Seguridad</a>
             <a class="configuracion__opcion" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a>
         </nav>
 
         @* ---------------- Cuenta ---------------- *@
-        <section class="configuracion__panel" data-panel="cuenta" aria-labelledby="titulo-cuenta">
-            <form class="formulario" data-demo-form="Editar tus datos llega en la próxima etapa: por ahora se muestran tal como están en tu cuenta." data-demo-tipo="advertencia" novalidate>
-                <div class="configuracion__cabecera">
-                    <h2 class="formulario__subtitulo" id="titulo-cuenta">Datos personales</h2>
-                    <p class="texto-suave">Estos datos los ven las empresas cuando te postulás.</p>
-                </div>
+        <section class="configuracion__panel" data-panel="cuenta" aria-labelledby="titulo-cuenta" hidden="@(activa != "cuenta")">
+            @if (!esEmpresa)
+            {
+                <form class="formulario" asp-controller="Perfil" asp-action="GuardarCuenta" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+                    <div class="configuracion__cabecera">
+                        <h2 class="formulario__subtitulo" id="titulo-cuenta">Datos personales</h2>
+                        <p class="texto-suave">Estos datos los ven quienes publican una búsqueda cuando te postulás.</p>
+                    </div>
 
-                <div class="configuracion__foto">
-                    <span class="avatar avatar--xl" aria-hidden="true">
-                        @if (!string.IsNullOrEmpty(perfil.Foto))
-                        {
-                            <img src="@perfil.Foto" alt="" />
-                        }
-                        else
-                        {
-                            @UsuarioActual.Iniciales(usuario.Nombre, usuario.Apellido)
-                        }
-                    </span>
-                    <div class="pila" style="--pila-espacio: 8px">
-                        <strong>Foto de perfil</strong>
-                        <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB. Se ve mejor si es cuadrada.</span>
-                        <div class="fila">
-                            <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />Subir foto<input type="file" accept=".jpg,.jpeg,.png,.webp" /></label>
+                    <div class="campo @Html.ClaseError("Foto")">
+                        <div class="configuracion__foto">
+                            <span class="avatar avatar--xl" data-vista-foto aria-hidden="true">
+                                @if (!string.IsNullOrEmpty(perfil.Foto))
+                                {
+                                    <img src="@perfil.Foto" alt="" />
+                                }
+                                else
+                                {
+                                    @UsuarioActual.Iniciales(usuario.Nombre, usuario.Apellido)
+                                }
+                            </span>
+                            <div class="pila" style="--pila-espacio: 8px">
+                                <strong>Foto de perfil</strong>
+                                <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB. Se ve mejor si es cuadrada.</span>
+                                <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />@(string.IsNullOrEmpty(perfil.Foto) ? "Elegir foto" : "Cambiar foto")
+                                    <input type="file" name="Foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                                           data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
+                                </label>
+                            </div>
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Foto", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
+                    </div>
+
+                    <div class="formulario__fila">
+                        <div class="campo @Html.ClaseError("Nombre")">
+                            <label class="campo__etiqueta" for="cfg-nombre">Nombre</label>
+                            <input class="campo__control" id="cfg-nombre" name="Nombre" value="@(fCuenta?.Nombre ?? usuario.Nombre)" maxlength="50" required autocomplete="given-name" />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
+                        </div>
+                        <div class="campo @Html.ClaseError("Apellido")">
+                            <label class="campo__etiqueta" for="cfg-apellido">Apellido</label>
+                            <input class="campo__control" id="cfg-apellido" name="Apellido" value="@(fCuenta?.Apellido ?? usuario.Apellido)" maxlength="50" required autocomplete="family-name" />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
                         </div>
                     </div>
-                </div>
 
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-nombre">Nombre</label>
-                        <input class="campo__control" id="cfg-nombre" type="text" value="@usuario.Nombre" maxlength="50" required />
-                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu nombre</span>
-                    </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-apellido">Apellido</label>
-                        <input class="campo__control" id="cfg-apellido" type="text" value="@usuario.Apellido" maxlength="50" required />
-                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Completá tu apellido</span>
-                    </div>
-                </div>
-
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-email">Email</label>
-                        <div class="control-con-icono">
-                            <icono nombre="mail" />
-                            <input class="campo__control" id="cfg-email" type="email" value="@usuario.Email" maxlength="100" required />
+                    <div class="formulario__fila">
+                        <div class="campo @Html.ClaseError("Email")">
+                            <label class="campo__etiqueta" for="cfg-email">Email</label>
+                            <div class="control-con-icono">
+                                <icono nombre="mail" />
+                                <input class="campo__control" id="cfg-email" name="Email" type="email" value="@(fCuenta?.Email ?? usuario.Email)" maxlength="100" required autocomplete="email" />
+                            </div>
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
                         </div>
-                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá un email válido</span>
+                        <partial name="_CampoTelefono" model='new CampoTelefono { Id = "cfg-telefono", Valor = fCuenta?.Telefono ?? Telefonos.ParteLocal(perfil.Telefono, perfil.Codigo_Telefono), Prefijo = codigoPais }' />
                     </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-telefono">Teléfono <span class="campo__opcional">(opcional)</span></label>
-                        <div class="control-con-prefijo">
-                            <span class="control-con-prefijo__prefijo" data-prefijo-telefono>@codigoPais</span>
-                            <input class="campo__control" id="cfg-telefono" type="tel" inputmode="numeric" placeholder="11 5555-1234" value="@Telefonos.ParteLocal(perfil.Telefono, perfil.Codigo_Telefono)"
-                                   maxlength="12" pattern="[0-9]{2,4} [0-9]{2,4}-[0-9]{4}" data-telefono data-codigos-area="@string.Join(",", Telefonos.CodigosDeArea3)" />
-                        </div>
-                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Ingresá el código de área y el número: 10 números</span>
-                    </div>
-                </div>
 
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-pais">País</label>
-                        <select class="campo__control" id="cfg-pais" data-selector-pais>
-                            @foreach (var pais in Model.Paises)
-                            {
-                                <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == idPais)">@pais.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-provincia">Provincia</label>
-                        <select class="campo__control" id="cfg-provincia" data-selector-provincia>
-                            <option value="">Elegí tu provincia</option>
-                            @foreach (var provincia in Model.Provincias)
-                            {
-                                <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == perfil.IDProvincia)">@provincia.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                </div>
+                    <partial name="_CampoUbicacion" model='new CampoUbicacion { Prefijo = "cfg-", Paises = Model.Paises, Provincias = Model.Provincias, IDPais = idPais, IDProvincia = fCuenta?.IDProvincia ?? perfil.IDProvincia, EtiquetaProvincia = "Provincia donde vivís" }' />
 
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="cfg-web">Sitio web o portfolio</label>
+                    <div class="campo @Html.ClaseError("SitioWeb")">
+                        <label class="campo__etiqueta" for="cfg-web">Sitio web, portfolio o LinkedIn <span class="campo__opcional">(opcional)</span></label>
                         <div class="control-con-icono">
                             <icono nombre="globe" />
-                            <input class="campo__control" id="cfg-web" type="text" value="@Model.CV?.Sitio_Web" placeholder="tusitio.com" maxlength="200" />
+                            <input class="campo__control" id="cfg-web" name="SitioWeb" value="@(fCuenta?.SitioWeb ?? Model.CV?.Sitio_Web)" inputmode="url" maxlength="200" placeholder="linkedin.com/in/tu-nombre" />
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("SitioWeb", "Usá hasta 200 caracteres")</span>
+                    </div>
+
+                    <div class="campo @Html.ClaseError("ArchivoCV")">
+                        <span class="campo__etiqueta">CV</span>
+                        @if (Model.TieneCV)
+                        {
+                            <p class="texto-chico">Tu CV actual: <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV">@Model.CV!.NombreOriginal</a>. Si elegís otro, lo reemplaza.</p>
+                        }
+                        <label class="zona-archivo" data-zona-archivo>
+                            <span class="caja-icono"><icono nombre="upload" /></span>
+                            <strong class="zona-archivo__nombre" data-zona-archivo-nombre>@(Model.TieneCV ? "Elegí otro CV" : "Arrastrá tu CV acá o hacé clic para subirlo")</strong>
+                            <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
+                            <input type="file" name="ArchivoCV" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                   data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
+                        </label>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("ArchivoCV", "Subí un archivo PDF, DOC o DOCX de hasta 5 MB")</span>
+                    </div>
+
+                    <div class="formulario__acciones">
+                        <button class="boton" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+            }
+            else if (empresa != null)
+            {
+                <form class="formulario" asp-controller="Perfil" asp-action="GuardarEmpresa" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+                    <div class="configuracion__cabecera">
+                        <h2 class="formulario__subtitulo" id="titulo-cuenta">Datos de la empresa</h2>
+                        <p class="texto-suave">Se muestran en la página de la empresa y en sus búsquedas. El CUIT (@VerificacionEmpresa.Formatear(empresa.CUIT ?? "")) y la razón social (@empresa.Razon_Social) no se pueden cambiar.</p>
+                    </div>
+
+                    <div class="campo @Html.ClaseError("Logo")">
+                        <div class="configuracion__foto">
+                            <span class="logo-empresa logo-empresa--lg" data-vista-foto aria-hidden="true">
+                                @if (!string.IsNullOrEmpty(empresa.Logo))
+                                {
+                                    <img src="@empresa.Logo" alt="" />
+                                }
+                                else
+                                {
+                                    @empresa.Iniciales
+                                }
+                            </span>
+                            <div class="pila" style="--pila-espacio: 8px">
+                                <strong>Logo</strong>
+                                <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB.</span>
+                                <label class="boton boton--contorno boton--sm boton--archivo"><icono nombre="upload" />@(string.IsNullOrEmpty(empresa.Logo) ? "Elegir logo" : "Cambiar logo")
+                                    <input type="file" name="Logo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                                           data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
+                                </label>
+                            </div>
+                        </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Logo", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
+                    </div>
+
+                    <div class="formulario__fila">
+                        <div class="campo @Html.ClaseError("NombreEmpresa")">
+                            <label class="campo__etiqueta" for="cfg-empresa">Nombre de la empresa</label>
+                            <input class="campo__control" id="cfg-empresa" name="NombreEmpresa" value="@(fEmpresa?.NombreEmpresa ?? empresa.Nombre)" maxlength="100" required />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("NombreEmpresa", "Completá el nombre de la empresa")</span>
+                        </div>
+                        <div class="campo @Html.ClaseError("Rubro")">
+                            <label class="campo__etiqueta" for="cfg-rubro">Rubro</label>
+                            <select class="campo__control" id="cfg-rubro" name="Rubro" required>
+                                <option value="">Elegí el rubro</option>
+                                @foreach (var rubro in Catalogos.Rubros)
+                                {
+                                    <option selected="@((fEmpresa?.Rubro ?? empresa.Rubro) == rubro)">@rubro</option>
+                                }
+                            </select>
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Rubro", "Elegí el rubro")</span>
                         </div>
                     </div>
-                </div>
 
-                <div class="campo">
-                    <span class="campo__etiqueta">CV</span>
-                    <label class="zona-archivo zona-archivo--fila @(string.IsNullOrEmpty(Model.CV?.Nombre_Archivo) ? "" : "tiene-archivo")" data-zona-archivo>
-                        <span class="caja-icono caja-icono--sm"><icono nombre="upload" /></span>
-                        <span>
-                            <span class="zona-archivo__nombre" data-zona-archivo-nombre>@(Model.CV?.NombreOriginal ?? "Todavía no subiste tu CV")</span>
-                            <span class="texto-chico texto-suave"> · Arrastrá un archivo o hacé clic para elegirlo (PDF, DOC o DOCX, hasta 5 MB)</span>
-                        </span>
-                        <input type="file" accept=".pdf,.doc,.docx" data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
-                    </label>
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Subí un archivo PDF, DOC o DOCX</span>
-                    @if (!string.IsNullOrEmpty(Model.CV?.Nombre_Archivo))
+                    <div class="campo @Html.ClaseError("SitioWeb")">
+                        <label class="campo__etiqueta" for="cfg-web">Sitio web</label>
+                        <div class="control-con-icono">
+                            <icono nombre="globe" />
+                            <input class="campo__control" id="cfg-web" name="SitioWeb" value="@(fEmpresa?.SitioWeb ?? empresa.Sitio_Web)" inputmode="url" maxlength="200" required />
+                        </div>
+                        <span class="campo__ayuda">Tiene que ser del dominio de tu email (@VerificacionEmpresa.DominioDelEmail(usuario.Email)).</span>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("SitioWeb", "Ingresá el sitio web de la empresa")</span>
+                    </div>
+
+                    <partial name="_CampoUbicacion" model='new CampoUbicacion { Prefijo = "cfg-", Paises = Model.Paises, Provincias = Model.Provincias, IDPais = idPais, IDProvincia = fEmpresa?.IDProvincia ?? empresa.IDProvincia, EtiquetaProvincia = "Provincia de la sede" }' />
+
+                    <div class="formulario__fila">
+                        <div class="campo @Html.ClaseError("Ubicacion")">
+                            <label class="campo__etiqueta" for="cfg-ubicacion">Localidad o dirección <span class="campo__opcional">(opcional)</span></label>
+                            <input class="campo__control" id="cfg-ubicacion" name="Ubicacion" value="@(fEmpresa?.Ubicacion ?? empresa.Ubicacion)" maxlength="100" placeholder="Ej.: Palermo, CABA" />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Ubicacion", "Usá hasta 100 caracteres")</span>
+                        </div>
+                        <partial name="_CampoTelefono" model='new CampoTelefono { Id = "cfg-telefono", Valor = fEmpresa?.Telefono ?? Telefonos.ParteLocal(empresa.Telefono, codigoGuardado), Prefijo = codigoPais }' />
+                    </div>
+
+                    <div class="campo @Html.ClaseError("Descripcion")">
+                        <label class="campo__etiqueta" for="cfg-descripcion">¿Qué hace la empresa?</label>
+                        <textarea class="campo__control" id="cfg-descripcion" name="Descripcion" rows="4" maxlength="500" required>@(fEmpresa?.Descripcion ?? empresa.Descripcion)</textarea>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
+                    </div>
+
+                    <h3 class="formulario__subtitulo">Quién maneja la cuenta</h3>
+                    <div class="formulario__fila">
+                        <div class="campo @Html.ClaseError("Nombre")">
+                            <label class="campo__etiqueta" for="cfg-nombre">Tu nombre</label>
+                            <input class="campo__control" id="cfg-nombre" name="Nombre" value="@(fEmpresa?.Nombre ?? usuario.Nombre)" maxlength="50" required />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
+                        </div>
+                        <div class="campo @Html.ClaseError("Apellido")">
+                            <label class="campo__etiqueta" for="cfg-apellido">Tu apellido</label>
+                            <input class="campo__control" id="cfg-apellido" name="Apellido" value="@(fEmpresa?.Apellido ?? usuario.Apellido)" maxlength="50" required />
+                            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
+                        </div>
+                    </div>
+                    <p class="texto-chico texto-suave">Email de la cuenta: @usuario.Email (es el que verifica la empresa, no se puede cambiar).</p>
+
+                    <div class="formulario__acciones">
+                        <button class="boton" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+            }
+        </section>
+
+        @* ---------------- Qué busco ---------------- *@
+        @if (!esEmpresa)
+        {
+            <section class="configuracion__panel" data-panel="busqueda" aria-labelledby="titulo-busqueda" hidden="@(activa != "busqueda")">
+                <form class="formulario" asp-controller="Perfil" asp-action="GuardarBusqueda" method="post" novalidate data-formulario-real>
+                    <div class="configuracion__cabecera">
+                        <h2 class="formulario__subtitulo" id="titulo-busqueda">Qué busco</h2>
+                        <p class="texto-suave">Con esto armamos las ofertas de tu inicio. Completá solo lo que tengas claro.</p>
+                    </div>
+                    <partial name="_CamposBusqueda" model="CamposBusqueda.Desde(Model, fBusqueda)" />
+                    <div class="formulario__acciones">
+                        <button class="boton" type="submit">Guardar</button>
+                    </div>
+                </form>
+            </section>
+        }
+
+        @* ---------------- Seguridad ---------------- *@
+        <section class="configuracion__panel" data-panel="seguridad" aria-labelledby="titulo-seguridad" hidden="@(activa != "seguridad")">
+            <form class="formulario" asp-controller="Perfil" asp-action="CambiarClave" method="post" novalidate data-formulario-real>
+                <div class="configuracion__cabecera">
+                    <h2 class="formulario__subtitulo" id="titulo-seguridad">@(usuario.TieneContrasena ? "Cambiar contraseña" : "Crear una contraseña")</h2>
+                    @if (!usuario.TieneContrasena)
                     {
-                        <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV"><icono nombre="download" tamano="16" />Descargar mi CV actual</a>
+                        <p class="texto-suave">Entrás con @string.Join(" y ", vinculados). Si creás una contraseña, también vas a poder entrar con tu email.</p>
+                    }
+                    else if (vinculados.Count > 0)
+                    {
+                        <p class="texto-suave">También podés entrar con @string.Join(" y ", vinculados).</p>
                     }
                 </div>
 
-                <div class="formulario__acciones">
-                    <button class="boton boton--contorno" type="reset">Descartar</button>
-                    <button class="boton" type="submit">Guardar cambios</button>
-                </div>
-            </form>
-        </section>
-
-        @* ---------------- Preferencias laborales ---------------- *@
-        <section class="configuracion__panel" data-panel="preferencias" aria-labelledby="titulo-preferencias" hidden>
-            <form class="formulario" data-demo-form="Actualizamos tus preferencias. Vas a ver nuevas coincidencias." novalidate>
-                <div class="configuracion__cabecera configuracion__cabecera--fila">
-                    <div>
-                        <h2 class="formulario__subtitulo" id="titulo-preferencias">Preferencias laborales</h2>
-                        <p class="texto-suave">Las usamos para ordenar las ofertas según lo que buscás.</p>
-                    </div>
-                    <label class="interruptor">
-                        <input type="checkbox" checked />
-                        <span class="interruptor__pista"></span>
-                        Buscando activamente
-                    </label>
-                </div>
-
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="pref-puesto">Puesto buscado</label>
-                        <div class="control-con-icono">
-                            <icono nombre="briefcase" />
-                            <input class="campo__control" id="pref-puesto" type="text" value="Frontend Developer" required />
-                        </div>
-                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Contanos qué puesto buscás</span>
-                    </div>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="pref-disponibilidad">Disponibilidad</label>
-                        <select class="campo__control" id="pref-disponibilidad">
-                            <option selected>Inmediata</option>
-                            <option>En 15 días</option>
-                            <option>En 30 días</option>
-                            <option>A convenir</option>
-                        </select>
-                    </div>
-                </div>
-
-                <fieldset class="formulario__grupo">
-                    <legend class="campo__etiqueta">Nivel</legend>
-                    <div class="opciones-fila">
-                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Sin experiencia</label>
-                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Junior</label>
-                        <label class="casilla"><input type="checkbox" checked /><span class="casilla__caja"><icono nombre="check" /></span>Semi Senior</label>
-                        <label class="casilla"><input type="checkbox" /><span class="casilla__caja"><icono nombre="check" /></span>Senior</label>
-                    </div>
-                </fieldset>
-
-                <fieldset class="formulario__grupo">
-                    <legend class="campo__etiqueta">Modalidad</legend>
-                    <div class="opciones-tarjeta">
-                        <label class="opcion-tarjeta">
-                            <input type="checkbox" checked />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="home-alt-outline" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Remota</span><span class="opcion-tarjeta__texto">Desde tu casa o donde quieras</span></span>
-                        </label>
-                        <label class="opcion-tarjeta">
-                            <input type="checkbox" checked />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="calendar" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Híbrida</span><span class="opcion-tarjeta__texto">Algunos días en la oficina</span></span>
-                        </label>
-                        <label class="opcion-tarjeta">
-                            <input type="checkbox" />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="building" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Presencial</span><span class="opcion-tarjeta__texto">Todos los días en la oficina</span></span>
-                        </label>
-                    </div>
-                </fieldset>
-
-                <div class="formulario__fila">
-                    <fieldset class="formulario__grupo">
-                        <legend class="campo__etiqueta">Jornada</legend>
-                        <div class="opciones-fila">
-                            <label class="opcion"><input type="radio" name="jornada" checked /><span class="opcion__circulo"></span>Full-time</label>
-                            <label class="opcion"><input type="radio" name="jornada" /><span class="opcion__circulo"></span>Part-time</label>
-                            <label class="opcion"><input type="radio" name="jornada" disabled /><span class="opcion__circulo"></span>Por proyecto</label>
-                        </div>
-                    </fieldset>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="pref-contratacion">Contratación</label>
-                        <select class="campo__control" id="pref-contratacion">
-                            <option selected>Relación de dependencia</option>
-                            <option>Contractor</option>
-                            <option>Pasantía</option>
-                            <option>Cualquiera</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="formulario__fila">
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="pref-ubicacion">¿Dónde querés trabajar?</label>
-                        <select class="campo__control" id="pref-ubicacion">
-                            <option value="">Todo el país</option>
-                            @foreach (var provincia in Model.Provincias.Where(p => p.IDPais == idPais))
-                            {
-                                <option value="@provincia.ID" selected="@(provincia.ID == perfil.IDProvincia)">@provincia.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="campo">
-                        <span class="campo__etiqueta">Expectativa salarial (bruta mensual)</span>
-                        <div class="rango-campos">
-                            <label class="solo-lectores" for="pref-salario-min">Mínimo</label>
-                            <input class="campo__control" id="pref-salario-min" type="text" inputmode="numeric" value="$1.400.000" />
-                            <span aria-hidden="true">–</span>
-                            <label class="solo-lectores" for="pref-salario-max">Máximo</label>
-                            <input class="campo__control" id="pref-salario-max" type="text" inputmode="numeric" value="$1.800.000" />
-                        </div>
-                    </div>
-                </div>
-
-                <fieldset class="formulario__grupo">
-                    <legend class="campo__etiqueta">Habilidades</legend>
-                    <div class="lista-tags lista-tags--holgada">
-                        @foreach (var habilidad in habilidades)
-                        {
-                            <label class="chip-seleccion">
-                                <input type="checkbox" checked="@marcadas.Contains(habilidad)" />
-                                <span>@habilidad</span>
-                            </label>
-                        }
-                    </div>
-                    <div class="campo-agregar">
-                        <label class="solo-lectores" for="pref-nueva-habilidad">Agregar habilidad</label>
-                        <input class="campo__control" id="pref-nueva-habilidad" type="text" placeholder="Agregá otra habilidad" />
-                        <button class="boton boton--icono" type="button" data-confirmar-accion="Sumamos la habilidad a tu perfil."><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
-                    </div>
-                </fieldset>
-
-                <div class="formulario__acciones">
-                    <button class="boton boton--contorno" type="reset">Descartar</button>
-                    <button class="boton" type="submit">Guardar preferencias</button>
-                </div>
-            </form>
-        </section>
-
-        @* ---------------- Notificaciones ---------------- *@
-        <section class="configuracion__panel" data-panel="notificaciones" aria-labelledby="titulo-notificaciones" hidden>
-            <form class="formulario" data-demo-form="Guardamos tus preferencias de notificaciones." novalidate>
-                <div class="configuracion__cabecera">
-                    <h2 class="formulario__subtitulo" id="titulo-notificaciones">Notificaciones</h2>
-                    <p class="texto-suave">Elegí qué avisos querés recibir en Workly y por mail.</p>
-                </div>
-
-                <ul class="lista-ajustes" role="list">
-                    <li class="ajuste">
-                        <div><strong>Nuevas coincidencias</strong><span>Ofertas que encajan con tu perfil.</span></div>
-                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Nuevas coincidencias</span></label>
-                    </li>
-                    <li class="ajuste">
-                        <div><strong>Cambios en mis postulaciones</strong><span>Cuando una empresa ve tu CV o te cambia de etapa.</span></div>
-                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Cambios en mis postulaciones</span></label>
-                    </li>
-                    <li class="ajuste">
-                        <div><strong>Mensajes de empresas</strong><span>Consultas y novedades de los procesos.</span></div>
-                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Mensajes de empresas</span></label>
-                    </li>
-                    <li class="ajuste">
-                        <div><strong>Recordatorios de entrevistas</strong><span>Te avisamos 1 hora antes.</span></div>
-                        <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Recordatorios de entrevistas</span></label>
-                    </li>
-                    <li class="ajuste">
-                        <div><strong>Novedades de Workly</strong><span>Consejos para tu búsqueda y nuevas funciones.</span></div>
-                        <label class="interruptor"><input type="checkbox" /><span class="interruptor__pista"></span><span class="solo-lectores">Novedades de Workly</span></label>
-                    </li>
-                    <li class="ajuste">
-                        <div><strong>Notificaciones por SMS</strong><span>Disponible próximamente.</span></div>
-                        <label class="interruptor"><input type="checkbox" disabled /><span class="interruptor__pista"></span><span class="solo-lectores">Notificaciones por SMS</span></label>
-                    </li>
-                </ul>
-
-                <div class="formulario__fila">
-                    <fieldset class="formulario__grupo">
-                        <legend class="campo__etiqueta">Resumen por mail</legend>
-                        <div class="opciones-columna">
-                            <label class="opcion"><input type="radio" name="resumen" /><span class="opcion__circulo"></span>Diario</label>
-                            <label class="opcion"><input type="radio" name="resumen" checked /><span class="opcion__circulo"></span>Semanal</label>
-                            <label class="opcion"><input type="radio" name="resumen" /><span class="opcion__circulo"></span>Nunca</label>
-                        </div>
-                    </fieldset>
-                    <div class="campo">
-                        <label class="campo__etiqueta" for="notif-horario">Horario para recibir alertas</label>
-                        <input class="campo__control" id="notif-horario" type="time" value="09:00" />
-                        <span class="campo__ayuda">Fuera de ese horario agrupamos los avisos.</span>
-                    </div>
-                </div>
-
-                <div class="formulario__acciones">
-                    <button class="boton" type="submit">Guardar notificaciones</button>
-                </div>
-            </form>
-        </section>
-
-        @* ---------------- Privacidad y seguridad ---------------- *@
-        <section class="configuracion__panel" data-panel="privacidad" aria-labelledby="titulo-privacidad" hidden>
-            <form class="formulario" data-demo-form="Actualizamos tu privacidad y seguridad." novalidate>
-                <div class="configuracion__cabecera">
-                    <h2 class="formulario__subtitulo" id="titulo-privacidad">Privacidad y seguridad</h2>
-                    <p class="texto-suave">Decidí quién puede ver tu perfil y cuidá el acceso a tu cuenta.</p>
-                </div>
-
-                <fieldset class="formulario__grupo">
-                    <legend class="campo__etiqueta">Visibilidad del perfil</legend>
-                    <div class="opciones-tarjeta opciones-tarjeta--columna">
-                        <label class="opcion-tarjeta">
-                            <input type="radio" name="visibilidad" checked />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="eye" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Visible para empresas</span><span class="opcion-tarjeta__texto">Las empresas pueden encontrarte y contactarte.</span></span>
-                        </label>
-                        <label class="opcion-tarjeta">
-                            <input type="radio" name="visibilidad" />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="send" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Solo donde me postulo</span><span class="opcion-tarjeta__texto">Tu perfil lo ven solo las empresas a las que te postulás.</span></span>
-                        </label>
-                        <label class="opcion-tarjeta">
-                            <input type="radio" name="visibilidad" />
-                            <span class="caja-icono caja-icono--sm"><icono nombre="eye-off" /></span>
-                            <span><span class="opcion-tarjeta__titulo">Oculto</span><span class="opcion-tarjeta__texto">Pausá tu búsqueda sin perder tus datos.</span></span>
-                        </label>
-                    </div>
-                </fieldset>
-
-                <div class="ajuste">
-                    <div><strong>Ocultar mi perfil a mi empleador actual</strong><span>Accenture Argentina no va a poder ver que estás buscando.</span></div>
-                    <label class="interruptor"><input type="checkbox" checked /><span class="interruptor__pista"></span><span class="solo-lectores">Ocultar mi perfil a mi empleador actual</span></label>
-                </div>
-
-                <div class="formulario__seccion">
-                    <h3 class="formulario__subtitulo">Cambiar contraseña</h3>
-                    <div class="campo">
+                @if (usuario.TieneContrasena)
+                {
+                    <div class="campo @Html.ClaseError("Actual")">
                         <label class="campo__etiqueta" for="clave-actual">Contraseña actual</label>
                         <div class="control-con-icono">
                             <icono nombre="lock" />
-                            <input class="campo__control" id="clave-actual" type="password" placeholder="••••••••" />
+                            <input class="campo__control" id="clave-actual" name="Actual" type="password" autocomplete="current-password" required />
                             <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
                         </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Actual", "Ingresá tu contraseña actual")</span>
                     </div>
-                    <div class="formulario__fila">
-                        <div class="campo">
-                            <label class="campo__etiqueta" for="clave-nueva">Nueva contraseña</label>
-                            <div class="control-con-icono">
-                                <icono nombre="lock" />
-                                <input class="campo__control" id="clave-nueva" type="password" placeholder="Mínimo 8 caracteres" />
-                                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
-                            </div>
+                }
+                <div class="formulario__fila">
+                    <div class="campo @Html.ClaseError("Nueva")">
+                        <label class="campo__etiqueta" for="clave-nueva">Contraseña nueva</label>
+                        <div class="control-con-icono">
+                            <icono nombre="lock" />
+                            <input class="campo__control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
+                                   pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
+                            <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
                         </div>
-                        <div class="campo">
-                            <label class="campo__etiqueta" for="clave-repetir">Repetí la contraseña</label>
-                            <div class="control-con-icono">
-                                <icono nombre="lock" />
-                                <input class="campo__control" id="clave-repetir" type="password" placeholder="Mínimo 8 caracteres" />
-                                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
-                            </div>
+                        <span class="campo__ayuda">Al menos 8 caracteres, con letras y números.</span>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+                    </div>
+                    <div class="campo @Html.ClaseError("Repetir")">
+                        <label class="campo__etiqueta" for="clave-repetir">Repetí la contraseña nueva</label>
+                        <div class="control-con-icono">
+                            <icono nombre="lock" />
+                            <input class="campo__control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
                         </div>
+                        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
                     </div>
                 </div>
-
                 <div class="formulario__acciones">
-                    <button class="boton" type="submit">Guardar cambios</button>
+                    <button class="boton" type="submit">@(usuario.TieneContrasena ? "Cambiar contraseña" : "Crear contraseña")</button>
                 </div>
+            </form>
 
-                <div class="zona-peligro">
-                    <div>
-                        <strong>Eliminar cuenta</strong>
-                        <span>Se borran tu perfil, tus postulaciones y tus alertas. No se puede deshacer.</span>
-                    </div>
-                    <button class="boton boton--contorno boton--peligro" type="button" data-modal-abrir="modal-eliminar"><icono nombre="trash-full" />Eliminar cuenta</button>
+            <form class="formulario zona-peligro" asp-controller="Perfil" asp-action="EliminarCuenta" method="post" novalidate>
+                <div class="configuracion__cabecera">
+                    <h2 class="formulario__subtitulo">Eliminar la cuenta</h2>
+                    <p class="texto-suave">
+                        @(esEmpresa
+                            ? "Se borran tu cuenta, las búsquedas de la empresa y sus postulaciones. No se puede deshacer."
+                            : "Se borran tu perfil, tu CV, tus postulaciones y las búsquedas que publicaste. No se puede deshacer.")
+                    </p>
+                </div>
+                <div class="campo">
+                    <label class="campo__etiqueta" for="confirmar-eliminar">Para confirmar, escribí ELIMINAR</label>
+                    <input class="campo__control" id="confirmar-eliminar" name="confirmacion" autocomplete="off" required pattern="ELIMINAR" />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Escribí ELIMINAR en mayúsculas</span>
+                </div>
+                <div class="formulario__acciones">
+                    <button class="boton boton--peligro-lleno" type="submit">Eliminar mi cuenta</button>
                 </div>
             </form>
         </section>
     </div>
 </div>
-
-<dialog class="modal" id="modal-eliminar" aria-labelledby="modal-eliminar-titulo">
-    <form class="modal__contenido" method="dialog">
-        <div class="modal__cabecera">
-            <h2 class="modal__titulo" id="modal-eliminar-titulo">¿Querés eliminar tu cuenta?</h2>
-            <button class="modal__cerrar" value="cancelar" aria-label="Cerrar"><icono nombre="close-big" /></button>
-        </div>
-        <p class="modal__descripcion">Vamos a borrar tu perfil, tus 11 postulaciones y tus alertas. Si solo querés pausar tu búsqueda, podés ocultar tu perfil.</p>
-        <div class="modal__acciones">
-            <button class="boton boton--gris" value="cancelar">Cancelar</button>
-            <button class="boton boton--peligro-lleno" value="eliminar">Eliminar</button>
-        </div>
-    </form>
-</dialog>

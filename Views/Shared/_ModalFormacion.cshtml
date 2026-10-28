@@ -1,0 +1,57 @@
+@model (bool EnServidor, FormacionFormulario? Valores, List<string> Instituciones)
+@{
+    var v = Model.Valores ?? new FormacionFormulario();
+    var abierto = Model.EnServidor && ViewBag.ModalAbierto as string == "modal-formacion";
+}
+@* Pop up "Agregar formación". En el perfil guarda en la base (Perfil/AgregarFormacion);
+   en el registro agrega la formación a la lista del formulario (site.js › data-modal-local). *@
+<dialog class="modal" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(abierto ? "true" : null)">
+    <form class="modal__contenido formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
+          action="@(Model.EnServidor ? Url.Action("AgregarFormacion", "Perfil") : null)"
+          data-modal-local="@(Model.EnServidor ? null : "formacion")" data-formulario-real="@(Model.EnServidor ? "" : null)">
+        @if (Model.EnServidor)
+        {
+            @Html.AntiForgeryToken()
+        }
+        <div class="modal__cabecera">
+            <h2 class="modal__titulo" id="modal-formacion-titulo">Agregar formación</h2>
+            <button class="modal__cerrar" type="button" value="cancelar" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+        </div>
+        <p class="modal__descripcion">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
+
+        <div class="campo @(abierto ? Html.ClaseError("Titulo") : "")">
+            <label class="campo__etiqueta" for="for-titulo">Título o curso</label>
+            <input class="campo__control" id="for-titulo" name="Titulo" value="@v.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(abierto ? Html.MensajeError("Titulo", "Completá el título o curso") : "Completá el título o curso")</span>
+        </div>
+        <div class="campo @(abierto ? Html.ClaseError("Institucion") : "")">
+            <label class="campo__etiqueta" for="for-institucion">Institución</label>
+            <input class="campo__control" id="for-institucion" name="Institucion" value="@v.Institucion" maxlength="150" required list="lista-instituciones" placeholder="Escuela, universidad o academia" />
+            <datalist id="lista-instituciones">
+                @foreach (var institucion in Model.Instituciones)
+                {
+                    <option value="@institucion"></option>
+                }
+            </datalist>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(abierto ? Html.MensajeError("Institucion", "Completá la institución") : "Completá la institución")</span>
+        </div>
+
+        <div class="formulario__fila">
+            <partial name="_CampoMes" model='new CampoMes { Nombre = "Inicio", Id = "for-inicio", Etiqueta = "Inicio", Valor = v.Inicio, Requerido = true, Error = abierto && Html.ClaseError("Inicio").Length > 0 ? Html.MensajeError("Inicio", "") : null }' />
+            <div data-fin-de="for-en-curso" hidden="@v.EnCurso">
+                <partial name="_CampoMes" model='new CampoMes { Nombre = "Fin", Id = "for-fin", Etiqueta = "Finalización", Valor = v.Fin, Requerido = !v.EnCurso, PermitirFuturo = true, Error = abierto && Html.ClaseError("Fin").Length > 0 ? Html.MensajeError("Fin", "") : null }' />
+            </div>
+        </div>
+
+        <label class="interruptor interruptor--etiqueta">
+            <input type="checkbox" id="for-en-curso" name="EnCurso" value="true" checked="@v.EnCurso" data-alternar-fin />
+            <span class="interruptor__pista"></span>
+            La estoy cursando
+        </label>
+
+        <div class="modal__acciones">
+            <button class="boton boton--gris" type="button" value="cancelar" data-modal-cerrar>Cancelar</button>
+            <button class="boton" type="submit">Agregar</button>
+        </div>
+    </form>
+</dialog>

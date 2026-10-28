@@ -1,39 +1,41 @@
 namespace Workly.Models;
 
-public enum EstadoPostulacion
+// Una postulación del tablero de la persona (a una oferta de Workly o externa)
+public class PostulacionItem
 {
-    Enviada,
-    EnRevision,
-    Entrevista,
-    Finalizada
+    public int ID { get; set; }
+    public string Estado { get; set; } = "Enviada";
+    public DateTime Fecha { get; set; }
+    public int? IDOfertaLaboral { get; set; }
+    public int? IDOfertaExterna { get; set; }
+    public string Titulo { get; set; } = "";
+    public string Empresa { get; set; } = "";
+    public string? Ubicacion { get; set; }
+    public string? Publicador { get; set; }
+    public string? Link_Postulacion { get; set; }
+
+    public bool EsExterna => IDOfertaExterna.HasValue;
+    public string Iniciales => Textos.Iniciales(Empresa);
+    public string FechaTexto => "Te postulaste el " + Fecha.ToString("d 'de' MMMM", new System.Globalization.CultureInfo("es-AR"));
 }
 
-public class Postulacion
+// Una persona que se postuló a una búsqueda (lo ve quien la publicó)
+public class Postulante
 {
-    public int Id { get; set; }
-    public int? OfertaId { get; set; }
-    public string Puesto { get; set; } = "";
-    public string Empresa { get; set; } = "";
-    public string Iniciales { get; set; } = "";
-    public string Ubicacion { get; set; } = "";
-    public EstadoPostulacion Estado { get; set; }
+    public int IDPostulacion { get; set; }
+    public int IDUsuario { get; set; }
+    public DateTime Fecha { get; set; }
+    public string Nombre { get; set; } = "";
+    public string Apellido { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string? Telefono { get; set; }
+    public string? Foto { get; set; }
+    public string? Provincia { get; set; }
+    public string? Estado_Busqueda { get; set; }
+    public string? Puesto_Buscado { get; set; }
+    public string? Nombre_Archivo { get; set; }
 
-    /// <summary>Etapa visible en la tarjeta: "CV visto por RR.HH.", "Entrevista técnica"...</summary>
-    public string Etapa { get; set; } = "";
-
-    /// <summary>Tono de la etiqueta de etapa: neutra, info, advertencia, exito, error, principal.</summary>
-    public string Tono { get; set; } = "neutra";
-
-    public string Actualizado { get; set; } = "";
-    public string? DestacadoTitulo { get; set; }
-    public string? DestacadoTexto { get; set; }
-    public bool Archivada { get; set; }
-
-    public string EstadoTexto => Estado switch
-    {
-        EstadoPostulacion.Enviada => "Enviada",
-        EstadoPostulacion.EnRevision => "En revisión",
-        EstadoPostulacion.Entrevista => "Entrevista",
-        _ => "Finalizada"
-    };
+    public string NombreCompleto => $"{Nombre} {Apellido}".Trim();
+    public string Iniciales => UsuarioActual.Iniciales(Nombre, Apellido);
+    public bool TieneCV => !string.IsNullOrEmpty(Nombre_Archivo);
 }
