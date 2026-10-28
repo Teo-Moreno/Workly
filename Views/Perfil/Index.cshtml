@@ -3,13 +3,34 @@
     ViewData["Title"] = "Mi perfil";
     var usuario = Model.Usuario;
     var perfil = Model.Perfil;
+    var pref = Model.Preferencia;
     var iniciales = UsuarioActual.Iniciales(usuario.Nombre, usuario.Apellido);
-    var faltan = Model.Checklist.Count(i => !i.Listo);
+    var pendientes = Model.Checklist.Where(i => !i.Listo).ToList();
+    var siguiente = Model.SiguientePaso;
     var sitioWeb = Model.CV?.Sitio_Web;
-    var enlaceSitio = string.IsNullOrEmpty(sitioWeb) ? null : (sitioWeb.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? sitioWeb : "https://" + sitioWeb);
-    var tieneCV = !string.IsNullOrEmpty(Model.CV?.Nombre_Archivo);
+    var enlaceSitio = Textos.Enlace(sitioWeb);
+    var volver = Url.Action("Index", "Perfil");
+    var es = new System.Globalization.CultureInfo("es-AR");
+
+    // Qué hace el botón de cada paso pendiente: abre un pop up de esta página o lleva a Configuración
+    (string? Modal, string? Url) Accion(string clave) => clave switch
+    {
+        "foto" => ("modal-foto", null),
+        "sobre-mi" => ("modal-sobre-mi", null),
+        "experiencia" => ("modal-experiencia", null),
+        "formacion" => ("modal-formacion", null),
+        "cv" => ("modal-cv", null),
+        "telefono" => (null, Url.Action("Configuracion", "Perfil", new { pestana = "cuenta" })),
+        _ => (null, Url.Action("Configuracion", "Perfil", new { pestana = "busqueda" }))
+    };
+    string Salario()
+    {
+        if (pref.Salario_Minimo != null && pref.Salario_Maximo != null) return $"{Textos.Pesos(pref.Salario_Minimo.Value)} – {Textos.Pesos(pref.Salario_Maximo.Value)}";
+        if (pref.Salario_Minimo != null) return "Desde " + Textos.Pesos(pref.Salario_Minimo.Value);
+        return "Hasta " + Textos.Pesos(pref.Salario_Maximo!.Value);
+    }
 }
-@* Mi perfil (Figma › Media · WF 05 · Perfil) *@
+@* Mi perfil (Figma › Media · WF 05 · Perfil). Todo sale de la base: lo carga la persona. *@
 
 <div class="contenedor seccion-app">
     <section class="perfil-cabecera" aria-label="Datos principales">
@@ -25,14 +46,15 @@
                 }
             </span>
             <span class="perfil-cabecera__camara"><icono nombre="image" tamano="18" /></span>
-            <span class="solo-lectores">Cambiar foto de perfil</span>
+            <span class="solo-lectores">@(string.IsNullOrEmpty(perfil.Foto) ? "Subir foto de perfil" : "Cambiar foto de perfil")</span>
         </button>
 
         <div class="perfil-cabecera__datos">
-            <div class="fila fila--envolver">
-                <h1 class="perfil-cabecera__nombre">@usuario.NombreCompleto</h1>
-            </div>
-            <p class="perfil-cabecera__rol">En Workly desde @usuario.Fecha_Registro.ToString("MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-AR"))</p>
+            <h1 class="perfil-cabecera__nombre">@usuario.NombreCompleto</h1>
+            @if (!string.IsNullOrWhiteSpace(pref.Puesto_Buscado))
+            {
+                <p class="perfil-cabecera__rol">Busca trabajo de @pref.Puesto_Buscado</p>
+            }
             <ul class="perfil-cabecera__contacto" role="list">
                 @if (!string.IsNullOrEmpty(perfil.Ubicacion))
                 {
@@ -41,84 +63,175 @@
                 <li><icono nombre="mail" tamano="18" /><a href="mailto:@usuario.Email">@usuario.Email</a></li>
                 @if (!string.IsNullOrEmpty(perfil.Telefono))
                 {
-                    <li><icono nombre="message-writing" tamano="18" /><a href="tel:@perfil.Telefono.Replace(" ", "")">@perfil.Telefono</a></li>
+                    <li><icono nombre="message-writing" tamano="18" /><a href="tel:@perfil.Telefono.Replace(" ", "").Replace("-", "")">@perfil.Telefono</a></li>
                 }
                 @if (enlaceSitio != null)
                 {
                     <li><icono nombre="globe" tamano="18" /><a href="@enlaceSitio" target="_blank" rel="noopener noreferrer">@sitioWeb</a></li>
                 }
             </ul>
+
+            <form class="estado-busqueda" asp-controller="Perfil" asp-action="GuardarEstado" method="post" data-enviar-al-cambiar>
+                <label class="estado-busqueda__etiqueta" for="estado-busqueda">Estado</label>
+                <select class="campo__control campo__control--sm estado-busqueda__control @(perfil.Estado_Busqueda == "Buscando activamente" ? "esta-activo" : "")" id="estado-busqueda" name="estado">
+                    @if (perfil.Estado_Busqueda == null)
+                    {
+                        <option value="" selected>Elegí tu estado</option>
+                    }
+                    @foreach (var estado in Catalogos.EstadosBusqueda)
+                    {
+                        <option selected="@(perfil.Estado_Busqueda == estado)">@estado</option>
+                    }
+                </select>
+                <noscript><button class="boton boton--sm" type="submit">Guardar</button></noscript>
+            </form>
         </div>
 
         <div class="perfil-cabecera__acciones">
-            @if (tieneCV)
+            @if (Model.TieneCV)
             {
                 <a class="boton boton--contorno" asp-controller="Perfil" asp-action="DescargarCV"><icono nombre="download" />Descargar CV</a>
             }
             else
             {
-                <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="upload" />Subir CV</a>
+                <button class="boton boton--contorno" type="button" data-modal-abrir="modal-cv"><icono nombre="upload" />Subir CV</button>
             }
             <a class="boton" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar perfil</a>
         </div>
     </section>
 
+    @if (siguiente != null)
+    {
+        var accion = Accion(siguiente.Clave);
+        @* Llamado a completar el perfil: lo primero que se ve, con un solo botón principal *@
+        <section class="onboarding" aria-labelledby="onboarding-titulo">
+            <div class="onboarding__principal">
+                <span class="etiqueta etiqueta--acento">Tu perfil está al @Model.PorcentajeCompleto%</span>
+                <h2 class="onboarding__titulo" id="onboarding-titulo">
+                    @(Model.PorcentajeCompleto == 0 ? "Empezá a armar tu perfil" : "Seguí completando tu perfil")
+                </h2>
+                <p class="onboarding__texto">Las empresas y personas que publican búsquedas en Workly ven tu perfil y tu CV cuando te postulás. Te falta: <strong>@siguiente.Texto.ToLower(es)</strong>.</p>
+                <div class="progreso progreso--principal onboarding__progreso" role="progressbar" aria-valuenow="@Model.PorcentajeCompleto" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo">
+                    <span class="progreso__barra" style="--valor: @(Model.PorcentajeCompleto)%"></span>
+                </div>
+                @if (accion.Modal != null)
+                {
+                    <button class="boton boton--acento boton--lg" type="button" data-modal-abrir="@accion.Modal">@siguiente.Accion<icono nombre="arrow-right" /></button>
+                }
+                else
+                {
+                    <a class="boton boton--acento boton--lg" href="@accion.Url">@siguiente.Accion<icono nombre="arrow-right" /></a>
+                }
+            </div>
+            @if (pendientes.Count > 1)
+            {
+                <div class="onboarding__resto">
+                    <h3 class="onboarding__subtitulo">También te falta</h3>
+                    <ul class="onboarding__lista" role="list">
+                        @foreach (var item in pendientes.Skip(1))
+                        {
+                            var a = Accion(item.Clave);
+                            <li>
+                                @if (a.Modal != null)
+                                {
+                                    <button class="onboarding__item" type="button" data-modal-abrir="@a.Modal"><icono nombre="circle-check-outline" tamano="20" />@item.Texto<icono nombre="chevron-right" tamano="18" /></button>
+                                }
+                                else
+                                {
+                                    <a class="onboarding__item" href="@a.Url"><icono nombre="circle-check-outline" tamano="20" />@item.Texto<icono nombre="chevron-right" tamano="18" /></a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </section>
+    }
+
     <div class="perfil-cuerpo">
         <div class="perfil-columna">
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
-                    <h2 class="tarjeta__titulo">Perfil completo al @Model.PorcentajeCompleto%</h2>
-                    @if (faltan > 0)
-                    {
-                        <span class="etiqueta etiqueta--acento">+@faltan @(faltan == 1 ? "paso" : "pasos")</span>
-                    }
+                    <h2 class="tarjeta__titulo">Qué busco</h2>
+                    <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />Editar</a>
                 </div>
-                <div class="progreso progreso--principal" role="progressbar" aria-valuenow="@Model.PorcentajeCompleto" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo">
-                    <span class="progreso__barra" style="--valor: @(Model.PorcentajeCompleto)%"></span>
-                </div>
-                <p class="perfil-ayuda">
-                    @(faltan == 0
-                        ? "¡Tu perfil está completo! Vas a aparecer primero en las búsquedas de las empresas."
-                        : "Completá lo que falta para aparecer primero en las búsquedas de las empresas.")
-                </p>
-                <ul class="checklist" role="list">
-                    @foreach (var item in Model.Checklist)
-                    {
-                        <li class="checklist__item @(item.Listo ? "esta-listo" : "")">
-                            <icono nombre="@(item.Listo ? "circle-check" : "circle-check-outline")" tamano="20" />
-                            @item.Texto
-                            @if (!item.Listo)
-                            {
-                                <a class="enlace checklist__accion" asp-controller="Perfil" asp-action="Configuracion">Agregar</a>
-                            }
-                        </li>
-                    }
-                </ul>
-            </section>
-
-            <section class="tarjeta">
-                <div class="tarjeta__encabezado">
-                    <h2 class="tarjeta__titulo">Preferencias laborales</h2>
-                    <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias"><icono nombre="pen" tamano="16" />Editar</a>
-                </div>
-                @if (!string.IsNullOrEmpty(perfil.Provincia))
+                @if (pref.TieneDatos || pref.Provincia != null)
                 {
                     <dl class="lista-clave-valor lista-clave-valor--perfil">
-                        <div><dt>Ubicación</dt><dd>@perfil.Provincia</dd></div>
+                        @if (!string.IsNullOrWhiteSpace(pref.Puesto_Buscado)) { <div><dt>Puesto</dt><dd>@pref.Puesto_Buscado</dd></div> }
+                        @if (pref.ListaNiveles.Count > 0) { <div><dt>Nivel</dt><dd>@string.Join(", ", pref.ListaNiveles)</dd></div> }
+                        @if (pref.ListaModalidades.Count > 0) { <div><dt>Modalidad</dt><dd>@string.Join(", ", pref.ListaModalidades)</dd></div> }
+                        @if (pref.Jornada != null) { <div><dt>Jornada</dt><dd>@pref.Jornada</dd></div> }
+                        @if (pref.Contratacion != null) { <div><dt>Contratación</dt><dd>@pref.Contratacion</dd></div> }
+                        <div><dt>Dónde</dt><dd>@(pref.Provincia ?? "Todo el país")</dd></div>
+                        @if (pref.Salario_Minimo != null || pref.Salario_Maximo != null) { <div><dt>Salario bruto</dt><dd>@Salario()</dd></div> }
+                        @if (pref.Disponibilidad != null) { <div><dt>Disponibilidad</dt><dd>@pref.Disponibilidad</dd></div> }
                     </dl>
                 }
-                <p class="perfil-vacio">Contanos qué puesto buscás, en qué modalidad y jornada, y tu expectativa salarial.
-                    <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="preferencias">Completar</a></p>
+                else
+                {
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Contanos qué puesto buscás, en qué modalidad y tu expectativa salarial. Con eso armamos las ofertas de tu inicio.</p>
+                        <a class="boton boton--contorno boton--sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="plus" />Completar qué busco</a>
+                    </div>
+                }
             </section>
 
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
-                    <h2 class="tarjeta__titulo">Actividad</h2>
+                    <h2 class="tarjeta__titulo">Mis postulaciones</h2>
+                    @if (Model.TotalPostulaciones > 0)
+                    {
+                        <a class="enlace" asp-controller="Postulaciones" asp-action="Index">Ver tablero</a>
+                    }
                 </div>
-                <div class="actividad actividad--dos">
-                    <div><strong>@Model.CantidadPostulaciones</strong><span>@(Model.CantidadPostulaciones == 1 ? "postulación" : "postulaciones")</span></div>
-                    <div><strong>@Model.CantidadGuardadas</strong><span>@(Model.CantidadGuardadas == 1 ? "oferta guardada" : "ofertas guardadas")</span></div>
+                @if (Model.TotalPostulaciones == 0)
+                {
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Todavía no te postulaste a ninguna búsqueda.</p>
+                        <a class="boton boton--contorno boton--sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                    </div>
+                }
+                else
+                {
+                    <ul class="actividad-estados" role="list">
+                        @foreach (var (estado, _, color) in Catalogos.EstadosPostulacion)
+                        {
+                            <li class="actividad-estados__item actividad-estados__item--@color">
+                                <strong>@(Model.PostulacionesPorEstado.GetValueOrDefault(estado))</strong><span>@estado</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+
+            <section class="tarjeta">
+                <div class="tarjeta__encabezado">
+                    <h2 class="tarjeta__titulo">CV</h2>
                 </div>
+                @if (Model.TieneCV)
+                {
+                    <div class="archivo-cv">
+                        <span class="caja-icono caja-icono--sm"><icono nombre="file-blank" /></span>
+                        <div class="archivo-cv__datos">
+                            <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV">@Model.CV!.NombreOriginal</a>
+                            <span class="texto-chico texto-suave">Actualizado el @Model.CV.Fecha_Actualizacion.ToString("d 'de' MMMM 'de' yyyy", es)</span>
+                        </div>
+                    </div>
+                    <div class="fila fila--envolver">
+                        <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-cv"><icono nombre="upload" />Cambiar</button>
+                        <form asp-controller="Perfil" asp-action="QuitarCV" method="post" data-confirmar="¿Quitamos tu CV?">
+                            <button class="boton boton--texto boton--sm" type="submit">Quitar</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Subí tu CV para poder postularte a las búsquedas de Workly.</p>
+                        <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-cv"><icono nombre="upload" />Subir CV</button>
+                    </div>
+                }
             </section>
         </div>
 
@@ -126,26 +239,38 @@
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
                     <h2 class="tarjeta__titulo">Sobre mí</h2>
-                    <button class="enlace" type="button" data-modal-abrir="modal-sobre-mi"><icono nombre="pen" tamano="16" />Editar</button>
+                    @if (!string.IsNullOrWhiteSpace(perfil.Descripcion))
+                    {
+                        <button class="enlace" type="button" data-modal-abrir="modal-sobre-mi"><icono nombre="pen" tamano="16" />Editar</button>
+                    }
                 </div>
                 @if (!string.IsNullOrWhiteSpace(perfil.Descripcion))
                 {
-                    <p class="perfil-texto" id="texto-sobre-mi">@perfil.Descripcion</p>
+                    <p class="perfil-texto">@perfil.Descripcion</p>
                 }
                 else
                 {
-                    <p class="perfil-vacio">Todavía no contaste nada sobre vos. Sumá unas líneas sobre qué hacés y qué estás buscando.</p>
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Todavía no contaste nada sobre vos. Sumá unas líneas sobre qué hacés y qué estás buscando.</p>
+                        <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-sobre-mi"><icono nombre="pen" />Escribir sobre mí</button>
+                    </div>
                 }
             </section>
 
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
                     <h2 class="tarjeta__titulo">Experiencia</h2>
-                    <button class="enlace" type="button" data-modal-abrir="modal-experiencia"><icono nombre="plus" tamano="16" />Agregar</button>
+                    @if (Model.Experiencias.Count > 0)
+                    {
+                        <button class="enlace" type="button" data-modal-abrir="modal-experiencia"><icono nombre="plus" tamano="16" />Agregar</button>
+                    }
                 </div>
                 @if (Model.Experiencias.Count == 0)
                 {
-                    <p class="perfil-vacio">Todavía no cargaste experiencia laboral. Sumá trabajos, pasantías o proyectos freelance.</p>
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Todavía no cargaste experiencia laboral. Sumá trabajos, pasantías o proyectos freelance.</p>
+                        <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-experiencia"><icono nombre="plus" />Agregar experiencia</button>
+                    </div>
                 }
                 else
                 {
@@ -153,7 +278,7 @@
                         @foreach (var experiencia in Model.Experiencias)
                         {
                             <li class="linea-tiempo__item">
-                                <span class="logo-empresa logo-empresa--md logo-empresa--principal" aria-hidden="true">@(experiencia.Empresa.Length > 0 ? experiencia.Empresa.Substring(0, 1) : "")</span>
+                                <span class="logo-empresa logo-empresa--md logo-empresa--principal" aria-hidden="true">@Textos.Iniciales(experiencia.Empresa)</span>
                                 <div class="linea-tiempo__contenido">
                                     <h3 class="linea-tiempo__titulo">@experiencia.Puesto</h3>
                                     <p class="linea-tiempo__lugar">@experiencia.Empresa</p>
@@ -163,6 +288,9 @@
                                         <p class="linea-tiempo__texto">@experiencia.Descripcion</p>
                                     }
                                 </div>
+                                <form asp-controller="Perfil" asp-action="EliminarExperiencia" asp-route-id="@experiencia.ID" method="post" data-confirmar="¿Borramos esta experiencia?">
+                                    <button class="boton boton--icono boton--icono-contorno" type="submit"><icono nombre="trash-full" etiqueta="Borrar experiencia" /></button>
+                                </form>
                             </li>
                         }
                     </ol>
@@ -172,11 +300,17 @@
             <section class="tarjeta">
                 <div class="tarjeta__encabezado">
                     <h2 class="tarjeta__titulo">Formación</h2>
-                    <button class="enlace" type="button" data-modal-abrir="modal-experiencia"><icono nombre="plus" tamano="16" />Agregar</button>
+                    @if (Model.Formaciones.Count > 0)
+                    {
+                        <button class="enlace" type="button" data-modal-abrir="modal-formacion"><icono nombre="plus" tamano="16" />Agregar</button>
+                    }
                 </div>
                 @if (Model.Formaciones.Count == 0)
                 {
-                    <p class="perfil-vacio">Todavía no cargaste tu formación. Sumá tus estudios y cursos.</p>
+                    <div class="estado-vacio estado-vacio--chico">
+                        <p>Todavía no cargaste tu formación. Sumá tus estudios y cursos.</p>
+                        <button class="boton boton--contorno boton--sm" type="button" data-modal-abrir="modal-formacion"><icono nombre="plus" />Agregar formación</button>
+                    </div>
                 }
                 else
                 {
@@ -190,6 +324,9 @@
                                     <p class="linea-tiempo__lugar">@formacion.Institucion</p>
                                     <p class="linea-tiempo__fecha">@formacion.Periodo</p>
                                 </div>
+                                <form asp-controller="Perfil" asp-action="EliminarFormacion" asp-route-id="@formacion.ID" method="post" data-confirmar="¿Borramos esta formación?">
+                                    <button class="boton boton--icono boton--icono-contorno" type="submit"><icono nombre="trash-full" etiqueta="Borrar formación" /></button>
+                                </form>
                             </li>
                         }
                     </ol>
@@ -200,108 +337,134 @@
                 <section class="tarjeta">
                     <div class="tarjeta__encabezado">
                         <h2 class="tarjeta__titulo">Habilidades</h2>
-                        <a class="enlace" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" tamano="16" />Editar</a>
+                        <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />@(Model.Habilidades.Count > 0 ? "Editar" : "Agregar")</a>
                     </div>
-                    <p class="perfil-vacio">Todavía no cargaste habilidades. Sumá las herramientas y tecnologías que manejás.</p>
+                    @if (Model.Habilidades.Count == 0)
+                    {
+                        <p class="perfil-vacio">Todavía no cargaste habilidades. Sumá las herramientas y tareas que manejás.</p>
+                    }
+                    else
+                    {
+                        <ul class="lista-tags" role="list">
+                            @foreach (var habilidad in Model.Habilidades)
+                            {
+                                <li class="tag">@habilidad</li>
+                            }
+                        </ul>
+                    }
                 </section>
 
                 <section class="tarjeta">
                     <div class="tarjeta__encabezado">
                         <h2 class="tarjeta__titulo">Idiomas</h2>
-                        <a class="enlace" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" tamano="16" />Editar</a>
+                        <a class="enlace" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />@(Model.Idiomas.Count > 0 ? "Editar" : "Agregar")</a>
                     </div>
-                    <p class="perfil-vacio">Todavía no cargaste idiomas. Sumá los que hablás y tu nivel.</p>
+                    @if (Model.Idiomas.Count == 0)
+                    {
+                        <p class="perfil-vacio">Todavía no cargaste idiomas. Sumá los que hablás y tu nivel.</p>
+                    }
+                    else
+                    {
+                        <dl class="lista-clave-valor">
+                            @foreach (var idioma in Model.Idiomas)
+                            {
+                                <div><dt>@idioma.Idioma</dt><dd>@idioma.Nivel</dd></div>
+                            }
+                        </dl>
+                    }
                 </section>
             </div>
         </div>
     </div>
 </div>
 
-@* Pop up "Actualizá tu foto de perfil" (Figma › Guidelines › 07. Notificaciones) *@
-<dialog class="modal modal--chico" id="modal-foto" aria-labelledby="modal-foto-titulo" data-snackbar-al-confirmar="Actualizamos tu foto de perfil.">
-    <form class="modal__contenido" method="dialog">
-        <div class="modal__cabecera">
-            <h2 class="modal__titulo" id="modal-foto-titulo">Actualizá tu foto de perfil</h2>
-            <button class="modal__cerrar" value="cancelar" aria-label="Cerrar"><icono nombre="close-big" /></button>
-        </div>
-        <div class="recorte-foto">
-            <span class="recorte-foto__imagen" id="foto-recorte">@iniciales</span>
-        </div>
-        <label class="recorte-foto__zoom">
-            <icono nombre="image" tamano="14" />
-            <span class="solo-lectores">Zoom</span>
-            <input class="deslizador" type="range" min="80" max="140" value="110" data-zoom-foto="foto-recorte" />
-            <icono nombre="image" tamano="24" />
-        </label>
-        <label class="boton boton--contorno boton--sm boton--bloque boton--archivo">
-            <icono nombre="upload" />Subir otra foto
-            <input type="file" accept="image/*" />
-        </label>
-        <div class="modal__acciones modal__acciones--centro">
-            <button class="boton boton--gris" value="cancelar">Cancelar</button>
-            <button class="boton" value="confirmar">Guardar foto</button>
-        </div>
-    </form>
+@* Pop up de la foto: elige el archivo, muestra la vista previa y lo sube (Perfil/SubirFoto) *@
+<dialog class="modal modal--chico" id="modal-foto" aria-labelledby="modal-foto-titulo">
+    <div class="modal__contenido">
+        <form class="formulario" asp-controller="Perfil" asp-action="SubirFoto" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+            <input type="hidden" name="volver" value="@volver" />
+            <div class="modal__cabecera">
+                <h2 class="modal__titulo" id="modal-foto-titulo">@(string.IsNullOrEmpty(perfil.Foto) ? "Subí tu foto de perfil" : "Cambiá tu foto de perfil")</h2>
+                <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+            </div>
+            <div class="recorte-foto">
+                <span class="recorte-foto__imagen" data-vista-foto>
+                    @if (!string.IsNullOrEmpty(perfil.Foto))
+                    {
+                        <img src="@perfil.Foto" alt="" />
+                    }
+                    else
+                    {
+                        @iniciales
+                    }
+                </span>
+            </div>
+            <div class="campo">
+                <label class="boton boton--contorno boton--sm boton--bloque boton--archivo">
+                    <icono nombre="upload" />Elegir foto
+                    <input type="file" name="foto" required accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                           data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
+                </label>
+                <span class="campo__ayuda campo__ayuda--centro">JPG, PNG o WEBP de hasta 5 MB.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Elegí una imagen JPG, PNG o WEBP de hasta 5 MB</span>
+            </div>
+            <div class="modal__acciones modal__acciones--centro">
+                <button class="boton boton--gris" type="button" data-modal-cerrar>Cancelar</button>
+                <button class="boton" type="submit">Guardar foto</button>
+            </div>
+        </form>
+        @if (!string.IsNullOrEmpty(perfil.Foto))
+        {
+            <form class="modal__pie" asp-controller="Perfil" asp-action="QuitarFoto" method="post">
+                <input type="hidden" name="volver" value="@volver" />
+                <button class="boton boton--texto boton--sm" type="submit"><icono nombre="trash-full" />Quitar la foto</button>
+            </form>
+        }
+    </div>
 </dialog>
 
-<dialog class="modal" id="modal-sobre-mi" aria-labelledby="modal-sobre-mi-titulo" data-snackbar-al-confirmar="Guardamos los cambios de tu perfil.">
-    <form class="modal__contenido" method="dialog">
+<dialog class="modal" id="modal-sobre-mi" aria-labelledby="modal-sobre-mi-titulo">
+    <form class="modal__contenido formulario" asp-controller="Perfil" asp-action="GuardarSobreMi" method="post" novalidate data-formulario-real>
         <div class="modal__cabecera">
-            <h2 class="modal__titulo" id="modal-sobre-mi-titulo">Editar "Sobre mí"</h2>
-            <button class="modal__cerrar" value="cancelar" aria-label="Cerrar"><icono nombre="close-big" /></button>
+            <h2 class="modal__titulo" id="modal-sobre-mi-titulo">Sobre mí</h2>
+            <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
         </div>
         <p class="modal__descripcion">Contá en pocas líneas qué hacés, qué te gusta y qué estás buscando.</p>
         <div class="campo">
             <label class="campo__etiqueta" for="campo-sobre-mi">Sobre mí</label>
-            <textarea class="campo__control" id="campo-sobre-mi" rows="6" maxlength="500">@perfil.Descripcion</textarea>
-            <span class="campo__ayuda">Máximo 500 caracteres.</span>
+            <textarea class="campo__control" id="campo-sobre-mi" name="descripcion" rows="6" maxlength="500">@perfil.Descripcion</textarea>
+            <span class="campo__ayuda">Hasta 500 caracteres.</span>
         </div>
         <div class="modal__acciones">
-            <button class="boton boton--gris" value="cancelar">Cancelar</button>
-            <button class="boton" value="confirmar">Guardar</button>
+            <button class="boton boton--gris" type="button" data-modal-cerrar>Cancelar</button>
+            <button class="boton" type="submit">Guardar</button>
         </div>
     </form>
 </dialog>
 
-@* Pop up con campos (Figma › Guidelines › 07. Notificaciones › Pop up) *@
-<dialog class="modal" id="modal-experiencia" aria-labelledby="modal-experiencia-titulo" data-snackbar-al-confirmar="Sumamos la experiencia a tu perfil.">
-    <form class="modal__contenido" method="dialog">
+<dialog class="modal" id="modal-cv" aria-labelledby="modal-cv-titulo">
+    <form class="modal__contenido formulario" asp-controller="Perfil" asp-action="SubirCV" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+        <input type="hidden" name="volver" value="@volver" />
         <div class="modal__cabecera">
-            <h2 class="modal__titulo" id="modal-experiencia-titulo">Agregar experiencia</h2>
-            <button class="modal__cerrar" value="cancelar" aria-label="Cerrar"><icono nombre="close-big" /></button>
+            <h2 class="modal__titulo" id="modal-cv-titulo">@(Model.TieneCV ? "Cambiar tu CV" : "Subir tu CV")</h2>
+            <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
         </div>
-        <p class="modal__descripcion">Sumá tus trabajos, pasantías o proyectos freelance.</p>
-        <div class="campo campo--horizontal">
-            <label class="campo__etiqueta" for="exp-puesto">Puesto</label>
-            <input class="campo__control" id="exp-puesto" type="text" placeholder="Escribí acá" />
+        <div class="campo">
+            <label class="zona-archivo" data-zona-archivo>
+                <span class="caja-icono"><icono nombre="upload" /></span>
+                <strong class="zona-archivo__nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
+                <span class="texto-chico">PDF, DOC o DOCX de hasta 5 MB</span>
+                <input type="file" name="archivo" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                       data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
+            </label>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />Elegí un archivo PDF, DOC o DOCX de hasta 5 MB</span>
         </div>
-        <div class="campo campo--horizontal">
-            <label class="campo__etiqueta" for="exp-empresa">Empresa</label>
-            <input class="campo__control" id="exp-empresa" type="text" placeholder="Escribí acá" />
-        </div>
-        <div class="campo campo--horizontal">
-            <label class="campo__etiqueta" for="exp-modalidad">Modalidad</label>
-            <select class="campo__control" id="exp-modalidad">
-                <option>Escribí acá</option>
-                <option>Presencial</option>
-                <option>Híbrido</option>
-                <option>Remoto</option>
-            </select>
-        </div>
-        <div class="campo campo--horizontal">
-            <label class="campo__etiqueta" for="exp-inicio">Inicio</label>
-            <div class="control-con-icono control-con-icono--derecha">
-                <input class="campo__control" id="exp-inicio" type="month" />
-            </div>
-        </div>
-        <label class="interruptor">
-            <input type="checkbox" checked />
-            <span class="interruptor__pista"></span>
-            Trabajo actualmente acá
-        </label>
         <div class="modal__acciones">
-            <button class="boton boton--gris" value="cancelar">Cancelar</button>
-            <button class="boton" value="confirmar">Agregar</button>
+            <button class="boton boton--gris" type="button" data-modal-cerrar>Cancelar</button>
+            <button class="boton" type="submit">Subir CV</button>
         </div>
     </form>
 </dialog>
+
+<partial name="_ModalExperiencia" model="(true, ViewBag.Formulario as ExperienciaFormulario)" />
+<partial name="_ModalFormacion" model="(true, ViewBag.Formulario as FormacionFormulario, Model.Instituciones)" />

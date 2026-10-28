@@ -49,21 +49,38 @@ public static class Archivos
     }
 
     /// <summary>Guarda la foto y devuelve su ruta pública ("/uploads/fotos/..."), o null si no hay archivo.</summary>
-    public static async Task<string?> GuardarFoto(IFormFile? archivo, string carpetaWwwroot)
+    public static Task<string?> GuardarFoto(IFormFile? archivo, string carpetaWwwroot) =>
+        GuardarImagen(archivo, carpetaWwwroot, "fotos");
+
+    /// <summary>Guarda el logo de una empresa y devuelve su ruta pública ("/uploads/logos/...").</summary>
+    public static Task<string?> GuardarLogo(IFormFile? archivo, string carpetaWwwroot) =>
+        GuardarImagen(archivo, carpetaWwwroot, "logos");
+
+    private static async Task<string?> GuardarImagen(IFormFile? archivo, string carpetaWwwroot, string subcarpeta)
     {
         if (archivo == null || archivo.Length == 0)
         {
             return null;
         }
 
-        var carpeta = Path.Combine(carpetaWwwroot, "uploads", "fotos");
+        var carpeta = Path.Combine(carpetaWwwroot, "uploads", subcarpeta);
         Directory.CreateDirectory(carpeta);
         var nombre = $"{Guid.NewGuid():N}{Path.GetExtension(archivo.FileName).ToLowerInvariant()}";
         await using (var destino = File.Create(Path.Combine(carpeta, nombre)))
         {
             await archivo.CopyToAsync(destino);
         }
-        return $"/uploads/fotos/{nombre}";
+        return $"/uploads/{subcarpeta}/{nombre}";
+    }
+
+    /// <summary>Ruta en disco de una imagen pública guardada ("/uploads/fotos/x.jpg"), o null si no es de uploads.</summary>
+    public static string? RutaImagen(string? rutaPublica, string carpetaWwwroot)
+    {
+        if (string.IsNullOrEmpty(rutaPublica) || !rutaPublica.StartsWith("/uploads/") || rutaPublica.Contains(".."))
+        {
+            return null;
+        }
+        return Path.Combine(carpetaWwwroot, rutaPublica.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
     }
 
     /// <summary>Guarda el CV y devuelve el nombre guardado ("{guid}_{nombre original}"), o null si no hay archivo.</summary>

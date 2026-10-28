@@ -13,6 +13,8 @@
 
     <partial name="_ErroresFormulario" />
 
+    <partial name="_BotonesExternos" model='("Iniciar sesión", (string?)null, Model.ReturnUrl)' />
+
     <form class="formulario" asp-controller="Cuenta" asp-action="IniciarSesion" method="post" novalidate data-formulario-real>
         <input type="hidden" asp-for="ReturnUrl" />
 
@@ -35,14 +37,11 @@
             <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Contrasena), "Ingresá tu contraseña")</span>
         </div>
 
-        <div class="fila fila--entre fila--envolver">
-            <label class="casilla casilla--sm">
-                <input asp-for="Recordarme" type="checkbox" />
-                <span class="casilla__caja"><icono nombre="check" /></span>
-                Recordarme
-            </label>
-            <a class="enlace" asp-controller="Cuenta" asp-action="RecuperarClave">¿Olvidaste tu contraseña?</a>
-        </div>
+        <label class="casilla casilla--sm">
+            <input asp-for="Recordarme" type="checkbox" />
+            <span class="casilla__caja"><icono nombre="check" /></span>
+            Recordarme
+        </label>
 
         <button class="boton boton--lg boton--bloque" type="submit">Iniciar sesión</button>
     </form>

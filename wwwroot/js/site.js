@@ -2,7 +2,7 @@
    Workly · Interacciones visuales
    JavaScript sin dependencias. Cada comportamiento se activa con atributos
    data-* en el HTML, así las vistas no necesitan scripts propios.
-   Todo es visual: no se envían datos al servidor.
+   Los formularios guardan en el servidor; acá solo se valida y se mejora la interacción.
    ========================================================================== */
 (() => {
   "use strict";
@@ -23,7 +23,7 @@
      Snackbar (07. Notificaciones › Snackbar)
      Uso: Workly.snackbar("Texto", "exito" | "advertencia" | "error" | "")
      ---------------------------------------------------------------------- */
-  const iconosSnackbar = { exito: "circle-check", advertencia: "warning", error: "error", "": "notification" };
+  const iconosSnackbar = { exito: "circle-check", advertencia: "warning", error: "error", "": "info" };
 
   function snackbar(texto, tipo = "") {
     const contenedor = $("[data-snackbars]");
@@ -31,7 +31,7 @@
     const elemento = document.createElement("div");
     elemento.className = `snackbar ${tipo ? `snackbar--${tipo}` : ""}`;
     elemento.setAttribute("role", tipo === "error" ? "alert" : "status");
-    elemento.innerHTML = `${icono(iconosSnackbar[tipo] || "notification", 22)}
+    elemento.innerHTML = `${icono(iconosSnackbar[tipo] || "info", 22)}
       <span class="snackbar__texto"></span>
       <button class="snackbar__cerrar" type="button" aria-label="Cerrar aviso">${icono("close-big", 20)}</button>`;
     elemento.querySelector(".snackbar__texto").textContent = texto;
@@ -64,7 +64,7 @@
   });
 
   /* ------------------------------------------------------------------------
-     Desplegables: notificaciones, menú de usuario, ordenar por
+     Desplegables: menú de usuario
      ---------------------------------------------------------------------- */
   const cerrarDesplegables = (excepto) => {
     $$("[data-desplegable].esta-abierto").forEach((desplegable) => {
@@ -94,19 +94,6 @@
 
   document.addEventListener("keydown", (evento) => {
     if (evento.key === "Escape") cerrarDesplegables();
-  });
-
-  // "Ordenar por": actualiza el texto del botón
-  $$("[data-ordenar]").forEach((menu) => {
-    menu.addEventListener("click", (evento) => {
-      const opcion = evento.target.closest(".menu__item");
-      if (!opcion) return;
-      $$(".menu__item", menu).forEach((item) => item.classList.toggle("esta-activo", item === opcion));
-      const desplegable = menu.closest("[data-desplegable]");
-      const valor = $("[data-ordenar-valor]", desplegable);
-      if (valor) valor.textContent = opcion.textContent.trim();
-      cerrarDesplegables();
-    });
   });
 
   /* ------------------------------------------------------------------------
@@ -139,7 +126,7 @@
       activarPestana(contenedor, boton.dataset.pestana, true);
     });
 
-    // Abrir la pestaña indicada en la URL (#preferencias, #guardadas...)
+    // Abrir la pestaña indicada en la URL (#busqueda, #seguridad...)
     if (contenedor.hasAttribute("data-pestanas-hash") && location.hash) {
       activarPestana(contenedor, decodeURIComponent(location.hash.slice(1)));
     }
@@ -149,87 +136,6 @@
     $$("[data-pestanas][data-pestanas-hash]").forEach((contenedor) =>
       activarPestana(contenedor, decodeURIComponent(location.hash.slice(1)))
     );
-  });
-
-  /* ------------------------------------------------------------------------
-     Notificaciones: marcar todas como leídas
-     ---------------------------------------------------------------------- */
-  $$("[data-marcar-leidas]").forEach((boton) => {
-    boton.addEventListener("click", () => {
-      $$("[data-notificacion].es-no-leida").forEach((n) => n.classList.remove("es-no-leida"));
-      $$("[data-contador-notificaciones]").forEach((contador) => {
-        contador.textContent = "0";
-        contador.dataset.cantidad = "0";
-      });
-      snackbar("Marcaste todas las notificaciones como leídas.", "exito");
-    });
-  });
-
-  /* ------------------------------------------------------------------------
-     Buscar trabajo: filtros, chips de filtros activos, rango salarial
-     ---------------------------------------------------------------------- */
-  const listaChips = $("[data-filtros-activos-lista]");
-
-  function dibujarChips() {
-    if (!listaChips) return;
-    const marcadas = $$("[data-filtro-casilla]:checked");
-    listaChips.innerHTML = "";
-    marcadas.forEach((casilla) => {
-      const chip = document.createElement("span");
-      chip.className = "chip";
-      chip.dataset.chip = casilla.value;
-      chip.textContent = casilla.value;
-      chip.insertAdjacentHTML(
-        "beforeend",
-        `<button class="chip__quitar" type="button" aria-label="Quitar filtro ${casilla.value}" data-chip-quitar>${icono("close-big", 14)}</button>`
-      );
-      listaChips.appendChild(chip);
-    });
-    $("[data-filtros-activos]")?.classList.toggle("esta-vacio", marcadas.length === 0);
-  }
-
-  $$("[data-filtro-casilla]").forEach((casilla) => casilla.addEventListener("change", dibujarChips));
-
-  document.addEventListener("click", (evento) => {
-    const quitar = evento.target.closest("[data-chip-quitar]");
-    if (quitar) {
-      const valor = quitar.closest("[data-chip]").dataset.chip;
-      const casilla = $$("[data-filtro-casilla]").find((c) => c.value === valor);
-      if (casilla) casilla.checked = false;
-      quitar.closest("[data-chip]").remove();
-      dibujarChips();
-    }
-
-    if (evento.target.closest("[data-limpiar-filtros]")) {
-      $$("[data-filtro-casilla]").forEach((casilla) => (casilla.checked = false));
-      dibujarChips();
-    }
-  });
-
-  const formatoPesos = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
-
-  $$("[data-rango]").forEach((rango) => {
-    const minimo = $("[data-rango-min]", rango);
-    const maximo = $("[data-rango-max]", rango);
-    const contenedor = rango.parentElement;
-    const actualizar = (evento) => {
-      let a = Number(minimo.value);
-      let b = Number(maximo.value);
-      if (a > b) {
-        if (evento?.target === minimo) minimo.value = a = b;
-        else maximo.value = b = a;
-      }
-      const total = Number(minimo.max) - Number(minimo.min);
-      rango.style.setProperty("--min", `${((a - minimo.min) / total) * 100}%`);
-      rango.style.setProperty("--max", `${((b - minimo.min) / total) * 100}%`);
-      const textoMin = $("[data-rango-texto-min]", contenedor);
-      const textoMax = $("[data-rango-texto-max]", contenedor);
-      if (textoMin) textoMin.textContent = formatoPesos.format(a).replace(/\s/g, "");
-      if (textoMax) textoMax.textContent = formatoPesos.format(b).replace(/\s/g, "");
-    };
-    minimo.addEventListener("input", actualizar);
-    maximo.addEventListener("input", actualizar);
-    actualizar();
   });
 
   // Mostrar u ocultar un panel (filtros en mobile)
@@ -266,227 +172,6 @@
     });
   }
 
-  // Cargar más ofertas (muestra las tarjetas ocultas con un spinner)
-  $$("[data-cargar-mas]").forEach((boton) => {
-    boton.addEventListener("click", () => {
-      const ocultas = $$("[data-resultados] [data-oferta][hidden]");
-      const spinner = $("[data-cargar-mas-spinner]", boton);
-      boton.classList.add("esta-cargando");
-      if (spinner) spinner.hidden = false;
-      setTimeout(() => {
-        boton.classList.remove("esta-cargando");
-        if (spinner) spinner.hidden = true;
-        if (!ocultas.length) {
-          snackbar("Ya viste todas las ofertas compatibles por hoy.");
-          return;
-        }
-        ocultas.slice(0, 3).forEach((tarjeta) => {
-          tarjeta.hidden = false;
-          tarjeta.classList.add("es-nueva");
-        });
-        if ($$("[data-resultados] [data-oferta][hidden]").length === 0) {
-          boton.disabled = true;
-          boton.lastChild.textContent = "No hay más ofertas";
-        }
-      }, 900);
-    });
-  });
-
-  /* ------------------------------------------------------------------------
-     Guardar oferta / Seguir empresa / Compartir
-     ---------------------------------------------------------------------- */
-  document.addEventListener("click", (evento) => {
-    const guardar = evento.target.closest("[data-guardar]");
-    if (guardar) {
-      const activo = !guardar.classList.contains("esta-activo");
-      guardar.classList.toggle("esta-activo", activo);
-      guardar.setAttribute("aria-pressed", String(activo));
-      cambiarIcono(guardar, activo ? "bookmark-fill" : "bookmark");
-      const texto = $("[data-guardar-texto]", guardar);
-      if (texto) texto.textContent = activo ? "Guardada" : "Guardar";
-      snackbar(activo ? "Guardaste la oferta en tus postulaciones." : "Quitaste la oferta de guardadas.", activo ? "exito" : "");
-      return;
-    }
-
-    const seguir = evento.target.closest("[data-seguir]");
-    if (seguir) {
-      const activo = !seguir.classList.contains("esta-activo");
-      seguir.classList.toggle("esta-activo", activo);
-      seguir.setAttribute("aria-pressed", String(activo));
-      cambiarIcono(seguir, activo ? "check" : "plus");
-      const texto = $("[data-seguir-texto]", seguir);
-      if (texto) texto.textContent = activo ? "Siguiendo" : "Seguir";
-      return;
-    }
-
-    const compartir = evento.target.closest("[data-compartir]");
-    if (compartir) {
-      const enlace = compartir.dataset.compartir || location.href;
-      navigator.clipboard?.writeText(new URL(enlace, location.origin).href).catch(() => {});
-      snackbar("Copiamos el enlace de la oferta.", "exito");
-      return;
-    }
-
-    const sinDetalle = evento.target.closest("[data-sin-detalle]");
-    if (sinDetalle) {
-      evento.preventDefault();
-      snackbar("Esta búsqueda ya no está publicada en Workly.", "advertencia");
-    }
-  });
-
-  /* ------------------------------------------------------------------------
-     Modales (<dialog> nativo)
-     ---------------------------------------------------------------------- */
-  document.addEventListener("click", (evento) => {
-    const abrir = evento.target.closest("[data-modal-abrir]");
-    if (abrir) {
-      document.getElementById(abrir.dataset.modalAbrir)?.showModal();
-      return;
-    }
-    // Clic sobre el fondo oscuro
-    if (evento.target.tagName === "DIALOG" && evento.target.open) {
-      const caja = evento.target.getBoundingClientRect();
-      const fuera =
-        evento.clientX < caja.left || evento.clientX > caja.right || evento.clientY < caja.top || evento.clientY > caja.bottom;
-      if (fuera) evento.target.close("cancelar");
-    }
-  });
-
-  /* Postularme ahora → pop up de confirmación → snackbar de éxito */
-  const modalPostular = document.getElementById("modal-postular");
-  let botonPostular = null;
-
-  document.addEventListener("click", (evento) => {
-    const boton = evento.target.closest("[data-postular]");
-    if (!boton || !modalPostular) return;
-    botonPostular = boton;
-    $("[data-modal-puesto]", modalPostular).textContent = boton.dataset.puesto || "este puesto";
-    $("[data-modal-empresa]", modalPostular).textContent = boton.dataset.empresa || "la empresa";
-    modalPostular.showModal();
-  });
-
-  modalPostular?.addEventListener("close", () => {
-    if (modalPostular.returnValue !== "confirmar" || !botonPostular) return;
-    const puesto = botonPostular.dataset.puesto;
-    $$(`[data-postular][data-puesto="${CSS.escape(puesto)}"]`).forEach((b) => {
-      b.disabled = true;
-      b.innerHTML = `${icono("check", 20)}Postulación enviada`;
-    });
-    snackbar("¡Postulación enviada con éxito!", "exito");
-  });
-
-  /* Recorte de la foto de perfil: el slider controla el zoom */
-  $$("[data-zoom-foto]").forEach((slider) => {
-    const imagen = document.getElementById(slider.dataset.zoomFoto);
-    const actualizar = () => {
-      imagen?.style.setProperty("--zoom", String(slider.value / 100));
-      const avance = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
-      slider.style.setProperty("--avance", `${avance}%`);
-    };
-    slider.addEventListener("input", actualizar);
-    actualizar();
-  });
-
-  $$("dialog[data-snackbar-al-confirmar]").forEach((dialogo) => {
-    dialogo.addEventListener("close", () => {
-      if (dialogo.returnValue === "confirmar") snackbar(dialogo.dataset.snackbarAlConfirmar, "exito");
-    });
-  });
-
-  /* ------------------------------------------------------------------------
-     Postulaciones: tablero con arrastrar y soltar entre columnas
-     ---------------------------------------------------------------------- */
-  let arrastrando = null;
-
-  const actualizarContadores = () => {
-    $$("[data-columna]").forEach((columna) => {
-      const cantidad = $$("[data-postulacion]", columna).length;
-      const contador = $("[data-columna-contador]", columna);
-      if (contador) contador.textContent = String(cantidad);
-      columna.classList.toggle("esta-vacia", cantidad === 0);
-    });
-  };
-
-  document.addEventListener("dragstart", (evento) => {
-    const tarjeta = evento.target.closest?.("[data-postulacion]");
-    if (!tarjeta) return;
-    arrastrando = tarjeta;
-    tarjeta.classList.add("esta-arrastrando");
-    evento.dataTransfer.effectAllowed = "move";
-    evento.dataTransfer.setData("text/plain", tarjeta.dataset.postulacion);
-  });
-
-  document.addEventListener("dragend", () => {
-    arrastrando?.classList.remove("esta-arrastrando");
-    arrastrando = null;
-    $$("[data-columna]").forEach((c) => c.classList.remove("es-destino"));
-  });
-
-  $$("[data-columna]").forEach((columna) => {
-    const lista = $("[data-columna-lista]", columna) || columna;
-    columna.addEventListener("dragover", (evento) => {
-      if (!arrastrando) return;
-      evento.preventDefault();
-      columna.classList.add("es-destino");
-      const despues = $$("[data-postulacion]:not(.esta-arrastrando)", lista).find((tarjeta) => {
-        const caja = tarjeta.getBoundingClientRect();
-        return evento.clientY < caja.top + caja.height / 2;
-      });
-      if (despues) lista.insertBefore(arrastrando, despues);
-      else lista.appendChild(arrastrando);
-    });
-    columna.addEventListener("dragleave", (evento) => {
-      if (!columna.contains(evento.relatedTarget)) columna.classList.remove("es-destino");
-    });
-    columna.addEventListener("drop", (evento) => {
-      evento.preventDefault();
-      columna.classList.remove("es-destino");
-      actualizarContadores();
-      const nombre = $("[data-columna-nombre]", columna)?.textContent.trim();
-      if (nombre) snackbar(`Moviste la postulación a "${nombre}".`);
-    });
-  });
-
-  /* ------------------------------------------------------------------------
-     Empresas: filtro por industria y búsqueda por nombre
-     ---------------------------------------------------------------------- */
-  const grillaEmpresas = $("[data-grilla-empresas]");
-  if (grillaEmpresas) {
-    let industria = "Todas";
-    const buscador = $("[data-buscar-empresa]");
-    const vacio = $("[data-empresas-vacio]");
-
-    const filtrar = () => {
-      const texto = (buscador?.value || "").trim().toLowerCase();
-      let visibles = 0;
-      $$("[data-empresa]", grillaEmpresas).forEach((tarjeta) => {
-        const coincideIndustria = industria === "Todas" || tarjeta.dataset.categorias.split("|").includes(industria);
-        const coincideTexto = !texto || tarjeta.dataset.nombre.includes(texto);
-        tarjeta.hidden = !(coincideIndustria && coincideTexto);
-        if (!tarjeta.hidden) visibles++;
-      });
-      if (vacio) vacio.hidden = visibles > 0;
-    };
-
-    $$("[data-industria]").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        industria = chip.dataset.industria;
-        $$("[data-industria]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-        filtrar();
-      });
-    });
-    buscador?.addEventListener("input", filtrar);
-    buscador?.form?.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      filtrar();
-    });
-  }
-
-  /* ------------------------------------------------------------------------
-     Formularios de demostración
-     data-demo-form="Mensaje"            → muestra un snackbar al enviar
-     data-redirigir="/Panel"            → navega luego de "enviar"
-     ---------------------------------------------------------------------- */
   // Valida los campos visibles: obligatorios vacíos y valores con formato inválido
   // (email, patrón, largo). Marca cada campo con .campo--error del UI Kit.
   // El contenedor puede estar oculto (un paso del registro que no se está viendo).
@@ -494,10 +179,16 @@
     let valido = true;
     $$("input, select, textarea", formulario).forEach((control) => {
       const oculto = control.closest("[hidden]");
-      if ((oculto && oculto !== formulario) || ["hidden", "file", "submit", "button"].includes(control.type)) return;
+      if ((oculto && oculto !== formulario) || ["hidden", "submit", "button"].includes(control.type)) return;
       const campo = control.closest(".campo");
       let ok;
-      if (control.type === "checkbox" || control.type === "radio") {
+      if (control.type === "file") {
+        if (!control.required) return;
+        ok = control.files.length > 0;
+      } else if (control.type === "radio") {
+        if (!control.required) return;
+        ok = $$(`input[type=radio][name="${CSS.escape(control.name)}"]`, control.form || formulario).some((r) => r.checked);
+      } else if (control.type === "checkbox") {
         if (!control.required) return;
         ok = control.checked;
       } else if (control.value.trim() === "") {
@@ -525,37 +216,11 @@
       const campo = control.closest(".campo");
       if (!campo?.classList.contains("campo--error")) return;
       campo.classList.remove("campo--sin-mensaje");
-      const ok = control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
+      const ok = control.type === "radio" ? true : control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
       if (ok) campo.classList.remove("campo--error");
     };
     control.addEventListener("input", quitarError);
     control.addEventListener("change", quitarError);
-  });
-
-  $$("form[data-demo-form]").forEach((formulario) => {
-    formulario.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      if (!validar(formulario)) {
-        snackbar("Revisá los campos marcados en rojo.", "error");
-        return;
-      }
-      const boton = $("button[type=submit]", formulario);
-      const mensaje = formulario.dataset.demoForm;
-      const destino = formulario.dataset.redirigir;
-      if (boton) {
-        boton.classList.add("esta-cargando");
-        boton.insertAdjacentHTML("afterbegin", '<span class="spinner spinner--sm spinner--claro" data-temporal></span>');
-      }
-      setTimeout(() => {
-        if (boton) {
-          boton.classList.remove("esta-cargando");
-          $("[data-temporal]", boton)?.remove();
-        }
-        if (mensaje) snackbar(mensaje, formulario.dataset.demoTipo || "exito");
-        if (destino) setTimeout(() => (location.href = destino), mensaje ? 700 : 0);
-        else if (formulario.hasAttribute("data-limpiar")) formulario.reset();
-      }, 700);
-    });
   });
 
   // Mostrar / ocultar contraseña
@@ -796,7 +461,7 @@
 
   // Vista previa de la foto de perfil elegida
   $$("[data-foto-entrada]").forEach((entrada) => {
-    const vista = $("[data-vista-foto]");
+    const vista = $("[data-vista-foto]", entrada.closest("form") || document);
     const vistaInicial = vista?.innerHTML;
     entrada.addEventListener("change", () => {
       const archivo = entrada.files?.[0];
@@ -810,6 +475,477 @@
       imagen.src = URL.createObjectURL(archivo);
       vista.replaceChildren(imagen);
     });
+  });
+
+
+  /* ------------------------------------------------------------------------
+     Pop ups (<dialog> nativo)
+     data-modal-abrir="id"   → abre el pop up
+     data-modal-cerrar       → cierra el pop up en el que está
+     data-abrir-al-cargar    → se abre solo (el servidor devolvió errores)
+     ---------------------------------------------------------------------- */
+  document.addEventListener("click", (evento) => {
+    const abrir = evento.target.closest("[data-modal-abrir]");
+    if (abrir) {
+      evento.preventDefault();
+      document.getElementById(abrir.dataset.modalAbrir)?.showModal();
+      return;
+    }
+    const cerrar = evento.target.closest("[data-modal-cerrar]");
+    if (cerrar) {
+      evento.preventDefault();
+      cerrar.closest("dialog")?.close();
+      return;
+    }
+    // Clic sobre el fondo oscuro
+    if (evento.target.tagName === "DIALOG" && evento.target.open) {
+      const caja = evento.target.getBoundingClientRect();
+      const fuera =
+        evento.clientX < caja.left || evento.clientX > caja.right || evento.clientY < caja.top || evento.clientY > caja.bottom;
+      if (fuera) evento.target.close();
+    }
+  });
+
+  $$('dialog[data-abrir-al-cargar="true"]').forEach((dialogo) => dialogo.showModal());
+
+  // Pedir confirmación antes de enviar (borrar, quitar, cerrar una búsqueda)
+  document.addEventListener("submit", (evento) => {
+    const formulario = evento.target;
+    if (formulario.dataset.confirmar && !confirm(formulario.dataset.confirmar)) evento.preventDefault();
+  }, true);
+
+  // Enviar el formulario al cambiar un filtro o una opción (estado de búsqueda, filtros, orden)
+  document.addEventListener("change", (evento) => {
+    const control = evento.target.closest?.("[data-enviar-al-cambiar], [data-enviar-al-cambiar] select");
+    if (!control || control.closest("[data-tablero]")) return;
+    const formulario = control.form || control.closest("form");
+    if (formulario) formulario.requestSubmit ? formulario.requestSubmit() : formulario.submit();
+  });
+
+  // "Repetí la contraseña": tiene que ser igual a la otra
+  $$("[data-igual-a]").forEach((repetir) => {
+    const original = document.getElementById(repetir.dataset.igualA);
+    const revisar = () => repetir.setCustomValidity(repetir.value && original && repetir.value !== original.value ? "No coinciden" : "");
+    repetir.addEventListener("input", revisar);
+    original?.addEventListener("input", revisar);
+  });
+
+  // CUIT: solo números, con los guiones en su lugar (30-12345678-9)
+  $$("[data-cuit]").forEach((entrada) => {
+    const formatear = () => {
+      const d = entrada.value.replace(/\D/g, "").slice(0, 11);
+      entrada.value = d.length > 10 ? `${d.slice(0, 2)}-${d.slice(2, 10)}-${d.slice(10)}` : d.length > 2 ? `${d.slice(0, 2)}-${d.slice(2)}` : d;
+    };
+    entrada.addEventListener("input", formatear);
+    formatear();
+  });
+
+  /* ------------------------------------------------------------------------
+     Selector de mes y año (MM/AAAA) con calendario de meses
+     ---------------------------------------------------------------------- */
+  const hoy = new Date();
+  const mesActual = hoy.getFullYear() * 12 + hoy.getMonth();
+
+  $$("[data-selector-mes]").forEach((selector) => {
+    const entrada = $("[data-selector-mes-entrada]", selector);
+    const abrir = $("[data-selector-mes-abrir]", selector);
+    const panel = $("[data-selector-mes-panel]", selector);
+    const textoAnio = $("[data-selector-mes-anio]", selector);
+    const botonesMes = $$("[data-mes]", selector);
+    const siguiente = $("[data-selector-mes-siguiente]", selector);
+    const permitirFuturo = selector.dataset.permitirFuturo === "true";
+    const anioMaximo = permitirFuturo ? hoy.getFullYear() + 10 : hoy.getFullYear();
+    let anio = hoy.getFullYear();
+
+    const leer = () => {
+      const partes = /^(\d{2})\/(\d{4})$/.exec(entrada.value);
+      return partes ? { mes: Number(partes[1]), anio: Number(partes[2]) } : null;
+    };
+
+    const dibujar = () => {
+      const elegido = leer();
+      textoAnio.textContent = String(anio);
+      siguiente.disabled = anio >= anioMaximo;
+      botonesMes.forEach((boton) => {
+        const mes = Number(boton.dataset.mes);
+        const indice = anio * 12 + mes - 1;
+        boton.disabled = !permitirFuturo && indice > mesActual;
+        const esElegido = elegido && elegido.mes === mes && elegido.anio === anio;
+        boton.classList.toggle("esta-elegido", Boolean(esElegido));
+        boton.setAttribute("aria-pressed", String(Boolean(esElegido)));
+        boton.classList.toggle("es-actual", indice === mesActual);
+      });
+    };
+
+    const cerrar = () => {
+      panel.hidden = true;
+      abrir.setAttribute("aria-expanded", "false");
+    };
+
+    abrir.addEventListener("click", () => {
+      if (!panel.hidden) return cerrar();
+      anio = leer()?.anio || hoy.getFullYear();
+      dibujar();
+      panel.hidden = false;
+      abrir.setAttribute("aria-expanded", "true");
+      (botonesMes.find((b) => b.classList.contains("esta-elegido")) || botonesMes.find((b) => !b.disabled))?.focus();
+    });
+    $("[data-selector-mes-anterior]", selector).addEventListener("click", () => { anio--; dibujar(); });
+    siguiente.addEventListener("click", () => { if (anio < anioMaximo) { anio++; dibujar(); } });
+    botonesMes.forEach((boton) =>
+      boton.addEventListener("click", () => {
+        entrada.value = `${boton.dataset.mes.padStart(2, "0")}/${anio}`;
+        entrada.dispatchEvent(new Event("input", { bubbles: true }));
+        entrada.dispatchEvent(new Event("change", { bubbles: true }));
+        cerrar();
+        entrada.focus();
+      })
+    );
+
+    // Escribir a mano: solo números y la barra se pone sola
+    entrada.addEventListener("input", (evento) => {
+      if (evento.isTrusted === false) return;
+      const d = entrada.value.replace(/\D/g, "").slice(0, 6);
+      entrada.value = d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+    });
+    // No puede ser un mes futuro (salvo la finalización de una formación en curso)
+    const revisar = () => {
+      const valor = leer();
+      const futuro = valor && !permitirFuturo && valor.anio * 12 + valor.mes - 1 > mesActual;
+      entrada.setCustomValidity(futuro ? "No puede ser un mes futuro" : "");
+    };
+    entrada.addEventListener("change", revisar);
+    entrada.addEventListener("input", revisar);
+
+    document.addEventListener("click", (evento) => { if (!selector.contains(evento.target)) cerrar(); });
+    selector.addEventListener("keydown", (evento) => {
+      if (evento.key === "Escape" && !panel.hidden) {
+        evento.stopPropagation();
+        evento.preventDefault();
+        cerrar();
+        abrir.focus();
+      }
+    });
+  });
+
+  // "Trabajo actualmente acá" / "Lo estoy cursando": oculta la fecha de finalización
+  $$("[data-alternar-fin]").forEach((casilla) => {
+    const contenedor = document.querySelector(`[data-fin-de="${casilla.id}"]`);
+    const actualizar = () => {
+      if (!contenedor) return;
+      contenedor.hidden = casilla.checked;
+      $$("input", contenedor).forEach((entrada) => {
+        entrada.required = !casilla.checked;
+        if (casilla.checked) {
+          entrada.value = "";
+          entrada.closest(".campo")?.classList.remove("campo--error");
+        }
+      });
+    };
+    casilla.addEventListener("change", actualizar);
+    actualizar();
+  });
+
+  /* ------------------------------------------------------------------------
+     Registro: experiencias y estudios que se agregan con un pop up y se
+     mandan junto con el formulario (inputs ocultos ExpPuesto, ForTitulo, …)
+     ---------------------------------------------------------------------- */
+  const actualizarVacio = (lista) => {
+    let vacio = $("[data-lista-vacia]", lista);
+    const hayItems = $$("[data-item-local]", lista).length > 0;
+    if (!hayItems && !vacio && lista.dataset.vacio) {
+      vacio = document.createElement("li");
+      vacio.className = "lista-local__vacio";
+      vacio.setAttribute("data-lista-vacia", "");
+      vacio.textContent = lista.dataset.vacio;
+      lista.appendChild(vacio);
+    }
+    if (hayItems) vacio?.remove();
+  };
+  $$("[data-lista-local]").forEach(actualizarVacio);
+
+  document.addEventListener("click", (evento) => {
+    const quitar = evento.target.closest("[data-quitar-item]");
+    if (!quitar) return;
+    const lista = quitar.closest("[data-lista-local]");
+    quitar.closest("[data-item-local]")?.remove();
+    if (lista) actualizarVacio(lista);
+  });
+
+  const camposLocales = {
+    experiencia: {
+      campos: { Puesto: "ExpPuesto", Empresa: "ExpEmpresa", Inicio: "ExpInicio", Fin: "ExpFin", Descripcion: "ExpDescripcion" },
+      actual: "Actual",
+      texto: (v) => [v.Puesto, `${v.Empresa} · ${v.Inicio} – ${v.Fin || "Actualidad"}`]
+    },
+    formacion: {
+      campos: { Titulo: "ForTitulo", Institucion: "ForInstitucion", Inicio: "ForInicio", Fin: "ForFin" },
+      actual: "EnCurso",
+      texto: (v) => [v.Titulo, `${v.Institucion} · ${v.Inicio} – ${v.Fin || "En curso"}`]
+    }
+  };
+
+  const aMes = (texto) => {
+    const p = /^(\d{2})\/(\d{4})$/.exec(texto || "");
+    return p ? Number(p[2]) * 12 + Number(p[1]) - 1 : null;
+  };
+
+  $$("form[data-modal-local]").forEach((formulario) => {
+    const tipo = formulario.dataset.modalLocal;
+    const config = camposLocales[tipo];
+    const lista = document.querySelector(`[data-lista-local="${tipo}"]`);
+    if (!config || !lista) return;
+
+    formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+      if (!validar(formulario)) return;
+      const valores = {};
+      Object.keys(config.campos).forEach((nombre) => (valores[nombre] = (formulario.elements[nombre]?.value || "").trim()));
+      if (formulario.elements[config.actual]?.checked) valores.Fin = "";
+
+      // La finalización no puede ser anterior al inicio
+      const inicio = aMes(valores.Inicio);
+      const fin = aMes(valores.Fin);
+      const campoFin = formulario.elements.Fin?.closest(".campo");
+      if (fin !== null && inicio !== null && fin < inicio) {
+        campoFin?.classList.add("campo--error");
+        const mensaje = campoFin && $(".campo__mensaje--error", campoFin);
+        if (mensaje) {
+          [...mensaje.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).forEach((n) => n.remove());
+          mensaje.append("La finalización no puede ser anterior al inicio");
+        }
+        return;
+      }
+
+      const item = document.createElement("li");
+      item.className = "item-local";
+      item.setAttribute("data-item-local", "");
+      const [titulo, detalle] = config.texto(valores);
+      const textos = document.createElement("div");
+      const fuerte = document.createElement("strong");
+      fuerte.textContent = titulo;
+      const linea = document.createElement("span");
+      linea.textContent = detalle;
+      textos.append(fuerte, linea);
+      item.appendChild(textos);
+      Object.entries(config.campos).forEach(([nombre, oculto]) => {
+        const entrada = document.createElement("input");
+        entrada.type = "hidden";
+        entrada.name = oculto;
+        entrada.value = valores[nombre];
+        item.appendChild(entrada);
+      });
+      const quitar = document.createElement("button");
+      quitar.type = "button";
+      quitar.className = "boton boton--texto";
+      quitar.setAttribute("data-quitar-item", "");
+      quitar.textContent = "Quitar";
+      item.appendChild(quitar);
+      lista.appendChild(item);
+      actualizarVacio(lista);
+
+      formulario.reset();
+      $$("[data-alternar-fin]", formulario).forEach((c) => c.dispatchEvent(new Event("change")));
+      formulario.closest("dialog")?.close();
+      snackbar(tipo === "experiencia" ? "Sumamos la experiencia." : "Sumamos la formación.", "exito");
+    });
+  });
+
+  /* ------------------------------------------------------------------------
+     Qué busco: agregar habilidades propias y filas de idiomas
+     ---------------------------------------------------------------------- */
+  $$("[data-habilidades]").forEach((grupo) => {
+    const lista = $("[data-habilidades-lista]", grupo);
+    const entrada = $("[data-habilidad-nueva]", grupo);
+    const agregar = () => {
+      const nombre = entrada.value.trim().replace(/\s+/g, " ");
+      if (!nombre) return;
+      const existente = $$("input[name=Habilidades]", lista).find((c) => c.value.toLowerCase() === nombre.toLowerCase());
+      if (existente) {
+        existente.checked = true;
+      } else {
+        const chip = document.createElement("label");
+        chip.className = "chip-seleccion";
+        const casilla = document.createElement("input");
+        casilla.type = "checkbox";
+        casilla.name = "Habilidades";
+        casilla.value = nombre.slice(0, 60);
+        casilla.checked = true;
+        const texto = document.createElement("span");
+        texto.textContent = casilla.value;
+        chip.append(casilla, texto);
+        lista.appendChild(chip);
+      }
+      entrada.value = "";
+      entrada.focus();
+    };
+    $("[data-habilidad-agregar]", grupo)?.addEventListener("click", agregar);
+    entrada?.addEventListener("keydown", (evento) => {
+      if (evento.key === "Enter") {
+        evento.preventDefault();
+        agregar();
+      }
+    });
+  });
+
+  $$("[data-idiomas]").forEach((grupo) => {
+    const lista = $("[data-idiomas-lista]", grupo);
+    const plantilla = $("[data-idioma-plantilla]", grupo);
+    $("[data-idioma-agregar]", grupo)?.addEventListener("click", () => {
+      const fila = plantilla.content.firstElementChild.cloneNode(true);
+      // Se propone el primer idioma que todavía no está elegido
+      const elegidos = $$("select[name=IdiomaIds]", lista).map((s) => s.value);
+      const selector = $("select[name=IdiomaIds]", fila);
+      const libre = [...selector.options].find((o) => !elegidos.includes(o.value));
+      if (libre) selector.value = libre.value;
+      lista.appendChild(fila);
+      selector.focus();
+    });
+    grupo.addEventListener("click", (evento) => {
+      const quitar = evento.target.closest("[data-idioma-quitar]");
+      if (quitar) quitar.closest("[data-idioma-fila]")?.remove();
+    });
+  });
+
+  /* ------------------------------------------------------------------------
+     Mis postulaciones: la persona mueve cada tarjeta (arrastrando o con el
+     selector) y el cambio se guarda en el servidor
+     ---------------------------------------------------------------------- */
+  const tablero = $("[data-tablero]");
+  if (tablero) {
+    const token = $("input[name=__RequestVerificationToken]", tablero)?.value || "";
+    let arrastrando = null;
+
+    const actualizarContadores = () => {
+      $$("[data-columna]", tablero).forEach((columna) => {
+        const cantidad = $$("[data-postulacion]", columna).length;
+        $("[data-columna-contador]", columna).textContent = String(cantidad);
+        columna.classList.toggle("esta-vacia", cantidad === 0);
+      });
+    };
+
+    // Guarda el estado. Si falla, la tarjeta vuelve a donde estaba.
+    const guardar = async (tarjeta, columnaAnterior, siguienteAnterior) => {
+      const columna = tarjeta.closest("[data-columna]");
+      const estado = columna.dataset.columna;
+      const selector = $("[data-estado-postulacion]", tarjeta);
+      try {
+        const cuerpo = new URLSearchParams({ estado, __RequestVerificationToken: token });
+        const respuesta = await fetch(`${tablero.dataset.urlEstado}/${tarjeta.dataset.postulacion}`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+          body: cuerpo
+        });
+        if (!respuesta.ok) throw new Error(String(respuesta.status));
+        if (selector) selector.value = estado;
+        snackbar(`Moviste la postulación a "${$("[data-columna-nombre]", columna).textContent.trim()}".`, "exito");
+      } catch {
+        $("[data-columna-lista]", columnaAnterior).insertBefore(tarjeta, siguienteAnterior);
+        if (selector) selector.value = columnaAnterior.dataset.columna;
+        snackbar("No pudimos guardar el cambio. Probá de nuevo.", "error");
+      }
+      actualizarContadores();
+    };
+
+    const mover = (tarjeta, estado) => {
+      const anterior = tarjeta.closest("[data-columna]");
+      const siguiente = tarjeta.nextElementSibling;
+      const destino = $$("[data-columna]", tablero).find((c) => c.dataset.columna === estado);
+      if (!destino || destino === anterior) return;
+      $("[data-columna-lista]", destino).prepend(tarjeta);
+      actualizarContadores();
+      guardar(tarjeta, anterior, siguiente);
+    };
+
+    tablero.addEventListener("change", (evento) => {
+      const selector = evento.target.closest("[data-estado-postulacion]");
+      if (selector) mover(selector.closest("[data-postulacion]"), selector.value);
+    });
+
+    let origen = null;
+    tablero.addEventListener("dragstart", (evento) => {
+      const tarjeta = evento.target.closest?.("[data-postulacion]");
+      if (!tarjeta) return;
+      arrastrando = tarjeta;
+      origen = { columna: tarjeta.closest("[data-columna]"), siguiente: tarjeta.nextElementSibling };
+      tarjeta.classList.add("esta-arrastrando");
+      evento.dataTransfer.effectAllowed = "move";
+      evento.dataTransfer.setData("text/plain", tarjeta.dataset.postulacion);
+    });
+    tablero.addEventListener("dragend", () => {
+      arrastrando?.classList.remove("esta-arrastrando");
+      arrastrando = null;
+      $$("[data-columna]", tablero).forEach((c) => c.classList.remove("es-destino"));
+    });
+
+    $$("[data-columna]", tablero).forEach((columna) => {
+      const lista = $("[data-columna-lista]", columna);
+      columna.addEventListener("dragover", (evento) => {
+        if (!arrastrando) return;
+        evento.preventDefault();
+        columna.classList.add("es-destino");
+        const despues = $$("[data-postulacion]:not(.esta-arrastrando)", lista).find((tarjeta) => {
+          const caja = tarjeta.getBoundingClientRect();
+          return evento.clientY < caja.top + caja.height / 2;
+        });
+        if (despues) lista.insertBefore(arrastrando, despues);
+        else lista.insertBefore(arrastrando, $(".tablero__vacio", lista));
+      });
+      columna.addEventListener("dragleave", (evento) => {
+        if (!columna.contains(evento.relatedTarget)) columna.classList.remove("es-destino");
+      });
+      columna.addEventListener("drop", (evento) => {
+        evento.preventDefault();
+        columna.classList.remove("es-destino");
+        if (!arrastrando || !origen) return;
+        actualizarContadores();
+        if (origen.columna !== columna) guardar(arrastrando, origen.columna, origen.siguiente);
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     Landing: el buscador "escribe" puestos reales (de JSearch o de Workly),
+     espera 5 segundos y los borra letra por letra. Es solo el texto de
+     ayuda: no busca nada ni muestra resultados.
+     ---------------------------------------------------------------------- */
+  $$("[data-animar-puestos]").forEach((entrada) => {
+    const puestos = entrada.dataset.animarPuestos.split("|").map((p) => p.trim()).filter(Boolean);
+    if (!puestos.length) return;
+    const textoOriginal = entrada.placeholder;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      entrada.placeholder = puestos[0];
+      return;
+    }
+    let indice = 0;
+    let temporizador = null;
+    const esperar = (ms) => new Promise((resolver) => (temporizador = setTimeout(resolver, ms)));
+    const enPausa = () => document.activeElement === entrada || entrada.value !== "";
+
+    const animar = async () => {
+      for (;;) {
+        if (enPausa()) {
+          entrada.placeholder = textoOriginal;
+          await esperar(600);
+          continue;
+        }
+        const puesto = puestos[indice % puestos.length];
+        indice++;
+        for (let i = 1; i <= puesto.length && !enPausa(); i++) {
+          entrada.placeholder = puesto.slice(0, i);
+          await esperar(70 + Math.random() * 60);
+        }
+        if (enPausa()) continue;
+        await esperar(5000);
+        for (let i = puesto.length - 1; i >= 0 && !enPausa(); i--) {
+          entrada.placeholder = puesto.slice(0, i);
+          await esperar(40);
+        }
+        await esperar(400);
+      }
+    };
+    entrada.addEventListener("focus", () => (entrada.placeholder = textoOriginal));
+    animar();
   });
 
   // Aviso que deja el servidor después de una acción (TempData["Mensaje"])
@@ -834,12 +970,11 @@
         if (texto && coincide) item.open = true;
       });
       if (vacio) vacio.hidden = visibles > 0;
+      // Los títulos de cada grupo se ocultan si no quedó ninguna pregunta del grupo
+      $$("[data-acordeon-grupo]").forEach((grupo) => {
+        grupo.hidden = !items.some((item) => !item.hidden && item.dataset.grupo === grupo.id);
+      });
     });
-  });
-
-  // Botones que solo muestran un aviso (Exportar, Descargar CV, etc.)
-  $$("[data-confirmar-accion]").forEach((boton) => {
-    boton.addEventListener("click", () => snackbar(boton.dataset.confirmarAccion, boton.dataset.tipo || "exito"));
   });
 
   // API pública mínima para usar desde las vistas o la consola
