@@ -68,6 +68,7 @@
                     }
                 </p>
                 <div class="lista-tags">
+                    <partial name="_SelloOficial" model="oferta" />
                     @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="tag tag--borde tag--lg">@oferta.Modalidad</span> }
                     @if (!string.IsNullOrEmpty(oferta.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@oferta.Tipo_Contrato</span> }
                     <span class="tag @(oferta.EsExterna ? "" : "tag--principal") tag--lg">@(oferta.EsExterna ? "Publicada en " + oferta.Fuente : "Publicada en Workly")</span>
