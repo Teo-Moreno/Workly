@@ -1,0 +1,9 @@
+@model RegistroBase
+<div class="campo @Html.ClaseError(nameof(Model.AceptaTerminos))">
+    <label class="casilla casilla--sm">
+        <input asp-for="AceptaTerminos" type="checkbox" required />
+        <span class="casilla__caja"><icono nombre="check" /></span>
+        <span>Acepto los <a class="enlace" asp-controller="Home" asp-action="Terminos" target="_blank">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy" target="_blank">Política de privacidad</a></span>
+    </label>
+    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.AceptaTerminos), "Tenés que aceptar los términos para continuar")</span>
+</div>

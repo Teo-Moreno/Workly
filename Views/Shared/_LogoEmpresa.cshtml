@@ -1,0 +1,12 @@
+@model (string? Logo, string Nombre, string Clases)
+@* Logo de una empresa: la imagen que subió o sus iniciales *@
+<span class="logo-empresa @Model.Clases" aria-hidden="true">
+    @if (!string.IsNullOrEmpty(Model.Logo))
+    {
+        <img src="@Model.Logo" alt="" loading="lazy" referrerpolicy="no-referrer" />
+    }
+    else
+    {
+        @Textos.Iniciales(Model.Nombre)
+    }
+</span>

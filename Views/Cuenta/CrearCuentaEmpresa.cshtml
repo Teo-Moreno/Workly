@@ -1,0 +1,173 @@
+@model RegistroEmpresaViewModel
+@{
+    ViewData["Title"] = "Crear cuenta de empresa";
+    var externo = Model.ProveedorExterno != null;
+    var prefijo = Model.Paises.FirstOrDefault(p => p.ID == Model.IDPais)?.Codigo_Telefono ?? "+54";
+    var pasos = new[] { "Quién la maneja", "La empresa" };
+}
+@section Barra {
+    <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+}
+@* Registro de una empresa: la persona responsable (Usuario) y los datos que verifican la empresa (Empresa) *@
+
+<div class="cuenta-tarjeta cuenta-tarjeta--ancha">
+    <h1 class="cuenta-tarjeta__titulo">Registrá tu empresa</h1>
+    <p class="cuenta-tarjeta__bajada">Paso <strong data-paso-actual>1</strong> de @pasos.Length. Con la cuenta de empresa publicás búsquedas y ves quién se postula.</p>
+
+    <partial name="_TipoCuenta" model='"empresa"' />
+
+    <ol class="pasos registro__pasos" aria-label="Progreso del registro">
+        @for (var i = 0; i < pasos.Length; i++)
+        {
+            <li class="pasos__item @(i == 0 ? "esta-actual" : "")" data-paso-indicador>
+                <span class="pasos__circulo"><span class="pasos__numero">@(i + 1)</span><icono nombre="check" /></span>
+                @pasos[i]
+            </li>
+        }
+    </ol>
+
+    <partial name="_ErroresFormulario" />
+
+    @if (!externo)
+    {
+        <partial name="_BotonesExternos" model='("Registrarte", "empresa", (string?)null)' />
+    }
+
+    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+        @* ---------------- Paso 1 · Responsable ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso>
+            <legend class="solo-lectores">Paso 1: quién maneja la cuenta</legend>
+            @if (externo)
+            {
+                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @Model.ProveedorExterno. No necesitás contraseña.</p>
+            }
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.Nombre))">
+                    <label class="campo__etiqueta" asp-for="Nombre">Tu nombre</label>
+                    <input class="campo__control" asp-for="Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Nombre), "Completá tu nombre")</span>
+                </div>
+                <div class="campo @Html.ClaseError(nameof(Model.Apellido))">
+                    <label class="campo__etiqueta" asp-for="Apellido">Tu apellido</label>
+                    <input class="campo__control" asp-for="Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Apellido), "Completá tu apellido")</span>
+                </div>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Email))">
+                <label class="campo__etiqueta" asp-for="Email">Email de la empresa</label>
+                <div class="control-con-icono">
+                    <icono nombre="mail" />
+                    <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="nombre@tuempresa.com.ar" maxlength="100" required readonly="@externo" />
+                </div>
+                <span class="campo__ayuda">Tiene que ser del mismo dominio que el sitio web de la empresa. No se aceptan Gmail, Hotmail, Outlook ni similares.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+            </div>
+
+            @if (!externo)
+            {
+                <partial name="_CampoContrasena" />
+            }
+
+            <partial name="_AceptaTerminos" />
+
+            <div class="registro__acciones">
+                <span></span>
+                <button class="boton boton--lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+            </div>
+        </fieldset>
+
+        @* ---------------- Paso 2 · Empresa ---------------- *@
+        <fieldset class="formulario registro__paso" data-paso hidden>
+            <legend class="solo-lectores">Paso 2: datos de la empresa</legend>
+            <p class="texto-suave">Con estos datos comprobamos que la empresa existe: el CUIT tiene que ser válido y el email, del dominio de su sitio web.</p>
+
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.NombreEmpresa))">
+                    <label class="campo__etiqueta" asp-for="NombreEmpresa">Nombre de la empresa</label>
+                    <input class="campo__control" asp-for="NombreEmpresa" autocomplete="organization" placeholder="Como la conoce la gente" maxlength="100" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.NombreEmpresa), "Completá el nombre de la empresa")</span>
+                </div>
+                <div class="campo @Html.ClaseError(nameof(Model.RazonSocial))">
+                    <label class="campo__etiqueta" asp-for="RazonSocial">Razón social</label>
+                    <input class="campo__control" asp-for="RazonSocial" placeholder="Ej.: Nombre S.A., Nombre S.R.L." maxlength="150" required />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.RazonSocial), "Completá la razón social")</span>
+                </div>
+            </div>
+
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.CUIT))">
+                    <label class="campo__etiqueta" asp-for="CUIT">CUIT</label>
+                    <input class="campo__control" asp-for="CUIT" inputmode="numeric" placeholder="30-12345678-9" maxlength="13" required
+                           pattern="[0-9]{2}-?[0-9]{8}-?[0-9]" data-cuit />
+                    <span class="campo__ayuda">11 números. Los guiones se ponen solos.</span>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.CUIT), "Ingresá los 11 números del CUIT")</span>
+                </div>
+                <div class="campo @Html.ClaseError(nameof(Model.Rubro))">
+                    <label class="campo__etiqueta" asp-for="Rubro">Rubro</label>
+                    <select class="campo__control" asp-for="Rubro" required>
+                        <option value="">Elegí el rubro</option>
+                        @foreach (var rubro in Catalogos.Rubros)
+                        {
+                            <option selected="@(Model.Rubro == rubro)">@rubro</option>
+                        }
+                    </select>
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Rubro), "Elegí el rubro")</span>
+                </div>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.SitioWeb))">
+                <label class="campo__etiqueta" asp-for="SitioWeb">Sitio web de la empresa</label>
+                <div class="control-con-icono">
+                    <icono nombre="globe" />
+                    <input class="campo__control" asp-for="SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="tuempresa.com.ar" maxlength="200" required />
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.SitioWeb), "Ingresá el sitio web de la empresa")</span>
+            </div>
+
+            <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = Model.Paises, Provincias = Model.Provincias, IDPais = Model.IDPais, IDProvincia = Model.IDProvincia, EtiquetaProvincia = "Provincia de la sede" }' />
+
+            <div class="formulario__fila">
+                <div class="campo @Html.ClaseError(nameof(Model.Ubicacion))">
+                    <label class="campo__etiqueta" asp-for="Ubicacion">Localidad o dirección <span class="campo__opcional">(opcional)</span></label>
+                    <input class="campo__control" asp-for="Ubicacion" placeholder="Ej.: Palermo, CABA" maxlength="100" />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Ubicacion), "Usá hasta 100 caracteres")</span>
+                </div>
+                <partial name="_CampoTelefono" model='new CampoTelefono { Valor = Model.Telefono, Prefijo = prefijo }' />
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Descripcion))">
+                <label class="campo__etiqueta" asp-for="Descripcion">¿Qué hace la empresa?</label>
+                <textarea class="campo__control" asp-for="Descripcion" rows="4" maxlength="500" required placeholder="Contá en pocas líneas a qué se dedica la empresa."></textarea>
+                <span class="campo__ayuda">Aparece en la página de la empresa. Hasta 500 caracteres.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Descripcion), "Contá en pocas líneas qué hace la empresa")</span>
+            </div>
+
+            <div class="campo @Html.ClaseError(nameof(Model.Logo))">
+                <span class="campo__etiqueta">Logo <span class="campo__opcional">(opcional)</span></span>
+                <div class="subir-foto">
+                    <span class="logo-empresa logo-empresa--lg subir-foto__vista" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
+                    <div class="pila" style="--pila-espacio: 8px">
+                        <label class="boton boton--contorno boton--sm boton--archivo">
+                            <icono nombre="upload" />Elegir logo
+                            <input asp-for="Logo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
+                                   data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
+                        </label>
+                        <span class="texto-chico texto-suave">JPG, PNG o WEBP de hasta 5 MB.</span>
+                    </div>
+                </div>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Logo), "Subí una imagen JPG, PNG o WEBP")</span>
+            </div>
+
+            @if (Model.Logo != null)
+            {
+                <p class="texto-chico texto-suave">Por seguridad, si hubo un error tenés que volver a elegir el logo.</p>
+            }
+
+            <div class="registro__acciones">
+                <button class="boton boton--contorno boton--lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="boton boton--acento boton--lg" type="submit">Crear cuenta de empresa</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
