@@ -2785,3 +2785,267 @@ select.campo__control {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ---------------------------------------------------------------------------
+   Selector de mes y año (kit 08 › Calendario, versión mes/año)
+   ------------------------------------------------------------------------- */
+.selector-mes {
+  position: relative;
+}
+
+.selector-mes__entrada {
+  padding-right: 48px;
+}
+
+.selector-mes__abrir {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--color-principal);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.selector-mes__abrir:hover,
+.selector-mes__abrir[aria-expanded="true"] {
+  background: var(--color-principal-tenue);
+}
+
+.selector-mes__abrir .icono {
+  width: 20px;
+  height: 20px;
+}
+
+.selector-mes__panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 288px;
+  max-width: calc(100vw - 48px);
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--color-neutro-oscuro);
+  color: var(--gris-6);
+  box-shadow: var(--sombra-calendario);
+}
+
+.selector-mes__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-left: 8px;
+}
+
+.selector-mes__anio {
+  color: var(--gris-7);
+  font-size: var(--texto-16);
+}
+
+.selector-mes__flechas {
+  display: flex;
+  gap: 4px;
+}
+
+.selector-mes__flecha {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gris-7);
+  cursor: pointer;
+}
+
+.selector-mes__flecha:hover:not(:disabled) {
+  background: rgba(243, 244, 246, 0.15);
+}
+
+.selector-mes__flecha:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.selector-mes__flecha .icono {
+  width: 18px;
+  height: 18px;
+}
+
+.selector-mes__meses {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.selector-mes__mes {
+  height: 40px;
+  border: 0;
+  border-radius: 40px;
+  background: transparent;
+  color: var(--gris-6);
+  font: inherit;
+  font-size: var(--texto-14);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.selector-mes__mes:hover:not(:disabled) {
+  background: rgba(243, 244, 246, 0.15);
+}
+
+.selector-mes__mes.es-actual {
+  box-shadow: inset 0 0 0 1px rgba(243, 244, 246, 0.5);
+}
+
+.selector-mes__mes.esta-elegido {
+  background: var(--color-principal);
+  color: var(--color-blanco);
+}
+
+.selector-mes__mes:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.selector-mes__mes:focus-visible,
+.selector-mes__flecha:focus-visible {
+  outline: 2px solid var(--color-secundario);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------------------------
+   Agregados de componentes
+   ------------------------------------------------------------------------- */
+.campo__control--sm {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: var(--texto-14);
+}
+
+select.campo__control--sm {
+  padding-right: 32px;
+}
+
+.campo__control--fijo {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  background: var(--gris-7);
+  color: var(--gris-3);
+}
+
+.campo__ayuda--centro {
+  text-align: center;
+}
+
+.interruptor--etiqueta {
+  gap: 12px;
+  font-size: var(--texto-15);
+}
+
+.etiqueta--gris {
+  background: var(--gris-7);
+  color: var(--gris-3);
+}
+
+.tag--principal {
+  background: var(--color-principal-tenue);
+  color: var(--color-principal);
+}
+
+.punto--info { color: var(--color-info); }
+.punto--advertencia { color: var(--color-advertencia); }
+.punto--exito { color: var(--color-exito); }
+.punto--error { color: var(--color-error); }
+
+.avatar--md {
+  width: 48px;
+  height: 48px;
+  font-size: var(--texto-16);
+}
+
+.caja-icono--lg {
+  width: 56px;
+  height: 56px;
+}
+
+.caja-icono--lg .icono {
+  width: 28px;
+  height: 28px;
+}
+
+.boton--peligro-contorno {
+  --boton-fondo: var(--color-blanco);
+  --boton-texto: var(--color-error);
+  --boton-borde: var(--color-error);
+}
+
+.boton--peligro-contorno:hover {
+  --boton-fondo: rgba(186, 0, 0, 0.08);
+}
+
+.texto-con-saltos {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Aviso en línea con ícono (sin ser snackbar) */
+p.aviso,
+.aviso--advertencia,
+.aviso--error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radio-md);
+  background: var(--color-info-tenue);
+  color: var(--gris-2);
+  font-size: var(--texto-15);
+}
+
+p.aviso .icono {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.aviso--advertencia {
+  background: rgba(251, 199, 86, 0.18);
+  color: var(--color-advertencia-texto);
+}
+
+.aviso--error {
+  background: rgba(186, 0, 0, 0.07);
+  color: var(--color-error);
+}
+
+.modal__pie {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.navbar__contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--color-acento);
+  color: var(--color-principal);
+  font-size: var(--texto-13);
+  font-weight: 700;
+}

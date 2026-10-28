@@ -1,0 +1,33 @@
+@model CampoUbicacion
+@{
+    var idPais = $"{Model.Prefijo}{Model.NombrePais}";
+    var idProvincia = $"{Model.Prefijo}{Model.NombreProvincia}";
+}
+@* País + provincia: al cambiar el país se muestran solo sus provincias (site.js › data-selector-pais) *@
+<div class="formulario__fila" data-ubicacion>
+    <div class="campo @Html.ClaseError(Model.NombrePais)">
+        <label class="campo__etiqueta" for="@idPais">País</label>
+        <select class="campo__control" id="@idPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
+            @if (Model.Paises.Count != 1)
+            {
+                <option value="">Elegí el país</option>
+            }
+            @foreach (var pais in Model.Paises)
+            {
+                <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
+            }
+        </select>
+        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Model.NombrePais, "Elegí el país")</span>
+    </div>
+    <div class="campo @Html.ClaseError(Model.NombreProvincia)">
+        <label class="campo__etiqueta" for="@idProvincia">@Model.EtiquetaProvincia</label>
+        <select class="campo__control" id="@idProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
+            <option value="">@(Model.TodoElPais ? "Todo el país" : "Elegí la provincia")</option>
+            @foreach (var provincia in Model.Provincias)
+            {
+                <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == Model.IDProvincia)">@provincia.Nombre</option>
+            }
+        </select>
+        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Model.NombreProvincia, "Elegí la provincia")</span>
+    </div>
+</div>

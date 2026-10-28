@@ -1,0 +1,44 @@
+@model (bool TienePublicaciones, int Pendientes)
+@functions {
+    private string Clase(string controlador, string? accion = null)
+    {
+        var actual = string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), controlador, StringComparison.OrdinalIgnoreCase)
+                     && (accion == null || string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), accion, StringComparison.OrdinalIgnoreCase));
+        return actual ? "navbar__link esta-activo" : "navbar__link";
+    }
+}
+@* Links de la navbar de la app (también se usan en el menú del celular) *@
+@if (!User.EstaLogueado())
+{
+    <a class="@Clase("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    <a class="@Clase("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+}
+else if (User.EsEmpresa())
+{
+    <a class="@Clase("Publicaciones", "Index")" asp-controller="Publicaciones" asp-action="Index">Mis búsquedas</a>
+    <a class="@Clase("Publicaciones", "Nueva")" asp-controller="Publicaciones" asp-action="Nueva">Publicar búsqueda</a>
+    <a class="@Clase("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+    <a class="@Clase("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil de la empresa</a>
+}
+else
+{
+    <a class="@Clase("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a>
+    <a class="@Clase("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    <a class="@Clase("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
+    <a class="@Clase("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+    <a class="@Clase("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
+    @if (Model.TienePublicaciones)
+    {
+        <a class="@Clase("Publicaciones")" asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
+    }
+}
+@if (User.EsModerador())
+{
+    <a class="@Clase("Moderacion")" asp-controller="Moderacion" asp-action="Index">
+        <span>Moderación</span>
+        @if (Model.Pendientes > 0)
+        {
+            <span class="navbar__contador" aria-label="@Model.Pendientes por revisar">@Model.Pendientes</span>
+        }
+    </a>
+}

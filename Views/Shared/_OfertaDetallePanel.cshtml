@@ -1,69 +1,45 @@
 @model Oferta
 @{
     var visible = ViewData["Visible"] is true;
+    var urlDetalle = Model.EsExterna ? Url.Action("Externa", "Empleos", new { id = Model.ID }) : Url.Action("Detalle", "Empleos", new { id = Model.ID });
 }
 @* Vista previa de la oferta (Figma › Media · WF 02 › Detalle de oferta) *@
-<article class="detalle-panel" data-detalle-oferta="@Model.Id" hidden="@(!visible)" aria-labelledby="detalle-titulo-@Model.Id">
+<article class="detalle-panel" data-detalle-oferta="@Model.Clave" hidden="@(!visible)" aria-labelledby="detalle-titulo-@Model.Clave">
     <div class="detalle-panel__barra">
-        <span class="logo-empresa logo-empresa--md" aria-hidden="true">@Model.Iniciales</span>
-        <div class="fila">
-            <button class="boton boton--contorno boton--sm" type="button" data-compartir>
-                <icono nombre="share" />Compartir
-            </button>
-            <button class="boton boton--contorno boton--sm @(Model.Guardada ? "esta-activo" : "")" type="button" aria-pressed="@(Model.Guardada ? "true" : "false")" data-guardar>
-                <icono nombre="@(Model.Guardada ? "bookmark-fill" : "bookmark")" /><span data-guardar-texto>@(Model.Guardada ? "Guardada" : "Guardar")</span>
-            </button>
-        </div>
+        <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, "logo-empresa--md")' />
+        <span class="tag @(Model.EsExterna ? "" : "tag--principal")">@(Model.EsExterna ? "Publicada en " + Model.Fuente : "Publicada en Workly")</span>
     </div>
 
     <header class="detalle-panel__encabezado">
-        <h2 class="detalle-panel__titulo" id="detalle-titulo-@Model.Id">@Model.Puesto</h2>
-        <p class="detalle-panel__meta">@Model.Empresa · @Model.Ubicacion · @Model.PublicadoTexto</p>
+        <h2 class="detalle-panel__titulo" id="detalle-titulo-@Model.Clave">@Model.Titulo</h2>
+        <p class="detalle-panel__meta">@string.Join(" · ", new[] { Model.Empresa, Model.UbicacionVisible, Model.PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)))</p>
         <div class="lista-tags">
-            <span class="tag tag--borde tag--lg">@Model.ModalidadDetalle</span>
-            <span class="tag tag--borde tag--lg">@Model.Nivel</span>
-            <span class="tag tag--borde tag--lg">@Model.Contratacion</span>
-            <span class="tag tag--borde tag--lg">@Model.Jornada</span>
+            @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde tag--lg">@Model.Modalidad</span> }
+            @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@Model.Tipo_Contrato</span> }
+            @if (!Model.EsExterna && Model.Cantidad_Puestos > 1) { <span class="tag tag--borde tag--lg">@Model.Cantidad_Puestos vacantes</span> }
         </div>
     </header>
 
-    <div class="cajas-dato">
-        <div class="caja-dato">
-            <span class="caja-dato__etiqueta">Rango salarial</span>
-            <strong class="caja-dato__valor">@Model.Salario</strong>
-            <span class="caja-dato__detalle">bruto mensual</span>
+    @if (Model.SalarioVisible != null)
+    {
+        <div class="cajas-dato">
+            <div class="caja-dato">
+                <span class="caja-dato__etiqueta">Salario</span>
+                <strong class="caja-dato__valor">@Model.SalarioVisible</strong>
+            </div>
         </div>
-        <div class="caja-dato">
-            <span class="caja-dato__etiqueta">Experiencia</span>
-            <strong class="caja-dato__valor">@Model.Experiencia</strong>
-            <span class="caja-dato__detalle">@Model.ExperienciaDetalle</span>
-        </div>
-    </div>
+    }
 
-    <partial name="_Compatibilidad" model="Model" />
-
-    <section class="detalle-panel__seccion">
-        <h3 class="detalle-panel__subtitulo">Sobre el puesto</h3>
-        <p>@Model.SobrePuesto</p>
-    </section>
-
-    <section class="detalle-panel__seccion">
-        <h3 class="detalle-panel__subtitulo">Requisitos</h3>
-        <ul class="lista-puntos" role="list">
-            @foreach (var requisito in Model.Requisitos)
-            {
-                <li>@requisito</li>
-            }
-        </ul>
-    </section>
-
-    <section class="detalle-panel__seccion">
-        <h3 class="detalle-panel__subtitulo">Habilidades</h3>
-        <partial name="_HabilidadesOferta" model="Model" />
-    </section>
+    @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
+    {
+        <section class="detalle-panel__seccion">
+            <h3 class="detalle-panel__subtitulo">Sobre el puesto</h3>
+            <p class="texto-con-saltos">@Textos.Recortar(Model.Descripcion, 700)</p>
+        </section>
+    }
 
     <div class="detalle-panel__acciones">
-        <button class="boton boton--lg" type="button" data-postular data-puesto="@Model.Puesto" data-empresa="@Model.Empresa">Postularme ahora</button>
-        <a class="boton boton--contorno boton--lg" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@Model.Id">Ver oferta completa</a>
+        <partial name="_AccionesOferta" model="Model" />
+        <a class="boton boton--contorno boton--lg" href="@urlDetalle">Ver oferta completa</a>
     </div>
 </article>

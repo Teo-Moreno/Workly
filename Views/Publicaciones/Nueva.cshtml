@@ -1,0 +1,119 @@
+@model PublicarViewModel
+@{
+    ViewData["Title"] = "Publicar búsqueda";
+    var hoy = DateTime.Today.ToString("yyyy-MM-dd");
+}
+@* Formulario para publicar una búsqueda (tabla OfertaLaboral) *@
+
+<div class="contenedor seccion-app seccion-app--angosta">
+    <header class="encabezado-pagina">
+        <nav class="migas migas--chica" aria-label="Estás en">
+            <a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
+            <icono nombre="chevron-right" />
+            <span aria-current="page">Publicar búsqueda</span>
+        </nav>
+        <h1 class="encabezado-pagina__titulo">Publicar una búsqueda</h1>
+        <p class="encabezado-pagina__bajada">
+            @(Model.EsEmpresa
+                ? "Se publica al instante en Buscar trabajo y en la página de tu empresa."
+                : "Antes de publicarla la revisa el equipo de Workly. Si no la podemos publicar, te contamos por qué.")
+        </p>
+    </header>
+
+    <partial name="_ErroresFormulario" />
+
+    <form class="formulario tarjeta" asp-controller="Publicaciones" asp-action="Nueva" method="post" novalidate data-formulario-real>
+        <div class="campo @Html.ClaseError(nameof(Model.Titulo))">
+            <label class="campo__etiqueta" asp-for="Titulo">Título de la búsqueda</label>
+            <input class="campo__control" asp-for="Titulo" maxlength="150" required placeholder="Ej.: Cajero/a para supermercado en Palermo" />
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Titulo), "Escribí el título de la búsqueda")</span>
+        </div>
+
+        <div class="formulario__fila">
+            <div class="campo @Html.ClaseError(nameof(Model.Puesto))">
+                <label class="campo__etiqueta" asp-for="Puesto">Puesto</label>
+                <input class="campo__control" asp-for="Puesto" maxlength="100" required placeholder="Ej.: Cajero/a" />
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Puesto), "Escribí el puesto")</span>
+            </div>
+            @if (Model.EsEmpresa)
+            {
+                <div class="campo">
+                    <span class="campo__etiqueta">Empresa</span>
+                    <p class="campo__control campo__control--fijo">@Model.EmpresaFija</p>
+                </div>
+            }
+            else
+            {
+                <div class="campo @Html.ClaseError(nameof(Model.EmpresaNombre))">
+                    <label class="campo__etiqueta" asp-for="EmpresaNombre">Empresa o negocio que contrata</label>
+                    <input class="campo__control" asp-for="EmpresaNombre" maxlength="100" required placeholder="Ej.: Almacén Don Pedro" />
+                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.EmpresaNombre), "Escribí el nombre de la empresa o el negocio")</span>
+                </div>
+            }
+        </div>
+
+        <div class="campo @Html.ClaseError(nameof(Model.Descripcion))">
+            <label class="campo__etiqueta" asp-for="Descripcion">Descripción</label>
+            <textarea class="campo__control" asp-for="Descripcion" rows="8" minlength="40" maxlength="2000" required
+                      placeholder="Qué tareas tiene el puesto, qué pedís (experiencia, estudios, horarios) y qué ofrecés."></textarea>
+            <span class="campo__ayuda">Entre 40 y 2000 caracteres.</span>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Descripcion), "Usá entre 40 y 2000 caracteres")</span>
+        </div>
+
+        <div class="formulario__fila">
+            <div class="campo @Html.ClaseError(nameof(Model.Modalidad))">
+                <label class="campo__etiqueta" asp-for="Modalidad">Modalidad</label>
+                <select class="campo__control" asp-for="Modalidad" required>
+                    <option value="">Elegí una opción</option>
+                    @foreach (var modalidad in Catalogos.Modalidades)
+                    {
+                        <option selected="@(Model.Modalidad == modalidad)">@modalidad</option>
+                    }
+                </select>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Modalidad), "Elegí la modalidad")</span>
+            </div>
+            <div class="campo @Html.ClaseError(nameof(Model.TipoEmpleo))">
+                <label class="campo__etiqueta" asp-for="TipoEmpleo">Tipo de empleo</label>
+                <select class="campo__control" asp-for="TipoEmpleo" required>
+                    <option value="">Elegí una opción</option>
+                    @foreach (var (tipo, _) in Catalogos.TiposEmpleo)
+                    {
+                        <option selected="@(Model.TipoEmpleo == tipo)">@tipo</option>
+                    }
+                </select>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.TipoEmpleo), "Elegí el tipo de empleo")</span>
+            </div>
+        </div>
+
+        <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = Model.Paises, Provincias = Model.Provincias, IDPais = Model.IDPais, IDProvincia = Model.IDProvincia, EtiquetaProvincia = "Provincia del trabajo" }' />
+
+        <div class="campo @Html.ClaseError(nameof(Model.Ubicacion))">
+            <label class="campo__etiqueta" asp-for="Ubicacion">Localidad o barrio <span class="campo__opcional">(opcional)</span></label>
+            <input class="campo__control" asp-for="Ubicacion" maxlength="100" placeholder="Ej.: Palermo" />
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Ubicacion), "Usá hasta 100 caracteres")</span>
+        </div>
+
+        <div class="formulario__fila formulario__fila--tres">
+            <div class="campo @Html.ClaseError(nameof(Model.Salario))">
+                <label class="campo__etiqueta" asp-for="Salario">Salario bruto por mes <span class="campo__opcional">(opcional)</span></label>
+                <input class="campo__control" asp-for="Salario" type="number" min="0" step="1000" placeholder="En pesos" />
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Salario), "Ingresá un monto válido")</span>
+            </div>
+            <div class="campo @Html.ClaseError(nameof(Model.CantidadPuestos))">
+                <label class="campo__etiqueta" asp-for="CantidadPuestos">Vacantes</label>
+                <input class="campo__control" asp-for="CantidadPuestos" type="number" min="1" max="999" required />
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.CantidadPuestos), "Ingresá entre 1 y 999")</span>
+            </div>
+            <div class="campo @Html.ClaseError(nameof(Model.FechaCierre))">
+                <label class="campo__etiqueta" asp-for="FechaCierre">Recibe postulaciones hasta <span class="campo__opcional">(opcional)</span></label>
+                <input class="campo__control" asp-for="FechaCierre" type="date" min="@hoy" />
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.FechaCierre), "Elegí una fecha desde hoy")</span>
+            </div>
+        </div>
+
+        <div class="formulario__acciones">
+            <a class="boton boton--gris" asp-controller="Publicaciones" asp-action="Index">Cancelar</a>
+            <button class="boton boton--acento" type="submit">@(Model.EsEmpresa ? "Publicar búsqueda" : "Enviar a revisión")</button>
+        </div>
+    </form>
+</div>
