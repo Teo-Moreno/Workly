@@ -631,13 +631,14 @@ public static class BD
         SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
                pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
                CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
-               o.IDUsuario_Publicador, o.Estado_Publicacion, o.Motivo_Rechazo,
+               o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
                (SELECT STRING_AGG(p.Nombre, ', ') FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
                (SELECT COUNT(*) FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
                CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
                     THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
         FROM OfertaLaboral o
         JOIN Empresa e ON e.ID = o.IDEmpresa
+        LEFT JOIN Usuario pu ON pu.ID = o.IDUsuario_Publicador
         LEFT JOIN Provincia pr ON pr.ID = o.IDProvincia";
 
     private const string OfertaPublica = @"o.Estado_Publicacion = N'Aprobada' AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))";

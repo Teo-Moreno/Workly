@@ -30,6 +30,9 @@ public class Oferta
 
     // Solo Workly
     public int? IDUsuario_Publicador { get; set; }
+
+    /// <summary>Tipo de cuenta de quien la publicó: "Empresa" o "Persona".</summary>
+    public string? TipoPublicador { get; set; }
     public string Estado_Publicacion { get; set; } = "Aprobada";
     public string? Motivo_Rechazo { get; set; }
     public int CantidadPostulantes { get; set; }
@@ -55,6 +58,9 @@ public class Oferta
 
     public string? UbicacionVisible =>
         string.Join(" · ", new[] { Ubicacion, Provincia }.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct()) is { Length: > 0 } t ? t : null;
+
+    /// <summary>Oficial: la publicó una cuenta de empresa o viene de otro sitio. No oficial: la publicó una persona.</summary>
+    public bool EsOficial => EsExterna || TipoPublicador == Usuario.TipoEmpresa;
 
     public string Fuente => EsExterna ? (string.IsNullOrWhiteSpace(Publicador) ? "otro sitio" : Publicador!) : "Workly";
 }
