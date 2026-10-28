@@ -356,13 +356,14 @@ BEGIN
     SET NOCOUNT ON;
     SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
-           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, o.Estado_Publicacion, o.Motivo_Rechazo,
+           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
            (SELECT STRING_AGG(p.Nombre, ', ') FROM dbo.OfertaPuesto op JOIN dbo.Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
            (SELECT COUNT(*) FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
            CASE WHEN EXISTS (SELECT 1 FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
                 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
     FROM dbo.OfertaLaboral o
     JOIN dbo.Empresa e ON e.ID = o.IDEmpresa
+    LEFT JOIN dbo.Usuario pu ON pu.ID = o.IDUsuario_Publicador
     LEFT JOIN dbo.Provincia pr ON pr.ID = o.IDProvincia
     WHERE o.ID = @ID;
 END
@@ -377,13 +378,14 @@ BEGIN
     DECLARE @IDUsuarioActual INT = 0;
     SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
-           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, o.Estado_Publicacion, o.Motivo_Rechazo,
+           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
            (SELECT STRING_AGG(p.Nombre, ', ') FROM dbo.OfertaPuesto op JOIN dbo.Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
            (SELECT COUNT(*) FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
            CASE WHEN EXISTS (SELECT 1 FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
                 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
     FROM dbo.OfertaLaboral o
     JOIN dbo.Empresa e ON e.ID = o.IDEmpresa
+    LEFT JOIN dbo.Usuario pu ON pu.ID = o.IDUsuario_Publicador
     LEFT JOIN dbo.Provincia pr ON pr.ID = o.IDProvincia
     WHERE o.IDUsuario_Publicador = @IDUsuario
     ORDER BY o.Fecha_Publicacion DESC, o.ID DESC;
@@ -411,13 +413,14 @@ BEGIN
     DECLARE @IDUsuarioActual INT = 0;
     SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
-           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, o.Estado_Publicacion, o.Motivo_Rechazo,
+           o.Fecha_Publicacion, o.Fecha_Cierre, o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
            (SELECT STRING_AGG(p.Nombre, ', ') FROM dbo.OfertaPuesto op JOIN dbo.Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
            (SELECT COUNT(*) FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
            CASE WHEN EXISTS (SELECT 1 FROM dbo.Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
                 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
     FROM dbo.OfertaLaboral o
     JOIN dbo.Empresa e ON e.ID = o.IDEmpresa
+    LEFT JOIN dbo.Usuario pu ON pu.ID = o.IDUsuario_Publicador
     LEFT JOIN dbo.Provincia pr ON pr.ID = o.IDProvincia
     WHERE o.Estado_Publicacion = N'Pendiente'
     ORDER BY o.Fecha_Publicacion, o.ID;

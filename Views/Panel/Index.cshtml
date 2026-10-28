@@ -61,7 +61,7 @@
                 {
                     @if (Model.ErrorExternas)
                     {
-                        <p class="aviso aviso--advertencia"><icono nombre="warning-outline" />No pudimos traer las ofertas de otros sitios en este momento.</p>
+                        <partial name="_AvisoExternas" />
                     }
                     @if (Model.ParaVos.Count == 0)
                     {
