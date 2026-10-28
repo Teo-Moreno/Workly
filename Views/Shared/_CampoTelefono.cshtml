@@ -1,0 +1,13 @@
+@model CampoTelefono
+@* Teléfono: solo números; el prefijo cambia con el país y los espacios y el guion se ponen solos *@
+<div class="campo @Html.ClaseError(Model.Nombre)">
+    <label class="campo__etiqueta" for="@Model.Id">Teléfono <span class="campo__opcional">(opcional)</span></label>
+    <div class="control-con-prefijo">
+        <span class="control-con-prefijo__prefijo" data-prefijo-telefono>@Model.Prefijo</span>
+        <input class="campo__control" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" type="tel" inputmode="numeric" autocomplete="tel-national"
+               placeholder="11 5555-1234" maxlength="12" pattern="[0-9]{2,4} [0-9]{2,4}-[0-9]{4}"
+               data-telefono data-codigos-area="@string.Join(",", Telefonos.CodigosDeArea3)" />
+    </div>
+    <span class="campo__ayuda">Código de área y número, sin el 0 ni el 15. Los espacios y el guion se ponen solos.</span>
+    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Model.Nombre, "Ingresá el código de área y el número: 10 números")</span>
+</div>

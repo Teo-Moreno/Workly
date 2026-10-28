@@ -1,0 +1,57 @@
+@model (bool EnServidor, ExperienciaFormulario? Valores)
+@{
+    var v = Model.Valores ?? new ExperienciaFormulario();
+    var abierto = Model.EnServidor && ViewBag.ModalAbierto as string == "modal-experiencia";
+}
+@* Pop up "Agregar experiencia". En el perfil guarda en la base (Perfil/AgregarExperiencia);
+   en el registro agrega la experiencia a la lista del formulario (site.js › data-modal-local). *@
+<dialog class="modal" id="modal-experiencia" aria-labelledby="modal-experiencia-titulo" data-abrir-al-cargar="@(abierto ? "true" : null)">
+    <form class="modal__contenido formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
+          action="@(Model.EnServidor ? Url.Action("AgregarExperiencia", "Perfil") : null)"
+          data-modal-local="@(Model.EnServidor ? null : "experiencia")" data-formulario-real="@(Model.EnServidor ? "" : null)">
+        @if (Model.EnServidor)
+        {
+            @Html.AntiForgeryToken()
+        }
+        <div class="modal__cabecera">
+            <h2 class="modal__titulo" id="modal-experiencia-titulo">Agregar experiencia</h2>
+            <button class="modal__cerrar" type="button" value="cancelar" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+        </div>
+        <p class="modal__descripcion">Sumá tus trabajos, pasantías o proyectos freelance.</p>
+
+        <div class="campo @(abierto ? Html.ClaseError("Puesto") : "")">
+            <label class="campo__etiqueta" for="exp-puesto">Puesto</label>
+            <input class="campo__control" id="exp-puesto" name="Puesto" value="@v.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a, Analista contable" />
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(abierto ? Html.MensajeError("Puesto", "Completá el puesto") : "Completá el puesto")</span>
+        </div>
+        <div class="campo @(abierto ? Html.ClaseError("Empresa") : "")">
+            <label class="campo__etiqueta" for="exp-empresa">Empresa</label>
+            <input class="campo__control" id="exp-empresa" name="Empresa" value="@v.Empresa" maxlength="100" required placeholder="Nombre de la empresa" />
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(abierto ? Html.MensajeError("Empresa", "Completá la empresa") : "Completá la empresa")</span>
+        </div>
+
+        <div class="formulario__fila">
+            <partial name="_CampoMes" model='new CampoMes { Nombre = "Inicio", Id = "exp-inicio", Etiqueta = "Inicio", Valor = v.Inicio, Requerido = true, Error = abierto && Html.ClaseError("Inicio").Length > 0 ? Html.MensajeError("Inicio", "") : null }' />
+            <div data-fin-de="exp-actual" hidden="@v.Actual">
+                <partial name="_CampoMes" model='new CampoMes { Nombre = "Fin", Id = "exp-fin", Etiqueta = "Finalización", Valor = v.Fin, Requerido = !v.Actual, Error = abierto && Html.ClaseError("Fin").Length > 0 ? Html.MensajeError("Fin", "") : null }' />
+            </div>
+        </div>
+
+        <label class="interruptor interruptor--etiqueta">
+            <input type="checkbox" id="exp-actual" name="Actual" value="true" checked="@v.Actual" data-alternar-fin />
+            <span class="interruptor__pista"></span>
+            Trabajo actualmente acá
+        </label>
+
+        <div class="campo @(abierto ? Html.ClaseError("Descripcion") : "")">
+            <label class="campo__etiqueta" for="exp-descripcion">Qué hacías <span class="campo__opcional">(opcional)</span></label>
+            <textarea class="campo__control" id="exp-descripcion" name="Descripcion" rows="3" maxlength="500" placeholder="Tus tareas y logros principales.">@v.Descripcion</textarea>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(abierto ? Html.MensajeError("Descripcion", "Usá hasta 500 caracteres") : "Usá hasta 500 caracteres")</span>
+        </div>
+
+        <div class="modal__acciones">
+            <button class="boton boton--gris" type="button" value="cancelar" data-modal-cerrar>Cancelar</button>
+            <button class="boton" type="submit">Agregar</button>
+        </div>
+    </form>
+</dialog>

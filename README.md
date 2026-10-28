@@ -10,37 +10,54 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
 
 ## Cómo correrlo
 
-1. **Crear la base de datos.** Abrir `script.sql` (en la raíz del repositorio) en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly`, todas las tablas del diagrama, datos de ejemplo y una cuenta de prueba. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
+1. **Crear la base de datos.** Abrir `script.sql` (en la raíz del repositorio) en SQL Server Management Studio y ejecutarlo (F5). Crea la base `Workly` con todas sus tablas, o actualiza una base anterior sin perder datos. Se puede volver a ejecutar sin romper nada: solo crea lo que falta. Para empezar de cero, al principio del script hay un bloque comentado que borra la base.
+   - No carga datos inventados: solo países y provincias, los catálogos de habilidades e idiomas y la cuenta moderadora.
+   - Si la base tiene los datos de ejemplo de versiones anteriores (Sofía Martínez y las ofertas de ejemplo), `BaseDeDatos/BorrarDatosDeEjemplo.sql` los borra.
 2. **Revisar la cadena de conexión** en `appsettings.json` (`ConnectionStrings › Workly`). Por defecto usa la instancia local con autenticación de Windows:
    ```json
    "Workly": "Server=localhost;Database=Workly;Trusted_Connection=True;TrustServerCertificate=True;"
    ```
    - Con SQL Server Express: `Server=localhost\\SQLEXPRESS;...` (en el JSON la barra va doble).
    - Con usuario y contraseña de SQL Server: `Server=localhost;Database=Workly;User Id=sa;Password=...;TrustServerCertificate=True;`
-3. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio). Los paquetes `Dapper` y `Microsoft.Data.SqlClient` se descargan solos.
-
-4. **Clave de JSearch** (ofertas de LinkedIn y otros sitios, vía RapidAPI). No está en el repositorio: cada integrante la guarda una vez en su compu desde la carpeta del proyecto:
+3. **Clave de JSearch** (ofertas de LinkedIn, Bumeran, Computrabajo y otros sitios, vía RapidAPI). No está en el repositorio: cada integrante la guarda una vez en su compu desde la carpeta del proyecto:
    ```
    dotnet user-secrets set "JSearch:ApiKey" "<la clave del equipo>"
    ```
-   Queda guardada fuera del proyecto y la app la lee como `JSearch:ApiKey`. En el servidor se usa la variable de entorno `JSearch__ApiKey`. El endpoint de búsqueda es `https://jsearch.p.rapidapi.com/search-v2`.
+   En el servidor se usa la variable de entorno `JSearch__ApiKey`. El endpoint es `https://jsearch.p.rapidapi.com/search-v2`. Cada búsqueda se guarda 6 horas en memoria para no gastar pedidos de más.
+4. **Google y LinkedIn (opcional).** Los botones "con Google" y "con LinkedIn" aparecen solo si están sus claves:
+   ```
+   dotnet user-secrets set "Authentication:Google:ClientId" "..."
+   dotnet user-secrets set "Authentication:Google:ClientSecret" "..."
+   dotnet user-secrets set "Authentication:LinkedIn:ClientId" "..."
+   dotnet user-secrets set "Authentication:LinkedIn:ClientSecret" "..."
+   ```
+   - Google: en Google Cloud Console › APIs y servicios › Credenciales, crear un "ID de cliente de OAuth" de tipo aplicación web con el URI de redirección `https://localhost:<puerto>/signin-google`.
+   - LinkedIn: en linkedin.com/developers crear una app, agregarle el producto "Sign In with LinkedIn using OpenID Connect" y cargar el URL de redirección `https://localhost:<puerto>/signin-linkedin`.
+5. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio).
 
-**Cuenta de prueba:** `sofia.martinez@mail.com` / `Workly2026`
+**Cuenta moderadora:** `50291929@est.ort.edu.ar` / `12345678a` (la crea `script.sql`). Las demás cuentas se crean desde la página y empiezan vacías.
 
-### Qué funciona con la base
+## Qué hace la página
 
-- **Crear cuenta** (`/Cuenta/CrearCuenta`): registro en 3 pasos que guarda en las tablas `Usuario`, `Perfil` y `CV` dentro de una transacción. Se elige país y provincia (la lista de provincias depende del país) y el teléfono se escribe solo con números: el prefijo del país (+54) aparece solo y los espacios y el guion se ponen automáticamente. Valida en el navegador y en el servidor (email repetido, contraseña de 8+ caracteres con letras y números, formatos y tamaño de archivos). Al terminar inicia la sesión.
-- **Iniciar sesión** (`/Cuenta/IniciarSesion`) con "Recordarme" (sesión de 14 días) y vuelta a la página que se quería ver.
-- **Cerrar sesión** desde el menú de usuario.
-- **Páginas protegidas:** todo lo que está dentro de la app (panel, empleos, postulaciones, empresas, notificaciones, perfil) pide iniciar sesión.
-- **Mi perfil** y la pestaña **Cuenta** de Configuración muestran los datos reales: nombre, email, ubicación, teléfono, descripción, foto, sitio web, CV (descarga privada en `/Perfil/DescargarCV`), experiencia y formación.
-- La navbar muestra el nombre, la ubicación y la foto (o las iniciales) de quien inició sesión.
+Todo lo que se muestra sale de la base, de lo que carga cada persona o empresa, o de JSearch. No hay datos de ejemplo ni notificaciones.
 
-Las contraseñas se guardan con hash PBKDF2-SHA256 (600.000 iteraciones y sal aleatoria), nunca en texto plano. Las fotos se guardan en `wwwroot/uploads/fotos` y los CV en `ArchivosPrivados/cv`, fuera de `wwwroot`, así solo los descarga su dueño. Las dos carpetas están en `.gitignore`.
+- **Crear cuenta** (`/Cuenta/CrearCuenta`): se elige **Persona** o **Empresa**.
+  - Persona, en 5 pasos: datos y contraseña; foto, provincia, teléfono, estado de búsqueda y "sobre mí"; qué busca (puesto, nivel, modalidad, jornada, contratación, dónde, salario, disponibilidad, habilidades e idiomas); experiencia y formación (con pop ups distintos y selector de mes y año); CV y sitio web. Todo es opcional salvo los datos de la cuenta.
+  - Empresa: quien la maneja y los datos que la verifican: CUIT válido (dígito verificador) y no repetido, razón social, rubro, sitio web y un email del mismo dominio que el sitio (no se aceptan Gmail, Hotmail, etc.).
+  - También con Google o LinkedIn (si están configurados).
+- **Mi perfil** (`/Perfil`): llamado a completar el perfil con el próximo paso, estado de búsqueda (se cambia ahí mismo), foto, sobre mí, experiencia y formación (agregar y borrar), qué busca, habilidades, idiomas, CV y resumen de postulaciones.
+- **Configuración** (`/Perfil/Configuracion`): datos de la cuenta (o de la empresa), qué busco y seguridad (cambiar o crear la contraseña y eliminar la cuenta).
+- **Buscar trabajo** (`/Empleos`): busca a la vez en Workly y en otros sitios (JSearch). Filtros de país, provincia, modalidad, tipo de empleo y fecha, y orden (más nuevas, más viejas, A-Z). Sin valores precargados. Si no hay resultados: "No encontramos ningún puesto con ese nombre".
+- **Postularse**: en las búsquedas de Workly con el perfil y el CV; en las de otros sitios se va al sitio original y con "Ya me postulé" se suma al tablero.
+- **Mis postulaciones** (`/Postulaciones`): tablero con Enviadas, En revisión, Pasé y No pasé. La persona mueve cada tarjeta (arrastrándola o con el selector) y se guarda.
+- **Publicar búsqueda** (`/Publicaciones/Nueva`): las empresas publican al instante; las personas también pueden publicar, pero antes pasa por moderación.
+- **Mis publicaciones** (`/Publicaciones`): cada búsqueda con su estado y la cantidad de postulantes; adentro, la lista de postulantes con su perfil completo y su CV.
+- **Moderación** (`/Moderacion`, solo cuentas moderadoras): vista previa de la búsqueda tal como la verían las personas; aceptar la publica y rechazar guarda el motivo, que la persona ve en Mis publicaciones. (El aviso por mail queda para cuando esté el envío de mails.)
+- **Empresas** (`/Empresas`): las empresas con cuenta o con búsquedas publicadas, con buscador, país y provincia (empieza en la provincia de la persona) y orden.
+- **Inicio** (`/Panel`): ofertas según el puesto que busca la persona, sus postulaciones y qué le falta al perfil.
+- **Landing** (`/`): el buscador escribe solo puestos reales de JSearch (o de Workly), espera 5 segundos y los borra letra por letra.
 
-### Qué sigue siendo visual
-
-Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idiomas y la edición del perfil todavía usan `Models/DatosDeEjemplo.cs`. Las tablas `OfertaLaboral`, `Empresa`, `Postulacion`, `Favorito` y `FavoritoOferta` ya existen en la base y tienen datos de ejemplo para conectarlas en la próxima etapa.
+Las contraseñas se guardan con hash PBKDF2-SHA256 (600.000 iteraciones y sal aleatoria). Las fotos y logos se guardan en `wwwroot/uploads` y los CV en `ArchivosPrivados/cv`, fuera de `wwwroot`: solo los descarga su dueño o quien publicó una búsqueda a la que esa persona se postuló. Las dos carpetas están en `.gitignore`.
 
 ## Base de datos
 
@@ -48,28 +65,33 @@ Ofertas, postulaciones, empresas, notificaciones, preferencias, habilidades, idi
 
 | Tabla | Para qué |
 | --- | --- |
-| `Pais` / `Provincia` | Países (con su prefijo telefónico, por ejemplo +54) y sus provincias. Por ahora, Argentina y sus 24 jurisdicciones |
-| `Usuario` | Nombre, apellido, email (único), contraseña (hash) y fecha de registro |
-| `Perfil` | Foto, descripción, provincia donde vive y teléfono con prefijo (uno por usuario) |
+| `Pais` / `Provincia` | Países (código ISO y prefijo telefónico) y sus provincias. Por ahora, Argentina y sus 24 jurisdicciones |
+| `Usuario` | Persona o empresa, email único, contraseña (hash, opcional si entra con Google o LinkedIn) y si es moderadora |
+| `LoginExterno` | Cuentas de Google o LinkedIn vinculadas |
+| `Perfil` | Foto, descripción, provincia, teléfono y estado de búsqueda (uno por usuario) |
 | `CV` | Archivo del CV y sitio web (uno por usuario) |
-| `Educacion` / `UsuarioEducacion` | Instituciones y la formación de cada usuario |
-| `Empresa` / `ExperienciaLaboral` | Empresas y la experiencia de cada usuario |
-| `OfertaLaboral` | Ofertas publicadas por las empresas, con la cantidad de puestos |
-| `Puesto` / `OfertaPuesto` | Puestos y a qué ofertas corresponden (N a N) |
-| `Favorito` / `FavoritoOferta` | Ofertas guardadas |
-| `Postulacion` | Postulaciones de cada usuario (una por oferta) y su estado |
+| `Preferencia` | Qué busca la persona: puesto, niveles, modalidades, jornada, contratación, provincia, salario y disponibilidad |
+| `Habilidad` / `UsuarioHabilidad` | Habilidades (catálogo + las que agrega cada persona) |
+| `Idioma` / `UsuarioIdioma` | Idiomas y el nivel de cada persona |
+| `Educacion` / `UsuarioEducacion` | Instituciones y la formación de cada persona |
+| `Empresa` / `ExperienciaLaboral` | Empresas (las de cuenta propia con CUIT, razón social y rubro) y la experiencia de cada persona |
+| `OfertaLaboral` | Búsquedas publicadas en Workly, con quién la publicó y su estado de moderación |
+| `Puesto` / `OfertaPuesto` | Puestos y a qué búsquedas corresponden (N a N) |
+| `OfertaExterna` | Ofertas de otros sitios que trajo JSearch |
+| `Postulacion` | Postulaciones a una oferta de Workly o externa, con su estado en el tablero |
+| `Favorito` / `FavoritoOferta` | Del diagrama original; la página todavía no las usa |
 
-Para tenerlo más ordenado, el mismo script también está separado en tres archivos (se ejecutan en este orden):
+El mismo script también está separado en tres archivos (se ejecutan en este orden y crean exactamente la misma base):
 
 | Archivo | Contenido |
 | --- | --- |
 | `BaseDeDatos/1_Estructura.sql` | Crea la base, las tablas, sus claves, controles e índices |
-| `BaseDeDatos/2_DatosDePrueba.sql` | Países y provincias, y los datos de ejemplo con la cuenta de prueba |
-| `BaseDeDatos/3_StoredProcedures.sql` | Un stored procedure por cada consulta de `Models/BD.cs`, con el mismo nombre |
+| `BaseDeDatos/2_DatosDePrueba.sql` | Los INSERT: países, provincias, catálogos y la cuenta moderadora |
+| `BaseDeDatos/3_StoredProcedures.sql` | Las consultas principales de `Models/BD.cs` como stored procedures, con el mismo nombre |
 
-`script.sql` sigue siendo el que se usa para crear y actualizar la base. Si se cambia algo en la estructura o en los datos, hay que cambiarlo en los dos lados.
+`script.sql` sigue siendo el que se usa para crear y actualizar la base. Si se cambia algo en la estructura o en los datos, hay que cambiarlo en todos lados.
 
-Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se abren con draw.io). Si la base se creó con una versión anterior del script, volver a ejecutarlo la actualiza sin perder datos.
+Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se abren con draw.io).
 
 ## Vistas
 
@@ -77,36 +99,28 @@ Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se 
 | --- | --- | --- |
 | `/` | Landing pública | Figma › Alta · Landing |
 | `/Cuenta/IniciarSesion` | Iniciar sesión | User flow (Miro) |
-| `/Cuenta/CrearCuenta` | Registro en 3 pasos | Barra de progreso del UI Kit |
-| `/Cuenta/RecuperarClave` | Recuperar contraseña | — |
-| `/Panel` | Inicio de la persona logueada | Componentes de Alta |
+| `/Cuenta/CrearCuenta?tipo=persona\|empresa` | Registro de persona (5 pasos) o de empresa (2 pasos) | Barra de progreso del UI Kit |
+| `/Panel` | Inicio de la persona | Componentes de Alta |
 | `/Empleos` | Buscar trabajo (filtros, resultados y vista previa) | Media · WF 02 |
-| `/Empleos/Detalle/{id}` | Detalle de oferta | Media · 06, 07 y 08 |
-| `/Postulaciones` | Tablero, lista, guardadas y archivadas | Media · WF 03 |
-| `/Empresas` | Listado de empresas | Media · WF 04 |
-| `/Empresas/Detalle/{id}` | Perfil de empresa y ofertas disponibles | Mapa de sitio (Miro) |
+| `/Empleos/Detalle/{id}`, `/Empleos/Externa/{id}` | Detalle de oferta de Workly o de otro sitio | Media · 06, 07 y 08 |
+| `/Postulaciones` | Tablero de postulaciones | Media · WF 03 |
+| `/Empresas`, `/Empresas/Detalle/{id}` | Empresas y su página | Media · WF 04 |
+| `/Publicaciones`, `/Publicaciones/Nueva`, `/Publicaciones/Detalle/{id}`, `/Publicaciones/Postulante/{id}` | Publicar búsquedas y ver postulantes | — |
+| `/Moderacion`, `/Moderacion/Revisar/{id}` | Moderación de búsquedas | — |
 | `/Perfil` | Mi perfil | Media · WF 05 |
-| `/Perfil/Configuracion` | Cuenta, preferencias, notificaciones y privacidad | Mapa de sitio (Miro) |
-| `/Perfil/Ayuda` | Ayuda y soporte | Mapa de sitio (Miro) |
-| `/Notificaciones` | Todas las notificaciones | UI Kit › 07 |
-| `/Home/UiKit` | Guía visual con todos los componentes | Figma › Guidelines |
+| `/Perfil/Configuracion` | Cuenta, qué busco y seguridad | Mapa de sitio (Miro) |
+| `/Perfil/Ayuda` | Ayuda (preguntas frecuentes) | Mapa de sitio (Miro) |
 | `/Home/Privacy`, `/Home/Terminos` | Legales | — |
 
 ## Estructura
 
 - `Models/BD.cs`: acceso a SQL Server con Dapper (consultas con parámetros).
-- `Models/Usuario.cs`, `Perfil.cs`, `CV.cs`: una clase por tabla. `Models/CuentaViewModels.cs`: modelos de los formularios y de "Mi perfil".
-- `Models/Contrasenas.cs`: hash y verificación de contraseñas. `Models/Archivos.cs`: validación y guardado de la foto y el CV.
-- `Models/UsuarioActual.cs`: datos de quien inició sesión en las vistas (`User.Nombre()`, `User.Iniciales()`…). `Models/ValidacionHtml.cs`: errores del servidor con el estilo del UI Kit.
-- `Models/DatosDeEjemplo.cs`: datos de ejemplo (ofertas, empresas, postulaciones y notificaciones) tomados de los wireframes. Reemplazar por la base de datos manteniendo los mismos métodos.
-- `Views/Shared/_Layout.cshtml`: layout público (landing y legales).
-- `Views/Shared/_LayoutApp.cshtml`: layout de la app (navbar con notificaciones y menú de usuario).
-- `Views/Shared/_LayoutCuenta.cshtml`: layout de iniciar sesión y registro.
-- `Views/Shared/_*.cshtml`: componentes reutilizables (tarjetas de oferta, empresa y postulación, panel de notificaciones, pop up de postulación).
-- `wwwroot/css/tokens.css`: colores, tipografía, radios y sombras del UI Kit.
-- `wwwroot/css/componentes.css`: componentes del UI Kit (botones, campos, casillas, pestañas, snackbars, pop ups…).
-- `wwwroot/css/paginas.css`: estilos de cada pantalla.
-- `wwwroot/js/site.js`: interacciones visuales (desplegables, pestañas, filtros, guardar, postularse, tablero con arrastrar y soltar, registro en pasos). Se activan con atributos `data-*`.
+- `Models/JSearch.cs`: búsqueda de ofertas de otros sitios.
+- `Models/*.cs`: una clase por tabla, los modelos de los formularios y de las vistas, catálogos, validaciones y helpers (todo en `Models`).
+- `Views/Shared/_LayoutApp.cshtml`: layout de la app (navbar según el tipo de cuenta y menú de usuario).
+- `Views/Shared/_*.cshtml`: componentes reutilizables (tarjetas, pop ups de experiencia y formación, selector de mes, ubicación, teléfono, qué busco…).
+- `wwwroot/css/`: tokens, componentes del UI Kit y estilos de cada pantalla.
+- `wwwroot/js/site.js`: interacciones (pop ups, selector de mes, registro en pasos, tablero, animación del buscador…). Se activan con atributos `data-*`.
 - `wwwroot/img/iconos.svg`: sprite de íconos (24 px, trazo de 2 px).
 
 ## Íconos
@@ -117,7 +131,7 @@ Los diagramas están en `BaseDeDatos/DER.drawio` y `BaseDeDatos/DLR.drawio` (se 
 <icono nombre="close-big" etiqueta="Cerrar" />  @* con etiqueta se anuncia a lectores de pantalla *@
 ```
 
-La lista completa de nombres está en `/Home/UiKit`.
+La lista completa de nombres está en `wwwroot/img/iconos.svg`.
 
 ## Tipografía
 

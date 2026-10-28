@@ -1,0 +1,33 @@
+@model CampoMes
+@{
+    var meses = new[] { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic" };
+    var conError = Model.Error != null || Html.ClaseError(Model.Nombre).Length > 0;
+}
+@* Selector de mes y año (MM/AAAA): se puede escribir o elegir en el calendario de meses *@
+<div class="campo @(conError ? "campo--error" : "")">
+    <label class="campo__etiqueta" for="@Model.Id">@Model.Etiqueta</label>
+    <div class="selector-mes" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
+        <input class="campo__control selector-mes__entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
+               inputmode="numeric" maxlength="7" autocomplete="off" pattern="(0[1-9]|1[0-2])/(19|20)[0-9]{2}" required="@Model.Requerido"
+               data-selector-mes-entrada />
+        <button class="selector-mes__abrir" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir>
+            <icono nombre="calendar" />
+        </button>
+        <div class="selector-mes__panel" role="dialog" aria-label="Elegí el mes y el año" hidden data-selector-mes-panel>
+            <div class="selector-mes__cabecera">
+                <strong class="selector-mes__anio" data-selector-mes-anio></strong>
+                <div class="selector-mes__flechas">
+                    <button class="selector-mes__flecha" type="button" aria-label="Año anterior" data-selector-mes-anterior><icono nombre="chevron-left" /></button>
+                    <button class="selector-mes__flecha" type="button" aria-label="Año siguiente" data-selector-mes-siguiente><icono nombre="chevron-right" /></button>
+                </div>
+            </div>
+            <div class="selector-mes__meses">
+                @for (var i = 0; i < meses.Length; i++)
+                {
+                    <button class="selector-mes__mes" type="button" data-mes="@(i + 1)">@meses[i]</button>
+                }
+            </div>
+        </div>
+    </div>
+    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@(Model.Error ?? Html.MensajeError(Model.Nombre, "Elegí el mes y el año (MM/AAAA)"))</span>
+</div>

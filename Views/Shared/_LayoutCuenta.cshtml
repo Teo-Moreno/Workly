@@ -20,24 +20,19 @@
                 <ul class="cuenta__lista" role="list">
                     <li>
                         <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="circle-check-outline" /></span>
-                        <span><strong>Más simple.</strong> Puesto, modalidad, requisitos y salario claros en cada oferta.</span>
+                        <span><strong>Todo en un lugar.</strong> Ofertas de Workly y de otros sitios en una sola búsqueda.</span>
                     </li>
                     <li>
                         <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="settings" /></span>
-                        <span><strong>Más personalizado.</strong> Oportunidades ordenadas según tu perfil y expectativas.</span>
+                        <span><strong>Tu perfil, tus reglas.</strong> Contá qué buscás y te mostramos ofertas acordes.</span>
                     </li>
                     <li>
                         <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="checkbox-checked" /></span>
-                        <span><strong>Más organizado.</strong> Todas tus postulaciones y próximos pasos en un solo tablero.</span>
+                        <span><strong>Más organizado.</strong> Seguí todas tus postulaciones desde un solo tablero.</span>
                     </li>
                 </ul>
             </div>
 
-            <div class="cuenta__datos">
-                <div><strong>12.400+</strong><span>ofertas activas</span></div>
-                <div><strong>1.850</strong><span>empresas contratando</span></div>
-                <div><strong>4 min</strong><span>para crear tu perfil</span></div>
-            </div>
         </aside>
 
         <main class="cuenta__contenido" id="contenido">
@@ -51,7 +46,7 @@
         </main>
     </div>
 
-    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]"></div>
+    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

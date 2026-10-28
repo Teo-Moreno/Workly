@@ -1,0 +1,51 @@
+@model Oferta
+@{
+    var volver = ViewData["Volver"] as string ?? (Context.Request.Path + Context.Request.QueryString);
+    var esPropia = User.EstaLogueado() && Model.IDUsuario_Publicador == User.IdUsuario();
+    var login = Url.Action("IniciarSesion", "Cuenta", new { returnUrl = volver });
+}
+@* Botón principal de una oferta: postularse en Workly o ir al sitio original y anotarla en el tablero *@
+@if (!Model.EsExterna)
+{
+    if (esPropia)
+    {
+        <a class="boton boton--lg" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@Model.ID">Ver postulantes</a>
+    }
+    else if (Model.YaPostulado)
+    {
+        <a class="boton boton--contorno boton--lg" asp-controller="Postulaciones" asp-action="Index"><icono nombre="circle-check" />Ya te postulaste</a>
+    }
+    else if (Model.EstaCerrada)
+    {
+        <span class="etiqueta etiqueta--error">Esta búsqueda ya cerró</span>
+    }
+    else if (!User.EstaLogueado())
+    {
+        <a class="boton boton--lg" href="@login">Iniciá sesión para postularte</a>
+    }
+    else if (User.EsPersona())
+    {
+        <form asp-controller="Empleos" asp-action="Postular" asp-route-id="@Model.ID" method="post">
+            <input type="hidden" name="volver" value="@volver" />
+            <button class="boton boton--lg" type="submit">Postularme</button>
+        </form>
+    }
+}
+else
+{
+    if (!string.IsNullOrEmpty(Model.Link_Postulacion))
+    {
+        <a class="boton boton--lg" href="@Model.Link_Postulacion" target="_blank" rel="noopener noreferrer">Postularme en @Model.Fuente<icono nombre="external-link" /></a>
+    }
+    if (Model.YaPostulado)
+    {
+        <a class="boton boton--contorno boton--lg" asp-controller="Postulaciones" asp-action="Index"><icono nombre="circle-check" />Está en tu tablero</a>
+    }
+    else if (User.EsPersona())
+    {
+        <form asp-controller="Empleos" asp-action="RegistrarExterna" asp-route-id="@Model.ID" method="post">
+            <input type="hidden" name="volver" value="@volver" />
+            <button class="boton boton--contorno boton--lg" type="submit" title="Sumala a tu tablero para hacerle el seguimiento">Ya me postulé</button>
+        </form>
+    }
+}
