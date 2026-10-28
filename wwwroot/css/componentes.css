@@ -3049,3 +3049,28 @@ p.aviso .icono {
   font-size: var(--texto-13);
   font-weight: 700;
 }
+
+/* Sello Oficial / No oficial de una oferta */
+.sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radio-pildora);
+  background: var(--gris-7);
+  color: var(--gris-4);
+  font-size: var(--texto-13);
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.sello .icono {
+  width: 14px;
+  height: 14px;
+}
+
+.sello--oficial {
+  background: rgba(118, 202, 102, 0.16);
+  color: var(--color-exito-texto);
+}

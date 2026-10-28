@@ -31,8 +31,8 @@ Proyecto ASP.NET Core MVC (.NET 9). Las vistas están maquetadas con HTML, CSS y
    dotnet user-secrets set "Authentication:LinkedIn:ClientId" "..."
    dotnet user-secrets set "Authentication:LinkedIn:ClientSecret" "..."
    ```
-   - Google: en Google Cloud Console › APIs y servicios › Credenciales, crear un "ID de cliente de OAuth" de tipo aplicación web con el URI de redirección `https://localhost:<puerto>/signin-google`.
-   - LinkedIn: en linkedin.com/developers crear una app, agregarle el producto "Sign In with LinkedIn using OpenID Connect" y cargar el URL de redirección `https://localhost:<puerto>/signin-linkedin`.
+   - Google: en Google Cloud Console › APIs y servicios › Credenciales, crear un "ID de cliente de OAuth" de tipo aplicación web con los URI de redirección autorizados `https://localhost:7108/signin-google` y `http://localhost:5128/signin-google` (los puertos de `Properties/launchSettings.json`).
+   - LinkedIn: en linkedin.com/developers crear una app, agregarle el producto "Sign In with LinkedIn using OpenID Connect" y cargar los URL de redirección `https://localhost:7108/signin-linkedin` y `http://localhost:5128/signin-linkedin`.
 5. **Correr el proyecto** (`dotnet run` o F5 en Visual Studio).
 
 **Cuenta moderadora:** `50291929@est.ort.edu.ar` / `12345678a` (la crea `script.sql`). Las demás cuentas se crean desde la página y empiezan vacías.
@@ -48,6 +48,7 @@ Todo lo que se muestra sale de la base, de lo que carga cada persona o empresa, 
 - **Mi perfil** (`/Perfil`): llamado a completar el perfil con el próximo paso, estado de búsqueda (se cambia ahí mismo), foto, sobre mí, experiencia y formación (agregar y borrar), qué busca, habilidades, idiomas, CV y resumen de postulaciones.
 - **Configuración** (`/Perfil/Configuracion`): datos de la cuenta (o de la empresa), qué busco y seguridad (cambiar o crear la contraseña y eliminar la cuenta).
 - **Buscar trabajo** (`/Empleos`): busca a la vez en Workly y en otros sitios (JSearch). Filtros de país, provincia, modalidad, tipo de empleo y fecha, y orden (más nuevas, más viejas, A-Z). Sin valores precargados. Si no hay resultados: "No encontramos ningún puesto con ese nombre".
+- **Oficial / No oficial**: cada oferta muestra si es oficial (la publicó una empresa registrada o viene de otro sitio) o no oficial (la publicó una persona).
 - **Postularse**: en las búsquedas de Workly con el perfil y el CV; en las de otros sitios se va al sitio original y con "Ya me postulé" se suma al tablero.
 - **Mis postulaciones** (`/Postulaciones`): tablero con Enviadas, En revisión, Pasé y No pasé. La persona mueve cada tarjeta (arrastrándola o con el selector) y se guarda.
 - **Publicar búsqueda** (`/Publicaciones/Nueva`): las empresas publican al instante; las personas también pueden publicar, pero antes pasa por moderación.

@@ -19,6 +19,7 @@
         }
     </div>
     <div class="lista-tags">
+        <partial name="_SelloOficial" model="Model" />
         @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde">@Model.Modalidad</span> }
         @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde">@Model.Tipo_Contrato</span> }
         <span class="tag @(Model.EsExterna ? "" : "tag--principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>

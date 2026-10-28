@@ -136,7 +136,7 @@
 
             @if (Model.ErrorExternas)
             {
-                <p class="aviso aviso--advertencia"><icono nombre="warning-outline" />No pudimos traer las ofertas de otros sitios en este momento. Te mostramos las de Workly; probá de nuevo en unos minutos.</p>
+                <partial name="_AvisoExternas" />
             }
             @if (!Model.BuscoAlgo && Model.Ofertas.Count > 0)
             {
