@@ -1,0 +1,35 @@
+@model NuevaClaveViewModel
+@{
+    ViewData["Title"] = "Contraseña nueva";
+}
+
+<div class="cuenta-tarjeta">
+    <h1 class="cuenta-tarjeta__titulo">Elegí tu contraseña nueva</h1>
+    <p class="cuenta-tarjeta__bajada">Después vas a poder iniciar sesión con ella.</p>
+
+    <partial name="_ErroresFormulario" />
+
+    <form class="formulario" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
+        <input type="hidden" asp-for="Token" />
+        <div class="campo @Html.ClaseError(nameof(Model.Nueva))">
+            <label class="campo__etiqueta" for="clave-nueva">Contraseña nueva</label>
+            <div class="control-con-icono">
+                <icono nombre="lock" />
+                <input class="campo__control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
+                       pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required autofocus />
+                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+            </div>
+            <span class="campo__ayuda">Al menos 8 caracteres, con letras y números.</span>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Nueva), "Usá al menos 8 caracteres, con una letra y un número")</span>
+        </div>
+        <div class="campo @Html.ClaseError(nameof(Model.Repetir))">
+            <label class="campo__etiqueta" for="clave-repetir">Repetí la contraseña nueva</label>
+            <div class="control-con-icono">
+                <icono nombre="lock" />
+                <input class="campo__control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
+            </div>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Repetir), "Las contraseñas no coinciden")</span>
+        </div>
+        <button class="boton boton--lg boton--bloque" type="submit">Guardar contraseña</button>
+    </form>
+</div>

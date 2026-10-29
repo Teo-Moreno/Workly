@@ -19,6 +19,28 @@ public class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
+public class RecuperarClaveViewModel
+{
+    [Required(ErrorMessage = "Ingresá tu email")]
+    [EmailAddress(ErrorMessage = "Ingresá un email válido")]
+    [StringLength(100)]
+    public string Email { get; set; } = "";
+}
+
+public class NuevaClaveViewModel
+{
+    public string Token { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí una contraseña nueva")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres")]
+    [RegularExpression(@"^(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).+$", ErrorMessage = "Usá al menos una letra y un número")]
+    public string Nueva { get; set; } = "";
+
+    [Required(ErrorMessage = "Repetí la contraseña nueva")]
+    [Compare(nameof(Nueva), ErrorMessage = "Las contraseñas no coinciden")]
+    public string Repetir { get; set; } = "";
+}
+
 public abstract class RegistroBase
 {
     [Required(ErrorMessage = "Completá tu nombre")]

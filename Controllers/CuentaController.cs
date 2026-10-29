@@ -15,12 +15,26 @@ public class CuentaController : Controller
     private readonly IWebHostEnvironment _entorno;
     private readonly ILogger<CuentaController> _logger;
     private readonly IAuthenticationSchemeProvider _esquemas;
+    private readonly Captcha _captcha;
+    private readonly IntentosLogin _intentos;
+    private readonly Correo _correo;
 
-    public CuentaController(IWebHostEnvironment entorno, ILogger<CuentaController> logger, IAuthenticationSchemeProvider esquemas)
+    public CuentaController(IWebHostEnvironment entorno, ILogger<CuentaController> logger, IAuthenticationSchemeProvider esquemas,
+                            Captcha captcha, IntentosLogin intentos, Correo correo)
     {
+        _correo = correo;
         _entorno = entorno;
         _logger = logger;
         _esquemas = esquemas;
+        _captcha = captcha;
+        _intentos = intentos;
+    }
+
+    [HttpGet]
+    public IActionResult NuevoCaptcha()
+    {
+        var desafio = _captcha.Nuevo();
+        return Json(new { token = desafio.Token, imagen = desafio.Imagen });
     }
 
     [HttpGet]
@@ -39,15 +53,34 @@ public class CuentaController : Controller
     public async Task<IActionResult> IniciarSesion(LoginViewModel modelo)
     {
         await CargarProveedores();
+        var email = NormalizarEmail(modelo.Email ?? "");
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        ViewBag.PideCaptcha = _intentos.PideCaptcha(email, ip);
         if (!ModelState.IsValid)
         {
+            return View(modelo);
+        }
+
+        if (_intentos.Bloqueado(email) is { } espera)
+        {
+            var minutos = Math.Max(1, (int)Math.Ceiling(espera.TotalMinutes));
+            ModelState.AddModelError(string.Empty,
+                $"Por seguridad frenamos el ingreso con este email después de varios intentos fallidos. Probá de nuevo en {minutos} {(minutos == 1 ? "minuto" : "minutos")}.");
+            modelo.Contrasena = "";
+            return View(modelo);
+        }
+
+        if (ViewBag.PideCaptcha == true && !_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
+        {
+            ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
+            modelo.Contrasena = "";
             return View(modelo);
         }
 
         Usuario? usuario;
         try
         {
-            usuario = BD.ObtenerUsuarioPorEmail(NormalizarEmail(modelo.Email));
+            usuario = BD.ObtenerUsuarioPorEmail(email);
         }
         catch (SqlException ex)
         {
@@ -58,6 +91,8 @@ public class CuentaController : Controller
 
         if (!Contrasenas.Verificar(modelo.Contrasena, usuario?.Contraseña) || usuario == null)
         {
+            _intentos.Fallo(email, ip);
+            ViewBag.PideCaptcha = _intentos.PideCaptcha(email, ip);
             var soloExterno = usuario != null && !usuario.TieneContrasena;
             ModelState.AddModelError(string.Empty, soloExterno
                 ? "Esta cuenta entra con Google o LinkedIn. Usá el botón de abajo, o creá una contraseña desde Configuración."
@@ -66,10 +101,96 @@ public class CuentaController : Controller
             return View(modelo);
         }
 
+        _intentos.Exito(email);
         await Sesion.Iniciar(HttpContext, usuario.ID, modelo.Recordarme);
         TempData["Mensaje"] = $"¡Hola de nuevo, {usuario.Nombre}!";
         return RedirigirDespuesDeIngresar(modelo.ReturnUrl);
     }
+
+    [HttpGet]
+    public IActionResult RecuperarClave()
+    {
+        if (!_correo.Configurado)
+        {
+            return NotFound();
+        }
+        return View(new RecuperarClaveViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RecuperarClave(RecuperarClaveViewModel modelo)
+    {
+        if (!_correo.Configurado)
+        {
+            return NotFound();
+        }
+        if (!_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
+        {
+            ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        var email = NormalizarEmail(modelo.Email);
+        try
+        {
+            var usuario = BD.ObtenerUsuarioPorEmail(email);
+            if (usuario != null && BD.ContarRecuperacionesRecientes(usuario.ID) < 3)
+            {
+                var token = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))
+                    .Replace('+', '-').Replace('/', '_').TrimEnd('=');
+                BD.GuardarRecuperacion(usuario.ID, HashDeToken(token), DateTime.UtcNow.AddHours(1));
+                var enlace = Url.Action(nameof(NuevaClave), "Cuenta", new { token }, Request.Scheme)!;
+                await _correo.Enviar(usuario.Email, "Workly: creá una contraseña nueva",
+                    $"Hola, {usuario.Nombre}.\n\n" +
+                    "Pediste crear una contraseña nueva para tu cuenta de Workly. Entrá a este link para elegirla:\n\n" +
+                    $"{enlace}\n\n" +
+                    "El link sirve una sola vez y vence en 1 hora. Si no lo pediste vos, ignorá este mail: tu contraseña no cambia.\n\n" +
+                    "Workly");
+            }
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "Error de base de datos al recuperar la contraseña");
+            ModelState.AddModelError(string.Empty, ErrorConexion);
+            return View(modelo);
+        }
+
+        TempData["Mensaje"] = "Si hay una cuenta con ese email, te mandamos un link para crear una contraseña nueva. Revisá tu correo (y la carpeta de spam).";
+        return RedirectToAction(nameof(IniciarSesion));
+    }
+
+    [HttpGet]
+    public IActionResult NuevaClave(string? token)
+    {
+        if (string.IsNullOrEmpty(token) || BD.ObtenerUsuarioDeRecuperacion(HashDeToken(token)) == null)
+        {
+            return View("LinkVencido");
+        }
+        return View(new NuevaClaveViewModel { Token = token });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult NuevaClave(NuevaClaveViewModel modelo)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+        if (!BD.UsarRecuperacion(HashDeToken(modelo.Token), Contrasenas.Hashear(modelo.Nueva)))
+        {
+            return View("LinkVencido");
+        }
+        TempData["Mensaje"] = "Listo, ya tenés tu contraseña nueva. Iniciá sesión con ella.";
+        return RedirectToAction(nameof(IniciarSesion));
+    }
+
+    private static string HashDeToken(string token) =>
+        Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token))).ToLowerInvariant();
 
     [HttpGet]
     public async Task<IActionResult> CrearCuenta(string? tipo = null)
@@ -113,6 +234,7 @@ public class CuentaController : Controller
         modelo.Descripcion = NormalizarSaltos(modelo.Descripcion, nameof(modelo.Descripcion), 500);
 
         ValidarContrasena(modelo, externo);
+        ValidarCaptcha();
         var (provincia, telefono) = ValidarUbicacionYTelefono(modelo.Paises, modelo.Provincias, modelo.IDPais, modelo.IDProvincia, modelo.Telefono,
                                                               nameof(modelo.IDProvincia), nameof(modelo.Telefono));
         if (modelo.EstadoBusqueda != null && !Catalogos.EstadosBusqueda.Contains(modelo.EstadoBusqueda))
@@ -204,6 +326,7 @@ public class CuentaController : Controller
         var cuit = VerificacionEmpresa.SoloNumeros(modelo.CUIT);
 
         ValidarContrasena(modelo, externo);
+        ValidarCaptcha();
         var (provincia, telefono) = ValidarUbicacionYTelefono(modelo.Paises, modelo.Provincias, modelo.IDPais, modelo.IDProvincia, modelo.Telefono,
                                                               nameof(modelo.IDProvincia), nameof(modelo.Telefono));
         if (modelo.Rubro != null && !Catalogos.Rubros.Contains(modelo.Rubro))
@@ -566,6 +689,14 @@ public class CuentaController : Controller
             ModelState.AddModelError(campo, $"Usá hasta {largo} caracteres");
         }
         return texto;
+    }
+
+    private void ValidarCaptcha()
+    {
+        if (!_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
+        {
+            ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
+        }
     }
 
     private IActionResult VolverAlRegistro(string vista, RegistroBase modelo)
