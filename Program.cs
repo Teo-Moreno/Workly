@@ -11,6 +11,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<Captcha>();
 builder.Services.AddSingleton<IntentosLogin>();
 builder.Services.AddSingleton<Correo>();
+builder.Services.AddSingleton<VerificacionEmail>();
 builder.Services.AddAntiforgery(opciones => opciones.Cookie.Name = "Workly.Seguridad");
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.CookieTempDataProviderOptions>(opciones => opciones.Cookie.Name = "Workly.Avisos");
 
