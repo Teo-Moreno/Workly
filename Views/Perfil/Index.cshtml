@@ -12,7 +12,6 @@
     var volver = Url.Action("Index", "Perfil");
     var es = new System.Globalization.CultureInfo("es-AR");
 
-    // Qué hace el botón de cada paso pendiente: abre un pop up de esta página o lleva a Configuración
     (string? Modal, string? Url) Accion(string clave) => clave switch
     {
         "foto" => ("modal-foto", null),
@@ -30,7 +29,6 @@
         return "Hasta " + Textos.Pesos(pref.Salario_Maximo!.Value);
     }
 }
-@* Mi perfil (Figma › Media · WF 05 · Perfil). Todo sale de la base: lo carga la persona. *@
 
 <div class="contenedor seccion-app">
     <section class="perfil-cabecera" aria-label="Datos principales">
@@ -103,7 +101,6 @@
     @if (siguiente != null)
     {
         var accion = Accion(siguiente.Clave);
-        @* Llamado a completar el perfil: lo primero que se ve, con un solo botón principal *@
         <section class="onboarding" aria-labelledby="onboarding-titulo">
             <div class="onboarding__principal">
                 <span class="etiqueta etiqueta--acento">Tu perfil está al @Model.PorcentajeCompleto%</span>
@@ -378,7 +375,6 @@
     </div>
 </div>
 
-@* Pop up de la foto: elige el archivo, muestra la vista previa y lo sube (Perfil/SubirFoto) *@
 <dialog class="modal modal--chico" id="modal-foto" aria-labelledby="modal-foto-titulo">
     <div class="modal__contenido">
         <form class="formulario" asp-controller="Perfil" asp-action="SubirFoto" method="post" enctype="multipart/form-data" novalidate data-formulario-real>

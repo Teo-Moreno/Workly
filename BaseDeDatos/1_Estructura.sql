@@ -1,29 +1,10 @@
-/* ============================================================================
-   Workly · 1 de 3 · Estructura (SQL Server)
-   ----------------------------------------------------------------------------
-   Crea la base "Workly", sus tablas, restricciones e índices.
-   Es la misma estructura que crea script.sql (raíz del proyecto), que es el
-   que se usa para crear o actualizar la base. Este archivo es para leerla
-   ordenada; después se ejecuta 2_DatosDePrueba.sql y 3_StoredProcedures.sql.
-   ============================================================================ */
-
 SET NOCOUNT ON;
--- Necesarios para los índices filtrados (SSMS ya los trae así; sqlcmd no)
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
 USE master;
 GO
-
-/* ---- REINICIAR (borra la base y todos sus datos) ---------------------------
-IF DB_ID(N'Workly') IS NOT NULL
-BEGIN
-    ALTER DATABASE Workly SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE Workly;
-END
-GO
----------------------------------------------------------------------------- */
 
 IF DB_ID(N'Workly') IS NULL
     CREATE DATABASE Workly;
@@ -32,25 +13,18 @@ GO
 USE Workly;
 GO
 
-/* ============================================================================
-   TABLAS
-   Los "string" del diagrama se crean como NVARCHAR (aceptan acentos y ñ).
-   ============================================================================ */
-
--- Pais ------------------------------------------------------------------------
 IF OBJECT_ID(N'dbo.Pais', N'U') IS NULL
 CREATE TABLE dbo.Pais
 (
     ID              INT IDENTITY(1, 1) NOT NULL,
     Nombre          NVARCHAR(60) NOT NULL,
-    Codigo_ISO      CHAR(2)      NOT NULL, -- "ar": lo usa la búsqueda de trabajos (JSearch)
-    Codigo_Telefono NVARCHAR(5)  NOT NULL, -- Prefijo internacional, por ejemplo "+54"
+    Codigo_ISO      CHAR(2)      NOT NULL,
+    Codigo_Telefono NVARCHAR(5)  NOT NULL,
     CONSTRAINT PK_Pais PRIMARY KEY (ID),
     CONSTRAINT UQ_Pais_Nombre UNIQUE (Nombre)
 );
 GO
 
--- Provincia (cada provincia pertenece a un país) ------------------------------
 IF OBJECT_ID(N'dbo.Provincia', N'U') IS NULL
 CREATE TABLE dbo.Provincia
 (
@@ -63,7 +37,6 @@ CREATE TABLE dbo.Provincia
 );
 GO
 
--- Usuario: persona o empresa ----------------------------------------------------
 IF OBJECT_ID(N'dbo.Usuario', N'U') IS NULL
 CREATE TABLE dbo.Usuario
 (
@@ -71,40 +44,38 @@ CREATE TABLE dbo.Usuario
     Nombre         NVARCHAR(50)  NOT NULL,
     Apellido       NVARCHAR(50)  NOT NULL,
     Email          NVARCHAR(100) NOT NULL,
-    [Contraseña]   NVARCHAR(200) NULL, -- Hash PBKDF2. NULL si entra solo con Google o LinkedIn
+    [Contraseña]   NVARCHAR(200) NULL,
     Fecha_Registro DATE NOT NULL CONSTRAINT DF_Usuario_Fecha_Registro DEFAULT (CAST(GETDATE() AS DATE)),
     Tipo           NVARCHAR(10) NOT NULL CONSTRAINT DF_Usuario_Tipo DEFAULT (N'Persona'),
-    Es_Moderador   BIT NOT NULL CONSTRAINT DF_Usuario_Es_Moderador DEFAULT (0), -- Revisa las búsquedas que publican las personas
+    Es_Moderador   BIT NOT NULL CONSTRAINT DF_Usuario_Es_Moderador DEFAULT (0),
     CONSTRAINT PK_Usuario PRIMARY KEY (ID),
     CONSTRAINT UQ_Usuario_Email UNIQUE (Email),
     CONSTRAINT CK_Usuario_Tipo CHECK (Tipo IN (N'Persona', N'Empresa'))
 );
 GO
 
--- LoginExterno: cuentas vinculadas con Google o LinkedIn ---------------------------
 IF OBJECT_ID(N'dbo.LoginExterno', N'U') IS NULL
 CREATE TABLE dbo.LoginExterno
 (
     ID         INT IDENTITY(1, 1) NOT NULL,
     IDUsuario  INT NOT NULL,
-    Proveedor  NVARCHAR(20)  NOT NULL, -- "Google" o "LinkedIn"
-    ID_Externo NVARCHAR(200) NOT NULL, -- Identificador de la persona en ese proveedor
+    Proveedor  NVARCHAR(20)  NOT NULL,
+    ID_Externo NVARCHAR(200) NOT NULL,
     CONSTRAINT PK_LoginExterno PRIMARY KEY (ID),
     CONSTRAINT UQ_LoginExterno UNIQUE (Proveedor, ID_Externo),
     CONSTRAINT FK_LoginExterno_Usuario FOREIGN KEY (IDUsuario) REFERENCES dbo.Usuario (ID) ON DELETE CASCADE
 );
 GO
 
--- Perfil (1 a 1 con Usuario) ------------------------------------------------------
 IF OBJECT_ID(N'dbo.Perfil', N'U') IS NULL
 CREATE TABLE dbo.Perfil
 (
     ID              INT IDENTITY(1, 1) NOT NULL,
     IDUsuario       INT NOT NULL,
-    IDProvincia     INT NULL, -- Dónde vive (el país sale de la provincia)
+    IDProvincia     INT NULL,
     Foto            NVARCHAR(260) NULL,
     Descripcion     NVARCHAR(500) NULL,
-    Telefono        NVARCHAR(30)  NULL, -- Con el prefijo del país, por ejemplo "+54 11 5555-1234"
+    Telefono        NVARCHAR(30)  NULL,
     Estado_Busqueda NVARCHAR(30)  NULL,
     CONSTRAINT PK_Perfil PRIMARY KEY (ID),
     CONSTRAINT UQ_Perfil_IDUsuario UNIQUE (IDUsuario),
@@ -114,7 +85,6 @@ CREATE TABLE dbo.Perfil
 );
 GO
 
--- CV (1 a 1 con Usuario) ------------------------------------------------------------
 IF OBJECT_ID(N'dbo.CV', N'U') IS NULL
 CREATE TABLE dbo.CV
 (
@@ -129,18 +99,17 @@ CREATE TABLE dbo.CV
 );
 GO
 
--- Preferencia: lo que busca la persona (1 a 1 con Usuario) ----------------------------
 IF OBJECT_ID(N'dbo.Preferencia', N'U') IS NULL
 CREATE TABLE dbo.Preferencia
 (
     ID             INT IDENTITY(1, 1) NOT NULL,
     IDUsuario      INT NOT NULL,
     Puesto_Buscado NVARCHAR(100) NULL,
-    Niveles        NVARCHAR(100) NULL, -- Separados por coma: "Junior,Semi Senior"
-    Modalidades    NVARCHAR(60)  NULL, -- Separadas por coma: "Remoto,Híbrido"
+    Niveles        NVARCHAR(100) NULL,
+    Modalidades    NVARCHAR(60)  NULL,
     Jornada        NVARCHAR(20)  NULL,
     Contratacion   NVARCHAR(40)  NULL,
-    IDProvincia    INT NULL, -- Dónde quiere trabajar; NULL = todo el país
+    IDProvincia    INT NULL,
     Salario_Minimo INT NULL,
     Salario_Maximo INT NULL,
     Disponibilidad NVARCHAR(20)  NULL,
@@ -153,7 +122,6 @@ CREATE TABLE dbo.Preferencia
 );
 GO
 
--- Habilidad y UsuarioHabilidad (N a N) ------------------------------------------------
 IF OBJECT_ID(N'dbo.Habilidad', N'U') IS NULL
 CREATE TABLE dbo.Habilidad
 (
@@ -177,7 +145,6 @@ CREATE TABLE dbo.UsuarioHabilidad
 );
 GO
 
--- Idioma y UsuarioIdioma (N a N, con el nivel) --------------------------------------------
 IF OBJECT_ID(N'dbo.Idioma', N'U') IS NULL
 CREATE TABLE dbo.Idioma
 (
@@ -203,7 +170,6 @@ CREATE TABLE dbo.UsuarioIdioma
 );
 GO
 
--- Educacion y UsuarioEducacion (N a N) ---------------------------------------------------
 IF OBJECT_ID(N'dbo.Educacion', N'U') IS NULL
 CREATE TABLE dbo.Educacion
 (
@@ -223,7 +189,7 @@ CREATE TABLE dbo.UsuarioEducacion
     IDEducacion  INT NOT NULL,
     Titulo       NVARCHAR(150) NOT NULL,
     Fecha_Inicio DATE NOT NULL,
-    Fecha_Fin    DATE NULL, -- NULL = en curso
+    Fecha_Fin    DATE NULL,
     CONSTRAINT PK_UsuarioEducacion PRIMARY KEY (ID),
     CONSTRAINT FK_UsuarioEducacion_Usuario FOREIGN KEY (IDUsuario) REFERENCES dbo.Usuario (ID) ON DELETE CASCADE,
     CONSTRAINT FK_UsuarioEducacion_Educacion FOREIGN KEY (IDEducacion) REFERENCES dbo.Educacion (ID),
@@ -231,8 +197,6 @@ CREATE TABLE dbo.UsuarioEducacion
 );
 GO
 
--- Empresa: las de cuenta propia tienen IDUsuario y CUIT; el resto se crea al cargar
--- una experiencia laboral o una búsqueda de una persona ------------------------------------
 IF OBJECT_ID(N'dbo.Empresa', N'U') IS NULL
 CREATE TABLE dbo.Empresa
 (
@@ -240,11 +204,11 @@ CREATE TABLE dbo.Empresa
     Nombre         NVARCHAR(100) NOT NULL,
     Descripcion    NVARCHAR(500) NULL,
     Logo           NVARCHAR(260) NULL,
-    Ubicacion      NVARCHAR(100) NULL, -- Barrio o dirección
+    Ubicacion      NVARCHAR(100) NULL,
     Sitio_Web      NVARCHAR(200) NULL,
-    IDUsuario      INT NULL,           -- Cuenta de empresa que la administra
+    IDUsuario      INT NULL,
     Razon_Social   NVARCHAR(150) NULL,
-    CUIT           CHAR(11) NULL,      -- Solo números
+    CUIT           CHAR(11) NULL,
     Rubro          NVARCHAR(60) NULL,
     IDProvincia    INT NULL,
     Telefono       NVARCHAR(30) NULL,
@@ -265,7 +229,7 @@ CREATE TABLE dbo.ExperienciaLaboral
     Puesto             NVARCHAR(100) NOT NULL,
     Descripcion        NVARCHAR(500) NULL,
     Fecha_Inicio       DATE NOT NULL,
-    Fecha_Finalizacion DATE NULL, -- NULL = trabajo actual
+    Fecha_Finalizacion DATE NULL,
     CONSTRAINT PK_ExperienciaLaboral PRIMARY KEY (ID),
     CONSTRAINT FK_ExperienciaLaboral_Usuario FOREIGN KEY (IDUsuario) REFERENCES dbo.Usuario (ID) ON DELETE CASCADE,
     CONSTRAINT FK_ExperienciaLaboral_Empresa FOREIGN KEY (IDEmpresa) REFERENCES dbo.Empresa (ID),
@@ -273,9 +237,6 @@ CREATE TABLE dbo.ExperienciaLaboral
 );
 GO
 
--- OfertaLaboral: búsquedas publicadas en Workly por empresas o personas -----------------
--- Las de empresas se publican al toque; las de personas quedan "Pendiente" hasta que
--- una cuenta moderadora las acepta o las rechaza.
 IF OBJECT_ID(N'dbo.OfertaLaboral', N'U') IS NULL
 CREATE TABLE dbo.OfertaLaboral
 (
@@ -286,7 +247,7 @@ CREATE TABLE dbo.OfertaLaboral
     Ubicacion            NVARCHAR(100)  NULL,
     Modalidad            NVARCHAR(20)   NOT NULL,
     Tipo_Contrato        NVARCHAR(50)   NOT NULL,
-    Salario              INT NULL, -- Bruto mensual en pesos
+    Salario              INT NULL,
     Cantidad_Puestos     INT NOT NULL CONSTRAINT DF_OfertaLaboral_Cantidad_Puestos DEFAULT (1),
     Fecha_Publicacion    DATE NOT NULL CONSTRAINT DF_OfertaLaboral_Fecha_Publicacion DEFAULT (CAST(GETDATE() AS DATE)),
     Fecha_Cierre         DATE NULL,
@@ -307,7 +268,6 @@ CREATE TABLE dbo.OfertaLaboral
 );
 GO
 
--- Puesto y OfertaPuesto (N a N) ----------------------------------------------------------
 IF OBJECT_ID(N'dbo.Puesto', N'U') IS NULL
 CREATE TABLE dbo.Puesto
 (
@@ -332,13 +292,11 @@ CREATE TABLE dbo.OfertaPuesto
 );
 GO
 
--- OfertaExterna: ofertas de otros sitios (LinkedIn, Bumeran...) que trae JSearch -------------
--- Se guardan para mostrar su detalle y para que la persona registre que se postuló.
 IF OBJECT_ID(N'dbo.OfertaExterna', N'U') IS NULL
 CREATE TABLE dbo.OfertaExterna
 (
     ID                INT IDENTITY(1, 1) NOT NULL,
-    ID_Externo        NVARCHAR(200)  NOT NULL, -- job_id de JSearch
+    ID_Externo        NVARCHAR(200)  NOT NULL,
     Titulo            NVARCHAR(300)  NOT NULL,
     Empresa           NVARCHAR(200)  NULL,
     Logo              NVARCHAR(1000) NULL,
@@ -348,7 +306,7 @@ CREATE TABLE dbo.OfertaExterna
     Tipo_Contrato     NVARCHAR(50)   NULL,
     Salario           NVARCHAR(100)  NULL,
     Link_Postulacion  NVARCHAR(2000) NULL,
-    Publicador        NVARCHAR(100)  NULL, -- Sitio donde está publicada (LinkedIn, Bumeran...)
+    Publicador        NVARCHAR(100)  NULL,
     Fecha_Publicacion DATETIME2 NULL,
     Fecha_Consulta    DATETIME2 NOT NULL CONSTRAINT DF_OfertaExterna_Fecha_Consulta DEFAULT (SYSUTCDATETIME()),
     CONSTRAINT PK_OfertaExterna PRIMARY KEY (ID),
@@ -356,9 +314,6 @@ CREATE TABLE dbo.OfertaExterna
 );
 GO
 
--- Favorito y FavoritoOferta: ofertas guardadas -------------------------------------------
--- Cada Favorito es una oferta que guardó la persona (con la fecha); FavoritoOferta dice cuál:
--- una de Workly o una de otro sitio (una de las dos).
 IF OBJECT_ID(N'dbo.Favorito', N'U') IS NULL
 CREATE TABLE dbo.Favorito
 (
@@ -387,8 +342,6 @@ CREATE TABLE dbo.FavoritoOferta
 );
 GO
 
--- Postulacion: a una oferta de Workly o a una externa (una de las dos) --------------------
--- El estado lo mueve la persona en su tablero.
 IF OBJECT_ID(N'dbo.Postulacion', N'U') IS NULL
 CREATE TABLE dbo.Postulacion
 (
@@ -408,9 +361,6 @@ CREATE TABLE dbo.Postulacion
 );
 GO
 
-/* ============================================================================
-   ÍNDICES
-   ============================================================================ */
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_Postulacion_Usuario_OfertaLaboral')
     CREATE UNIQUE INDEX UX_Postulacion_Usuario_OfertaLaboral ON dbo.Postulacion (IDUsuario, IDOfertaLaboral) WHERE IDOfertaLaboral IS NOT NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_Postulacion_Usuario_OfertaExterna')

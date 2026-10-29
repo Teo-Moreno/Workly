@@ -4,8 +4,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Ofertas guardadas de la persona (tablas Favorito y FavoritoOferta).
-// Se puede guardar una búsqueda de Workly o una oferta de otro sitio.
 [Authorize]
 public class GuardadasController : Controller
 {

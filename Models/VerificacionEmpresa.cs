@@ -1,11 +1,5 @@
 namespace Workly.Models;
 
-/// <summary>
-/// Controles para registrar una cuenta de empresa:
-/// - CUIT válido (11 números con el dígito verificador correcto).
-/// - Email del mismo dominio que el sitio web de la empresa (no se aceptan
-///   gmail, hotmail, etc.), así quien se registra tiene un mail de la empresa.
-/// </summary>
 public static class VerificacionEmpresa
 {
     private static readonly int[] Pesos = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
@@ -17,10 +11,8 @@ public static class VerificacionEmpresa
         "gmx.com", "mail.com", "yandex.com", "fibertel.com.ar", "speedy.com.ar", "arnet.com.ar"
     };
 
-    /// <summary>Deja solo los números: "30-71234567-1" → "30712345671".</summary>
     public static string SoloNumeros(string? cuit) => new((cuit ?? "").Where(char.IsAsciiDigit).ToArray());
 
-    /// <summary>"30712345671" → "30-71234567-1".</summary>
     public static string Formatear(string cuit) =>
         cuit.Length == 11 ? $"{cuit[..2]}-{cuit[2..10]}-{cuit[10]}" : cuit;
 
@@ -42,7 +34,6 @@ public static class VerificacionEmpresa
         return cuit[10] - '0' == verificador;
     }
 
-    /// <summary>"https://www.acme.com.ar/contacto" → "acme.com.ar". Null si no es una dirección válida.</summary>
     public static string? DominioDelSitio(string? sitio)
     {
         if (string.IsNullOrWhiteSpace(sitio))
@@ -70,7 +61,6 @@ public static class VerificacionEmpresa
 
     public static bool EsEmailGratuito(string email) => DominiosGratuitos.Contains(DominioDelEmail(email));
 
-    /// <summary>El email es de la empresa: rrhh@acme.com.ar o rrhh@ar.acme.com con el sitio acme.com.ar / acme.com.</summary>
     public static bool EmailCoincideConSitio(string email, string? sitio)
     {
         var dominioSitio = DominioDelSitio(sitio);

@@ -1,6 +1,5 @@
 namespace Workly.Models;
 
-// Tabla Provincia (cada provincia pertenece a un país)
 public class Provincia
 {
     public int ID { get; set; }

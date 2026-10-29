@@ -3,7 +3,6 @@
     var meses = new[] { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic" };
     var conError = Model.Error != null || Html.ClaseError(Model.Nombre).Length > 0;
 }
-@* Selector de mes y año (MM/AAAA): se puede escribir o elegir en el calendario de meses *@
 <div class="campo @(conError ? "campo--error" : "")">
     <label class="campo__etiqueta" for="@Model.Id">@Model.Etiqueta</label>
     <div class="selector-mes" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">

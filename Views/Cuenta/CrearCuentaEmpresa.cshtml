@@ -8,7 +8,6 @@
 @section Barra {
     <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
-@* Registro de una empresa: la persona responsable (Usuario) y los datos que verifican la empresa (Empresa) *@
 
 <div class="cuenta-tarjeta cuenta-tarjeta--ancha">
     <h1 class="cuenta-tarjeta__titulo">Registrá tu empresa</h1>
@@ -34,7 +33,6 @@
     }
 
     <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
-        @* ---------------- Paso 1 · Responsable ---------------- *@
         <fieldset class="formulario registro__paso" data-paso>
             <legend class="solo-lectores">Paso 1: quién maneja la cuenta</legend>
             @if (externo)
@@ -77,7 +75,6 @@
             </div>
         </fieldset>
 
-        @* ---------------- Paso 2 · Empresa ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
             <legend class="solo-lectores">Paso 2: datos de la empresa</legend>
             <p class="texto-suave">Con estos datos comprobamos que la empresa existe: el CUIT tiene que ser válido y el email, del dominio de su sitio web.</p>
