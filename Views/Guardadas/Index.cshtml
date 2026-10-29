@@ -1,0 +1,68 @@
+@model List<Oferta>
+@{
+    ViewData["Title"] = "Guardadas";
+    var es = new System.Globalization.CultureInfo("es-AR");
+    var volver = Url.Action("Index", "Guardadas");
+}
+@* Ofertas guardadas: de Workly o de otros sitios (tablas Favorito y FavoritoOferta) *@
+
+<div class="contenedor seccion-app">
+    <header class="encabezado-pagina">
+        <div class="encabezado-pagina__fila">
+            <div>
+                <h1 class="encabezado-pagina__titulo">Guardadas</h1>
+                <p class="encabezado-pagina__bajada">Las ofertas que guardaste para ver después o postularte más tarde.</p>
+            </div>
+            <div class="encabezado-pagina__acciones">
+                <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            </div>
+        </div>
+    </header>
+
+    @if (Model.Count == 0)
+    {
+        <div class="estado-vacio">
+            <span class="caja-icono caja-icono--lg"><icono nombre="bookmark" /></span>
+            <h2 class="estado-vacio__titulo">Todavía no guardaste ofertas</h2>
+            <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
+            <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+        </div>
+    }
+    else
+    {
+        <ul class="lista-guardadas" role="list">
+            @foreach (var oferta in Model)
+            {
+                var enlace = oferta.EsExterna ? Url.Action("Externa", "Empleos", new { id = oferta.ID }) : Url.Action("Detalle", "Empleos", new { id = oferta.ID });
+                var noDisponible = !oferta.EsExterna && (oferta.EstaCerrada || oferta.Estado_Publicacion != "Aprobada");
+                <li class="guardada">
+                    <partial name="_LogoEmpresa" model='(oferta.Logo, oferta.Empresa, "logo-empresa--md")' />
+                    <div class="guardada__datos">
+                        <h2 class="guardada__titulo"><a href="@enlace">@oferta.Titulo</a></h2>
+                        <p class="guardada__meta">@string.Join(" · ", new[] { oferta.Empresa, oferta.UbicacionVisible, oferta.SalarioVisible }.Where(t => !string.IsNullOrEmpty(t)))</p>
+                        <div class="lista-tags">
+                            <partial name="_SelloOficial" model="oferta" />
+                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="tag tag--borde">@oferta.Modalidad</span> }
+                            <span class="tag @(oferta.EsExterna ? "" : "tag--principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
+                            @if (oferta.YaPostulado) { <span class="etiqueta etiqueta--exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
+                            @if (noDisponible) { <span class="etiqueta etiqueta--error">Ya no recibe postulaciones</span> }
+                        </div>
+                        @if (oferta.Fecha_Guardado.HasValue)
+                        {
+                            <p class="texto-chico texto-suave">Guardada el @oferta.Fecha_Guardado.Value.ToString("d 'de' MMMM", es)</p>
+                        }
+                    </div>
+                    <div class="guardada__acciones">
+                        <a class="boton boton--sm" href="@enlace">Ver oferta</a>
+                        <form asp-controller="Guardadas" asp-action="Quitar" method="post">
+                            <input type="hidden" name="id" value="@oferta.ID" />
+                            <input type="hidden" name="externa" value="@(oferta.EsExterna ? "true" : "false")" />
+                            <input type="hidden" name="volver" value="@volver" />
+                            <button class="boton boton--texto boton--sm" type="submit"><icono nombre="trash-full" />Quitar</button>
+                        </form>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

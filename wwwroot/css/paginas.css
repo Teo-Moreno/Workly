@@ -806,8 +806,8 @@
 .detalle-panel__acciones {
   position: sticky;
   bottom: -24px;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 0 -24px -24px;
   padding: 16px 24px 24px;
@@ -4214,4 +4214,68 @@ li:last-child > .onboarding__item {
 
 .ordenar label {
   white-space: nowrap;
+}
+
+/* Guardadas */
+.lista-guardadas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guardada {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-xl);
+  background: var(--color-blanco);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.guardada__datos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.guardada__titulo {
+  font-size: var(--texto-18);
+}
+
+.guardada__titulo a {
+  color: var(--color-principal);
+  text-decoration: none;
+}
+
+.guardada__titulo a:hover {
+  text-decoration: underline;
+}
+
+.guardada__meta {
+  font-size: var(--texto-14);
+  color: var(--color-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.guardada__acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .guardada {
+    flex-wrap: wrap;
+  }
+
+  .guardada__acciones {
+    width: 100%;
+  }
 }
