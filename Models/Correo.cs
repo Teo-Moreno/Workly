@@ -1,23 +1,32 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Net.Mail;
 
 namespace Workly.Models;
 
 public class Correo
 {
+    private const string UrlBrevo = "https://api.brevo.com/v3/smtp/email";
+
     private readonly IConfiguration _configuracion;
+    private readonly IHttpClientFactory _http;
     private readonly ILogger<Correo> _logger;
 
-    public Correo(IConfiguration configuracion, ILogger<Correo> logger)
+    public Correo(IConfiguration configuracion, IHttpClientFactory http, ILogger<Correo> logger)
     {
         _configuracion = configuracion;
+        _http = http;
         _logger = logger;
     }
 
     private IConfigurationSection Datos => _configuracion.GetSection("Correo");
 
-    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Servidor"]) && !string.IsNullOrWhiteSpace(Datos["Remitente"])
-                               && (string.IsNullOrWhiteSpace(Datos["Usuario"]) || !string.IsNullOrWhiteSpace(Datos["Contrasena"]));
+    private bool UsaBrevo => !string.IsNullOrWhiteSpace(Datos["BrevoApiKey"]);
+
+    private bool SmtpConfigurado => !string.IsNullOrWhiteSpace(Datos["Servidor"])
+                                    && (string.IsNullOrWhiteSpace(Datos["Usuario"]) || !string.IsNullOrWhiteSpace(Datos["Contrasena"]));
+
+    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Remitente"]) && (UsaBrevo || SmtpConfigurado);
 
     public async Task<bool> Enviar(string destino, string asunto, string texto)
     {
@@ -25,6 +34,45 @@ public class Correo
         {
             return false;
         }
+        return UsaBrevo ? await EnviarPorBrevo(destino, asunto, texto) : await EnviarPorSmtp(destino, asunto, texto);
+    }
+
+    private async Task<bool> EnviarPorBrevo(string destino, string asunto, string texto)
+    {
+        try
+        {
+            using var pedido = new HttpRequestMessage(HttpMethod.Post, UrlBrevo)
+            {
+                Content = JsonContent.Create(new
+                {
+                    sender = new { name = Datos["NombreRemitente"] ?? "Workly", email = Datos["Remitente"] },
+                    to = new[] { new { email = destino } },
+                    subject = asunto,
+                    textContent = texto
+                })
+            };
+            pedido.Headers.Add("api-key", Datos["BrevoApiKey"]);
+            pedido.Headers.Accept.ParseAdd("application/json");
+            using var cliente = _http.CreateClient();
+            cliente.Timeout = TimeSpan.FromSeconds(20);
+            using var respuesta = await cliente.SendAsync(pedido);
+            if (respuesta.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            _logger.LogError("Brevo no mandó el mail a {Destino}: {Estado} {Detalle}", destino, (int)respuesta.StatusCode,
+                await respuesta.Content.ReadAsStringAsync());
+            return false;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogError(ex, "No se pudo enviar el mail a {Destino}", destino);
+            return false;
+        }
+    }
+
+    private async Task<bool> EnviarPorSmtp(string destino, string asunto, string texto)
+    {
         try
         {
             using var mensaje = new MailMessage
