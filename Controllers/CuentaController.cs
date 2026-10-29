@@ -212,13 +212,11 @@ public class CuentaController : Controller
 
         var persona = new RegistroPersonaViewModel();
         CompletarConExterno(persona, externo);
-        CargarListas(persona);
         return View("CrearCuentaPersona", persona);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(12 * 1024 * 1024)]
     public async Task<IActionResult> CrearCuentaPersona(RegistroPersonaViewModel modelo)
     {
         if (User.EstaLogueado())
@@ -229,37 +227,13 @@ public class CuentaController : Controller
         await CargarProveedores();
         var externo = await LeerExterno();
         CompletarConExterno(modelo, externo);
-        CargarListas(modelo);
         NormalizarDatosBase(modelo);
-        modelo.Descripcion = NormalizarSaltos(modelo.Descripcion, nameof(modelo.Descripcion), 500);
-
         ValidarContrasena(modelo, externo);
         ValidarCaptcha();
-        var (provincia, telefono) = ValidarUbicacionYTelefono(modelo.Paises, modelo.Provincias, modelo.IDPais, modelo.IDProvincia, modelo.Telefono,
-                                                              nameof(modelo.IDProvincia), nameof(modelo.Telefono));
-        if (modelo.EstadoBusqueda != null && !Catalogos.EstadosBusqueda.Contains(modelo.EstadoBusqueda))
-        {
-            ModelState.AddModelError(nameof(modelo.EstadoBusqueda), "Elegí una opción de la lista");
-        }
-
-        var preferencia = Validaciones.Preferencia(modelo.PuestoBuscado, modelo.Niveles, modelo.Modalidades, modelo.Jornada, modelo.Contratacion,
-                                                   modelo.IDProvinciaPreferida, modelo.SalarioMinimo, modelo.SalarioMaximo, modelo.Disponibilidad,
-                                                   modelo.Provincias, nameof(modelo.SalarioMaximo), ModelState);
-        var habilidades = Validaciones.Habilidades(modelo.Habilidades, nameof(modelo.Habilidades), ModelState);
-        var idiomas = Validaciones.Idiomas(modelo.IdiomaIds, modelo.IdiomaNiveles, modelo.CatalogoIdiomas, "Idiomas", ModelState);
-        var experiencias = ArmarExperiencias(modelo);
-        var formaciones = ArmarFormaciones(modelo);
-
-        ValidarArchivo(modelo.Foto, Archivos.ExtensionesFoto, nameof(modelo.Foto));
-        ValidarArchivo(modelo.ArchivoCV, Archivos.ExtensionesCV, nameof(modelo.ArchivoCV));
         if (!ValidarEmailLibre(modelo.Email, nameof(modelo.Email)) || !ModelState.IsValid)
         {
             return VolverAlRegistro("CrearCuentaPersona", modelo);
         }
-
-        var rutaFoto = await Archivos.GuardarFoto(modelo.Foto, _entorno.WebRootPath);
-        var nombreCV = await Archivos.GuardarCV(modelo.ArchivoCV, _entorno.ContentRootPath);
-        var sitioWeb = Limpiar(modelo.SitioWeb);
 
         var datos = new PersonaNueva
         {
@@ -270,20 +244,6 @@ public class CuentaController : Controller
                 Email = modelo.Email,
                 Contraseña = string.IsNullOrEmpty(modelo.Contrasena) ? null : Contrasenas.Hashear(modelo.Contrasena)
             },
-            Perfil = new Perfil
-            {
-                IDProvincia = provincia?.ID,
-                Foto = rutaFoto,
-                Descripcion = Limpiar(modelo.Descripcion),
-                Telefono = telefono,
-                Estado_Busqueda = modelo.EstadoBusqueda
-            },
-            CV = nombreCV != null || sitioWeb != null ? new CV { Nombre_Archivo = nombreCV, Sitio_Web = sitioWeb } : null,
-            Preferencia = preferencia.TieneDatos || preferencia.IDProvincia.HasValue ? preferencia : null,
-            Habilidades = habilidades,
-            Idiomas = idiomas,
-            Experiencias = experiencias,
-            Formaciones = formaciones,
             LoginExterno = externo == null ? null : new LoginExternoNuevo { Proveedor = externo.Proveedor, ID_Externo = externo.ID }
         };
 
@@ -294,15 +254,13 @@ public class CuentaController : Controller
         }
         catch (SqlException ex)
         {
-            Archivos.Borrar(Archivos.RutaImagen(rutaFoto, _entorno.WebRootPath));
-            if (nombreCV != null) Archivos.Borrar(Path.Combine(Archivos.CarpetaCV(_entorno.ContentRootPath), nombreCV));
             ManejarErrorDeRegistro(ex, nameof(modelo.Email));
             return VolverAlRegistro("CrearCuentaPersona", modelo);
         }
 
         await TerminarRegistro(id);
-        TempData["Mensaje"] = $"¡Te damos la bienvenida a Workly, {modelo.Nombre}! Tu cuenta está lista.";
-        return RedirectToAction("Index", "Panel");
+        TempData["Mensaje"] = $"¡Te damos la bienvenida a Workly, {modelo.Nombre}! Tu cuenta está lista. Completá tu perfil cuando quieras.";
+        return RedirectToAction("Completar", "Perfil");
     }
 
     [HttpPost]
@@ -534,7 +492,7 @@ public class CuentaController : Controller
         ViewBag.Proveedores = proveedores;
     }
 
-    private void CargarListas(RegistroBase modelo)
+    private void CargarListas(RegistroEmpresaViewModel modelo)
     {
         try
         {
@@ -543,12 +501,6 @@ public class CuentaController : Controller
             if (modelo.IDPais == null && modelo.Paises.Count == 1)
             {
                 modelo.IDPais = modelo.Paises[0].ID;
-            }
-            if (modelo is RegistroPersonaViewModel persona)
-            {
-                persona.CatalogoHabilidades = BD.ObtenerCatalogoHabilidades();
-                persona.CatalogoIdiomas = BD.ObtenerCatalogoIdiomas();
-                persona.Instituciones = BD.ObtenerInstituciones();
             }
         }
         catch (SqlException ex)
@@ -630,51 +582,6 @@ public class CuentaController : Controller
         }
         return (provincia, Validaciones.Telefono(telefonoLocal, pais, campoTelefono, ModelState));
     }
-
-    private List<ExperienciaNueva> ArmarExperiencias(RegistroPersonaViewModel m)
-    {
-        var lista = new List<ExperienciaNueva>();
-        for (var i = 0; i < m.ExpPuesto.Count; i++)
-        {
-            var puesto = Valor(m.ExpPuesto, i);
-            var empresa = Valor(m.ExpEmpresa, i);
-            var inicio = Fechas.ParsearMesAnio(Valor(m.ExpInicio, i));
-            var finTexto = Valor(m.ExpFin, i);
-            var fin = Fechas.ParsearMesAnio(finTexto);
-            var descripcion = Valor(m.ExpDescripcion, i);
-            if (puesto.Length is 0 or > 100 || empresa.Length is 0 or > 100 || inicio == null || inicio > Fechas.MesActual ||
-                (finTexto.Length > 0 && (fin == null || fin < inicio || fin > Fechas.MesActual)) || descripcion.Length > 500)
-            {
-                ModelState.AddModelError("Experiencias", "Revisá las experiencias: cada una necesita puesto, empresa y fechas válidas.");
-                continue;
-            }
-            lista.Add(new ExperienciaNueva { Puesto = puesto, Empresa = empresa, Inicio = inicio.Value, Fin = fin, Descripcion = Limpiar(descripcion) });
-        }
-        return lista;
-    }
-
-    private List<FormacionNueva> ArmarFormaciones(RegistroPersonaViewModel m)
-    {
-        var lista = new List<FormacionNueva>();
-        for (var i = 0; i < m.ForTitulo.Count; i++)
-        {
-            var titulo = Valor(m.ForTitulo, i);
-            var institucion = Valor(m.ForInstitucion, i);
-            var inicio = Fechas.ParsearMesAnio(Valor(m.ForInicio, i));
-            var finTexto = Valor(m.ForFin, i);
-            var fin = Fechas.ParsearMesAnio(finTexto);
-            if (titulo.Length is 0 or > 150 || institucion.Length is 0 or > 150 || inicio == null || inicio > Fechas.MesActual ||
-                (finTexto.Length > 0 && (fin == null || fin < inicio)))
-            {
-                ModelState.AddModelError("Formaciones", "Revisá la formación: cada una necesita título, institución y fechas válidas.");
-                continue;
-            }
-            lista.Add(new FormacionNueva { Titulo = titulo, Institucion = institucion, Inicio = inicio.Value, Fin = fin });
-        }
-        return lista;
-    }
-
-    private static string Valor(List<string> lista, int i) => i < lista.Count ? (lista[i] ?? "").Trim() : "";
 
     private string? NormalizarSaltos(string? texto, string campo, int largo)
     {
