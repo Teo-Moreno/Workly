@@ -59,9 +59,9 @@ public class CamposBusqueda
     public List<Provincia> Provincias { get; set; } = new();
     public int? IDPais { get; set; }
 
-    public static CamposBusqueda Desde(RegistroPersonaViewModel m) => new()
+    public static CamposBusqueda Desde(CompletarPerfilViewModel m) => new()
     {
-        Prefijo = "reg",
+        Prefijo = "cmp",
         IncluirEstado = false,
         PuestoBuscado = m.PuestoBuscado,
         Niveles = m.Niveles,

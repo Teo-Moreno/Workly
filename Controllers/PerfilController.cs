@@ -204,6 +204,118 @@ public class PerfilController : Controller
         return ArchivoCV(BD.ObtenerCV(User.IdUsuario()));
     }
 
+    public async Task<IActionResult> Completar()
+    {
+        if (User.EsEmpresa())
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        var perfil = ObtenerMiPerfil();
+        if (perfil == null)
+        {
+            return await SesionInvalida();
+        }
+        var p = perfil.Preferencia;
+        var modelo = new CompletarPerfilViewModel
+        {
+            IDPais = perfil.Perfil.IDPais,
+            IDProvincia = perfil.Perfil.IDProvincia,
+            Telefono = Telefonos.ParteLocal(perfil.Perfil.Telefono, perfil.Perfil.Codigo_Telefono),
+            Descripcion = perfil.Perfil.Descripcion,
+            EstadoBusqueda = perfil.Perfil.Estado_Busqueda,
+            PuestoBuscado = p.Puesto_Buscado,
+            Niveles = p.ListaNiveles,
+            Modalidades = p.ListaModalidades,
+            Jornada = p.Jornada,
+            Contratacion = p.Contratacion,
+            IDProvinciaPreferida = p.IDProvincia,
+            SalarioMinimo = p.Salario_Minimo,
+            SalarioMaximo = p.Salario_Maximo,
+            Disponibilidad = p.Disponibilidad,
+            Habilidades = perfil.Habilidades,
+            IdiomaIds = perfil.Idiomas.Select(i => i.IDIdioma).ToList(),
+            IdiomaNiveles = perfil.Idiomas.Select(i => i.Nivel).ToList(),
+            SitioWeb = perfil.CV?.Sitio_Web
+        };
+        CargarCompletar(modelo, perfil);
+        return View(modelo);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(12 * 1024 * 1024)]
+    public async Task<IActionResult> Completar(CompletarPerfilViewModel modelo)
+    {
+        if (User.EsEmpresa())
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        var perfil = ObtenerMiPerfil();
+        if (perfil == null)
+        {
+            return await SesionInvalida();
+        }
+        CargarCompletar(modelo, perfil);
+
+        modelo.Descripcion = modelo.Descripcion?.Replace("\r\n", "\n");
+        ModelState.Remove(nameof(modelo.Descripcion));
+        if (modelo.Descripcion?.Length > 500)
+        {
+            ModelState.AddModelError(nameof(modelo.Descripcion), "Usá hasta 500 caracteres");
+        }
+        var provincia = modelo.Provincias.FirstOrDefault(pr => pr.ID == modelo.IDProvincia);
+        if (modelo.IDProvincia != null && (provincia == null || provincia.IDPais != modelo.IDPais))
+        {
+            ModelState.AddModelError(nameof(modelo.IDProvincia), "Elegí una provincia de la lista");
+            provincia = null;
+        }
+        var telefono = Validaciones.Telefono(modelo.Telefono, modelo.Paises.FirstOrDefault(pa => pa.ID == modelo.IDPais), nameof(modelo.Telefono), ModelState);
+        if (modelo.EstadoBusqueda != null && !Catalogos.EstadosBusqueda.Contains(modelo.EstadoBusqueda))
+        {
+            ModelState.AddModelError(nameof(modelo.EstadoBusqueda), "Elegí una opción de la lista");
+        }
+        var preferencia = Validaciones.Preferencia(modelo.PuestoBuscado, modelo.Niveles, modelo.Modalidades, modelo.Jornada, modelo.Contratacion,
+                                                   modelo.IDProvinciaPreferida, modelo.SalarioMinimo, modelo.SalarioMaximo, modelo.Disponibilidad,
+                                                   modelo.Provincias, nameof(modelo.SalarioMaximo), ModelState);
+        var habilidades = Validaciones.Habilidades(modelo.Habilidades, nameof(modelo.Habilidades), ModelState);
+        var idiomas = Validaciones.Idiomas(modelo.IdiomaIds, modelo.IdiomaNiveles, modelo.CatalogoIdiomas, "Idiomas", ModelState);
+        var experiencias = ArmarExperiencias(modelo);
+        var formaciones = ArmarFormaciones(modelo);
+        if (Archivos.Validar(modelo.Foto, Archivos.ExtensionesFoto) is { } errorFoto)
+        {
+            ModelState.AddModelError(nameof(modelo.Foto), errorFoto);
+        }
+        if (Archivos.Validar(modelo.ArchivoCV, Archivos.ExtensionesCV) is { } errorCV)
+        {
+            ModelState.AddModelError(nameof(modelo.ArchivoCV), errorCV);
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        var rutaFoto = await Archivos.GuardarFoto(modelo.Foto, _entorno.WebRootPath);
+        var nombreCV = await Archivos.GuardarCV(modelo.ArchivoCV, _entorno.ContentRootPath);
+        var (fotoAnterior, cvAnterior) = BD.CompletarPerfil(User.IdUsuario(), new PerfilCompletado
+        {
+            IDProvincia = provincia?.ID,
+            Telefono = telefono,
+            Descripcion = Validaciones.Limpiar(modelo.Descripcion),
+            EstadoBusqueda = modelo.EstadoBusqueda,
+            Foto = rutaFoto,
+            ArchivoCV = nombreCV,
+            SitioWeb = Validaciones.Limpiar(modelo.SitioWeb),
+            Preferencia = preferencia,
+            Habilidades = habilidades,
+            Idiomas = idiomas,
+            Experiencias = experiencias,
+            Formaciones = formaciones
+        });
+        if (rutaFoto != null) Archivos.Borrar(Archivos.RutaImagen(fotoAnterior, _entorno.WebRootPath));
+        if (nombreCV != null) BorrarCVViejo(cvAnterior);
+        return Volver("Guardamos tu perfil.");
+    }
+
     public async Task<IActionResult> Configuracion()
     {
         var modelo = ObtenerMiPerfil();
@@ -428,6 +540,65 @@ public class PerfilController : Controller
         var modelo = BD.ObtenerMiPerfil(User.IdUsuario());
         return EsUsuarioDeLaSesion(modelo?.Usuario) ? modelo : null;
     }
+
+    private void CargarCompletar(CompletarPerfilViewModel modelo, MiPerfilViewModel perfil)
+    {
+        modelo.Paises = BD.ObtenerPaises();
+        modelo.Provincias = BD.ObtenerProvincias();
+        modelo.IDPais ??= modelo.Paises.Count == 1 ? modelo.Paises[0].ID : null;
+        modelo.CatalogoHabilidades = BD.ObtenerCatalogoHabilidades();
+        modelo.CatalogoIdiomas = BD.ObtenerCatalogoIdiomas();
+        modelo.Instituciones = BD.ObtenerInstituciones();
+        modelo.FotoActual = perfil.Perfil.Foto;
+        modelo.CVActual = perfil.CV?.NombreOriginal ?? (perfil.TieneCV ? "CV" : null);
+        modelo.ExperienciasCargadas = perfil.Experiencias;
+        modelo.FormacionesCargadas = perfil.Formaciones;
+    }
+
+    private List<ExperienciaNueva> ArmarExperiencias(CompletarPerfilViewModel m)
+    {
+        var lista = new List<ExperienciaNueva>();
+        for (var i = 0; i < m.ExpPuesto.Count; i++)
+        {
+            var puesto = Valor(m.ExpPuesto, i);
+            var empresa = Valor(m.ExpEmpresa, i);
+            var inicio = Fechas.ParsearMesAnio(Valor(m.ExpInicio, i));
+            var finTexto = Valor(m.ExpFin, i);
+            var fin = Fechas.ParsearMesAnio(finTexto);
+            var descripcion = Valor(m.ExpDescripcion, i);
+            if (puesto.Length is 0 or > 100 || empresa.Length is 0 or > 100 || inicio == null || inicio > Fechas.MesActual ||
+                (finTexto.Length > 0 && (fin == null || fin < inicio || fin > Fechas.MesActual)) || descripcion.Length > 500)
+            {
+                ModelState.AddModelError("Experiencias", "Revisá las experiencias: cada una necesita puesto, empresa y fechas válidas.");
+                continue;
+            }
+            lista.Add(new ExperienciaNueva { Puesto = puesto, Empresa = empresa, Inicio = inicio.Value, Fin = fin, Descripcion = Validaciones.Limpiar(descripcion) });
+        }
+        return lista;
+    }
+
+    private List<FormacionNueva> ArmarFormaciones(CompletarPerfilViewModel m)
+    {
+        var lista = new List<FormacionNueva>();
+        for (var i = 0; i < m.ForTitulo.Count; i++)
+        {
+            var titulo = Valor(m.ForTitulo, i);
+            var institucion = Valor(m.ForInstitucion, i);
+            var inicio = Fechas.ParsearMesAnio(Valor(m.ForInicio, i));
+            var finTexto = Valor(m.ForFin, i);
+            var fin = Fechas.ParsearMesAnio(finTexto);
+            if (titulo.Length is 0 or > 150 || institucion.Length is 0 or > 150 || inicio == null || inicio > Fechas.MesActual ||
+                (finTexto.Length > 0 && (fin == null || fin < inicio)))
+            {
+                ModelState.AddModelError("Formaciones", "Revisá la formación: cada una necesita título, institución y fechas válidas.");
+                continue;
+            }
+            lista.Add(new FormacionNueva { Titulo = titulo, Institucion = institucion, Inicio = inicio.Value, Fin = fin });
+        }
+        return lista;
+    }
+
+    private static string Valor(List<string> lista, int i) => i < lista.Count ? (lista[i] ?? "").Trim() : "";
 
     private void CargarConfiguracion(MiPerfilViewModel modelo)
     {
