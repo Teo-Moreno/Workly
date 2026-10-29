@@ -2,9 +2,14 @@
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
 @if (!Busqueda.Configurada && Entorno.IsDevelopment())
 {
-    <p class="aviso-desarrollo"><icono nombre="warning-outline" tamano="18" />
-        Falta la clave de JSearch en esta compu, por eso no aparecen las ofertas de otros sitios. Desde la carpeta del proyecto ejecutá
-        <code>dotnet user-secrets set "JSearch:ApiKey" "&lt;la clave&gt;"</code> y volvé a correr el proyecto. Este aviso solo se ve mientras se desarrolla.</p>
+    <div class="aviso-desarrollo">
+        <icono nombre="warning-outline" tamano="18" />
+        <div class="aviso-desarrollo__texto">
+            <p>Falta la clave de JSearch en esta compu, por eso no aparecen las ofertas de otros sitios. Desde la carpeta del proyecto, ejecutá:</p>
+            <pre class="aviso-desarrollo__codigo">dotnet user-secrets set "JSearch:ApiKey" "&lt;la clave&gt;"</pre>
+            <p>Después volvé a correr el proyecto. Este aviso solo se ve mientras se desarrolla.</p>
+        </div>
+    </div>
 }
 else
 {

@@ -27,5 +27,13 @@
 }
 else if (Entorno.IsDevelopment())
 {
-    <p class="aviso-desarrollo"><icono nombre="warning-outline" tamano="18" />Para mostrar "@Model.Texto con Google / LinkedIn" cargá sus claves desde la carpeta del proyecto con <code>dotnet user-secrets set "Authentication:Google:ClientId" "..."</code> y <code>"Authentication:Google:ClientSecret"</code> (lo mismo con LinkedIn). Este aviso solo se ve mientras se desarrolla.</p>
+    <div class="aviso-desarrollo">
+        <icono nombre="warning-outline" tamano="18" />
+        <div class="aviso-desarrollo__texto">
+            <p>Para mostrar "@Model.Texto con Google" y "con LinkedIn" faltan sus claves en esta compu. Desde la carpeta del proyecto, ejecutá:</p>
+            <pre class="aviso-desarrollo__codigo">dotnet user-secrets set "Authentication:Google:ClientId" "..."
+dotnet user-secrets set "Authentication:Google:ClientSecret" "..."</pre>
+            <p>Para LinkedIn, lo mismo con <code>Authentication:LinkedIn</code>. Este aviso solo se ve mientras se desarrolla.</p>
+        </div>
+    </div>
 }
