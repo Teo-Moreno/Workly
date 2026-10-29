@@ -79,7 +79,10 @@
         @if (!Model.EsRevision)
         {
             <div class="oferta-cabecera__acciones">
-                <partial name="_AccionesOferta" model="oferta" />
+                <div class="fila fila--envolver">
+                    <partial name="_AccionesOferta" model="oferta" />
+                    <partial name="_BotonGuardar" model="oferta" />
+                </div>
                 @if (Model.PuedePostular && User.EsPersona() && !Model.TieneCV)
                 {
                     <p class="texto-chico texto-suave">Para postularte necesitás tu CV. <a class="enlace" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>

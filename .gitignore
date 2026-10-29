@@ -278,3 +278,6 @@ __pycache__/
 ### Workly: archivos subidos por los usuarios ###
 wwwroot/uploads/
 ArchivosPrivados/
+
+# No se suben archivos Markdown al repositorio
+*.md

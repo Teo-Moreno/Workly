@@ -45,6 +45,13 @@ public class Oferta
     /// <summary>La persona logueada ya se postuló (o registró su postulación externa).</summary>
     public bool YaPostulado { get; set; }
 
+    /// <summary>La persona logueada la guardó (tablas Favorito y FavoritoOferta).</summary>
+    public bool Guardada { get; set; }
+
+    /// <summary>Solo en "Guardadas": cuándo la guardó.</summary>
+    public DateTime? Fecha_Guardado { get; set; }
+    public int IDFavorito { get; set; }
+
     /// <summary>Clave única para la vista ("w12" o "x34").</summary>
     public string Clave => (EsExterna ? "x" : "w") + ID;
 
