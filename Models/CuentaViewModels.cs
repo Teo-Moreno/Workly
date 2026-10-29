@@ -41,6 +41,17 @@ public class NuevaClaveViewModel
     public string Repetir { get; set; } = "";
 }
 
+public class VerificarEmailViewModel
+{
+    public string Token { get; set; } = "";
+
+    public string Email { get; set; } = "";
+
+    [Required(ErrorMessage = "Escribí el código que te mandamos")]
+    [RegularExpression(@"^\s*\d{6}\s*$", ErrorMessage = "El código tiene 6 números")]
+    public string Codigo { get; set; } = "";
+}
+
 public abstract class RegistroBase
 {
     [Required(ErrorMessage = "Completá tu nombre")]

@@ -16,7 +16,8 @@ public class Correo
 
     private IConfigurationSection Datos => _configuracion.GetSection("Correo");
 
-    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Servidor"]) && !string.IsNullOrWhiteSpace(Datos["Remitente"]);
+    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Servidor"]) && !string.IsNullOrWhiteSpace(Datos["Remitente"])
+                               && (string.IsNullOrWhiteSpace(Datos["Usuario"]) || !string.IsNullOrWhiteSpace(Datos["Contrasena"]));
 
     public async Task<bool> Enviar(string destino, string asunto, string texto)
     {
