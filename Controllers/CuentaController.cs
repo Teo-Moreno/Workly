@@ -18,11 +18,13 @@ public class CuentaController : Controller
     private readonly Captcha _captcha;
     private readonly IntentosLogin _intentos;
     private readonly Correo _correo;
+    private readonly VerificacionEmail _verificacion;
 
     public CuentaController(IWebHostEnvironment entorno, ILogger<CuentaController> logger, IAuthenticationSchemeProvider esquemas,
-                            Captcha captcha, IntentosLogin intentos, Correo correo)
+                            Captcha captcha, IntentosLogin intentos, Correo correo, VerificacionEmail verificacion)
     {
         _correo = correo;
+        _verificacion = verificacion;
         _entorno = entorno;
         _logger = logger;
         _esquemas = esquemas;
@@ -229,7 +231,6 @@ public class CuentaController : Controller
         CompletarConExterno(modelo, externo);
         NormalizarDatosBase(modelo);
         ValidarContrasena(modelo, externo);
-        ValidarCaptcha();
         if (!ValidarEmailLibre(modelo.Email, nameof(modelo.Email)) || !ModelState.IsValid)
         {
             return VolverAlRegistro("CrearCuentaPersona", modelo);
@@ -247,6 +248,11 @@ public class CuentaController : Controller
             LoginExterno = externo == null ? null : new LoginExternoNuevo { Proveedor = externo.Proveedor, ID_Externo = externo.ID }
         };
 
+        if (externo == null)
+        {
+            return await PedirCodigo(datos.Usuario, datos, null) ?? VolverAlRegistro("CrearCuentaPersona", modelo);
+        }
+
         int id;
         try
         {
@@ -259,8 +265,7 @@ public class CuentaController : Controller
         }
 
         await TerminarRegistro(id);
-        TempData["Mensaje"] = $"¡Te damos la bienvenida a Workly, {modelo.Nombre}! Tu cuenta está lista. Completá tu perfil cuando quieras.";
-        return RedirectToAction("Completar", "Perfil");
+        return BienvenidaPersona(datos);
     }
 
     [HttpPost]
@@ -284,7 +289,6 @@ public class CuentaController : Controller
         var cuit = VerificacionEmpresa.SoloNumeros(modelo.CUIT);
 
         ValidarContrasena(modelo, externo);
-        ValidarCaptcha();
         var (provincia, telefono) = ValidarUbicacionYTelefono(modelo.Paises, modelo.Provincias, modelo.IDPais, modelo.IDProvincia, modelo.Telefono,
                                                               nameof(modelo.IDProvincia), nameof(modelo.Telefono));
         if (modelo.Rubro != null && !Catalogos.Rubros.Contains(modelo.Rubro))
@@ -362,6 +366,12 @@ public class CuentaController : Controller
             LoginExterno = externo == null ? null : new LoginExternoNuevo { Proveedor = externo.Proveedor, ID_Externo = externo.ID }
         };
 
+        if (externo == null)
+        {
+            return await PedirCodigo(datos.Usuario, datos, Archivos.RutaImagen(rutaLogo, _entorno.WebRootPath))
+                ?? VolverAlRegistro("CrearCuentaEmpresa", modelo);
+        }
+
         int id;
         try
         {
@@ -375,7 +385,136 @@ public class CuentaController : Controller
         }
 
         await TerminarRegistro(id);
-        TempData["Mensaje"] = $"¡Listo! La cuenta de {modelo.NombreEmpresa} está creada. Ya podés publicar tu primera búsqueda.";
+        return BienvenidaEmpresa(datos);
+    }
+
+    [HttpGet]
+    public IActionResult VerificarEmail(string? token)
+    {
+        var pendiente = _verificacion.Obtener(token);
+        if (pendiente == null)
+        {
+            return CodigoVencido();
+        }
+        return View(new VerificarEmailViewModel { Token = token!, Email = pendiente.Email });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerificarEmail(VerificarEmailViewModel modelo)
+    {
+        var pendiente = _verificacion.Obtener(modelo.Token);
+        if (pendiente == null)
+        {
+            return CodigoVencido();
+        }
+        modelo.Email = pendiente.Email;
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        switch (_verificacion.Verificar(modelo.Token, modelo.Codigo))
+        {
+            case VerificacionEmail.Resultado.Vencido:
+                return CodigoVencido();
+            case VerificacionEmail.Resultado.SinIntentos:
+                _verificacion.Descartar(modelo.Token);
+                TempData["Mensaje"] = "Escribiste mal el código demasiadas veces. Por seguridad, completá el registro de nuevo.";
+                TempData["MensajeTipo"] = "error";
+                return RedirectToAction(nameof(CrearCuenta), new { tipo = pendiente.Datos is EmpresaNueva ? "empresa" : null });
+            case VerificacionEmail.Resultado.Incorrecto:
+                ModelState.AddModelError(nameof(modelo.Codigo), "El código no es correcto. Revisalo y probá de nuevo.");
+                modelo.Codigo = "";
+                return View(modelo);
+        }
+
+        int id;
+        try
+        {
+            id = pendiente.Datos is EmpresaNueva empresa ? BD.RegistrarEmpresa(empresa) : BD.RegistrarPersona((PersonaNueva)pendiente.Datos);
+        }
+        catch (SqlException ex)
+        {
+            ManejarErrorDeRegistro(ex, string.Empty);
+            modelo.Codigo = "";
+            return View(modelo);
+        }
+
+        _verificacion.Terminar(modelo.Token);
+        await TerminarRegistro(id);
+        return pendiente.Datos is EmpresaNueva datosEmpresa ? BienvenidaEmpresa(datosEmpresa) : BienvenidaPersona((PersonaNueva)pendiente.Datos);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReenviarCodigo(string? token)
+    {
+        var pendiente = _verificacion.Obtener(token);
+        if (pendiente == null)
+        {
+            return CodigoVencido();
+        }
+        var codigo = _verificacion.Reenviar(token);
+        if (codigo == null)
+        {
+            TempData["Mensaje"] = "Esperá un minuto antes de pedir otro código. Si ya pediste varios, revisá la carpeta de spam.";
+            TempData["MensajeTipo"] = "error";
+        }
+        else if (await EnviarCodigo(pendiente.Email, pendiente.Nombre, codigo))
+        {
+            TempData["Mensaje"] = $"Te mandamos un código nuevo a {pendiente.Email}. El anterior ya no sirve.";
+        }
+        else
+        {
+            TempData["Mensaje"] = "No pudimos mandarte el mail. Probá de nuevo en unos minutos.";
+            TempData["MensajeTipo"] = "error";
+        }
+        return RedirectToAction(nameof(VerificarEmail), new { token });
+    }
+
+    private async Task<IActionResult?> PedirCodigo(Usuario usuario, object datos, string? archivoTemporal)
+    {
+        var (token, codigo) = _verificacion.Crear(usuario.Email, usuario.Nombre, datos, archivoTemporal);
+        if (!await EnviarCodigo(usuario.Email, usuario.Nombre, codigo))
+        {
+            _verificacion.Descartar(token);
+            ModelState.AddModelError(string.Empty, "No pudimos mandarte el mail con el código. Revisá que el email esté bien escrito o probá de nuevo en unos minutos.");
+            return null;
+        }
+        return RedirectToAction(nameof(VerificarEmail), new { token });
+    }
+
+    private async Task<bool> EnviarCodigo(string email, string nombre, string codigo)
+    {
+        if (!_correo.Configurado && _entorno.IsDevelopment())
+        {
+            _logger.LogWarning("El mail no está configurado. Código de verificación para {Email}: {Codigo}", email, codigo);
+            return true;
+        }
+        return await _correo.Enviar(email, $"{codigo} es tu código de Workly",
+            $"Hola, {nombre}.\n\n" +
+            $"Tu código para terminar de crear tu cuenta en Workly es:\n\n{codigo}\n\n" +
+            $"Vence en {VerificacionEmail.Vigencia.TotalMinutes:0} minutos. Si no estás creando una cuenta en Workly, ignorá este mail.\n\n" +
+            "Workly");
+    }
+
+    private IActionResult CodigoVencido()
+    {
+        TempData["Mensaje"] = "El código venció o ya lo usaste. Completá el registro de nuevo para que te mandemos otro.";
+        TempData["MensajeTipo"] = "error";
+        return RedirectToAction(nameof(CrearCuenta));
+    }
+
+    private IActionResult BienvenidaPersona(PersonaNueva datos)
+    {
+        TempData["Mensaje"] = $"¡Te damos la bienvenida a Workly, {datos.Usuario.Nombre}! Tu cuenta está lista. Completá tu perfil cuando quieras.";
+        return RedirectToAction("Completar", "Perfil");
+    }
+
+    private IActionResult BienvenidaEmpresa(EmpresaNueva datos)
+    {
+        TempData["Mensaje"] = $"¡Listo! La cuenta de {datos.Empresa.Nombre} está creada. Ya podés publicar tu primera búsqueda.";
         return RedirectToAction("Index", "Publicaciones");
     }
 
@@ -596,14 +735,6 @@ public class CuentaController : Controller
             ModelState.AddModelError(campo, $"Usá hasta {largo} caracteres");
         }
         return texto;
-    }
-
-    private void ValidarCaptcha()
-    {
-        if (!_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
-        {
-            ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
-        }
     }
 
     private IActionResult VolverAlRegistro(string vista, RegistroBase modelo)

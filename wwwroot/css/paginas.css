@@ -4304,3 +4304,10 @@ li:last-child > .onboarding__item {
   width: min(720px, 100%);
   margin-inline: auto;
 }
+
+.codigo-email {
+  max-width: 220px;
+  font-size: var(--texto-24);
+  letter-spacing: 0.4em;
+  text-align: center;
+}
