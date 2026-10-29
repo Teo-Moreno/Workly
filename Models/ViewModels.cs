@@ -4,14 +4,12 @@ namespace Workly.Models;
 
 public class LandingViewModel
 {
-    /// <summary>Puestos reales (JSearch o la base) para la animación del buscador.</summary>
     public List<string> Puestos { get; set; } = new();
     public List<Empresa> Empresas { get; set; } = new();
 }
 
 public class BuscarTrabajoViewModel
 {
-    // Filtros (vienen de la URL)
     public string? Q { get; set; }
     public int? IDPais { get; set; }
     public int? IDProvincia { get; set; }
@@ -26,10 +24,8 @@ public class BuscarTrabajoViewModel
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
 
-    /// <summary>Cursor para pedir la página siguiente de ofertas externas.</summary>
     public string? CursorSiguiente { get; set; }
 
-    /// <summary>No se pudieron traer las ofertas de otros sitios.</summary>
     public bool ErrorExternas { get; set; }
 
     public bool BuscoAlgo => !string.IsNullOrWhiteSpace(Q);
@@ -41,13 +37,10 @@ public class OfertaDetalleViewModel
     public Oferta Oferta { get; set; } = new();
     public Empresa? Empresa { get; set; }
 
-    /// <summary>La publicó la persona logueada.</summary>
     public bool EsPropia { get; set; }
 
-    /// <summary>La ve una cuenta moderadora antes de aceptarla o rechazarla.</summary>
     public bool EsRevision { get; set; }
 
-    /// <summary>Puede postularse (persona logueada, no es suya, está publicada y abierta).</summary>
     public bool PuedePostular { get; set; }
 
     public bool TieneCV { get; set; }
@@ -108,7 +101,6 @@ public class PublicarViewModel
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string Puesto { get; set; } = "";
 
-    /// <summary>Solo para personas: la empresa que contrata.</summary>
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string? EmpresaNombre { get; set; }
 
@@ -139,7 +131,6 @@ public class PublicarViewModel
     [DataType(DataType.Date)]
     public DateTime? FechaCierre { get; set; }
 
-    // Para el formulario
     public bool EsEmpresa { get; set; }
     public string? EmpresaFija { get; set; }
     public List<Pais> Paises { get; set; } = new();

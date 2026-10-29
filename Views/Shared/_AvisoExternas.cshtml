@@ -1,6 +1,5 @@
 @inject JSearch Busqueda
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
-@* Aviso cuando no se pudieron traer las ofertas de otros sitios (JSearch) *@
 @if (!Busqueda.Configurada && Entorno.IsDevelopment())
 {
     <p class="aviso-desarrollo"><icono nombre="warning-outline" tamano="18" />

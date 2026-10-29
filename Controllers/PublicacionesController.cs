@@ -4,8 +4,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Búsquedas que publica una cuenta. Las de empresas se publican al toque; las de personas
-// pasan antes por la moderación. Quien publicó ve a sus postulantes, su perfil y su CV.
 [Authorize]
 public class PublicacionesController : Controller
 {
@@ -106,7 +104,6 @@ public class PublicacionesController : Controller
         return RedirectToAction(nameof(Detalle), new { id });
     }
 
-    // Una búsqueda propia con sus postulantes
     public IActionResult Detalle(int id)
     {
         var oferta = BD.ObtenerOferta(id, User.IdUsuario());
@@ -117,7 +114,6 @@ public class PublicacionesController : Controller
         return View(new PublicacionDetalleViewModel { Oferta = oferta, Postulantes = BD.ObtenerPostulantes(id) });
     }
 
-    // El perfil completo de alguien que se postuló a una búsqueda propia
     public IActionResult Postulante(int id)
     {
         var postulacion = BD.ObtenerPostulacionDePublicador(id, User.IdUsuario());
@@ -134,7 +130,6 @@ public class PublicacionesController : Controller
         return View(new PostulanteViewModel { IDPostulacion = id, Oferta = oferta, Perfil = perfil });
     }
 
-    // CV de alguien que se postuló a una búsqueda propia
     public IActionResult CV(int id)
     {
         var postulacion = BD.ObtenerPostulacionDePublicador(id, User.IdUsuario());

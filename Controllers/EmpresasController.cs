@@ -3,7 +3,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Empresas con cuenta en Workly o con búsquedas publicadas. Se puede ver sin iniciar sesión.
 public class EmpresasController : Controller
 {
     public IActionResult Index(EmpresasViewModel filtros)
@@ -13,7 +12,6 @@ public class EmpresasController : Controller
         modelo.Paises = BD.ObtenerPaises();
         modelo.Provincias = BD.ObtenerProvincias();
 
-        // Ubicación: la primera vez se usa la provincia de la persona; después, la que elija
         if (!Request.Query.ContainsKey(nameof(modelo.IDProvincia)) && User.EsPersona())
         {
             var perfil = BD.ObtenerPerfil(User.IdUsuario());

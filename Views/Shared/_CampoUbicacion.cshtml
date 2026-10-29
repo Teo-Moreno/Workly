@@ -3,7 +3,6 @@
     var idPais = $"{Model.Prefijo}{Model.NombrePais}";
     var idProvincia = $"{Model.Prefijo}{Model.NombreProvincia}";
 }
-@* País + provincia: al cambiar el país se muestran solo sus provincias (site.js › data-selector-pais) *@
 <div class="formulario__fila" data-ubicacion>
     <div class="campo @Html.ClaseError(Model.NombrePais)">
         <label class="campo__etiqueta" for="@idPais">País</label>

@@ -23,8 +23,6 @@ public class CuentaController : Controller
         _esquemas = esquemas;
     }
 
-    // ================================================================ Iniciar sesión
-
     [HttpGet]
     public async Task<IActionResult> IniciarSesion(string? returnUrl = null)
     {
@@ -58,7 +56,6 @@ public class CuentaController : Controller
             return View(modelo);
         }
 
-        // Si el email no existe igual se verifica un hash de relleno, así la respuesta tarda lo mismo.
         if (!Contrasenas.Verificar(modelo.Contrasena, usuario?.Contraseña) || usuario == null)
         {
             var soloExterno = usuario != null && !usuario.TieneContrasena;
@@ -73,8 +70,6 @@ public class CuentaController : Controller
         TempData["Mensaje"] = $"¡Hola de nuevo, {usuario.Nombre}!";
         return RedirigirDespuesDeIngresar(modelo.ReturnUrl);
     }
-
-    // ================================================================ Crear cuenta
 
     [HttpGet]
     public async Task<IActionResult> CrearCuenta(string? tipo = null)
@@ -140,7 +135,6 @@ public class CuentaController : Controller
             return VolverAlRegistro("CrearCuentaPersona", modelo);
         }
 
-        // Archivos: se guardan antes de insertar; si el INSERT falla se borran.
         var rutaFoto = await Archivos.GuardarFoto(modelo.Foto, _entorno.WebRootPath);
         var nombreCV = await Archivos.GuardarCV(modelo.ArchivoCV, _entorno.ContentRootPath);
         var sitioWeb = Limpiar(modelo.SitioWeb);
@@ -218,7 +212,6 @@ public class CuentaController : Controller
         }
         ValidarArchivo(modelo.Logo, Archivos.ExtensionesFoto, nameof(modelo.Logo));
 
-        // Verificación de la empresa: CUIT válido y email del dominio de la empresa
         if (!string.IsNullOrEmpty(modelo.CUIT) && !VerificacionEmpresa.CuitValido(cuit))
         {
             ModelState.AddModelError(nameof(modelo.CUIT), "El CUIT no es válido. Revisá los 11 números (el último es el verificador).");
@@ -305,8 +298,6 @@ public class CuentaController : Controller
         return RedirectToAction("Index", "Publicaciones");
     }
 
-    // ================================================================ Google y LinkedIn
-
     [HttpGet]
     public async Task<IActionResult> Externo(string proveedor, string? tipo = null, string? returnUrl = null)
     {
@@ -335,9 +326,7 @@ public class CuentaController : Controller
 
         try
         {
-            // 1. Ya entró antes con esta cuenta
             var id = BD.ObtenerUsuarioDeLoginExterno(externo.Proveedor, externo.ID);
-            // 2. Ya tiene una cuenta con ese email: se vinculan
             if (id == null && BD.ObtenerUsuarioPorEmail(externo.Email) is { } existente)
             {
                 BD.VincularLoginExterno(existente.ID, new LoginExternoNuevo { Proveedor = externo.Proveedor, ID_Externo = externo.ID });
@@ -360,11 +349,8 @@ public class CuentaController : Controller
             return RedirectToAction(nameof(IniciarSesion));
         }
 
-        // 3. Es nueva: completa el registro con sus datos ya cargados
         return RedirectToAction(nameof(CrearCuenta), new { tipo });
     }
-
-    // ================================================================ Cerrar sesión
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -375,11 +361,8 @@ public class CuentaController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // ================================================================ Auxiliares
-
     private record DatosExternos(string Proveedor, string ID, string Email, string Nombre, string Apellido);
 
-    // Datos que dejó Google o LinkedIn en la cookie temporal (null si no hay)
     private async Task<DatosExternos?> LeerExterno()
     {
         var resultado = await HttpContext.AuthenticateAsync(Sesion.EsquemaExterno);
@@ -407,7 +390,7 @@ public class CuentaController : Controller
             return;
         }
         modelo.ProveedorExterno = externo.Proveedor;
-        modelo.Email = externo.Email; // El email lo confirmó Google o LinkedIn: no se cambia
+        modelo.Email = externo.Email;
         if (string.IsNullOrWhiteSpace(modelo.Nombre)) modelo.Nombre = externo.Nombre;
         if (string.IsNullOrWhiteSpace(modelo.Apellido)) modelo.Apellido = externo.Apellido;
     }
@@ -492,7 +475,6 @@ public class CuentaController : Controller
 
     private void ManejarErrorDeRegistro(SqlException ex, string campoEmail)
     {
-        // 2627 / 2601: algo único repetido (por ejemplo, dos registros al mismo tiempo con el mismo email)
         if (ex.Number is 2627 or 2601)
         {
             ModelState.AddModelError(campoEmail, "Ya hay una cuenta con ese email. ¿Querés iniciar sesión?");
@@ -513,7 +495,6 @@ public class CuentaController : Controller
         }
     }
 
-    /// <summary>País y provincia coherentes y teléfono con 10 números. Devuelve la provincia y el teléfono con prefijo.</summary>
     private (Provincia? Provincia, string? Telefono) ValidarUbicacionYTelefono(List<Pais> paises, List<Provincia> provincias, int? idPais, int? idProvincia,
                                                                              string? telefonoLocal, string campoProvincia, string campoTelefono)
     {
@@ -572,8 +553,6 @@ public class CuentaController : Controller
 
     private static string Valor(List<string> lista, int i) => i < lista.Count ? (lista[i] ?? "").Trim() : "";
 
-    // El navegador cuenta cada salto de línea como 1 carácter pero envía "\r\n" (2):
-    // se normaliza antes de medir para que el límite coincida con el del formulario.
     private string? NormalizarSaltos(string? texto, string campo, int largo)
     {
         if (texto == null)
@@ -589,8 +568,6 @@ public class CuentaController : Controller
         return texto;
     }
 
-    // La contraseña no se devuelve en el HTML: si hubo errores se pide escribirla de nuevo,
-    // así el formulario abre en el paso 1 y la persona recorre los pasos marcados en rojo.
     private IActionResult VolverAlRegistro(string vista, RegistroBase modelo)
     {
         modelo.Contrasena = "";
@@ -601,7 +578,6 @@ public class CuentaController : Controller
         return View(vista, modelo);
     }
 
-    // Solo redirige a direcciones de este sitio (evita redirecciones abiertas a otros dominios).
     private IActionResult RedirigirDespuesDeIngresar(string? returnUrl) =>
         !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? LocalRedirect(returnUrl)

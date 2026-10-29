@@ -7,7 +7,6 @@
         return actual ? "navbar__link esta-activo" : "navbar__link";
     }
 }
-@* Links de la navbar de la app (también se usan en el menú del celular) *@
 @if (!User.EstaLogueado())
 {
     <a class="@Clase("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>

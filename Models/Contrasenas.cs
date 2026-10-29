@@ -2,11 +2,6 @@ using System.Security.Cryptography;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Hash de contraseñas con PBKDF2-SHA256 (recomendación de OWASP: 600.000 iteraciones).
-/// Formato guardado en Usuario.Contraseña: "PBKDF2$iteraciones$sal$hash" (sal y hash en Base64).
-/// Nunca se guarda ni se compara la contraseña en texto plano.
-/// </summary>
 public static class Contrasenas
 {
     private const string Prefijo = "PBKDF2";
@@ -14,8 +9,6 @@ public static class Contrasenas
     private const int BytesSal = 16;
     private const int BytesHash = 32;
 
-    // Hash de relleno para que verificar un email inexistente tarde lo mismo
-    // que uno existente (evita adivinar qué emails están registrados).
     private static readonly string HashDeRelleno = Hashear("workly-relleno");
 
     public static string Hashear(string contrasena)
