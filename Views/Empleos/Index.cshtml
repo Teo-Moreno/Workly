@@ -138,7 +138,7 @@
             }
             @if (!Model.BuscoAlgo && Model.Ofertas.Count > 0)
             {
-                <p class="texto-chico texto-suave">Estas son las búsquedas publicadas en Workly. Escribí un puesto para buscar también en otros sitios.</p>
+                <p class="texto-chico texto-suave">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @(Model.Provincias.FirstOrDefault(p => p.ID == Model.IDProvincia)?.Nombre ?? Model.Paises.FirstOrDefault(p => p.ID == Model.IDPais)?.Nombre). Escribí un puesto para buscar uno en particular.</p>
             }
 
             @if (Model.Ofertas.Count == 0)
@@ -156,8 +156,8 @@
                     }
                     else
                     {
-                        <h3 class="estado-vacio__titulo">Todavía no hay búsquedas publicadas en Workly@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? " con esos filtros" : "")</h3>
-                        <p>Escribí arriba el puesto que buscás y te mostramos también las ofertas de otros sitios.</p>
+                        <h3 class="estado-vacio__titulo">No encontramos ofertas@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? " con esos filtros" : "")</h3>
+                        <p>Escribí arriba el puesto que buscás@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? ", sacá algún filtro o buscá en todo el país" : "").</p>
                     }
                 </div>
             }
