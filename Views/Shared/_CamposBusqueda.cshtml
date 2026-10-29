@@ -1,13 +1,11 @@
 @model CamposBusqueda
 @{
     var p = Model.Prefijo;
-    // Habilidades: las del catálogo + las propias que la persona agregó
     var habilidades = Model.CatalogoHabilidades.Select(h => h.Nombre)
         .Concat(Model.Habilidades.Where(h => !Model.CatalogoHabilidades.Any(c => string.Equals(c.Nombre, h, StringComparison.OrdinalIgnoreCase))))
         .ToList();
     var elegidas = Model.Habilidades.ToHashSet(StringComparer.OrdinalIgnoreCase);
 }
-@* Qué busca la persona: tablas Preferencia, UsuarioHabilidad y UsuarioIdioma *@
 
 @if (Model.IncluirEstado)
 {

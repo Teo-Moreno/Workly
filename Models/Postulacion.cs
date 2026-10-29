@@ -1,6 +1,5 @@
 namespace Workly.Models;
 
-// Una postulación del tablero de la persona (a una oferta de Workly o externa)
 public class PostulacionItem
 {
     public int ID { get; set; }
@@ -19,7 +18,6 @@ public class PostulacionItem
     public string FechaTexto => "Te postulaste el " + Fecha.ToString("d 'de' MMMM", new System.Globalization.CultureInfo("es-AR"));
 }
 
-// Una persona que se postuló a una búsqueda (lo ve quien la publicó)
 public class Postulante
 {
     public int IDPostulacion { get; set; }

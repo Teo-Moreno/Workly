@@ -8,8 +8,6 @@
 @section Barra {
     <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
-@* Registro de una persona en 5 pasos (Usuario, Perfil, Preferencia, habilidades, idiomas,
-   experiencia, formación y CV). Usa la "Barra de progreso" de Figma › Guidelines. *@
 
 <div class="cuenta-tarjeta cuenta-tarjeta--ancha">
     <h1 class="cuenta-tarjeta__titulo">Creá tu cuenta</h1>
@@ -35,7 +33,6 @@
     }
 
     <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
-        @* ---------------- Paso 1 · Tus datos ---------------- *@
         <fieldset class="formulario registro__paso" data-paso>
             <legend class="solo-lectores">Paso 1: tus datos</legend>
             @if (externo)
@@ -77,7 +74,6 @@
             </div>
         </fieldset>
 
-        @* ---------------- Paso 2 · Tu perfil ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
             <legend class="solo-lectores">Paso 2: tu perfil</legend>
 
@@ -127,7 +123,6 @@
             </div>
         </fieldset>
 
-        @* ---------------- Paso 3 · Qué buscás ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
             <legend class="solo-lectores">Paso 3: qué buscás</legend>
             <p class="texto-suave">Todo es opcional: completá lo que tengas claro.</p>
@@ -138,7 +133,6 @@
             </div>
         </fieldset>
 
-        @* ---------------- Paso 4 · Experiencia y formación ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
             <legend class="solo-lectores">Paso 4: experiencia y formación</legend>
             <p class="texto-suave">Opcional: podés sumarlas ahora o más adelante desde tu perfil.</p>
@@ -190,7 +184,6 @@
             </div>
         </fieldset>
 
-        @* ---------------- Paso 5 · Tu CV ---------------- *@
         <fieldset class="formulario registro__paso" data-paso hidden>
             <legend class="solo-lectores">Paso 5: tu CV</legend>
 

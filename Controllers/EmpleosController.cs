@@ -4,8 +4,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Buscar trabajo: ofertas publicadas en Workly + ofertas de otros sitios (JSearch).
-// Se puede ver sin iniciar sesión; para postularse hay que tener cuenta de persona.
 public class EmpleosController : Controller
 {
     private readonly JSearch _jsearch;
@@ -22,13 +20,11 @@ public class EmpleosController : Controller
         modelo.Paises = BD.ObtenerPaises();
         modelo.Provincias = BD.ObtenerProvincias();
 
-        // Sin valores precargados: la persona elige todos los filtros
         var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais) ?? modelo.Paises.FirstOrDefault();
         modelo.IDPais = pais?.ID;
         var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia && p.IDPais == modelo.IDPais);
         modelo.IDProvincia = provincia?.ID;
 
-        // Solo valores conocidos
         modelo.Modalidad = modelo.Modalidad.Where(Catalogos.Modalidades.Contains).Distinct().ToList();
         modelo.Tipo = modelo.Tipo.Where(t => Catalogos.TiposEmpleo.Any(c => c.Nombre == t)).Distinct().ToList();
         var fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha);
@@ -48,7 +44,6 @@ public class EmpleosController : Controller
             }, User.IdUsuario()));
         }
 
-        // Ofertas de otros sitios: solo cuando la persona busca un puesto
         if (modelo.BuscoAlgo && pais != null)
         {
             var lugar = provincia?.Nombre ?? pais.Nombre;
@@ -58,7 +53,6 @@ public class EmpleosController : Controller
             modelo.ErrorExternas = resultado.Error;
             modelo.CursorSiguiente = resultado.Cursor;
             var externas = resultado.Ofertas;
-            // Si eligió solo modalidades presenciales o híbridas, se sacan las remotas
             if (modelo.Modalidad.Count > 0 && !modelo.Modalidad.Contains("Remoto"))
             {
                 externas = externas.Where(o => o.Modalidad != "Remoto").ToList();
@@ -77,7 +71,6 @@ public class EmpleosController : Controller
         return View(modelo);
     }
 
-    // Detalle de una oferta publicada en Workly
     public IActionResult Detalle(int id)
     {
         var oferta = BD.ObtenerOferta(id, User.IdUsuario());
@@ -86,7 +79,6 @@ public class EmpleosController : Controller
             return NotFound();
         }
         var esPropia = User.EstaLogueado() && oferta.IDUsuario_Publicador == User.IdUsuario();
-        // Las pendientes o rechazadas solo las ven quien las publicó y la moderación
         if (oferta.Estado_Publicacion != "Aprobada" && !esPropia && !User.EsModerador())
         {
             return NotFound();
@@ -94,7 +86,6 @@ public class EmpleosController : Controller
         return View(ArmarDetalle(oferta, esPropia));
     }
 
-    // Detalle de una oferta de otro sitio (guardada desde JSearch)
     public IActionResult Externa(int id)
     {
         var oferta = BD.ObtenerOfertaExterna(id, User.IdUsuario());
@@ -132,7 +123,6 @@ public class EmpleosController : Controller
             : Volver("Ya te habías postulado a esta búsqueda.", "advertencia", volver, id);
     }
 
-    // La persona avisa que se postuló en el sitio original, para seguirla en su tablero
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]

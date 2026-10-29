@@ -9,7 +9,6 @@
     var pedida = ViewBag.Pestana as string ?? Context.Request.Query["pestana"].ToString();
     var activa = pestanas.Contains(pedida) ? pedida : "cuenta";
 
-    // Si se volvió con errores, se muestran los valores que la persona escribió
     var fCuenta = ViewBag.Formulario as CuentaFormulario;
     var fEmpresa = ViewBag.Formulario as EmpresaFormulario;
     var fBusqueda = ViewBag.Formulario as BusquedaFormulario;
@@ -19,7 +18,6 @@
     var codigoGuardado = Model.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? empresa?.IDPais : perfil.IDPais))?.Codigo_Telefono;
     var vinculados = Model.ProveedoresVinculados;
 }
-@* Configuración: datos de la cuenta, qué busca la persona y seguridad. Cada pestaña guarda en la base. *@
 
 <div class="contenedor seccion-app">
     <header class="encabezado-pagina">
@@ -50,7 +48,6 @@
             <a class="configuracion__opcion" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a>
         </nav>
 
-        @* ---------------- Cuenta ---------------- *@
         <section class="configuracion__panel" data-panel="cuenta" aria-labelledby="titulo-cuenta" hidden="@(activa != "cuenta")">
             @if (!esEmpresa)
             {
@@ -241,7 +238,6 @@
             }
         </section>
 
-        @* ---------------- Qué busco ---------------- *@
         @if (!esEmpresa)
         {
             <section class="configuracion__panel" data-panel="busqueda" aria-labelledby="titulo-busqueda" hidden="@(activa != "busqueda")">
@@ -258,7 +254,6 @@
             </section>
         }
 
-        @* ---------------- Seguridad ---------------- *@
         <section class="configuracion__panel" data-panel="seguridad" aria-labelledby="titulo-seguridad" hidden="@(activa != "seguridad")">
             <form class="formulario" asp-controller="Perfil" asp-action="CambiarClave" method="post" novalidate data-formulario-real>
                 <div class="configuracion__cabecera">

@@ -1,5 +1,4 @@
 @model CampoTelefono
-@* Teléfono: solo números; el prefijo cambia con el país y los espacios y el guion se ponen solos *@
 <div class="campo @Html.ClaseError(Model.Nombre)">
     <label class="campo__etiqueta" for="@Model.Id">Teléfono <span class="campo__opcional">(opcional)</span></label>
     <div class="control-con-prefijo">

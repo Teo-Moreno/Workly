@@ -1,21 +1,3 @@
-/* ============================================================================
-   Workly · 3 de 3 · Stored procedures (SQL Server)
-   ----------------------------------------------------------------------------
-   Las consultas principales de la aplicación (Models/BD.cs) como
-   procedimientos, con el mismo nombre que el método. La aplicación hace estas
-   mismas consultas desde BD.cs con Dapper; las que arman el SQL según los
-   filtros (buscar ofertas y empresas) y las que usan transacciones de varios
-   pasos (registro, guardar qué busca, eliminar cuenta) quedan solo en BD.cs.
-   Ejecutar después de 1_Estructura.sql.
-
-   Se usa CREATE OR ALTER (SQL Server 2016 SP1 o posterior): se puede ejecutar
-   más de una vez.
-
-   Ejemplos:
-     EXEC dbo.ObtenerUsuarioPorEmail @Email = N'50291929@est.ort.edu.ar';
-     EXEC dbo.ObtenerPostulaciones @IDUsuario = 1;
-   ============================================================================ */
-
 SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
@@ -24,11 +6,6 @@ GO
 USE Workly;
 GO
 
-/* ============================================================================
-   USUARIO Y CUENTA
-   ============================================================================ */
-
--- Iniciar sesión: la cuenta por email (se guarda en minúsculas)
 CREATE OR ALTER PROCEDURE dbo.ObtenerUsuarioPorEmail
     @Email NVARCHAR(100)
 AS
@@ -38,7 +15,6 @@ BEGIN
 END
 GO
 
--- Cuenta por ID
 CREATE OR ALTER PROCEDURE dbo.ObtenerUsuarioPorId
     @ID INT
 AS
@@ -48,7 +24,6 @@ BEGIN
 END
 GO
 
--- Hay otra cuenta con ese email (registro y Configuración)
 CREATE OR ALTER PROCEDURE dbo.ExisteEmail
     @Email NVARCHAR(100),
     @Excepto INT = NULL
@@ -59,7 +34,6 @@ BEGIN
 END
 GO
 
--- Entrar con Google o LinkedIn
 CREATE OR ALTER PROCEDURE dbo.ObtenerUsuarioDeLoginExterno
     @Proveedor NVARCHAR(20),
     @IDExterno NVARCHAR(200)
@@ -70,7 +44,6 @@ BEGIN
 END
 GO
 
--- Configuración › Seguridad (el hash PBKDF2 lo arma la aplicación)
 CREATE OR ALTER PROCEDURE dbo.CambiarContrasena
     @IDUsuario INT,
     @Hash NVARCHAR(200)
@@ -81,11 +54,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   CATÁLOGOS
-   ============================================================================ */
-
--- Países del registro
 CREATE OR ALTER PROCEDURE dbo.ObtenerPaises
 AS
 BEGIN
@@ -94,7 +62,6 @@ BEGIN
 END
 GO
 
--- Provincias (cada una con su país)
 CREATE OR ALTER PROCEDURE dbo.ObtenerProvincias
 AS
 BEGIN
@@ -103,7 +70,6 @@ BEGIN
 END
 GO
 
--- Habilidades para elegir
 CREATE OR ALTER PROCEDURE dbo.ObtenerCatalogoHabilidades
 AS
 BEGIN
@@ -112,7 +78,6 @@ BEGIN
 END
 GO
 
--- Idiomas para elegir
 CREATE OR ALTER PROCEDURE dbo.ObtenerCatalogoIdiomas
 AS
 BEGIN
@@ -121,11 +86,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   PERFIL
-   ============================================================================ */
-
--- Perfil con su provincia y país
 CREATE OR ALTER PROCEDURE dbo.ObtenerPerfil
     @IDUsuario INT
 AS
@@ -140,7 +100,6 @@ BEGIN
 END
 GO
 
--- CV de la persona
 CREATE OR ALTER PROCEDURE dbo.ObtenerCV
     @IDUsuario INT
 AS
@@ -150,7 +109,6 @@ BEGIN
 END
 GO
 
--- Qué busca la persona
 CREATE OR ALTER PROCEDURE dbo.ObtenerPreferencia
     @IDUsuario INT
 AS
@@ -163,7 +121,6 @@ BEGIN
 END
 GO
 
--- Habilidades de la persona
 CREATE OR ALTER PROCEDURE dbo.ObtenerHabilidadesUsuario
     @IDUsuario INT
 AS
@@ -174,7 +131,6 @@ BEGIN
 END
 GO
 
--- Idiomas de la persona con su nivel
 CREATE OR ALTER PROCEDURE dbo.ObtenerIdiomasUsuario
     @IDUsuario INT
 AS
@@ -185,7 +141,6 @@ BEGIN
 END
 GO
 
--- Sobre mí
 CREATE OR ALTER PROCEDURE dbo.ActualizarDescripcion
     @IDUsuario INT,
     @Descripcion NVARCHAR(500)
@@ -196,7 +151,6 @@ BEGIN
 END
 GO
 
--- Buscando activamente / Abierto a propuestas / No estoy buscando
 CREATE OR ALTER PROCEDURE dbo.ActualizarEstadoBusqueda
     @IDUsuario INT,
     @Estado NVARCHAR(30)
@@ -207,7 +161,6 @@ BEGIN
 END
 GO
 
--- Experiencia laboral (primero la actual)
 CREATE OR ALTER PROCEDURE dbo.ObtenerExperiencias
     @IDUsuario INT
 AS
@@ -221,7 +174,6 @@ BEGIN
 END
 GO
 
--- Agregar una experiencia (Fin NULL = trabaja ahí actualmente)
 CREATE OR ALTER PROCEDURE dbo.AgregarExperiencia
     @IDUsuario INT,
     @Empresa NVARCHAR(100),
@@ -232,7 +184,6 @@ CREATE OR ALTER PROCEDURE dbo.AgregarExperiencia
 AS
 BEGIN
     SET NOCOUNT ON;
-    -- La empresa se busca por nombre y, si no existe, se crea sin cuenta
     IF NOT EXISTS (SELECT 1 FROM dbo.Empresa WHERE Nombre = @Empresa)
         INSERT INTO dbo.Empresa (Nombre) VALUES (@Empresa);
     INSERT INTO dbo.ExperienciaLaboral (IDUsuario, IDEmpresa, Puesto, Descripcion, Fecha_Inicio, Fecha_Finalizacion)
@@ -240,7 +191,6 @@ BEGIN
 END
 GO
 
--- Borrar una experiencia propia
 CREATE OR ALTER PROCEDURE dbo.EliminarExperiencia
     @IDUsuario INT,
     @ID INT
@@ -251,7 +201,6 @@ BEGIN
 END
 GO
 
--- Formación (primero la que está en curso)
 CREATE OR ALTER PROCEDURE dbo.ObtenerFormaciones
     @IDUsuario INT
 AS
@@ -265,7 +214,6 @@ BEGIN
 END
 GO
 
--- Agregar una formación (Fin NULL = en curso)
 CREATE OR ALTER PROCEDURE dbo.AgregarFormacion
     @IDUsuario INT,
     @Institucion NVARCHAR(150),
@@ -282,7 +230,6 @@ BEGIN
 END
 GO
 
--- Borrar una formación propia
 CREATE OR ALTER PROCEDURE dbo.EliminarFormacion
     @IDUsuario INT,
     @ID INT
@@ -293,11 +240,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   EMPRESAS
-   ============================================================================ */
-
--- Página de una empresa
 CREATE OR ALTER PROCEDURE dbo.ObtenerEmpresa
     @ID INT
 AS
@@ -315,7 +257,6 @@ BEGIN
 END
 GO
 
--- La empresa de una cuenta de empresa
 CREATE OR ALTER PROCEDURE dbo.ObtenerEmpresaDeUsuario
     @IDUsuario INT
 AS
@@ -333,7 +274,6 @@ BEGIN
 END
 GO
 
--- Registro de empresa: el CUIT no puede repetirse
 CREATE OR ALTER PROCEDURE dbo.ExisteCuit
     @CUIT CHAR(11)
 AS
@@ -343,11 +283,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   BÚSQUEDAS DE WORKLY Y MODERACIÓN
-   ============================================================================ */
-
--- Detalle de una búsqueda (YaPostulado según quien la mira)
 CREATE OR ALTER PROCEDURE dbo.ObtenerOferta
     @ID INT,
     @IDUsuarioActual INT = 0
@@ -369,7 +304,6 @@ BEGIN
 END
 GO
 
--- Mis publicaciones, con la cantidad de postulantes
 CREATE OR ALTER PROCEDURE dbo.ObtenerOfertasPublicadas
     @IDUsuario INT
 AS
@@ -392,7 +326,6 @@ BEGIN
 END
 GO
 
--- Cerrar una búsqueda propia
 CREATE OR ALTER PROCEDURE dbo.CerrarOferta
     @ID INT,
     @IDPublicador INT
@@ -405,7 +338,6 @@ BEGIN
 END
 GO
 
--- Moderación: búsquedas de personas que esperan revisión
 CREATE OR ALTER PROCEDURE dbo.ObtenerOfertasPendientes
 AS
 BEGIN
@@ -427,7 +359,6 @@ BEGIN
 END
 GO
 
--- Contador de la navbar de moderación
 CREATE OR ALTER PROCEDURE dbo.ContarOfertasPendientes
 AS
 BEGIN
@@ -436,7 +367,6 @@ BEGIN
 END
 GO
 
--- Aceptar (se publica) o rechazar (queda el motivo) una búsqueda
 CREATE OR ALTER PROCEDURE dbo.RevisarOferta
     @ID INT,
     @Aprobada BIT,
@@ -453,11 +383,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   OFERTAS GUARDADAS
-   ============================================================================ */
-
--- Guardar una oferta: @IDOfertaLaboral o @IDOfertaExterna (uno de los dos). Cada Favorito es una oferta guardada.
 CREATE OR ALTER PROCEDURE dbo.GuardarOferta
     @IDUsuario INT,
     @IDOfertaLaboral INT = NULL,
@@ -481,7 +406,6 @@ BEGIN
 END
 GO
 
--- Sacar una oferta de las guardadas
 CREATE OR ALTER PROCEDURE dbo.QuitarGuardada
     @IDUsuario INT,
     @IDOfertaLaboral INT = NULL,
@@ -495,7 +419,6 @@ BEGIN
 END
 GO
 
--- Lista de guardadas (la más reciente primero), de Workly y de otros sitios
 CREATE OR ALTER PROCEDURE dbo.ObtenerGuardadas
     @IDUsuario INT
 AS
@@ -517,11 +440,6 @@ BEGIN
 END
 GO
 
-/* ============================================================================
-   POSTULACIONES
-   ============================================================================ */
-
--- Postularse a una búsqueda de Workly (una vez por búsqueda)
 CREATE OR ALTER PROCEDURE dbo.Postular
     @IDUsuario INT,
     @IDOferta INT
@@ -534,7 +452,6 @@ BEGIN
 END
 GO
 
--- "Ya me postulé" en una oferta de otro sitio
 CREATE OR ALTER PROCEDURE dbo.RegistrarPostulacionExterna
     @IDUsuario INT,
     @IDOfertaExterna INT
@@ -548,7 +465,6 @@ BEGIN
 END
 GO
 
--- Tablero de postulaciones
 CREATE OR ALTER PROCEDURE dbo.ObtenerPostulaciones
     @IDUsuario INT
 AS
@@ -570,7 +486,6 @@ BEGIN
 END
 GO
 
--- La persona mueve la tarjeta: Enviada, En revisión, Pasé o No pasé
 CREATE OR ALTER PROCEDURE dbo.CambiarEstadoPostulacion
     @IDUsuario INT,
     @ID INT,
@@ -582,7 +497,6 @@ BEGIN
 END
 GO
 
--- Quitar una postulación del tablero
 CREATE OR ALTER PROCEDURE dbo.EliminarPostulacion
     @IDUsuario INT,
     @ID INT
@@ -593,7 +507,6 @@ BEGIN
 END
 GO
 
--- Resumen del perfil y del inicio
 CREATE OR ALTER PROCEDURE dbo.ContarPostulacionesPorEstado
     @IDUsuario INT
 AS
@@ -603,7 +516,6 @@ BEGIN
 END
 GO
 
--- Personas que se postularon a una búsqueda
 CREATE OR ALTER PROCEDURE dbo.ObtenerPostulantes
     @IDOferta INT
 AS
@@ -622,7 +534,6 @@ BEGIN
 END
 GO
 
--- Solo quien publicó la búsqueda puede ver el perfil y el CV de quien se postuló
 CREATE OR ALTER PROCEDURE dbo.ObtenerPostulacionDePublicador
     @ID INT,
     @IDPublicador INT

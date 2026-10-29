@@ -4,7 +4,6 @@
     var esPropia = User.EstaLogueado() && Model.IDUsuario_Publicador == User.IdUsuario();
     var login = Url.Action("IniciarSesion", "Cuenta", new { returnUrl = volver });
 }
-@* Botón principal de una oferta: postularse en Workly o ir al sitio original y anotarla en el tablero *@
 @if (!Model.EsExterna)
 {
     if (esPropia)

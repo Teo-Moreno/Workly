@@ -4,11 +4,6 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Dibuja un ícono del sprite wwwroot/img/iconos.svg.
-/// Uso: &lt;icono nombre="alarm" /&gt; · &lt;icono nombre="near-me" tamano="14" class="..." /&gt;
-/// Si se pasa "etiqueta" el ícono se anuncia a lectores de pantalla; si no, es decorativo.
-/// </summary>
 [HtmlTargetElement("icono", TagStructure = TagStructure.WithoutEndTag)]
 public class IconoTagHelper : TagHelper
 {
