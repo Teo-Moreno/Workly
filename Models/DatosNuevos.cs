@@ -26,14 +26,23 @@ public class LoginExternoNuevo
 public class PersonaNueva
 {
     public Usuario Usuario { get; set; } = new();
-    public Perfil Perfil { get; set; } = new();
-    public CV? CV { get; set; }
-    public Preferencia? Preferencia { get; set; }
+    public LoginExternoNuevo? LoginExterno { get; set; }
+}
+
+public class PerfilCompletado
+{
+    public int? IDProvincia { get; set; }
+    public string? Telefono { get; set; }
+    public string? Descripcion { get; set; }
+    public string? EstadoBusqueda { get; set; }
+    public string? Foto { get; set; }
+    public string? ArchivoCV { get; set; }
+    public string? SitioWeb { get; set; }
+    public Preferencia Preferencia { get; set; } = new();
     public List<string> Habilidades { get; set; } = new();
     public List<(int IDIdioma, string Nivel)> Idiomas { get; set; } = new();
     public List<ExperienciaNueva> Experiencias { get; set; } = new();
     public List<FormacionNueva> Formaciones { get; set; } = new();
-    public LoginExternoNuevo? LoginExterno { get; set; }
 }
 
 public class EmpresaNueva

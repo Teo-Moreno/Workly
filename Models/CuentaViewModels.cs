@@ -64,6 +64,15 @@ public abstract class RegistroBase
     [Range(typeof(bool), "true", "true", ErrorMessage = "Tenés que aceptar los términos para continuar")]
     public bool AceptaTerminos { get; set; }
 
+    public string? ProveedorExterno { get; set; }
+}
+
+public class RegistroPersonaViewModel : RegistroBase
+{
+}
+
+public class RegistroEmpresaViewModel : RegistroBase
+{
     [Required(ErrorMessage = "Elegí el país")]
     public int? IDPais { get; set; }
 
@@ -76,17 +85,47 @@ public abstract class RegistroBase
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
 
-    public string? ProveedorExterno { get; set; }
+    [Required(ErrorMessage = "Completá el nombre de la empresa")]
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string NombreEmpresa { get; set; } = "";
+
+    [Required(ErrorMessage = "Completá la razón social")]
+    [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
+    public string RazonSocial { get; set; } = "";
+
+    [Required(ErrorMessage = "Ingresá el CUIT")]
+    public string CUIT { get; set; } = "";
+
+    [Required(ErrorMessage = "Elegí el rubro")]
+    public string? Rubro { get; set; }
+
+    [Required(ErrorMessage = "Ingresá el sitio web de la empresa")]
+    [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
+    public string SitioWeb { get; set; } = "";
+
+    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
+    public string? Ubicacion { get; set; }
+
+    [Required(ErrorMessage = "Contá en pocas líneas qué hace la empresa")]
+    [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
+    public string? Descripcion { get; set; }
+
+    public IFormFile? Logo { get; set; }
 }
 
-public class RegistroPersonaViewModel : RegistroBase
+public class CompletarPerfilViewModel
 {
+    public int? IDPais { get; set; }
+    public int? IDProvincia { get; set; }
+
+    [StringLength(20)]
+    public string? Telefono { get; set; }
+
     public IFormFile? Foto { get; set; }
 
     [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
     public string? Descripcion { get; set; }
 
-    [Required(ErrorMessage = "Contanos si estás buscando trabajo")]
     public string? EstadoBusqueda { get; set; }
 
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
@@ -127,36 +166,13 @@ public class RegistroPersonaViewModel : RegistroBase
     public List<Habilidad> CatalogoHabilidades { get; set; } = new();
     public List<Idioma> CatalogoIdiomas { get; set; } = new();
     public List<string> Instituciones { get; set; } = new();
-}
 
-public class RegistroEmpresaViewModel : RegistroBase
-{
-    [Required(ErrorMessage = "Completá el nombre de la empresa")]
-    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
-    public string NombreEmpresa { get; set; } = "";
-
-    [Required(ErrorMessage = "Completá la razón social")]
-    [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
-    public string RazonSocial { get; set; } = "";
-
-    [Required(ErrorMessage = "Ingresá el CUIT")]
-    public string CUIT { get; set; } = "";
-
-    [Required(ErrorMessage = "Elegí el rubro")]
-    public string? Rubro { get; set; }
-
-    [Required(ErrorMessage = "Ingresá el sitio web de la empresa")]
-    [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
-    public string SitioWeb { get; set; } = "";
-
-    [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
-    public string? Ubicacion { get; set; }
-
-    [Required(ErrorMessage = "Contá en pocas líneas qué hace la empresa")]
-    [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
-    public string? Descripcion { get; set; }
-
-    public IFormFile? Logo { get; set; }
+    public List<Pais> Paises { get; set; } = new();
+    public List<Provincia> Provincias { get; set; } = new();
+    public string? FotoActual { get; set; }
+    public string? CVActual { get; set; }
+    public List<ExperienciaItem> ExperienciasCargadas { get; set; } = new();
+    public List<FormacionItem> FormacionesCargadas { get; set; } = new();
 }
 
 public class CuentaFormulario
