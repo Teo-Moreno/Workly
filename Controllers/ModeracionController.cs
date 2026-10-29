@@ -8,6 +8,13 @@ namespace Workly.Controllers;
 [Authorize]
 public class ModeracionController : Controller
 {
+    private readonly Correo _correo;
+
+    public ModeracionController(Correo correo)
+    {
+        _correo = correo;
+    }
+
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         if (!User.EsModerador())
@@ -52,7 +59,7 @@ public class ModeracionController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Rechazar(int id, string? motivo)
+    public async Task<IActionResult> Rechazar(int id, string? motivo)
     {
         var texto = (motivo ?? "").Replace("\r\n", "\n").Trim();
         if (texto.Length is < 10 or > 500)
@@ -61,9 +68,28 @@ public class ModeracionController : Controller
             TempData["MensajeTipo"] = "error";
             return RedirectToAction(nameof(Revisar), new { id });
         }
-        TempData["Mensaje"] = BD.RevisarOferta(id, false, texto)
-            ? "Rechazaste la búsqueda. Quien la publicó va a ver el motivo."
-            : "Esa búsqueda ya estaba revisada.";
+        if (!BD.RevisarOferta(id, false, texto))
+        {
+            TempData["Mensaje"] = "Esa búsqueda ya estaba revisada.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var oferta = BD.ObtenerOferta(id, 0);
+        var publicador = oferta?.IDUsuario_Publicador is int idPublicador ? BD.ObtenerUsuarioPorId(idPublicador) : null;
+        var mandado = false;
+        if (oferta != null && publicador != null && _correo.Configurado)
+        {
+            var enlace = Url.Action("Index", "Publicaciones", null, Request.Scheme);
+            mandado = await _correo.Enviar(publicador.Email, $"Workly: tu búsqueda \"{oferta.Titulo}\" no se publicó",
+                $"Hola, {publicador.Nombre}.\n\n" +
+                $"Revisamos tu búsqueda \"{oferta.Titulo}\" y no la pudimos publicar. Este es el motivo:\n\n" +
+                $"{texto}\n\n" +
+                $"Podés verla en Mis publicaciones y publicar una nueva con los cambios: {enlace}\n\n" +
+                "Workly");
+        }
+        TempData["Mensaje"] = mandado
+            ? "Rechazaste la búsqueda. Le mandamos un mail con el motivo a quien la publicó, y también lo ve en Mis publicaciones."
+            : "Rechazaste la búsqueda. Quien la publicó va a ver el motivo en Mis publicaciones.";
         return RedirectToAction(nameof(Index));
     }
 }

@@ -1,0 +1,29 @@
+@model RecuperarClaveViewModel
+@{
+    ViewData["Title"] = "Recuperar contraseña";
+}
+@section Barra {
+    <p class="texto-suave">¿Te acordaste? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+}
+
+<div class="cuenta-tarjeta">
+    <h1 class="cuenta-tarjeta__titulo">Creá una contraseña nueva</h1>
+    <p class="cuenta-tarjeta__bajada">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
+
+    <partial name="_ErroresFormulario" />
+
+    <form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
+        <div class="campo @Html.ClaseError(nameof(Model.Email))">
+            <label class="campo__etiqueta" asp-for="Email">Email</label>
+            <div class="control-con-icono">
+                <icono nombre="mail" />
+                <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
+            </div>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+        </div>
+
+        <partial name="_Captcha" />
+
+        <button class="boton boton--lg boton--bloque" type="submit"><icono nombre="send" />Mandarme el link</button>
+    </form>
+</div>

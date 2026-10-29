@@ -1,4 +1,5 @@
 @model LoginViewModel
+@inject Correo Mail
 @{
     ViewData["Title"] = "Iniciar sesión";
     var hayErrorGeneral = Html.ErroresGenerales().Any();
@@ -37,11 +38,22 @@
             <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Contrasena), "Ingresá tu contraseña")</span>
         </div>
 
-        <label class="casilla casilla--sm">
-            <input asp-for="Recordarme" type="checkbox" />
-            <span class="casilla__caja"><icono nombre="check" /></span>
-            Recordarme
-        </label>
+        @if (ViewBag.PideCaptcha == true)
+        {
+            <partial name="_Captcha" />
+        }
+
+        <div class="fila fila--entre">
+            <label class="casilla casilla--sm">
+                <input asp-for="Recordarme" type="checkbox" />
+                <span class="casilla__caja"><icono nombre="check" /></span>
+                Recordarme
+            </label>
+            @if (Mail.Configurado)
+            {
+                <a class="enlace texto-chico" asp-controller="Cuenta" asp-action="RecuperarClave">¿Olvidaste tu contraseña?</a>
+            }
+        </div>
 
         <button class="boton boton--lg boton--bloque" type="submit">Iniciar sesión</button>
     </form>

@@ -2959,3 +2959,22 @@ p.aviso .icono {
   background: rgba(118, 202, 102, 0.16);
   color: var(--color-exito-texto);
 }
+
+.captcha__fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.captcha__imagen {
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  background: var(--color-neutro-claro);
+}
+
+.captcha__entrada {
+  max-width: 220px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}

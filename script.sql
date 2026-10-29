@@ -342,6 +342,21 @@ CREATE TABLE dbo.FavoritoOferta
 );
 GO
 
+IF OBJECT_ID(N'dbo.RecuperacionClave', N'U') IS NULL
+CREATE TABLE dbo.RecuperacionClave
+(
+    ID          INT IDENTITY(1, 1) NOT NULL,
+    IDUsuario   INT NOT NULL,
+    Token_Hash  CHAR(64) NOT NULL,
+    Fecha       DATETIME2(0) NOT NULL CONSTRAINT DF_RecuperacionClave_Fecha DEFAULT (SYSUTCDATETIME()),
+    Vence       DATETIME2(0) NOT NULL,
+    Usada       BIT NOT NULL CONSTRAINT DF_RecuperacionClave_Usada DEFAULT (0),
+    CONSTRAINT PK_RecuperacionClave PRIMARY KEY (ID),
+    CONSTRAINT UQ_RecuperacionClave_Token_Hash UNIQUE (Token_Hash),
+    CONSTRAINT FK_RecuperacionClave_Usuario FOREIGN KEY (IDUsuario) REFERENCES dbo.Usuario (ID) ON DELETE CASCADE
+);
+GO
+
 IF OBJECT_ID(N'dbo.Postulacion', N'U') IS NULL
 CREATE TABLE dbo.Postulacion
 (
@@ -498,6 +513,8 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_OfertaLaboral_IDUsuar
     CREATE INDEX IX_OfertaLaboral_IDUsuario_Publicador ON dbo.OfertaLaboral (IDUsuario_Publicador);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Favorito_IDUsuario')
     CREATE INDEX IX_Favorito_IDUsuario ON dbo.Favorito (IDUsuario);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_RecuperacionClave_IDUsuario')
+    CREATE INDEX IX_RecuperacionClave_IDUsuario ON dbo.RecuperacionClave (IDUsuario, Fecha);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaLaboral')
     CREATE INDEX IX_FavoritoOferta_IDOfertaLaboral ON dbo.FavoritoOferta (IDOfertaLaboral);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaExterna')

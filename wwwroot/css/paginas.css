@@ -4204,3 +4204,64 @@ li:last-child > .onboarding__item {
     width: 100%;
   }
 }
+
+.aviso-cookies {
+  position: fixed;
+  z-index: 60;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 760px;
+  margin-inline: auto;
+  padding: 16px 20px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-blanco);
+  box-shadow: var(--sombra-destacada);
+}
+
+.aviso-cookies__texto {
+  flex: 1;
+  font-size: var(--texto-14);
+  color: var(--gris-2);
+}
+
+.tabla-legal {
+  overflow-x: auto;
+  margin-block: 12px 24px;
+}
+
+.tabla-legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-15);
+}
+
+.tabla-legal th,
+.tabla-legal td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-legal th {
+  color: var(--color-principal);
+}
+
+.tabla-legal code {
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .aviso-cookies {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

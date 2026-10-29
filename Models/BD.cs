@@ -261,6 +261,47 @@ public static class BD
         return (foto, cv, logo);
     }
 
+    public static int ContarRecuperacionesRecientes(int idUsuario)
+    {
+        using var conexion = Conectar();
+        return conexion.ExecuteScalar<int>(
+            "SELECT COUNT(*) FROM RecuperacionClave WHERE IDUsuario = @ID AND Fecha >= DATEADD(HOUR, -1, SYSUTCDATETIME())", new { ID = idUsuario });
+    }
+
+    public static void GuardarRecuperacion(int idUsuario, string tokenHash, DateTime venceUtc)
+    {
+        using var conexion = Conectar();
+        conexion.Execute("INSERT INTO RecuperacionClave (IDUsuario, Token_Hash, Vence) VALUES (@IDUsuario, @Hash, @Vence)",
+            new { IDUsuario = idUsuario, Hash = tokenHash, Vence = venceUtc });
+    }
+
+    public static int? ObtenerUsuarioDeRecuperacion(string tokenHash)
+    {
+        using var conexion = Conectar();
+        return conexion.ExecuteScalar<int?>(
+            "SELECT IDUsuario FROM RecuperacionClave WHERE Token_Hash = @Hash AND Usada = 0 AND Vence > SYSUTCDATETIME()", new { Hash = tokenHash });
+    }
+
+    public static bool UsarRecuperacion(string tokenHash, string hashContrasena)
+    {
+        using var conexion = Conectar();
+        conexion.Open();
+        using var tx = conexion.BeginTransaction();
+        var idUsuario = conexion.ExecuteScalar<int?>(
+            "SELECT IDUsuario FROM RecuperacionClave WITH (UPDLOCK) WHERE Token_Hash = @Hash AND Usada = 0 AND Vence > SYSUTCDATETIME()",
+            new { Hash = tokenHash }, tx);
+        if (idUsuario == null)
+        {
+            tx.Rollback();
+            return false;
+        }
+        conexion.Execute(@"UPDATE Usuario SET [Contraseña] = @Contrasena WHERE ID = @ID;
+                           UPDATE RecuperacionClave SET Usada = 1 WHERE IDUsuario = @ID AND Usada = 0;",
+            new { ID = idUsuario, Contrasena = hashContrasena }, tx);
+        tx.Commit();
+        return true;
+    }
+
     public static List<Pais> ObtenerPaises()
     {
         using var conexion = Conectar();
