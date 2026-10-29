@@ -1,0 +1,10 @@
+@if (!Context.Request.Cookies.ContainsKey("Workly.Cookies"))
+{
+    <div class="aviso-cookies" role="region" aria-label="Aviso de cookies" data-aviso-cookies>
+        <p class="aviso-cookies__texto">
+            Workly usa solo las cookies necesarias para que funcione: mantener tu sesión, proteger los formularios y mostrarte los avisos después de cada acción. No usamos cookies de publicidad ni de seguimiento.
+            <a class="enlace" asp-controller="Home" asp-action="Cookies">Ver la política de cookies</a>
+        </p>
+        <button class="boton boton--sm" type="button" data-aceptar-cookies>Entendido</button>
+    </div>
+}
