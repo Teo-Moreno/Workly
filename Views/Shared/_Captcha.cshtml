@@ -1,0 +1,16 @@
+@inject Captcha Generador
+@{
+    var desafio = Generador.Nuevo();
+}
+<div class="campo captcha @Html.ClaseError(Captcha.CampoRespuesta)" data-captcha data-captcha-url="@Url.Action("NuevoCaptcha", "Cuenta")">
+    <label class="campo__etiqueta" for="captcha-respuesta">Escribí las letras de la imagen</label>
+    <div class="captcha__fila">
+        <img class="captcha__imagen" src="@desafio.Imagen" width="200" height="64" alt="Letras para comprobar que sos una persona" data-captcha-imagen />
+        <button class="boton boton--contorno boton--sm" type="button" data-captcha-otra><icono nombre="refresh" />Otra imagen</button>
+    </div>
+    <input type="hidden" name="@Captcha.CampoToken" value="@desafio.Token" data-captcha-token />
+    <input class="campo__control captcha__entrada" id="captcha-respuesta" name="@Captcha.CampoRespuesta" autocomplete="off" autocapitalize="characters"
+           spellcheck="false" maxlength="10" required placeholder="Ej.: K7P3Q" />
+    <span class="campo__ayuda">No distingue mayúsculas de minúsculas.</span>
+    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
+</div>

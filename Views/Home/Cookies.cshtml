@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Política de cookies";
+}
+
+<section class="legal-encabezado">
+    <div class="contenedor contenedor--angosto">
+        <span class="etiqueta">Legales</span>
+        <h1 class="texto-titulo-1">Política de cookies</h1>
+        <p class="texto-bajada">Última actualización: 29 de octubre de 2026</p>
+    </div>
+</section>
+
+<div class="contenedor contenedor--angosto legal">
+    <p>Las cookies son archivos chicos que el navegador guarda cuando entrás a una página. Workly usa solo las que necesita para funcionar. No usamos cookies de publicidad, de análisis ni de seguimiento, y no compartimos ninguna con otras empresas.</p>
+
+    <h2>Las cookies que usamos</h2>
+    <div class="tabla-legal" role="region" aria-label="Cookies de Workly" tabindex="0">
+        <table>
+            <thead>
+                <tr><th scope="col">Nombre</th><th scope="col">Para qué sirve</th><th scope="col">Cuánto dura</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>Workly.Sesion</code></td><td>Mantiene tu sesión iniciada.</td><td>Hasta que cerrás el navegador, o 14 días si marcaste "Recordarme".</td></tr>
+                <tr><td><code>Workly.Seguridad</code></td><td>Protege los formularios para que nadie pueda enviarlos en tu nombre desde otra página.</td><td>Hasta que cerrás el navegador.</td></tr>
+                <tr><td><code>Workly.Avisos</code></td><td>Guarda por un momento el aviso que aparece después de una acción, por ejemplo "Guardamos tus datos".</td><td>Se borra apenas se muestra el aviso.</td></tr>
+                <tr><td><code>Workly.Externo</code></td><td>Solo si entrás con Google o LinkedIn: recuerda esa cuenta mientras terminás de iniciar sesión o de registrarte.</td><td>30 minutos.</td></tr>
+                <tr><td><code>.AspNetCore.Correlation.*</code> y <code>.AspNetCore.OpenIdConnect.Nonce.*</code></td><td>Solo si entrás con Google o LinkedIn: verifican que la respuesta viene de ellos.</td><td>Unos minutos.</td></tr>
+                <tr><td><code>Workly.Cookies</code></td><td>Recuerda que ya viste este aviso de cookies.</td><td>1 año.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Cómo borrarlas</h2>
+    <p>Podés borrarlas desde la configuración de tu navegador. Si lo hacés, se cierra tu sesión y vuelve a aparecer el aviso de cookies.</p>
+
+    <h2>Más información</h2>
+    <p>Para saber qué datos personales guardamos y para qué, mirá la <a class="enlace" asp-controller="Home" asp-action="Privacy">Política de privacidad</a>.</p>
+</div>
