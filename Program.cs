@@ -33,7 +33,7 @@ var autenticacion = builder.Services
         opciones.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     });
 
-// Iniciar sesión con Google o LinkedIn: solo si están configuradas sus claves (ver README)
+// Iniciar sesión con Google o LinkedIn: solo si están configuradas sus claves (dotnet user-secrets: Authentication:Google:ClientId/ClientSecret y Authentication:LinkedIn:ClientId/ClientSecret)
 var google = builder.Configuration.GetSection("Authentication:Google");
 if (!string.IsNullOrEmpty(google["ClientId"]) && !string.IsNullOrEmpty(google["ClientSecret"]))
 {
