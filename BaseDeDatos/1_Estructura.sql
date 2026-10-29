@@ -356,7 +356,9 @@ CREATE TABLE dbo.OfertaExterna
 );
 GO
 
--- Favorito y FavoritoOferta (del DLR; la página todavía no los usa) --------------------------
+-- Favorito y FavoritoOferta: ofertas guardadas -------------------------------------------
+-- Cada Favorito es una oferta que guardó la persona (con la fecha); FavoritoOferta dice cuál:
+-- una de Workly o una de otro sitio (una de las dos).
 IF OBJECT_ID(N'dbo.Favorito', N'U') IS NULL
 CREATE TABLE dbo.Favorito
 (
@@ -373,11 +375,15 @@ CREATE TABLE dbo.FavoritoOferta
 (
     ID              INT IDENTITY(1, 1) NOT NULL,
     IDFavorito      INT NOT NULL,
-    IDOfertaLaboral INT NOT NULL,
+    IDOfertaLaboral INT NULL,
+    IDOfertaExterna INT NULL,
     CONSTRAINT PK_FavoritoOferta PRIMARY KEY (ID),
-    CONSTRAINT UQ_FavoritoOferta UNIQUE (IDFavorito, IDOfertaLaboral),
+    CONSTRAINT UQ_FavoritoOferta_IDFavorito UNIQUE (IDFavorito),
     CONSTRAINT FK_FavoritoOferta_Favorito FOREIGN KEY (IDFavorito) REFERENCES dbo.Favorito (ID_favorito) ON DELETE CASCADE,
-    CONSTRAINT FK_FavoritoOferta_OfertaLaboral FOREIGN KEY (IDOfertaLaboral) REFERENCES dbo.OfertaLaboral (ID)
+    CONSTRAINT FK_FavoritoOferta_OfertaLaboral FOREIGN KEY (IDOfertaLaboral) REFERENCES dbo.OfertaLaboral (ID),
+    CONSTRAINT FK_FavoritoOferta_OfertaExterna FOREIGN KEY (IDOfertaExterna) REFERENCES dbo.OfertaExterna (ID),
+    CONSTRAINT CK_FavoritoOferta_Oferta CHECK ((IDOfertaLaboral IS NULL AND IDOfertaExterna IS NOT NULL)
+                                            OR (IDOfertaLaboral IS NOT NULL AND IDOfertaExterna IS NULL))
 );
 GO
 
@@ -425,6 +431,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_OfertaLaboral_IDUsuar
     CREATE INDEX IX_OfertaLaboral_IDUsuario_Publicador ON dbo.OfertaLaboral (IDUsuario_Publicador);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Favorito_IDUsuario')
     CREATE INDEX IX_Favorito_IDUsuario ON dbo.Favorito (IDUsuario);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaLaboral')
+    CREATE INDEX IX_FavoritoOferta_IDOfertaLaboral ON dbo.FavoritoOferta (IDOfertaLaboral);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaExterna')
+    CREATE INDEX IX_FavoritoOferta_IDOfertaExterna ON dbo.FavoritoOferta (IDOfertaExterna);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Postulacion_IDOfertaLaboral')
     CREATE INDEX IX_Postulacion_IDOfertaLaboral ON dbo.Postulacion (IDOfertaLaboral);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Perfil_IDProvincia')
