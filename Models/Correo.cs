@@ -1,13 +1,11 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Net.Mail;
+using System.Text.Json;
 
 namespace Workly.Models;
 
 public class Correo
 {
-    private const string UrlBrevo = "https://api.brevo.com/v3/smtp/email";
-
     private readonly IConfiguration _configuracion;
     private readonly IHttpClientFactory _http;
     private readonly ILogger<Correo> _logger;
@@ -21,12 +19,12 @@ public class Correo
 
     private IConfigurationSection Datos => _configuracion.GetSection("Correo");
 
-    private bool UsaBrevo => !string.IsNullOrWhiteSpace(Datos["BrevoApiKey"]);
+    private bool UsaRelay => !string.IsNullOrWhiteSpace(Datos["Relay"]) && !string.IsNullOrWhiteSpace(Datos["RelayClave"]);
 
     private bool SmtpConfigurado => !string.IsNullOrWhiteSpace(Datos["Servidor"])
                                     && (string.IsNullOrWhiteSpace(Datos["Usuario"]) || !string.IsNullOrWhiteSpace(Datos["Contrasena"]));
 
-    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Remitente"]) && (UsaBrevo || SmtpConfigurado);
+    public bool Configurado => !string.IsNullOrWhiteSpace(Datos["Remitente"]) && (UsaRelay || SmtpConfigurado);
 
     public async Task<bool> Enviar(string destino, string asunto, string texto)
     {
@@ -34,25 +32,18 @@ public class Correo
         {
             return false;
         }
-        return UsaBrevo ? await EnviarPorBrevo(destino, asunto, texto) : await EnviarPorSmtp(destino, asunto, texto);
+        return UsaRelay ? await EnviarPorRelay(destino, asunto, texto) : await EnviarPorSmtp(destino, asunto, texto);
     }
 
-    private async Task<bool> EnviarPorBrevo(string destino, string asunto, string texto)
+    private async Task<bool> EnviarPorRelay(string destino, string asunto, string texto)
     {
         try
         {
-            using var pedido = new HttpRequestMessage(HttpMethod.Post, UrlBrevo)
+            using var pedido = new HttpRequestMessage(HttpMethod.Post, Datos["Relay"])
             {
-                Content = JsonContent.Create(new
-                {
-                    sender = new { name = Datos["NombreRemitente"] ?? "Workly", email = Datos["Remitente"] },
-                    to = new[] { new { email = destino } },
-                    subject = asunto,
-                    textContent = texto
-                })
+                Content = new StringContent(JsonSerializer.Serialize(new { destino, asunto, texto }), System.Text.Encoding.UTF8, "application/json")
             };
-            pedido.Headers.Add("api-key", Datos["BrevoApiKey"]);
-            pedido.Headers.Accept.ParseAdd("application/json");
+            pedido.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Datos["RelayClave"]);
             using var cliente = _http.CreateClient();
             cliente.Timeout = TimeSpan.FromSeconds(20);
             using var respuesta = await cliente.SendAsync(pedido);
@@ -60,11 +51,11 @@ public class Correo
             {
                 return true;
             }
-            _logger.LogError("Brevo no mandó el mail a {Destino}: {Estado} {Detalle}", destino, (int)respuesta.StatusCode,
+            _logger.LogError("El servidor de mails no mandó el mail a {Destino}: {Estado} {Detalle}", destino, (int)respuesta.StatusCode,
                 await respuesta.Content.ReadAsStringAsync());
             return false;
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
         {
             _logger.LogError(ex, "No se pudo enviar el mail a {Destino}", destino);
             return false;
