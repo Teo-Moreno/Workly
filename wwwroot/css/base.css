@@ -1,7 +1,3 @@
-/* ==========================================================================
-   Workly · Base: reset, tipografía y utilidades de layout
-   ========================================================================== */
-
 *,
 *::before,
 *::after {
@@ -105,7 +101,6 @@ button {
   color: var(--color-principal);
 }
 
-/* --- Texto accesible solo para lectores de pantalla --------------------- */
 .solo-lectores {
   position: absolute !important;
   width: 1px;
@@ -135,9 +130,7 @@ button {
   top: 16px;
 }
 
-/* --- Íconos (sprite /img/iconos.svg) ------------------------------------- */
 .icono {
-  /* El tamaño sale de los atributos width/height (ver IconoTagHelper, por defecto 24 px) */
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
@@ -147,7 +140,6 @@ button {
   --icono-contraste: var(--color-blanco);
 }
 
-/* --- Layout -------------------------------------------------------------- */
 .contenedor {
   width: 100%;
   max-width: calc(var(--ancho-contenido) + var(--margen-pagina) * 2);
@@ -179,7 +171,6 @@ button {
   justify-content: space-between;
 }
 
-/* --- Tipografía utilitaria (estilos de texto del kit) -------------------- */
 .texto-display {
   font-size: var(--texto-68);
   line-height: 1.05;
@@ -265,7 +256,6 @@ button {
   color: var(--color-secundario-oscuro);
 }
 
-/* --- Secciones de página ------------------------------------------------- */
 .encabezado-pagina {
   padding-block: 40px 28px;
 }

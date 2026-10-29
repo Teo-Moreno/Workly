@@ -1,7 +1,5 @@
 namespace Workly.Models;
 
-// Datos ya validados que el controlador le pasa a BD para guardar
-
 public class ExperienciaNueva
 {
     public string Puesto { get; set; } = "";
@@ -63,7 +61,6 @@ public class OfertaNueva
     public string Estado_Publicacion { get; set; } = "Aprobada";
 }
 
-// Filtros de Buscar trabajo que se aplican a las ofertas de Workly
 public class FiltrosOfertas
 {
     public string? Texto { get; set; }

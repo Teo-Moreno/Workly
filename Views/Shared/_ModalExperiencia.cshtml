@@ -3,8 +3,6 @@
     var v = Model.Valores ?? new ExperienciaFormulario();
     var abierto = Model.EnServidor && ViewBag.ModalAbierto as string == "modal-experiencia";
 }
-@* Pop up "Agregar experiencia". En el perfil guarda en la base (Perfil/AgregarExperiencia);
-   en el registro agrega la experiencia a la lista del formulario (site.js › data-modal-local). *@
 <dialog class="modal" id="modal-experiencia" aria-labelledby="modal-experiencia-titulo" data-abrir-al-cargar="@(abierto ? "true" : null)">
     <form class="modal__contenido formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
           action="@(Model.EnServidor ? Url.Action("AgregarExperiencia", "Perfil") : null)"

@@ -1,14 +1,12 @@
 @model BuscarTrabajoViewModel
 @{
     ViewData["Title"] = "Buscar trabajo";
-    // URL actual sin la oferta elegida, para armar los enlaces de las tarjetas y volver después de postularse
     var consulta = Context.Request.Query.Where(q => q.Key != "id").SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
     string ConOferta(string clave) => Url.Action("Index", "Empleos") + "?" + string.Join("&", consulta.Append("id=" + clave));
     var volver = Context.Request.Path + Context.Request.QueryString;
     var titulo = Model.Ofertas.Count == 0 ? "Sin resultados"
         : $"{Model.Ofertas.Count} {(Model.Ofertas.Count == 1 ? "oferta" : "ofertas")}" + (Model.BuscoAlgo ? $" para “{Model.Q}”" : "");
 }
-@* Buscar trabajo (Figma › Media · WF 02 · Buscar trabajo): búsquedas de Workly + de otros sitios (JSearch) *@
 
 <div class="contenedor seccion-app">
     <header class="encabezado-pagina">

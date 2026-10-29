@@ -3,8 +3,6 @@
     var v = Model.Valores ?? new FormacionFormulario();
     var abierto = Model.EnServidor && ViewBag.ModalAbierto as string == "modal-formacion";
 }
-@* Pop up "Agregar formación". En el perfil guarda en la base (Perfil/AgregarFormacion);
-   en el registro agrega la formación a la lista del formulario (site.js › data-modal-local). *@
 <dialog class="modal" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(abierto ? "true" : null)">
     <form class="modal__contenido formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
           action="@(Model.EnServidor ? Url.Action("AgregarFormacion", "Perfil") : null)"

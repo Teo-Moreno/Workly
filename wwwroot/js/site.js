@@ -1,10 +1,4 @@
-﻿/* ==========================================================================
-   Workly · Interacciones visuales
-   JavaScript sin dependencias. Cada comportamiento se activa con atributos
-   data-* en el HTML, así las vistas no necesitan scripts propios.
-   Los formularios guardan en el servidor; acá solo se valida y se mejora la interacción.
-   ========================================================================== */
-(() => {
+﻿(() => {
   "use strict";
 
   const $ = (selector, raiz = document) => raiz.querySelector(selector);
@@ -19,10 +13,6 @@
     if (uso) uso.setAttribute("href", `${rutaIconos}#${nombre}`);
   };
 
-  /* ------------------------------------------------------------------------
-     Snackbar (07. Notificaciones › Snackbar)
-     Uso: Workly.snackbar("Texto", "exito" | "advertencia" | "error" | "")
-     ---------------------------------------------------------------------- */
   const iconosSnackbar = { exito: "circle-check", advertencia: "warning", error: "error", "": "info" };
 
   function snackbar(texto, tipo = "") {
@@ -45,15 +35,11 @@
     setTimeout(cerrar, 4200);
   }
 
-  // Botones de cierre de snackbars estáticos (UI Kit, avisos en línea)
   document.addEventListener("click", (evento) => {
     const cerrar = evento.target.closest("[data-cerrar-aviso]");
     if (cerrar) cerrar.closest(".snackbar")?.remove();
   });
 
-  /* ------------------------------------------------------------------------
-     Menú móvil
-     ---------------------------------------------------------------------- */
   $$("[data-menu-movil]").forEach((boton) => {
     boton.addEventListener("click", () => {
       const navbar = boton.closest("[data-navbar]");
@@ -63,9 +49,6 @@
     });
   });
 
-  /* ------------------------------------------------------------------------
-     Desplegables: menú de usuario
-     ---------------------------------------------------------------------- */
   const cerrarDesplegables = (excepto) => {
     $$("[data-desplegable].esta-abierto").forEach((desplegable) => {
       if (desplegable === excepto) return;
@@ -96,10 +79,6 @@
     if (evento.key === "Escape") cerrarDesplegables();
   });
 
-  /* ------------------------------------------------------------------------
-     Pestañas (subrayadas, segmentadas y navegación lateral)
-     Estructura: [data-pestanas] > [data-pestana="id"] + [data-panel="id"]
-     ---------------------------------------------------------------------- */
   function activarPestana(contenedor, id, actualizarHash = false) {
     const botones = $$("[data-pestana]", contenedor).filter((b) => b.closest("[data-pestanas]") === contenedor);
     const paneles = $$("[data-panel]", contenedor).filter((p) => p.closest("[data-pestanas]") === contenedor);
@@ -126,7 +105,6 @@
       activarPestana(contenedor, boton.dataset.pestana, true);
     });
 
-    // Abrir la pestaña indicada en la URL (#busqueda, #seguridad...)
     if (contenedor.hasAttribute("data-pestanas-hash") && location.hash) {
       activarPestana(contenedor, decodeURIComponent(location.hash.slice(1)));
     }
@@ -138,7 +116,6 @@
     );
   });
 
-  // Mostrar u ocultar un panel (filtros en mobile)
   $$("[data-alternar]").forEach((boton) => {
     boton.addEventListener("click", () => {
       const panel = document.getElementById(boton.dataset.alternar);
@@ -147,16 +124,12 @@
     });
   });
 
-  /* ------------------------------------------------------------------------
-     Buscar trabajo: seleccionar una oferta muestra su vista previa
-     ---------------------------------------------------------------------- */
   const panelDetalles = $("[data-detalles]");
 
   if (panelDetalles) {
     $("[data-resultados]")?.addEventListener("click", (evento) => {
       const tarjeta = evento.target.closest("[data-oferta]");
       if (!tarjeta) return;
-      // En pantallas chicas no hay vista previa: se navega al detalle.
       if (getComputedStyle(panelDetalles).display === "none") return;
       evento.preventDefault();
       const id = tarjeta.dataset.oferta;
@@ -172,9 +145,6 @@
     });
   }
 
-  // Valida los campos visibles: obligatorios vacíos y valores con formato inválido
-  // (email, patrón, largo). Marca cada campo con .campo--error del UI Kit.
-  // El contenedor puede estar oculto (un paso del registro que no se está viendo).
   function validar(formulario) {
     let valido = true;
     $$("input, select, textarea", formulario).forEach((control) => {
@@ -210,7 +180,6 @@
     return valido;
   }
 
-  // Al corregir un campo marcado en rojo, se quita el error
   $$("form .campo input, form .campo select, form .campo textarea").forEach((control) => {
     const quitarError = () => {
       const campo = control.closest(".campo");
@@ -223,7 +192,6 @@
     control.addEventListener("change", quitarError);
   });
 
-  // Mostrar / ocultar contraseña
   $$("[data-ver-clave]").forEach((boton) => {
     boton.addEventListener("click", () => {
       const input = boton.parentElement.querySelector("input");
@@ -235,9 +203,6 @@
     });
   });
 
-  // Revisa tamaño y formato de un archivo elegido antes de enviarlo (el servidor también lo valida).
-  // Si no sirve, vacía el input y marca el campo con el error del UI Kit.
-  // Usa accept="…" del input y data-tamano-maximo / data-error-formato.
   function archivoValido(input, archivo) {
     const campo = input.closest(".campo");
     const extensiones = input.accept.split(",").map((e) => e.trim().toLowerCase()).filter((e) => e.startsWith("."));
@@ -260,12 +225,11 @@
     return false;
   }
 
-  // Zona de arrastrar y soltar archivos (CV)
   $$("[data-zona-archivo]").forEach((zona) => {
     const input = $("input[type=file]", zona);
     const nombre = $("[data-zona-archivo-nombre]", zona);
     const textoInicial = nombre?.textContent;
-    const teniaArchivo = zona.classList.contains("tiene-archivo"); // p. ej. el CV ya guardado
+    const teniaArchivo = zona.classList.contains("tiene-archivo");
     const mostrar = (archivo) => {
       if (!archivo) return;
       if (input && !archivoValido(input, archivo)) {
@@ -289,16 +253,12 @@
       evento.preventDefault();
       const archivos = evento.dataTransfer.files;
       if (!archivos.length) return;
-      // El archivo soltado se pasa al input para que se envíe con el formulario.
       if (input) input.files = archivos;
       mostrar(archivos[0]);
     });
     input?.addEventListener("change", () => mostrar(input.files[0]));
   });
 
-  /* ------------------------------------------------------------------------
-     Registro en pasos (08. Selectores › Barra de progreso)
-     ---------------------------------------------------------------------- */
   $$("[data-pasos-form]").forEach((formulario) => {
     const pasos = $$("[data-paso]", formulario);
     const indicadores = $$("[data-paso-indicador]");
@@ -333,8 +293,6 @@
       }
     });
 
-    // Enter en un paso intermedio funciona como "Siguiente". Desde el último paso se revisan
-    // todos los pasos (no solo el visible) y, si alguno tiene errores, se abre el primero.
     formulario.addEventListener("submit", (evento) => {
       if (actual < pasos.length - 1) {
         evento.preventDefault();
@@ -350,15 +308,10 @@
       snackbar("Revisá los campos marcados en rojo.", "error");
     });
 
-    // Si el servidor devolvió errores, se abre el primer paso que tiene alguno.
     const pasoConError = pasos.findIndex((paso) => paso.querySelector(".campo--error"));
     mostrar(Math.max(pasoConError, 0), pasoConError >= 0);
   });
 
-  /* ------------------------------------------------------------------------
-     Formularios que se envían al servidor (iniciar sesión, crear cuenta)
-     Se validan en el navegador antes de enviar y se evita el doble envío.
-     ---------------------------------------------------------------------- */
   $$("form[data-formulario-real]").forEach((formulario) => {
     formulario.addEventListener("submit", (evento) => {
       const pasoVisible = $$("[data-paso]", formulario).find((paso) => !paso.hidden);
@@ -373,19 +326,10 @@
         boton.setAttribute("aria-disabled", "true");
         boton.insertAdjacentHTML("afterbegin", '<span class="spinner spinner--sm spinner--claro" aria-hidden="true"></span>');
       }
-      // Un segundo envío mientras se procesa el primero se ignora.
       formulario.addEventListener("submit", (e) => e.preventDefault(), { once: true });
     });
   });
 
-  /* ------------------------------------------------------------------------
-     País, provincia y teléfono (registro y configuración)
-     data-selector-pais      → al cambiar, muestra solo sus provincias y
-                               cambia el prefijo del teléfono (data-codigo)
-     data-selector-provincia → opciones con data-pais
-     data-telefono           → solo números; los espacios y el guion se
-                               ponen solos (data-codigos-area = áreas de 3)
-     ---------------------------------------------------------------------- */
   $$("[data-selector-pais]").forEach((selectorPais) => {
     const contenedor = selectorPais.closest("form") || document;
     const selectorProvincia = $("[data-selector-provincia]", contenedor);
@@ -410,7 +354,6 @@
     const DIGITOS = 10;
     const areas3 = (entrada.dataset.codigosArea || "").split(",");
 
-    // Mismo formato que Models/Telefonos.cs: "11 5555-1234", "351 555-1234", "2982 55-1234"
     const formatear = (digitos) => {
       const largoArea = digitos.startsWith("11") ? 2 : areas3.includes(digitos.slice(0, 3)) ? 3 : digitos.length >= 4 ? 4 : 0;
       if (!largoArea || digitos.length <= largoArea) return digitos;
@@ -420,7 +363,6 @@
       return numero.length > corte ? `${area} ${numero.slice(0, corte)}-${numero.slice(corte)}` : `${area} ${numero}`;
     };
 
-    // Si se pega un número completo ("+54 9 11 ...", "011 ..."), se quitan el país, el 9 y el 0.
     const limpiar = (texto) => {
       let digitos = texto.replace(/\D/g, "");
       if (digitos.length > DIGITOS && digitos.startsWith("54")) digitos = digitos.slice(2);
@@ -433,7 +375,6 @@
       const nuevo = formatear(limpiar(valor));
       entrada.value = nuevo;
       if (document.activeElement !== entrada) return;
-      // El cursor queda después de la misma cantidad de números que antes
       let posicion = 0;
       for (let vistos = 0; posicion < nuevo.length && vistos < digitosAntes; posicion++) {
         if (/\d/.test(nuevo[posicion])) vistos++;
@@ -442,12 +383,10 @@
     };
 
     entrada.addEventListener("beforeinput", (evento) => {
-      // Solo números al escribir (pegar se limpia en "input")
       if (evento.inputType === "insertText" && /\D/.test(evento.data || "")) {
         evento.preventDefault();
         return;
       }
-      // Borrar sobre un espacio o el guion borra también el número anterior
       const { selectionStart: inicio, selectionEnd: fin, value } = entrada;
       if (evento.inputType === "deleteContentBackward" && inicio === fin && inicio > 0 && /\D/.test(value[inicio - 1])) {
         evento.preventDefault();
@@ -459,7 +398,6 @@
     aplicar();
   });
 
-  // Vista previa de la foto de perfil elegida
   $$("[data-foto-entrada]").forEach((entrada) => {
     const vista = $("[data-vista-foto]", entrada.closest("form") || document);
     const vistaInicial = vista?.innerHTML;
@@ -477,13 +415,6 @@
     });
   });
 
-
-  /* ------------------------------------------------------------------------
-     Pop ups (<dialog> nativo)
-     data-modal-abrir="id"   → abre el pop up
-     data-modal-cerrar       → cierra el pop up en el que está
-     data-abrir-al-cargar    → se abre solo (el servidor devolvió errores)
-     ---------------------------------------------------------------------- */
   document.addEventListener("click", (evento) => {
     const abrir = evento.target.closest("[data-modal-abrir]");
     if (abrir) {
@@ -497,7 +428,6 @@
       cerrar.closest("dialog")?.close();
       return;
     }
-    // Clic sobre el fondo oscuro
     if (evento.target.tagName === "DIALOG" && evento.target.open) {
       const caja = evento.target.getBoundingClientRect();
       const fuera =
@@ -508,13 +438,11 @@
 
   $$('dialog[data-abrir-al-cargar="true"]').forEach((dialogo) => dialogo.showModal());
 
-  // Pedir confirmación antes de enviar (borrar, quitar, cerrar una búsqueda)
   document.addEventListener("submit", (evento) => {
     const formulario = evento.target;
     if (formulario.dataset.confirmar && !confirm(formulario.dataset.confirmar)) evento.preventDefault();
   }, true);
 
-  // Enviar el formulario al cambiar un filtro o una opción (estado de búsqueda, filtros, orden)
   document.addEventListener("change", (evento) => {
     const control = evento.target.closest?.("[data-enviar-al-cambiar], [data-enviar-al-cambiar] select");
     if (!control || control.closest("[data-tablero]")) return;
@@ -522,7 +450,6 @@
     if (formulario) formulario.requestSubmit ? formulario.requestSubmit() : formulario.submit();
   });
 
-  // "Repetí la contraseña": tiene que ser igual a la otra
   $$("[data-igual-a]").forEach((repetir) => {
     const original = document.getElementById(repetir.dataset.igualA);
     const revisar = () => repetir.setCustomValidity(repetir.value && original && repetir.value !== original.value ? "No coinciden" : "");
@@ -530,7 +457,6 @@
     original?.addEventListener("input", revisar);
   });
 
-  // CUIT: solo números, con los guiones en su lugar (30-12345678-9)
   $$("[data-cuit]").forEach((entrada) => {
     const formatear = () => {
       const d = entrada.value.replace(/\D/g, "").slice(0, 11);
@@ -540,9 +466,6 @@
     formatear();
   });
 
-  /* ------------------------------------------------------------------------
-     Selector de mes y año (MM/AAAA) con calendario de meses
-     ---------------------------------------------------------------------- */
   const hoy = new Date();
   const mesActual = hoy.getFullYear() * 12 + hoy.getMonth();
 
@@ -602,13 +525,11 @@
       })
     );
 
-    // Escribir a mano: solo números y la barra se pone sola
     entrada.addEventListener("input", (evento) => {
       if (evento.isTrusted === false) return;
       const d = entrada.value.replace(/\D/g, "").slice(0, 6);
       entrada.value = d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
     });
-    // No puede ser un mes futuro (salvo la finalización de una formación en curso)
     const revisar = () => {
       const valor = leer();
       const futuro = valor && !permitirFuturo && valor.anio * 12 + valor.mes - 1 > mesActual;
@@ -628,7 +549,6 @@
     });
   });
 
-  // "Trabajo actualmente acá" / "Lo estoy cursando": oculta la fecha de finalización
   $$("[data-alternar-fin]").forEach((casilla) => {
     const contenedor = document.querySelector(`[data-fin-de="${casilla.id}"]`);
     const actualizar = () => {
@@ -646,10 +566,6 @@
     actualizar();
   });
 
-  /* ------------------------------------------------------------------------
-     Registro: experiencias y estudios que se agregan con un pop up y se
-     mandan junto con el formulario (inputs ocultos ExpPuesto, ForTitulo, …)
-     ---------------------------------------------------------------------- */
   const actualizarVacio = (lista) => {
     let vacio = $("[data-lista-vacia]", lista);
     const hayItems = $$("[data-item-local]", lista).length > 0;
@@ -703,7 +619,6 @@
       Object.keys(config.campos).forEach((nombre) => (valores[nombre] = (formulario.elements[nombre]?.value || "").trim()));
       if (formulario.elements[config.actual]?.checked) valores.Fin = "";
 
-      // La finalización no puede ser anterior al inicio
       const inicio = aMes(valores.Inicio);
       const fin = aMes(valores.Fin);
       const campoFin = formulario.elements.Fin?.closest(".campo");
@@ -751,9 +666,6 @@
     });
   });
 
-  /* ------------------------------------------------------------------------
-     Qué busco: agregar habilidades propias y filas de idiomas
-     ---------------------------------------------------------------------- */
   $$("[data-habilidades]").forEach((grupo) => {
     const lista = $("[data-habilidades-lista]", grupo);
     const entrada = $("[data-habilidad-nueva]", grupo);
@@ -793,7 +705,6 @@
     const plantilla = $("[data-idioma-plantilla]", grupo);
     $("[data-idioma-agregar]", grupo)?.addEventListener("click", () => {
       const fila = plantilla.content.firstElementChild.cloneNode(true);
-      // Se propone el primer idioma que todavía no está elegido
       const elegidos = $$("select[name=IdiomaIds]", lista).map((s) => s.value);
       const selector = $("select[name=IdiomaIds]", fila);
       const libre = [...selector.options].find((o) => !elegidos.includes(o.value));
@@ -807,10 +718,6 @@
     });
   });
 
-  /* ------------------------------------------------------------------------
-     Mis postulaciones: la persona mueve cada tarjeta (arrastrando o con el
-     selector) y el cambio se guarda en el servidor
-     ---------------------------------------------------------------------- */
   const tablero = $("[data-tablero]");
   if (tablero) {
     const token = $("input[name=__RequestVerificationToken]", tablero)?.value || "";
@@ -824,7 +731,6 @@
       });
     };
 
-    // Guarda el estado. Si falla, la tarjeta vuelve a donde estaba.
     const guardar = async (tarjeta, columnaAnterior, siguienteAnterior) => {
       const columna = tarjeta.closest("[data-columna]");
       const estado = columna.dataset.columna;
@@ -904,11 +810,6 @@
     });
   }
 
-  /* ------------------------------------------------------------------------
-     Landing: el buscador "escribe" puestos reales (de JSearch o de Workly),
-     espera 5 segundos y los borra letra por letra. Es solo el texto de
-     ayuda: no busca nada ni muestra resultados.
-     ---------------------------------------------------------------------- */
   $$("[data-animar-puestos]").forEach((entrada) => {
     const puestos = entrada.dataset.animarPuestos.split("|").map((p) => p.trim()).filter(Boolean);
     if (!puestos.length) return;
@@ -948,14 +849,10 @@
     animar();
   });
 
-  // Aviso que deja el servidor después de una acción (TempData["Mensaje"])
   $$("[data-snackbars][data-mensaje]").forEach((contenedor) => {
     if (contenedor.dataset.mensaje) snackbar(contenedor.dataset.mensaje, contenedor.dataset.mensajeTipo || "exito");
   });
 
-  /* ------------------------------------------------------------------------
-     Ayuda: filtrar preguntas frecuentes mientras se escribe
-     ---------------------------------------------------------------------- */
   $$("[data-filtrar-preguntas]").forEach((input) => {
     const items = $$("[data-acordeon] .acordeon__item");
     const vacio = $("[data-acordeon-vacio]");
@@ -970,13 +867,11 @@
         if (texto && coincide) item.open = true;
       });
       if (vacio) vacio.hidden = visibles > 0;
-      // Los títulos de cada grupo se ocultan si no quedó ninguna pregunta del grupo
       $$("[data-acordeon-grupo]").forEach((grupo) => {
         grupo.hidden = !items.some((item) => !item.hidden && item.dataset.grupo === grupo.id);
       });
     });
   });
 
-  // API pública mínima para usar desde las vistas o la consola
   window.Workly = { snackbar };
 })();

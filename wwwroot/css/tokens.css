@@ -1,27 +1,19 @@
-/* ==========================================================================
-   Workly · Tokens de diseño
-   Valores tomados del UI Kit (Figma › página "Guidelines") y de la landing en
-   alta fidelidad (Figma › página "Alta").
-   ========================================================================== */
-
 :root {
-  /* --- 02. Colores de la marca ------------------------------------------ */
   --color-principal: #133461;
-  --color-principal-hover: #5a7190;      /* Principal + 30 % blanco (estado Hover del kit)  */
-  --color-principal-presionado: #0d2444; /* Principal + 30 % negro (estado Presionado)      */
-  --color-principal-suave: #d0d6df;      /* Principal + 80 % blanco (hover de Contorno/Texto) */
+  --color-principal-hover: #5a7190;
+  --color-principal-presionado: #0d2444;
+  --color-principal-suave: #d0d6df;
   --color-principal-tenue: rgba(19, 52, 97, 0.08);
   --color-neutro-oscuro: #1a1a1a;
   --color-secundario: #16afbd;
-  --color-secundario-oscuro: #0e7f89;    /* Texto sobre fondos turquesa (match, links) */
+  --color-secundario-oscuro: #0e7f89;
   --color-secundario-tenue: rgba(22, 175, 189, 0.12);
   --color-secundario-tenue-2: rgba(22, 175, 189, 0.14);
   --color-acento: #f2b84b;
   --color-acento-tenue: rgba(242, 184, 75, 0.16);
   --color-neutro-claro: #f5f7fa;
-  --color-degradado-fin: #0f5e86;        /* Fin del degradado de la tarjeta CTA */
+  --color-degradado-fin: #0f5e86;
 
-  /* --- Colores neutros --------------------------------------------------- */
   --color-negro: #000000;
   --gris-1: #1f2937;
   --gris-2: #374151;
@@ -31,48 +23,42 @@
   --gris-6: #d1d5db;
   --gris-7: #f3f4f6;
   --color-blanco: #ffffff;
-  --color-borde: #e3e8ef;                /* Bordes de tarjetas en la landing Alta */
+  --color-borde: #e3e8ef;
   --color-texto: var(--color-neutro-oscuro);
-  --color-texto-suave: #5b6472;          /* Bajadas y textos secundarios de Alta */
-  --color-superficie-gris: #d9dde7;      /* "Secondary 3" (items de notificaciones) */
+  --color-texto-suave: #5b6472;
+  --color-superficie-gris: #d9dde7;
   --color-celeste-tenue: rgba(179, 206, 226, 0.2);
-  --color-pista: #b3cee2;                /* Pista del indicador de progreso */
+  --color-pista: #b3cee2;
 
-  /* --- Colores de estado ------------------------------------------------- */
   --color-info: #a0c3ff;
   --color-info-tenue: rgba(160, 195, 255, 0.1);
   --color-exito: #76ca66;
-  --color-exito-texto: #2f7a22;          /* Variante oscura para texto legible */
+  --color-exito-texto: #2f7a22;
   --color-advertencia: #fbc756;
-  --color-advertencia-texto: #8a5d00;    /* Variante oscura para texto legible */
+  --color-advertencia-texto: #8a5d00;
   --color-error: #ba0000;
 
-  /* --- 01. Tipografía ---------------------------------------------------- */
-  /* Cardo (lectura) · The Seasons (principal). The Seasons es una fuente
-     comercial (Adobe Fonts): si se agrega el kit, reemplazar el primer valor
-     de --fuente-titulos por "the-seasons". Hoy la landing Alta usa Cardo. */
   --fuente-titulos: "Cardo", Georgia, "Times New Roman", serif;
   --fuente-texto: "Cardo", Georgia, "Times New Roman", serif;
 
-  --texto-13: 0.8125rem; /* 13px */
-  --texto-14: 0.875rem;  /* 14px */
-  --texto-15: 0.9375rem; /* 15px */
-  --texto-16: 1rem;      /* 16px */
-  --texto-17: 1.0625rem; /* 17px */
-  --texto-18: 1.125rem;  /* 18px */
-  --texto-19: 1.1875rem; /* 19px */
-  --texto-20: 1.25rem;   /* 20px */
-  --texto-22: 1.375rem;  /* 22px */
-  --texto-24: 1.5rem;    /* 24px */
-  --texto-28: 1.75rem;   /* 28px */
-  --texto-32: 2rem;      /* 32px */
-  --texto-36: 2.25rem;   /* 36px */
-  --texto-40: 2.5rem;    /* 40px */
-  --texto-48: 3rem;      /* 48px */
-  --texto-50: 3.125rem;  /* 50px */
-  --texto-68: 4.25rem;   /* 68px */
+  --texto-13: 0.8125rem;
+  --texto-14: 0.875rem;
+  --texto-15: 0.9375rem;
+  --texto-16: 1rem;
+  --texto-17: 1.0625rem;
+  --texto-18: 1.125rem;
+  --texto-19: 1.1875rem;
+  --texto-20: 1.25rem;
+  --texto-22: 1.375rem;
+  --texto-24: 1.5rem;
+  --texto-28: 1.75rem;
+  --texto-32: 2rem;
+  --texto-36: 2.25rem;
+  --texto-40: 2.5rem;
+  --texto-48: 3rem;
+  --texto-50: 3.125rem;
+  --texto-68: 4.25rem;
 
-  /* --- Radios ------------------------------------------------------------ */
   --radio-xs: 4px;
   --radio-sm: 6px;
   --radio-campo: 7px;
@@ -84,7 +70,6 @@
   --radio-4xl: 28px;
   --radio-pildora: 999px;
 
-  /* --- Sombras ----------------------------------------------------------- */
   --sombra-buscador: 0 12px 32px rgba(19, 52, 97, 0.1);
   --sombra-destacada: 0 24px 48px rgba(19, 52, 97, 0.25);
   --sombra-tarjeta: 0 1px 2px rgba(19, 52, 97, 0.04), 0 8px 24px rgba(19, 52, 97, 0.06);
@@ -94,7 +79,6 @@
   --sombra-calendario: 0 30px 84px rgba(19, 10, 46, 0.08), 0 8px 32px rgba(19, 10, 46, 0.07),
     0 3px 14px rgba(19, 10, 46, 0.03), 0 1px 3px rgba(19, 10, 46, 0.13);
 
-  /* --- Espaciado y layout ------------------------------------------------ */
   --ancho-contenido: 1280px;
   --margen-pagina: 80px;
   --alto-navbar: 84px;

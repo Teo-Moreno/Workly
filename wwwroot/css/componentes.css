@@ -1,12 +1,3 @@
-/* ==========================================================================
-   Workly · Componentes del UI Kit
-   Cada bloque referencia la sección correspondiente de la página
-   "Guidelines" del Figma (05. Botones, 04. Campos de texto, etc.).
-   ========================================================================== */
-
-/* ---------------------------------------------------------------------------
-   Logo
-   ------------------------------------------------------------------------- */
 .logo {
   display: inline-flex;
   align-items: center;
@@ -74,12 +65,6 @@
   font-size: 22px;
 }
 
-/* ---------------------------------------------------------------------------
-   05. Botones
-   Reglas del kit: padding horizontal 1,5 × tamaño de fuente,
-   padding vertical ≈ 1 × tamaño de fuente. Estados: Reposo, Hover,
-   Presionado y Deshabilitado.
-   ------------------------------------------------------------------------- */
 .boton {
   --boton-fondo: var(--color-principal);
   --boton-texto: var(--color-blanco);
@@ -130,7 +115,6 @@
   transform: none;
 }
 
-/* Secundario (turquesa) */
 .boton--secundario {
   --boton-fondo: var(--color-secundario);
   --boton-texto: var(--color-neutro-oscuro);
@@ -144,7 +128,6 @@
   --boton-fondo: #0f8a95;
 }
 
-/* Acento (amarillo) — CTA de la landing */
 .boton--acento {
   --boton-fondo: var(--color-acento);
   --boton-texto: var(--color-principal);
@@ -158,7 +141,6 @@
   --boton-fondo: #d99f33;
 }
 
-/* Contorno */
 .boton--contorno {
   --boton-fondo: var(--color-blanco);
   --boton-texto: var(--color-principal);
@@ -181,7 +163,6 @@
   --boton-borde: var(--gris-5);
 }
 
-/* Contorno blanco (sobre fondos oscuros) */
 .boton--contorno-blanco {
   --boton-fondo: transparent;
   --boton-texto: var(--color-blanco);
@@ -196,7 +177,6 @@
   --boton-fondo: rgba(255, 255, 255, 0.22);
 }
 
-/* Gris (Cancelar en los pop ups) */
 .boton--gris {
   --boton-fondo: var(--gris-4);
 }
@@ -209,7 +189,6 @@
   --boton-fondo: var(--gris-2);
 }
 
-/* Claro (Cancelar sobre fondos oscuros: calendario y selector de hora) */
 .boton--claro {
   --boton-fondo: var(--gris-7);
   --boton-texto: var(--color-neutro-oscuro);
@@ -219,7 +198,6 @@
   --boton-fondo: var(--color-blanco);
 }
 
-/* Texto */
 .boton--texto {
   --boton-fondo: transparent;
   --boton-texto: var(--color-principal);
@@ -241,7 +219,6 @@
   --boton-texto: var(--gris-5);
 }
 
-/* Ícono */
 .boton--icono {
   min-height: 0;
   width: 44px;
@@ -261,7 +238,6 @@
   --boton-borde: var(--color-principal);
 }
 
-/* Puntos (menú contextual) */
 .boton--puntos {
   --boton-fondo: transparent;
   --boton-texto: var(--color-neutro-oscuro);
@@ -276,7 +252,6 @@
   --boton-fondo: var(--gris-7);
 }
 
-/* Etiqueta (píldora con cruz) */
 .boton--etiqueta {
   min-height: 30px;
   gap: 5px;
@@ -285,7 +260,6 @@
   font-size: var(--texto-14);
 }
 
-/* Tamaños */
 .boton--sm {
   min-height: 40px;
   padding: 8px 16px;
@@ -320,7 +294,6 @@
   height: 18px;
 }
 
-/* Estado "activo" para botones conmutables (Guardar, Seguir) */
 .boton--contorno.esta-activo {
   --boton-fondo: var(--color-secundario-tenue);
   --boton-borde: var(--color-secundario-oscuro);
@@ -332,9 +305,6 @@
   opacity: 0.85;
 }
 
-/* ---------------------------------------------------------------------------
-   Etiquetas, chips y tags (landing Alta)
-   ------------------------------------------------------------------------- */
 .etiqueta {
   display: inline-flex;
   align-items: center;
@@ -405,7 +375,6 @@
   background: currentColor;
 }
 
-/* Chip: búsquedas populares, filtros activos, industrias */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -453,7 +422,6 @@ button.chip:hover {
   height: 14px;
 }
 
-/* Tag: tecnologías y datos de la oferta */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -500,7 +468,6 @@ button.chip:hover {
   gap: 6px;
 }
 
-/* Match (% de compatibilidad) */
 .match {
   display: inline-flex;
   align-items: center;
@@ -530,7 +497,6 @@ button.chip:hover {
   color: var(--color-acento);
 }
 
-/* Badge "Nuevo" de la landing */
 .badge-novedad {
   display: inline-flex;
   align-items: center;
@@ -552,9 +518,6 @@ button.chip:hover {
   font-weight: 700;
 }
 
-/* ---------------------------------------------------------------------------
-   Tarjetas, logos de empresa y avatares
-   ------------------------------------------------------------------------- */
 .tarjeta {
   background: var(--color-blanco);
   border: 1px solid var(--color-borde);
@@ -712,7 +675,6 @@ button.chip:hover {
   height: 20px;
 }
 
-/* Dato (stats de la landing y resúmenes) */
 .dato {
   display: flex;
   align-items: center;
@@ -738,9 +700,6 @@ button.chip:hover {
   color: var(--color-texto-suave);
 }
 
-/* ---------------------------------------------------------------------------
-   Navbar pública (landing) y navbar de la app
-   ------------------------------------------------------------------------- */
 .navbar {
   position: sticky;
   top: 0;
@@ -809,7 +768,6 @@ button.chip:hover {
   display: none;
 }
 
-/* Navbar app: links tipo píldora */
 .navbar--app .navbar__interior {
   min-height: 75px;
   padding-block: 12px;
@@ -911,9 +869,6 @@ button.chip:hover {
   color: var(--color-texto-suave);
 }
 
-/* ---------------------------------------------------------------------------
-   Desplegables (menú de usuario, ordenar por, panel de notificaciones)
-   ------------------------------------------------------------------------- */
 .desplegable {
   position: relative;
 }
@@ -997,7 +952,6 @@ button.chip:hover {
   margin-bottom: 6px;
 }
 
-/* Ordenamiento (kit 08) */
 .ordenar {
   display: inline-flex;
   align-items: center;
@@ -1027,7 +981,6 @@ button.chip:hover {
   transform: rotate(180deg);
 }
 
-/* Panel de notificaciones (kit 07) */
 .panel-notificaciones {
   width: min(440px, calc(100vw - 32px));
   padding: 0;
@@ -1108,9 +1061,6 @@ button.chip:hover {
   color: var(--gris-3);
 }
 
-/* ---------------------------------------------------------------------------
-   Pestañas: subrayadas (kit 08) y segmentadas (panel de notificaciones)
-   ------------------------------------------------------------------------- */
 .pestanas {
   display: flex;
   gap: 4px;
@@ -1203,9 +1153,6 @@ button.chip:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ---------------------------------------------------------------------------
-   Migas de pan (Breadcrumbs) y paginación
-   ------------------------------------------------------------------------- */
 .migas {
   display: flex;
   align-items: center;
@@ -1268,9 +1215,6 @@ button.chip:hover {
   height: 18px;
 }
 
-/* ---------------------------------------------------------------------------
-   04. Campos de texto
-   ------------------------------------------------------------------------- */
 .campo {
   display: flex;
   flex-direction: column;
@@ -1390,7 +1334,6 @@ select.campo__control {
   text-align: right;
 }
 
-/* Control con ícono (campo con ícono, buscador, contraseña) */
 .control-con-icono {
   position: relative;
   display: flex;
@@ -1441,13 +1384,11 @@ select.campo__control {
   height: 20px;
 }
 
-/* Campo + botón agregar (kit "Agregar") */
 .campo-agregar {
   display: flex;
   gap: 12px;
 }
 
-/* Zona de arrastrar y soltar (CV) */
 .zona-archivo {
   position: relative;
   display: flex;
@@ -1491,7 +1432,6 @@ select.campo__control {
   color: var(--color-principal);
 }
 
-/* Grilla de formularios */
 .formulario {
   display: grid;
   gap: 20px;
@@ -1527,9 +1467,6 @@ select.campo__control {
   font-size: var(--texto-20);
 }
 
-/* ---------------------------------------------------------------------------
-   08. Casilla, botón de opción e interruptor
-   ------------------------------------------------------------------------- */
 .casilla,
 .opcion,
 .interruptor {
@@ -1599,7 +1536,6 @@ select.campo__control {
   cursor: not-allowed;
 }
 
-/* Casilla chica: listas de filtros */
 .casilla--sm {
   gap: 10px;
   font-weight: 400;
@@ -1710,7 +1646,6 @@ select.campo__control {
   background: var(--gris-6);
 }
 
-/* Opción tipo tarjeta (registro, preferencias) */
 .opcion-tarjeta {
   position: relative;
   display: flex;
@@ -1750,7 +1685,6 @@ select.campo__control {
   color: var(--color-texto-suave);
 }
 
-/* Chips seleccionables (habilidades) */
 .chip-seleccion {
   position: relative;
   display: inline-flex;
@@ -1789,9 +1723,6 @@ select.campo__control {
   box-shadow: var(--foco);
 }
 
-/* ---------------------------------------------------------------------------
-   Barras de progreso
-   ------------------------------------------------------------------------- */
 .progreso {
   position: relative;
   height: 8px;
@@ -1821,7 +1752,6 @@ select.campo__control {
   height: 6px;
 }
 
-/* Barra de pasos (kit 08 · Barra de progreso) */
 .pasos {
   display: flex;
   align-items: flex-start;
@@ -1909,7 +1839,6 @@ select.campo__control {
   background: var(--color-principal);
 }
 
-/* Barra de valoración (idiomas) */
 .valoracion {
   position: relative;
   display: flex;
@@ -1961,9 +1890,6 @@ select.campo__control {
   box-shadow: 0 0 0 3px var(--color-blanco);
 }
 
-/* ---------------------------------------------------------------------------
-   Tooltip
-   ------------------------------------------------------------------------- */
 .tooltip {
   position: relative;
   display: inline-flex;
@@ -2024,9 +1950,6 @@ select.campo__control {
   color: var(--color-neutro-oscuro);
 }
 
-/* ---------------------------------------------------------------------------
-   07. Snackbar
-   ------------------------------------------------------------------------- */
 .snackbars {
   position: fixed;
   bottom: 24px;
@@ -2126,14 +2049,10 @@ select.campo__control {
   to { opacity: 0; transform: translateY(12px); }
 }
 
-/* Aviso en línea (mismo lenguaje que el snackbar) */
 .aviso {
   margin-bottom: 24px;
 }
 
-/* ---------------------------------------------------------------------------
-   07. Pop ups (dialog nativo)
-   ------------------------------------------------------------------------- */
 .modal {
   width: min(504px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);
@@ -2214,7 +2133,6 @@ select.campo__control {
   to { opacity: 1; transform: none; }
 }
 
-/* Recorte de foto de perfil */
 .recorte-foto {
   position: relative;
   display: grid;
@@ -2253,9 +2171,6 @@ select.campo__control {
   height: 14px;
 }
 
-/* ---------------------------------------------------------------------------
-   06. Loadings y barras de progreso
-   ------------------------------------------------------------------------- */
 .spinner {
   display: inline-block;
   width: 64px;
@@ -2306,7 +2221,6 @@ select.campo__control {
   to { transform: translateX(230%); }
 }
 
-/* Rango doble (salario) */
 .rango {
   --min: 0%;
   --max: 100%;
@@ -2382,9 +2296,6 @@ select.campo__control {
   color: var(--color-principal);
 }
 
-/* ---------------------------------------------------------------------------
-   Calendario y selector de hora (kit 08) — versión estática para la guía
-   ------------------------------------------------------------------------- */
 .calendario {
   width: 344px;
   max-width: 100%;
@@ -2474,9 +2385,6 @@ select.campo__control {
   font-weight: 700;
 }
 
-/* ---------------------------------------------------------------------------
-   Pie de página
-   ------------------------------------------------------------------------- */
 .pie {
   background: var(--color-neutro-oscuro);
   color: rgba(255, 255, 255, 0.85);
@@ -2538,9 +2446,6 @@ select.campo__control {
   color: var(--color-principal);
 }
 
-/* ---------------------------------------------------------------------------
-   Responsive de componentes compartidos
-   ------------------------------------------------------------------------- */
 @media (max-width: 1100px) {
   .navbar__links,
   .navbar__acciones .boton,
@@ -2649,9 +2554,6 @@ select.campo__control {
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Sesión: avatar con foto, subida de foto y errores de login
-   ------------------------------------------------------------------------- */
 .avatar img {
   width: 100%;
   height: 100%;
@@ -2690,9 +2592,6 @@ select.campo__control {
   margin: 0;
 }
 
-/* ---------------------------------------------------------------------------
-   Campo con prefijo (teléfono: "+54" según el país elegido)
-   ------------------------------------------------------------------------- */
 .control-con-prefijo {
   display: flex;
   align-items: stretch;
@@ -2722,9 +2621,6 @@ select.campo__control {
   border-color: var(--color-error);
 }
 
-/* ---------------------------------------------------------------------------
-   Hover del header (navbar pública y de la app)
-   ------------------------------------------------------------------------- */
 .navbar .logo {
   transition: opacity var(--transicion);
 }
@@ -2733,7 +2629,6 @@ select.campo__control {
   opacity: 0.8;
 }
 
-/* Navbar pública: subrayado amarillo que crece desde la izquierda */
 .navbar__link::after {
   content: "";
   position: absolute;
@@ -2754,7 +2649,6 @@ select.campo__control {
   transform: scaleX(1);
 }
 
-/* Navbar de la app y menú mobile: píldora con fondo */
 .navbar--app .navbar__link::after,
 .navbar__movil .navbar__link::after {
   display: none;
@@ -2778,7 +2672,6 @@ select.campo__control {
   background: var(--color-principal-tenue);
 }
 
-/* La provincia puede ser larga ("Ciudad Autónoma de Buenos Aires") */
 .navbar .boton-usuario__rol {
   max-width: 170px;
   overflow: hidden;
@@ -2786,9 +2679,6 @@ select.campo__control {
   white-space: nowrap;
 }
 
-/* ---------------------------------------------------------------------------
-   Selector de mes y año (kit 08 › Calendario, versión mes/año)
-   ------------------------------------------------------------------------- */
 .selector-mes {
   position: relative;
 }
@@ -2923,9 +2813,6 @@ select.campo__control {
   outline-offset: 1px;
 }
 
-/* ---------------------------------------------------------------------------
-   Agregados de componentes
-   ------------------------------------------------------------------------- */
 .campo__control--sm {
   min-height: 36px;
   padding: 6px 12px;
@@ -2999,7 +2886,6 @@ select.campo__control--sm {
   overflow-wrap: anywhere;
 }
 
-/* Aviso en línea con ícono (sin ser snackbar) */
 p.aviso,
 .aviso--advertencia,
 .aviso--error {
@@ -3050,7 +2936,6 @@ p.aviso .icono {
   font-weight: 700;
 }
 
-/* Sello Oficial / No oficial de una oferta */
 .sello {
   display: inline-flex;
   align-items: center;

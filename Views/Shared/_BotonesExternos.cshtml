@@ -3,8 +3,6 @@
 @{
     var proveedores = ViewBag.Proveedores as List<string> ?? new();
 }
-@* Iniciar sesión o registrarse con Google o LinkedIn. Los botones aparecen solo si
-   están configuradas sus claves (Authentication:Google y Authentication:LinkedIn, con dotnet user-secrets). *@
 @if (proveedores.Count > 0)
 {
     <div class="botones-externos">

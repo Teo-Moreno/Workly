@@ -1,14 +1,9 @@
 namespace Workly.Models;
 
-/// <summary>
-/// Una oferta para mostrar en Buscar trabajo, el detalle, Inicio o el perfil de una empresa.
-/// Puede venir de Workly (tabla OfertaLaboral) o de otro sitio vía JSearch (tabla OfertaExterna).
-/// </summary>
 public class Oferta
 {
     public bool EsExterna { get; set; }
 
-    /// <summary>OfertaLaboral.ID o OfertaExterna.ID, según EsExterna.</summary>
     public int ID { get; set; }
 
     public string Titulo { get; set; } = "";
@@ -28,31 +23,24 @@ public class Oferta
     public DateTime? Fecha_Cierre { get; set; }
     public string? Puestos { get; set; }
 
-    // Solo Workly
     public int? IDUsuario_Publicador { get; set; }
 
-    /// <summary>Tipo de cuenta de quien la publicó: "Empresa" o "Persona".</summary>
     public string? TipoPublicador { get; set; }
     public string Estado_Publicacion { get; set; } = "Aprobada";
     public string? Motivo_Rechazo { get; set; }
     public int CantidadPostulantes { get; set; }
 
-    // Solo externas
     public string? ID_Externo { get; set; }
     public string? Link_Postulacion { get; set; }
     public string? Publicador { get; set; }
 
-    /// <summary>La persona logueada ya se postuló (o registró su postulación externa).</summary>
     public bool YaPostulado { get; set; }
 
-    /// <summary>La persona logueada la guardó (tablas Favorito y FavoritoOferta).</summary>
     public bool Guardada { get; set; }
 
-    /// <summary>Solo en "Guardadas": cuándo la guardó.</summary>
     public DateTime? Fecha_Guardado { get; set; }
     public int IDFavorito { get; set; }
 
-    /// <summary>Clave única para la vista ("w12" o "x34").</summary>
     public string Clave => (EsExterna ? "x" : "w") + ID;
 
     public string Iniciales => Textos.Iniciales(Empresa);
@@ -66,7 +54,6 @@ public class Oferta
     public string? UbicacionVisible =>
         string.Join(" · ", new[] { Ubicacion, Provincia }.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct()) is { Length: > 0 } t ? t : null;
 
-    /// <summary>Oficial: la publicó una cuenta de empresa o viene de otro sitio. No oficial: la publicó una persona.</summary>
     public bool EsOficial => EsExterna || TipoPublicador == Usuario.TipoEmpresa;
 
     public string Fuente => EsExterna ? (string.IsNullOrWhiteSpace(Publicador) ? "otro sitio" : Publicador!) : "Workly";

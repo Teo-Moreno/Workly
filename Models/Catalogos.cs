@@ -1,9 +1,5 @@
 namespace Workly.Models;
 
-/// <summary>
-/// Opciones fijas de los formularios. Los CHECK de la base usan los mismos valores
-/// (Perfil.Estado_Busqueda, UsuarioIdioma.Nivel, Postulacion.Estado, OfertaLaboral.Modalidad...).
-/// </summary>
 public static class Catalogos
 {
     public static readonly string[] EstadosBusqueda = { "Buscando activamente", "Abierto a propuestas", "No estoy buscando" };
@@ -15,7 +11,6 @@ public static class Catalogos
     public static readonly string[] Disponibilidades = { "Inmediata", "En 15 días", "En 30 días", "A convenir" };
     public static readonly string[] NivelesIdioma = { "Básico", "Intermedio", "Avanzado", "Nativo" };
 
-    /// <summary>Tipos de empleo de las búsquedas de Workly. Coinciden con los filtros de JSearch.</summary>
     public static readonly (string Nombre, string JSearch)[] TiposEmpleo =
     {
         ("Tiempo completo", "FULLTIME"),
@@ -24,7 +19,6 @@ public static class Catalogos
         ("Pasantía", "INTERN")
     };
 
-    /// <summary>Estados del tablero de postulaciones (los mueve la persona).</summary>
     public static readonly (string Estado, string Columna, string Color)[] EstadosPostulacion =
     {
         ("Enviada", "Enviadas", "info"),
@@ -33,7 +27,6 @@ public static class Catalogos
         ("No pasé", "No pasé", "error")
     };
 
-    /// <summary>Filtro "Fecha de publicación" de Buscar trabajo (valor de JSearch, texto, días).</summary>
     public static readonly (string Valor, string Texto, int Dias)[] FechasPublicacion =
     {
         ("today", "Hoy", 1),

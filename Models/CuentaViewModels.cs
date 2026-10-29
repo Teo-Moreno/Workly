@@ -19,7 +19,6 @@ public class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
-// Datos comunes de los dos registros (persona y empresa)
 public abstract class RegistroBase
 {
     [Required(ErrorMessage = "Completá tu nombre")]
@@ -35,7 +34,6 @@ public abstract class RegistroBase
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string Email { get; set; } = "";
 
-    // Obligatoria salvo que la persona venga de Google o LinkedIn (lo controla CuentaController)
     [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres")]
     [RegularExpression(@"^(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).+$", ErrorMessage = "Usá al menos una letra y un número")]
     [DataType(DataType.Password)]
@@ -50,21 +48,17 @@ public abstract class RegistroBase
     [Required(ErrorMessage = "Elegí la provincia")]
     public int? IDProvincia { get; set; }
 
-    /// <summary>Sin el prefijo del país: "11 5555-1234".</summary>
     [StringLength(20)]
     public string? Telefono { get; set; }
 
-    // Opciones de las listas (no vienen del formulario)
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
 
-    /// <summary>"Google" o "LinkedIn" si la persona eligió registrarse con esa cuenta.</summary>
     public string? ProveedorExterno { get; set; }
 }
 
 public class RegistroPersonaViewModel : RegistroBase
 {
-    // ---- Tu perfil ----
     public IFormFile? Foto { get; set; }
 
     [StringLength(500, ErrorMessage = "Usá hasta 500 caracteres")]
@@ -73,7 +67,6 @@ public class RegistroPersonaViewModel : RegistroBase
     [Required(ErrorMessage = "Contanos si estás buscando trabajo")]
     public string? EstadoBusqueda { get; set; }
 
-    // ---- Tu búsqueda (tabla Preferencia, habilidades e idiomas) ----
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string? PuestoBuscado { get; set; }
 
@@ -94,7 +87,6 @@ public class RegistroPersonaViewModel : RegistroBase
     public List<int> IdiomaIds { get; set; } = new();
     public List<string> IdiomaNiveles { get; set; } = new();
 
-    // ---- Experiencia y formación (filas que agrega la persona) ----
     public List<string> ExpPuesto { get; set; } = new();
     public List<string> ExpEmpresa { get; set; } = new();
     public List<string> ExpInicio { get; set; } = new();
@@ -105,13 +97,11 @@ public class RegistroPersonaViewModel : RegistroBase
     public List<string> ForInicio { get; set; } = new();
     public List<string> ForFin { get; set; } = new();
 
-    // ---- Tu CV ----
     public IFormFile? ArchivoCV { get; set; }
 
     [StringLength(200, ErrorMessage = "Usá hasta 200 caracteres")]
     public string? SitioWeb { get; set; }
 
-    // Catálogos para el formulario
     public List<Habilidad> CatalogoHabilidades { get; set; } = new();
     public List<Idioma> CatalogoIdiomas { get; set; } = new();
     public List<string> Instituciones { get; set; } = new();
@@ -146,8 +136,6 @@ public class RegistroEmpresaViewModel : RegistroBase
 
     public IFormFile? Logo { get; set; }
 }
-
-// ---------------------------------------------------------------- Configuración
 
 public class CuentaFormulario
 {
@@ -257,7 +245,6 @@ public class EmpresaFormulario
     public IFormFile? Logo { get; set; }
 }
 
-// Pop ups "Agregar experiencia" y "Agregar formación" del perfil
 public class ExperienciaFormulario
 {
     [Required(ErrorMessage = "Completá el puesto")]
@@ -295,12 +282,8 @@ public class FormacionFormulario
     public string? Fin { get; set; }
 }
 
-// ---------------------------------------------------------------- Mi perfil
-
-// Un paso del "perfil completo" con la acción para completarlo
 public record ItemPerfil(string Clave, string Texto, bool Listo, string Accion);
 
-// Datos que se muestran en "Mi perfil" y "Configuración"
 public class MiPerfilViewModel
 {
     public Usuario Usuario { get; set; } = new();
@@ -313,7 +296,6 @@ public class MiPerfilViewModel
     public List<FormacionItem> Formaciones { get; set; } = new();
     public Dictionary<string, int> PostulacionesPorEstado { get; set; } = new();
 
-    // Para Configuración
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
     public List<Habilidad> CatalogoHabilidades { get; set; } = new();
@@ -321,7 +303,6 @@ public class MiPerfilViewModel
     public List<string> Instituciones { get; set; } = new();
     public List<string> ProveedoresVinculados { get; set; } = new();
 
-    // Cuenta de empresa
     public Empresa? Empresa { get; set; }
 
     public int TotalPostulaciones => PostulacionesPorEstado.Values.Sum();
@@ -352,7 +333,6 @@ public class MiPerfilViewModel
     public ItemPerfil? SiguientePaso => Checklist.FirstOrDefault(i => !i.Listo);
 }
 
-// ExperienciaLaboral + nombre de la Empresa
 public class ExperienciaItem
 {
     public int ID { get; set; }
@@ -365,7 +345,6 @@ public class ExperienciaItem
     public string Periodo => Fechas.Periodo(Fecha_Inicio, Fecha_Finalizacion);
 }
 
-// UsuarioEducacion + datos de la Educacion
 public class FormacionItem
 {
     public int ID { get; set; }
@@ -385,7 +364,6 @@ public static class Fechas
 
     public static string MesAnio(DateTime fecha) => $"{Meses[fecha.Month - 1]} {fecha.Year}";
 
-    /// <summary>"06/2026" → 1/6/2026. Null si el texto no es un mes válido.</summary>
     public static DateTime? ParsearMesAnio(string? texto)
     {
         var partes = (texto ?? "").Trim().Split('/');
@@ -397,10 +375,8 @@ public static class Fechas
         return null;
     }
 
-    /// <summary>Primer día del mes actual (no se aceptan fechas de inicio a futuro).</summary>
     public static DateTime MesActual => new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
-    // "Mar 2025 – Actualidad · 1 año 7 meses"
     public static string Periodo(DateTime inicio, DateTime? fin)
     {
         var hasta = fin ?? DateTime.Today;

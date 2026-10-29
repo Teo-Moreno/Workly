@@ -2,12 +2,10 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Workly.Models;
 
-/// <summary>Validaciones del servidor que usan el registro y Configuración.</summary>
 public static class Validaciones
 {
     public static string? Limpiar(string? texto) => string.IsNullOrWhiteSpace(texto) ? null : texto.Trim();
 
-    /// <summary>Teléfono local con 10 números. Devuelve el teléfono con el prefijo del país ("+54 11 5555-1234").</summary>
     public static string? Telefono(string? telefonoLocal, Pais? pais, string campo, ModelStateDictionary estado)
     {
         if (string.IsNullOrWhiteSpace(telefonoLocal))
@@ -30,7 +28,6 @@ public static class Validaciones
         return null;
     }
 
-    /// <summary>Arma la preferencia con los valores permitidos (lo que no está en la lista se descarta).</summary>
     public static Preferencia Preferencia(string? puesto, List<string> niveles, List<string> modalidades, string? jornada, string? contratacion,
                                           int? idProvincia, int? salarioMinimo, int? salarioMaximo, string? disponibilidad,
                                           List<Provincia> provincias, string campoSalario, ModelStateDictionary estado)
@@ -84,7 +81,6 @@ public static class Validaciones
         return idiomas;
     }
 
-    /// <summary>Fechas "MM/AAAA" de una experiencia o formación. Devuelve false si no son válidas.</summary>
     public static bool Periodo(string? inicioTexto, string? finTexto, bool finPuedeSerFuturo, out DateTime inicio, out DateTime? fin, out string? error)
     {
         inicio = default;

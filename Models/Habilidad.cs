@@ -1,6 +1,5 @@
 namespace Workly.Models;
 
-// Tablas Habilidad e Idioma (catálogos) y el idioma elegido por una persona (UsuarioIdioma)
 public class Habilidad
 {
     public int ID { get; set; }

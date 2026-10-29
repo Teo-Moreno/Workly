@@ -5,9 +5,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Revisión de las búsquedas que publican las personas (solo cuentas moderadoras).
-// Aceptada: se publica junto a las demás. Rechazada: queda el motivo, que la persona ve
-// en "Mis publicaciones" (el aviso por mail se suma cuando esté el envío de mails).
 [Authorize]
 public class ModeracionController : Controller
 {
@@ -28,7 +25,6 @@ public class ModeracionController : Controller
         });
     }
 
-    // Muestra la búsqueda exactamente como la vería una persona al entrar
     public IActionResult Revisar(int id)
     {
         var oferta = BD.ObtenerOferta(id, 0);
