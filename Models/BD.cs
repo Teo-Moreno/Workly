@@ -277,7 +277,8 @@ public static class BD
             WHERE o.IDUsuario_Publicador = @ID OR o.IDEmpresa IN (SELECT ID FROM Empresa WHERE IDUsuario = @ID);
 
             DELETE FROM Postulacion WHERE IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
-            DELETE FROM FavoritoOferta WHERE IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
+            DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
+            WHERE fo.IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
             DELETE FROM OfertaLaboral WHERE ID IN (SELECT ID FROM @Ofertas);
 
             -- La empresa queda (puede figurar en experiencias de otras personas) pero sin cuenta ni CUIT
@@ -635,7 +636,10 @@ public static class BD
                (SELECT STRING_AGG(p.Nombre, ', ') FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
                (SELECT COUNT(*) FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
                CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
+               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                 WHERE fo.IDOfertaLaboral = o.ID AND f.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
         FROM OfertaLaboral o
         JOIN Empresa e ON e.ID = o.IDEmpresa
         LEFT JOIN Usuario pu ON pu.ID = o.IDUsuario_Publicador
@@ -751,7 +755,7 @@ public static class BD
         if (esSuya)
         {
             conexion.Execute(@"DELETE FROM Postulacion WHERE IDOfertaLaboral = @ID;
-                               DELETE FROM FavoritoOferta WHERE IDOfertaLaboral = @ID;
+                               DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito WHERE fo.IDOfertaLaboral = @ID;
                                DELETE FROM OfertaLaboral WHERE ID = @ID;", new { ID = idOferta }, tx);
         }
         tx.Commit();
@@ -836,7 +840,10 @@ public static class BD
                CASE WHEN x.Es_Remoto = 1 THEN N'Remoto' ELSE NULL END AS Modalidad, x.Tipo_Contrato, x.Salario AS SalarioTexto,
                x.Descripcion, x.Fecha_Publicacion, x.Link_Postulacion, x.Publicador,
                CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
+               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                 WHERE fo.IDOfertaExterna = x.ID AND f.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
         FROM OfertaExterna x";
 
     public static Oferta? ObtenerOfertaExterna(int id, int idUsuarioActual)
@@ -845,7 +852,7 @@ public static class BD
         return conexion.QueryFirstOrDefault<Oferta>($"{SelectExterna} WHERE x.ID = @ID", new { ID = id, IDUsuarioActual = idUsuarioActual });
     }
 
-    /// <summary>Marca cuáles ofertas externas ya registró la persona como postulaciones.</summary>
+    /// <summary>Marca cuáles ofertas externas ya registró la persona como postulaciones y cuáles guardó.</summary>
     public static void MarcarPostuladas(List<Oferta> ofertas, int idUsuario)
     {
         var externas = ofertas.Where(o => o.EsExterna).Select(o => o.ID).ToList();
@@ -856,10 +863,84 @@ public static class BD
         using var conexion = Conectar();
         var postuladas = conexion.Query<int>("SELECT IDOfertaExterna FROM Postulacion WHERE IDUsuario = @ID AND IDOfertaExterna IN @IDs",
             new { ID = idUsuario, IDs = externas }).ToHashSet();
+        var guardadas = conexion.Query<int>(@"SELECT fo.IDOfertaExterna FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                              WHERE f.IDUsuario = @ID AND fo.IDOfertaExterna IN @IDs",
+            new { ID = idUsuario, IDs = externas }).ToHashSet();
         foreach (var oferta in ofertas.Where(o => o.EsExterna))
         {
             oferta.YaPostulado = postuladas.Contains(oferta.ID);
+            oferta.Guardada = guardadas.Contains(oferta.ID);
         }
+    }
+
+    // =====================================================================
+    // Ofertas guardadas (Favorito y FavoritoOferta)
+    // =====================================================================
+
+    /// <summary>Guarda una oferta de Workly o externa. Devuelve false si ya estaba guardada o no existe.</summary>
+    public static bool GuardarOferta(int idUsuario, int idOferta, bool esExterna)
+    {
+        using var conexion = Conectar();
+        conexion.Open();
+        using var tx = conexion.BeginTransaction();
+        var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
+        // Las de Workly se pueden guardar solo si están publicadas
+        var existe = esExterna
+            ? "EXISTS (SELECT 1 FROM OfertaExterna WHERE ID = @IDOferta)"
+            : "EXISTS (SELECT 1 FROM OfertaLaboral WHERE ID = @IDOferta AND Estado_Publicacion = N'Aprobada')";
+        var puede = conexion.ExecuteScalar<int>($@"
+            SELECT CASE WHEN {existe}
+                         AND NOT EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                         WHERE f.IDUsuario = @IDUsuario AND fo.{columna} = @IDOferta)
+                        THEN 1 ELSE 0 END", new { IDUsuario = idUsuario, IDOferta = idOferta }, tx) == 1;
+        if (puede)
+        {
+            conexion.Execute($@"
+                INSERT INTO Favorito (IDUsuario, fecha_guardado) VALUES (@IDUsuario, CAST(GETDATE() AS DATE));
+                INSERT INTO FavoritoOferta (IDFavorito, {columna}) VALUES (SCOPE_IDENTITY(), @IDOferta);",
+                new { IDUsuario = idUsuario, IDOferta = idOferta }, tx);
+        }
+        tx.Commit();
+        return puede;
+    }
+
+    /// <summary>Saca una oferta de las guardadas. Devuelve false si no estaba guardada.</summary>
+    public static bool QuitarGuardada(int idUsuario, int idOferta, bool esExterna)
+    {
+        var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
+        using var conexion = Conectar();
+        return conexion.Execute($@"DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
+                                   WHERE f.IDUsuario = @IDUsuario AND fo.{columna} = @IDOferta",
+            new { IDUsuario = idUsuario, IDOferta = idOferta }) > 0;
+    }
+
+    /// <summary>Las ofertas que guardó la persona, de la más nueva a la más vieja que guardó.</summary>
+    public static List<Oferta> ObtenerGuardadas(int idUsuario)
+    {
+        var sql = $@"
+            SELECT * FROM (
+                SELECT w.*, CAST(f.fecha_guardado AS DATETIME2) AS Fecha_Guardado, f.ID_favorito AS IDFavorito
+                FROM ({SelectOferta}) w
+                JOIN FavoritoOferta fo ON fo.IDOfertaLaboral = w.ID
+                JOIN Favorito f ON f.ID_favorito = fo.IDFavorito AND f.IDUsuario = @IDUsuarioActual
+            ) x
+            ORDER BY x.IDFavorito DESC;
+            SELECT e.*, CAST(f.fecha_guardado AS DATETIME2) AS Fecha_Guardado, f.ID_favorito AS IDFavorito
+            FROM ({SelectExterna}) e
+            JOIN FavoritoOferta fo ON fo.IDOfertaExterna = e.ID
+            JOIN Favorito f ON f.ID_favorito = fo.IDFavorito AND f.IDUsuario = @IDUsuarioActual
+            ORDER BY f.ID_favorito DESC;";
+        using var conexion = Conectar();
+        using var lectura = conexion.QueryMultiple(sql, new { IDUsuarioActual = idUsuario });
+        var workly = lectura.Read<Oferta>().ToList();
+        var externas = lectura.Read<Oferta>().ToList();
+        return workly.Concat(externas).OrderByDescending(o => o.IDFavorito).ToList();
+    }
+
+    public static int ContarGuardadas(int idUsuario)
+    {
+        using var conexion = Conectar();
+        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Favorito WHERE IDUsuario = @ID", new { ID = idUsuario });
     }
 
     // =====================================================================

@@ -4,7 +4,7 @@
     var proveedores = ViewBag.Proveedores as List<string> ?? new();
 }
 @* Iniciar sesión o registrarse con Google o LinkedIn. Los botones aparecen solo si
-   están configuradas sus claves (Authentication:Google y Authentication:LinkedIn, ver README). *@
+   están configuradas sus claves (Authentication:Google y Authentication:LinkedIn, con dotnet user-secrets). *@
 @if (proveedores.Count > 0)
 {
     <div class="botones-externos">
@@ -29,5 +29,5 @@
 }
 else if (Entorno.IsDevelopment())
 {
-    <p class="aviso-desarrollo"><icono nombre="warning-outline" tamano="18" />Para mostrar "@Model.Texto con Google / LinkedIn" cargá sus claves con <code>dotnet user-secrets</code> (ver README). Este aviso solo se ve mientras se desarrolla.</p>
+    <p class="aviso-desarrollo"><icono nombre="warning-outline" tamano="18" />Para mostrar "@Model.Texto con Google / LinkedIn" cargá sus claves desde la carpeta del proyecto con <code>dotnet user-secrets set "Authentication:Google:ClientId" "..."</code> y <code>"Authentication:Google:ClientSecret"</code> (lo mismo con LinkedIn). Este aviso solo se ve mientras se desarrolla.</p>
 }

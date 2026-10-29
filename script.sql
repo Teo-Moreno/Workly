@@ -368,7 +368,9 @@ CREATE TABLE dbo.OfertaExterna
 );
 GO
 
--- Favorito y FavoritoOferta (del DLR; la página todavía no los usa) --------------------------
+-- Favorito y FavoritoOferta: ofertas guardadas -------------------------------------------
+-- Cada Favorito es una oferta que guardó la persona (con la fecha); FavoritoOferta dice cuál:
+-- una de Workly o una de otro sitio (una de las dos).
 IF OBJECT_ID(N'dbo.Favorito', N'U') IS NULL
 CREATE TABLE dbo.Favorito
 (
@@ -385,11 +387,15 @@ CREATE TABLE dbo.FavoritoOferta
 (
     ID              INT IDENTITY(1, 1) NOT NULL,
     IDFavorito      INT NOT NULL,
-    IDOfertaLaboral INT NOT NULL,
+    IDOfertaLaboral INT NULL,
+    IDOfertaExterna INT NULL,
     CONSTRAINT PK_FavoritoOferta PRIMARY KEY (ID),
-    CONSTRAINT UQ_FavoritoOferta UNIQUE (IDFavorito, IDOfertaLaboral),
+    CONSTRAINT UQ_FavoritoOferta_IDFavorito UNIQUE (IDFavorito),
     CONSTRAINT FK_FavoritoOferta_Favorito FOREIGN KEY (IDFavorito) REFERENCES dbo.Favorito (ID_favorito) ON DELETE CASCADE,
-    CONSTRAINT FK_FavoritoOferta_OfertaLaboral FOREIGN KEY (IDOfertaLaboral) REFERENCES dbo.OfertaLaboral (ID)
+    CONSTRAINT FK_FavoritoOferta_OfertaLaboral FOREIGN KEY (IDOfertaLaboral) REFERENCES dbo.OfertaLaboral (ID),
+    CONSTRAINT FK_FavoritoOferta_OfertaExterna FOREIGN KEY (IDOfertaExterna) REFERENCES dbo.OfertaExterna (ID),
+    CONSTRAINT CK_FavoritoOferta_Oferta CHECK ((IDOfertaLaboral IS NULL AND IDOfertaExterna IS NOT NULL)
+                                            OR (IDOfertaLaboral IS NOT NULL AND IDOfertaExterna IS NULL))
 );
 GO
 
@@ -487,6 +493,41 @@ BEGIN
 END
 GO
 
+-- FavoritoOferta: también ofertas de otros sitios, y una oferta por cada Favorito
+IF COL_LENGTH(N'dbo.FavoritoOferta', N'IDOfertaExterna') IS NULL
+BEGIN
+    IF OBJECT_ID(N'dbo.UQ_FavoritoOferta', N'UQ') IS NOT NULL
+        ALTER TABLE dbo.FavoritoOferta DROP CONSTRAINT UQ_FavoritoOferta;
+    ALTER TABLE dbo.FavoritoOferta ALTER COLUMN IDOfertaLaboral INT NULL;
+    ALTER TABLE dbo.FavoritoOferta ADD IDOfertaExterna INT NULL
+        CONSTRAINT FK_FavoritoOferta_OfertaExterna REFERENCES dbo.OfertaExterna (ID);
+END
+GO
+IF OBJECT_ID(N'dbo.CK_FavoritoOferta_Oferta', N'C') IS NULL
+    ALTER TABLE dbo.FavoritoOferta ADD CONSTRAINT CK_FavoritoOferta_Oferta
+        CHECK ((IDOfertaLaboral IS NULL AND IDOfertaExterna IS NOT NULL) OR (IDOfertaLaboral IS NOT NULL AND IDOfertaExterna IS NULL));
+-- Si una base vieja tenía varias ofertas en un mismo Favorito, cada una pasa a tener el suyo
+IF OBJECT_ID(N'dbo.UQ_FavoritoOferta_IDFavorito', N'UQ') IS NULL
+BEGIN
+    EXEC(N'
+        DECLARE @Pasar TABLE (ID INT, IDUsuario INT, Fecha DATE);
+        INSERT INTO @Pasar
+        SELECT fo.ID, f.IDUsuario, f.fecha_guardado
+        FROM dbo.FavoritoOferta fo JOIN dbo.Favorito f ON f.ID_favorito = fo.IDFavorito
+        WHERE fo.ID <> (SELECT MIN(x.ID) FROM dbo.FavoritoOferta x WHERE x.IDFavorito = fo.IDFavorito);
+        DECLARE @ID INT, @IDUsuario INT, @Fecha DATE;
+        WHILE EXISTS (SELECT 1 FROM @Pasar)
+        BEGIN
+            SELECT TOP (1) @ID = ID, @IDUsuario = IDUsuario, @Fecha = Fecha FROM @Pasar;
+            INSERT INTO dbo.Favorito (IDUsuario, fecha_guardado) VALUES (@IDUsuario, @Fecha);
+            UPDATE dbo.FavoritoOferta SET IDFavorito = SCOPE_IDENTITY() WHERE ID = @ID;
+            DELETE FROM @Pasar WHERE ID = @ID;
+        END
+        DELETE f FROM dbo.Favorito f WHERE NOT EXISTS (SELECT 1 FROM dbo.FavoritoOferta fo WHERE fo.IDFavorito = f.ID_favorito);
+        ALTER TABLE dbo.FavoritoOferta ADD CONSTRAINT UQ_FavoritoOferta_IDFavorito UNIQUE (IDFavorito);');
+END
+GO
+
 -- Postulacion: estado, ofertas externas y una postulación por oferta
 IF COL_LENGTH(N'dbo.Postulacion', N'Estado') IS NULL
     ALTER TABLE dbo.Postulacion ADD Estado NVARCHAR(20) NOT NULL CONSTRAINT DF_Postulacion_Estado DEFAULT (N'Enviada');
@@ -538,6 +579,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_OfertaLaboral_IDUsuar
     CREATE INDEX IX_OfertaLaboral_IDUsuario_Publicador ON dbo.OfertaLaboral (IDUsuario_Publicador);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Favorito_IDUsuario')
     CREATE INDEX IX_Favorito_IDUsuario ON dbo.Favorito (IDUsuario);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaLaboral')
+    CREATE INDEX IX_FavoritoOferta_IDOfertaLaboral ON dbo.FavoritoOferta (IDOfertaLaboral);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_FavoritoOferta_IDOfertaExterna')
+    CREATE INDEX IX_FavoritoOferta_IDOfertaExterna ON dbo.FavoritoOferta (IDOfertaExterna);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Postulacion_IDOfertaLaboral')
     CREATE INDEX IX_Postulacion_IDOfertaLaboral ON dbo.Postulacion (IDOfertaLaboral);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Perfil_IDProvincia')
