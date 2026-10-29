@@ -44,12 +44,13 @@ public class EmpleosController : Controller
             }, User.IdUsuario()));
         }
 
-        if (modelo.BuscoAlgo && pais != null)
+        if (pais != null)
         {
             var lugar = provincia?.Nombre ?? pais.Nombre;
             var soloRemoto = modelo.Modalidad.Count == 1 && modelo.Modalidad[0] == "Remoto";
             var tipos = Catalogos.TiposEmpleo.Where(t => modelo.Tipo.Contains(t.Nombre)).Select(t => t.JSearch);
-            var resultado = await _jsearch.Buscar($"{modelo.Q} en {lugar}", pais.Codigo_ISO, soloRemoto, tipos, modelo.Fecha, modelo.Cursor);
+            var puesto = modelo.BuscoAlgo ? modelo.Q : "empleos";
+            var resultado = await _jsearch.Buscar($"{puesto} en {lugar}", pais.Codigo_ISO, soloRemoto, tipos, modelo.Fecha, modelo.Cursor);
             modelo.ErrorExternas = resultado.Error;
             modelo.CursorSiguiente = resultado.Cursor;
             var externas = resultado.Ofertas;
