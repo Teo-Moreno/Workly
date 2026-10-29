@@ -1,10 +1,9 @@
 @model CamposBusqueda
 @{
     var p = Model.Prefijo;
-    var habilidades = Model.CatalogoHabilidades.Select(h => h.Nombre)
-        .Concat(Model.Habilidades.Where(h => !Model.CatalogoHabilidades.Any(c => string.Equals(c.Nombre, h, StringComparison.OrdinalIgnoreCase))))
-        .ToList();
     var elegidas = Model.Habilidades.ToHashSet(StringComparer.OrdinalIgnoreCase);
+    var propias = Model.Habilidades.Where(h => !Model.CatalogoHabilidades.Any(c => string.Equals(c.Nombre, h, StringComparison.OrdinalIgnoreCase))).ToList();
+    var sectores = Model.CatalogoHabilidades.GroupBy(h => (h.IDSector, h.Sector)).Select(g => g.Key).ToList();
 }
 
 @if (Model.IncluirEstado)
@@ -114,18 +113,37 @@
 </div>
 
 <fieldset class="formulario__grupo campo @Html.ClaseError("Habilidades")" data-habilidades>
-    <legend class="campo__etiqueta">Habilidades <span class="campo__opcional">(elegí las que tengas o agregá otras)</span></legend>
+    <legend class="campo__etiqueta">Habilidades <span class="campo__opcional">(elegí un sector y marcá las que tengas)</span></legend>
+    @if (sectores.Count > 0)
+    {
+        <div class="campo">
+            <label class="solo-lectores" for="@(p)-sector">Sector</label>
+            <select class="campo__control" id="@(p)-sector" data-habilidades-sector>
+                <option value="">Elegí un sector</option>
+                @foreach (var sector in sectores)
+                {
+                    <option value="@sector.IDSector">@sector.Sector</option>
+                }
+            </select>
+        </div>
+    }
     <div class="lista-tags lista-tags--holgada" data-habilidades-lista>
-        @foreach (var habilidad in habilidades)
+        @foreach (var habilidad in propias)
         {
-            <label class="chip-seleccion"><input type="checkbox" name="Habilidades" value="@habilidad" checked="@elegidas.Contains(habilidad)" /><span>@habilidad</span></label>
+            <label class="chip-seleccion" data-sector=""><input type="checkbox" name="Habilidades" value="@habilidad" checked /><span>@habilidad</span></label>
+        }
+        @foreach (var habilidad in Model.CatalogoHabilidades)
+        {
+            <label class="chip-seleccion" data-sector="@habilidad.IDSector"><input type="checkbox" name="Habilidades" value="@habilidad.Nombre" checked="@elegidas.Contains(habilidad.Nombre)" /><span>@habilidad.Nombre</span></label>
         }
     </div>
+    <p class="texto-chico texto-suave" data-habilidades-vacio hidden>Elegí un sector para ver sus habilidades.</p>
     <div class="campo-agregar">
         <label class="solo-lectores" for="@(p)-nueva-habilidad">Agregar otra habilidad</label>
-        <input class="campo__control" id="@(p)-nueva-habilidad" type="text" maxlength="60" placeholder="Agregá otra habilidad" data-habilidad-nueva />
+        <input class="campo__control" id="@(p)-nueva-habilidad" type="text" maxlength="60" placeholder="¿No está la tuya? Escribila acá" data-habilidad-nueva />
         <button class="boton boton--icono" type="button" data-habilidad-agregar><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
     </div>
+    <span class="campo__ayuda">Las que agregás vos solo aparecen en tu perfil.</span>
     <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("Habilidades", "Revisá las habilidades")</span>
 </fieldset>
 

@@ -48,34 +48,7 @@ public static class BD
         using var tx = conexion.BeginTransaction();
 
         var id = InsertarUsuario(conexion, tx, datos.Usuario, Usuario.TipoPersona);
-
-        conexion.Execute(@"INSERT INTO Perfil (IDUsuario, IDProvincia, Foto, Descripcion, Telefono, Estado_Busqueda)
-                           VALUES (@IDUsuario, @IDProvincia, @Foto, @Descripcion, @Telefono, @Estado_Busqueda)",
-            new { IDUsuario = id, datos.Perfil.IDProvincia, datos.Perfil.Foto, datos.Perfil.Descripcion, datos.Perfil.Telefono, datos.Perfil.Estado_Busqueda }, tx);
-
-        if (datos.CV != null)
-        {
-            conexion.Execute(@"INSERT INTO CV (IDUsuario, Nombre_Archivo, Sitio_Web, Fecha_Actualizacion)
-                               VALUES (@IDUsuario, @Nombre_Archivo, @Sitio_Web, CAST(GETDATE() AS DATE))",
-                new { IDUsuario = id, datos.CV.Nombre_Archivo, datos.CV.Sitio_Web }, tx);
-        }
-
-        if (datos.Preferencia != null)
-        {
-            datos.Preferencia.IDUsuario = id;
-            GuardarPreferencia(conexion, tx, datos.Preferencia);
-        }
-
-        GuardarHabilidades(conexion, tx, id, datos.Habilidades);
-        GuardarIdiomas(conexion, tx, id, datos.Idiomas);
-        foreach (var experiencia in datos.Experiencias)
-        {
-            AgregarExperiencia(conexion, tx, id, experiencia);
-        }
-        foreach (var formacion in datos.Formaciones)
-        {
-            AgregarFormacion(conexion, tx, id, formacion);
-        }
+        AsegurarPerfil(conexion, tx, id);
         if (datos.LoginExterno != null)
         {
             VincularLoginExterno(conexion, tx, id, datos.LoginExterno);
@@ -163,6 +136,35 @@ public static class BD
             new { ID = idUsuario, IDProvincia = idProvincia, Telefono = telefono }, tx);
         GuardarCV(conexion, tx, idUsuario, sitioWeb: sitioWeb, cambiarSitio: true);
         tx.Commit();
+    }
+
+    public static (string? FotoAnterior, string? CVAnterior) CompletarPerfil(int idUsuario, PerfilCompletado d)
+    {
+        using var conexion = Conectar();
+        conexion.Open();
+        using var tx = conexion.BeginTransaction();
+        AsegurarPerfil(conexion, tx, idUsuario);
+        var fotoAnterior = d.Foto == null ? null : conexion.ExecuteScalar<string?>("SELECT Foto FROM Perfil WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
+        var cvAnterior = d.ArchivoCV == null ? null : conexion.ExecuteScalar<string?>("SELECT Nombre_Archivo FROM CV WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
+        conexion.Execute(@"UPDATE Perfil SET IDProvincia = @IDProvincia, Telefono = @Telefono, Descripcion = @Descripcion, Estado_Busqueda = @Estado,
+                               Foto = COALESCE(@Foto, Foto)
+                           WHERE IDUsuario = @ID",
+            new { ID = idUsuario, d.IDProvincia, d.Telefono, d.Descripcion, Estado = d.EstadoBusqueda, d.Foto }, tx);
+        GuardarCV(conexion, tx, idUsuario, nombreArchivo: d.ArchivoCV, cambiarArchivo: d.ArchivoCV != null, sitioWeb: d.SitioWeb, cambiarSitio: true);
+        d.Preferencia.IDUsuario = idUsuario;
+        GuardarPreferencia(conexion, tx, d.Preferencia);
+        GuardarHabilidades(conexion, tx, idUsuario, d.Habilidades);
+        GuardarIdiomas(conexion, tx, idUsuario, d.Idiomas);
+        foreach (var experiencia in d.Experiencias)
+        {
+            AgregarExperiencia(conexion, tx, idUsuario, experiencia);
+        }
+        foreach (var formacion in d.Formaciones)
+        {
+            AgregarFormacion(conexion, tx, idUsuario, formacion);
+        }
+        tx.Commit();
+        return (fotoAnterior, cvAnterior);
     }
 
     public static void ActualizarResponsable(int idUsuario, string nombre, string apellido)
@@ -256,6 +258,7 @@ public static class BD
             UPDATE Empresa SET IDUsuario = NULL, CUIT = NULL, Razon_Social = NULL, Logo = NULL WHERE IDUsuario = @ID;
 
             DELETE FROM Usuario WHERE ID = @ID;", new { ID = idUsuario }, tx);
+        BorrarHabilidadesSinUso(conexion, tx);
 
         tx.Commit();
         return (foto, cv, logo);
@@ -368,7 +371,9 @@ public static class BD
     public static List<Habilidad> ObtenerCatalogoHabilidades()
     {
         using var conexion = Conectar();
-        return conexion.Query<Habilidad>("SELECT ID, Nombre FROM Habilidad ORDER BY Nombre").ToList();
+        return conexion.Query<Habilidad>(@"SELECT h.ID, h.Nombre, h.IDSector, s.Nombre AS Sector
+                                           FROM Habilidad h JOIN Sector s ON s.ID = h.IDSector
+                                           ORDER BY s.Orden, s.Nombre, h.Nombre").ToList();
     }
 
     public static List<string> ObtenerHabilidadesUsuario(int idUsuario)
@@ -389,7 +394,12 @@ public static class BD
                                  AND NOT EXISTS (SELECT 1 FROM UsuarioHabilidad WHERE IDUsuario = @ID AND IDHabilidad = h.ID)",
                 new { ID = idUsuario, Nombre = nombre }, tx);
         }
+        BorrarHabilidadesSinUso(conexion, tx);
     }
+
+    private static void BorrarHabilidadesSinUso(IDbConnection conexion, IDbTransaction tx) =>
+        conexion.Execute(@"DELETE h FROM Habilidad h
+                           WHERE h.IDSector IS NULL AND NOT EXISTS (SELECT 1 FROM UsuarioHabilidad uh WHERE uh.IDHabilidad = h.ID)", transaction: tx);
 
     public static List<Idioma> ObtenerCatalogoIdiomas()
     {

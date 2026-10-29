@@ -32,7 +32,7 @@
 
     @if (siguiente != null)
     {
-        <a class="aviso-perfil" asp-controller="Perfil" asp-action="Index">
+        <a class="aviso-perfil" asp-controller="Perfil" asp-action="Completar">
             <span class="caja-icono caja-icono--sm"><icono nombre="user-square" /></span>
             <span class="aviso-perfil__texto"><strong>Tu perfil está al @m.PorcentajeCompleto%.</strong> Te falta: @siguiente.Texto.ToLower(es). Quienes publican búsquedas lo ven cuando te postulás.</span>
             <span class="boton boton--sm">Completar perfil</span>
