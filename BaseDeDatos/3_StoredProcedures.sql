@@ -454,6 +454,70 @@ END
 GO
 
 /* ============================================================================
+   OFERTAS GUARDADAS
+   ============================================================================ */
+
+-- Guardar una oferta: @IDOfertaLaboral o @IDOfertaExterna (uno de los dos). Cada Favorito es una oferta guardada.
+CREATE OR ALTER PROCEDURE dbo.GuardarOferta
+    @IDUsuario INT,
+    @IDOfertaLaboral INT = NULL,
+    @IDOfertaExterna INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF (@IDOfertaLaboral IS NULL AND @IDOfertaExterna IS NULL) OR (@IDOfertaLaboral IS NOT NULL AND @IDOfertaExterna IS NOT NULL)
+        RETURN;
+    IF @IDOfertaLaboral IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.OfertaLaboral WHERE ID = @IDOfertaLaboral AND Estado_Publicacion = N'Aprobada')
+        RETURN;
+    IF @IDOfertaExterna IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.OfertaExterna WHERE ID = @IDOfertaExterna)
+        RETURN;
+    IF EXISTS (SELECT 1 FROM dbo.FavoritoOferta fo JOIN dbo.Favorito f ON f.ID_favorito = fo.IDFavorito
+               WHERE f.IDUsuario = @IDUsuario AND (fo.IDOfertaLaboral = @IDOfertaLaboral OR fo.IDOfertaExterna = @IDOfertaExterna))
+        RETURN;
+    BEGIN TRANSACTION;
+    INSERT INTO dbo.Favorito (IDUsuario, fecha_guardado) VALUES (@IDUsuario, CAST(GETDATE() AS DATE));
+    INSERT INTO dbo.FavoritoOferta (IDFavorito, IDOfertaLaboral, IDOfertaExterna) VALUES (SCOPE_IDENTITY(), @IDOfertaLaboral, @IDOfertaExterna);
+    COMMIT;
+END
+GO
+
+-- Sacar una oferta de las guardadas
+CREATE OR ALTER PROCEDURE dbo.QuitarGuardada
+    @IDUsuario INT,
+    @IDOfertaLaboral INT = NULL,
+    @IDOfertaExterna INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE f FROM dbo.Favorito f
+    JOIN dbo.FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
+    WHERE f.IDUsuario = @IDUsuario AND (fo.IDOfertaLaboral = @IDOfertaLaboral OR fo.IDOfertaExterna = @IDOfertaExterna);
+END
+GO
+
+-- Lista de guardadas (la más reciente primero), de Workly y de otros sitios
+CREATE OR ALTER PROCEDURE dbo.ObtenerGuardadas
+    @IDUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT f.ID_favorito AS IDFavorito, f.fecha_guardado AS Fecha_Guardado,
+           CASE WHEN fo.IDOfertaExterna IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS EsExterna,
+           COALESCE(o.ID, x.ID) AS ID, COALESCE(o.Titulo, x.Titulo) AS Titulo,
+           COALESCE(e.Nombre, x.Empresa) AS Empresa, COALESCE(o.Ubicacion, pr.Nombre, x.Ubicacion) AS Ubicacion,
+           o.Estado_Publicacion, o.Fecha_Cierre, x.Link_Postulacion, x.Publicador
+    FROM dbo.Favorito f
+    JOIN dbo.FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
+    LEFT JOIN dbo.OfertaLaboral o ON o.ID = fo.IDOfertaLaboral
+    LEFT JOIN dbo.Empresa e ON e.ID = o.IDEmpresa
+    LEFT JOIN dbo.Provincia pr ON pr.ID = o.IDProvincia
+    LEFT JOIN dbo.OfertaExterna x ON x.ID = fo.IDOfertaExterna
+    WHERE f.IDUsuario = @IDUsuario
+    ORDER BY f.ID_favorito DESC;
+END
+GO
+
+/* ============================================================================
    POSTULACIONES
    ============================================================================ */
 
