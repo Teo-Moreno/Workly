@@ -1,5 +1,4 @@
 @model string
-@* Elegir qué cuenta crear: persona (busca trabajo) o empresa (publica búsquedas) *@
 <div class="tipo-cuenta" role="group" aria-label="¿Qué cuenta querés crear?">
     <a class="tipo-cuenta__opcion @(Model == "persona" ? "esta-activa" : "")" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="persona"
        aria-current="@(Model == "persona" ? "page" : null)">

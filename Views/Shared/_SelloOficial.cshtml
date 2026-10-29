@@ -1,5 +1,4 @@
 @model Oferta
-@* Oficial: la publicó una empresa registrada o viene de otro sitio. No oficial: la publicó una persona. *@
 @if (Model.EsOficial)
 {
     <span class="sello sello--oficial" title="@(Model.EsExterna ? "Publicada por la empresa en otro sitio" : "Publicada por una empresa registrada con su CUIT")"><icono nombre="circle-check" tamano="14" />Oficial</span>

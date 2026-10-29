@@ -15,7 +15,6 @@ public class HomeController : Controller
         _jsearch = jsearch;
     }
 
-    // Landing pública (Figma › Alta · Landing)
     public async Task<IActionResult> Index()
     {
         return View(new LandingViewModel

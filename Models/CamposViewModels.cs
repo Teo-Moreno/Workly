@@ -1,8 +1,5 @@
 namespace Workly.Models;
 
-// Modelos de los partials de campos que se repiten en el registro y en Configuración
-
-/// <summary>País + provincia (la lista de provincias depende del país elegido).</summary>
 public class CampoUbicacion
 {
     public List<Pais> Paises { get; set; } = new();
@@ -14,13 +11,11 @@ public class CampoUbicacion
     public string EtiquetaProvincia { get; set; } = "Provincia";
     public string Prefijo { get; set; } = "";
 
-    /// <summary>Agrega la opción "Todo el país" (valor vacío) en lugar de "Elegí tu provincia".</summary>
     public bool TodoElPais { get; set; }
 
     public bool Requerido { get; set; } = true;
 }
 
-/// <summary>Teléfono con el prefijo del país; los espacios y el guion se ponen solos.</summary>
 public class CampoTelefono
 {
     public string Nombre { get; set; } = "Telefono";
@@ -29,7 +24,6 @@ public class CampoTelefono
     public string Prefijo { get; set; } = "+54";
 }
 
-/// <summary>Selector de mes y año ("MM/AAAA").</summary>
 public class CampoMes
 {
     public string Nombre { get; set; } = "";
@@ -38,13 +32,11 @@ public class CampoMes
     public string? Valor { get; set; }
     public bool Requerido { get; set; }
 
-    /// <summary>Permite elegir meses futuros (por ejemplo, el fin de una carrera).</summary>
     public bool PermitirFuturo { get; set; }
 
     public string? Error { get; set; }
 }
 
-/// <summary>Qué busca la persona: preferencias, habilidades, idiomas y estado de búsqueda.</summary>
 public class CamposBusqueda
 {
     public string Prefijo { get; set; } = "";
@@ -113,7 +105,6 @@ public class CamposBusqueda
         };
         if (enviado != null)
         {
-            // Si hubo errores, se muestra lo que la persona había escrito
             c.EstadoBusqueda = enviado.EstadoBusqueda;
             c.PuestoBuscado = enviado.PuestoBuscado;
             c.Niveles = enviado.Niveles;

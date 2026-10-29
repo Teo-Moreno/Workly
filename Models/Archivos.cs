@@ -2,20 +2,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Validación y guardado de archivos subidos (foto de perfil y CV).
-/// - Las fotos se guardan en wwwroot/uploads/fotos (son públicas).
-/// - Los CV se guardan en ArchivosPrivados/cv (fuera de wwwroot): solo se
-///   descargan desde /Perfil/DescargarCV, con la sesión iniciada.
-/// </summary>
 public static class Archivos
 {
-    public const long TamanoMaximo = 5 * 1024 * 1024; // 5 MB
+    public const long TamanoMaximo = 5 * 1024 * 1024;
 
     public static readonly string[] ExtensionesFoto = { ".jpg", ".jpeg", ".png", ".webp" };
     public static readonly string[] ExtensionesCV = { ".pdf", ".doc", ".docx" };
 
-    /// <summary>Devuelve un mensaje de error o null si el archivo es válido.</summary>
     public static string? Validar(IFormFile? archivo, string[] extensionesPermitidas)
     {
         if (archivo == null || archivo.Length == 0)
@@ -37,7 +30,6 @@ public static class Archivos
         return null;
     }
 
-    /// <summary>Lista legible de formatos: { ".jpg", ".jpeg", ".png" } → "JPG o PNG".</summary>
     public static string Formatos(string[] extensiones)
     {
         var nombres = extensiones.Select(e => e.TrimStart('.').ToUpperInvariant())
@@ -48,11 +40,9 @@ public static class Archivos
             : $"{string.Join(", ", nombres.Take(nombres.Count - 1))} o {nombres[^1]}";
     }
 
-    /// <summary>Guarda la foto y devuelve su ruta pública ("/uploads/fotos/..."), o null si no hay archivo.</summary>
     public static Task<string?> GuardarFoto(IFormFile? archivo, string carpetaWwwroot) =>
         GuardarImagen(archivo, carpetaWwwroot, "fotos");
 
-    /// <summary>Guarda el logo de una empresa y devuelve su ruta pública ("/uploads/logos/...").</summary>
     public static Task<string?> GuardarLogo(IFormFile? archivo, string carpetaWwwroot) =>
         GuardarImagen(archivo, carpetaWwwroot, "logos");
 
@@ -73,7 +63,6 @@ public static class Archivos
         return $"/uploads/{subcarpeta}/{nombre}";
     }
 
-    /// <summary>Ruta en disco de una imagen pública guardada ("/uploads/fotos/x.jpg"), o null si no es de uploads.</summary>
     public static string? RutaImagen(string? rutaPublica, string carpetaWwwroot)
     {
         if (string.IsNullOrEmpty(rutaPublica) || !rutaPublica.StartsWith("/uploads/") || rutaPublica.Contains(".."))
@@ -83,7 +72,6 @@ public static class Archivos
         return Path.Combine(carpetaWwwroot, rutaPublica.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
     }
 
-    /// <summary>Guarda el CV y devuelve el nombre guardado ("{guid}_{nombre original}"), o null si no hay archivo.</summary>
     public static async Task<string?> GuardarCV(IFormFile? archivo, string carpetaRaiz)
     {
         if (archivo == null || archivo.Length == 0)
@@ -103,7 +91,6 @@ public static class Archivos
 
     public static string CarpetaCV(string carpetaRaiz) => Path.Combine(carpetaRaiz, "ArchivosPrivados", "cv");
 
-    /// <summary>Borra un archivo guardado (por ejemplo si el registro falló después de subirlo).</summary>
     public static void Borrar(string? rutaCompleta)
     {
         if (!string.IsNullOrEmpty(rutaCompleta) && File.Exists(rutaCompleta))
@@ -112,7 +99,6 @@ public static class Archivos
         }
     }
 
-    // Deja solo letras, números, guiones y puntos, y limita el largo.
     private static string NombreSeguro(string nombreOriginal)
     {
         var nombre = Path.GetFileNameWithoutExtension(Path.GetFileName(nombreOriginal));
@@ -129,7 +115,6 @@ public static class Archivos
         return limpio + extension;
     }
 
-    // Revisa los primeros bytes para confirmar que el archivo es del tipo que dice ser.
     private static bool FirmaValida(IFormFile archivo, string extension)
     {
         Span<byte> cabecera = stackalloc byte[12];

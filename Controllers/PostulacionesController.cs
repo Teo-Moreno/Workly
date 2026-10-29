@@ -4,8 +4,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Tablero de postulaciones de la persona: ella misma mueve cada una entre
-// Enviada, En revisión, Pasé y No pasé.
 [Authorize]
 public class PostulacionesController : Controller
 {
@@ -18,7 +16,6 @@ public class PostulacionesController : Controller
         return View(BD.ObtenerPostulaciones(User.IdUsuario()));
     }
 
-    // Lo usa el tablero al arrastrar una tarjeta (fetch) y el menú de cada tarjeta (formulario)
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult CambiarEstado(int id, string estado)

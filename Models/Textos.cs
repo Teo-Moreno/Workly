@@ -2,7 +2,6 @@ namespace Workly.Models;
 
 public static class Textos
 {
-    /// <summary>"Mercado Libre" → "ML"; "Ualá" → "U".</summary>
     public static string Iniciales(string? nombre)
     {
         var palabras = (nombre ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries)
@@ -11,7 +10,6 @@ public static class Textos
         return iniciales.Length > 0 ? iniciales : "?";
     }
 
-    /// <summary>"miempresa.com" → "https://miempresa.com" (para usar en un href).</summary>
     public static string? Enlace(string? sitio)
     {
         if (string.IsNullOrWhiteSpace(sitio))
@@ -24,10 +22,8 @@ public static class Textos
             : "https://" + texto;
     }
 
-    /// <summary>1500000 → "$1.500.000".</summary>
     public static string Pesos(int monto) => "$" + monto.ToString("N0", new System.Globalization.CultureInfo("es-AR"));
 
-    /// <summary>"Publicada hoy", "Publicada hace 3 días", "Publicada el 2 de octubre".</summary>
     public static string Publicada(DateTime? fecha)
     {
         if (fecha == null)
@@ -44,7 +40,6 @@ public static class Textos
         };
     }
 
-    /// <summary>Recorta un texto largo sin cortar palabras.</summary>
     public static string Recortar(string? texto, int largo)
     {
         if (string.IsNullOrWhiteSpace(texto))

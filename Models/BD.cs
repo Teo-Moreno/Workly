@@ -4,11 +4,6 @@ using Microsoft.Data.SqlClient;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Acceso a la base de datos Workly (SQL Server) con Dapper.
-/// La cadena de conexión se configura en appsettings.json › ConnectionStrings › Workly.
-/// Todas las consultas usan parámetros (@Nombre, @Email...) para evitar inyección SQL.
-/// </summary>
 public static class BD
 {
     private static string _connectionString = "";
@@ -20,15 +15,10 @@ public static class BD
 
     private static SqlConnection Conectar() => new(_connectionString);
 
-    // Para buscar con LIKE sin que %, _ o [ que escribió la persona funcionen como comodines
     private static string? Like(string? texto) =>
         string.IsNullOrWhiteSpace(texto)
             ? null
             : "%" + texto.Trim().Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]") + "%";
-
-    // =====================================================================
-    // Usuario y cuenta
-    // =====================================================================
 
     private const string ColumnasUsuario = "ID, Nombre, Apellido, Email, [Contraseña], Fecha_Registro, Tipo, Es_Moderador";
 
@@ -51,10 +41,6 @@ public static class BD
         return conexion.ExecuteScalar<int>(sql, new { Email = email, Excepto = exceptoIdUsuario }) == 1;
     }
 
-    /// <summary>
-    /// Registra una persona con todo lo que cargó: perfil, CV, preferencias, habilidades,
-    /// idiomas, experiencia y formación. Todo en una transacción. Devuelve el ID nuevo.
-    /// </summary>
     public static int RegistrarPersona(PersonaNueva datos)
     {
         using var conexion = Conectar();
@@ -99,10 +85,6 @@ public static class BD
         return id;
     }
 
-    /// <summary>
-    /// Registra una cuenta de empresa. Si la empresa ya existía sin cuenta (porque alguien la
-    /// cargó en su experiencia), se le asigna esta cuenta. Devuelve el ID del usuario nuevo.
-    /// </summary>
     public static int RegistrarEmpresa(EmpresaNueva datos)
     {
         using var conexion = Conectar();
@@ -142,8 +124,6 @@ public static class BD
                                       VALUES (@Nombre, @Apellido, @Email, @Contrasena, CAST(GETDATE() AS DATE), @Tipo)",
             new { u.Nombre, u.Apellido, u.Email, Contrasena = u.Contraseña, Tipo = tipo }, tx);
 
-    // ---------------------------------------------------- Google y LinkedIn
-
     public static int? ObtenerUsuarioDeLoginExterno(string proveedor, string idExterno)
     {
         using var conexion = Conectar();
@@ -170,8 +150,6 @@ public static class BD
         using var conexion = Conectar();
         return conexion.Query<string>("SELECT Proveedor FROM LoginExterno WHERE IDUsuario = @ID", new { ID = idUsuario }).ToList();
     }
-
-    // ---------------------------------------------------- Datos de la cuenta
 
     public static void ActualizarDatosPersonales(int idUsuario, string nombre, string apellido, string email, int? idProvincia, string? telefono, string? sitioWeb)
     {
@@ -204,7 +182,6 @@ public static class BD
         conexion.Execute("IF NOT EXISTS (SELECT 1 FROM Perfil WHERE IDUsuario = @ID) INSERT INTO Perfil (IDUsuario) VALUES (@ID)",
             new { ID = idUsuario }, tx);
 
-    /// <summary>Cambia la foto y devuelve la anterior (para borrar el archivo).</summary>
     public static string? ActualizarFoto(int idUsuario, string? ruta)
     {
         using var conexion = Conectar();
@@ -231,7 +208,6 @@ public static class BD
         conexion.Execute("UPDATE Perfil SET Estado_Busqueda = @Estado WHERE IDUsuario = @ID", new { ID = idUsuario, Estado = estado });
     }
 
-    /// <summary>Cambia el archivo del CV y devuelve el anterior (para borrarlo del disco).</summary>
     public static string? ActualizarArchivoCV(int idUsuario, string? nombreArchivo)
     {
         using var conexion = Conectar();
@@ -256,10 +232,6 @@ public static class BD
             new { ID = idUsuario, Archivo = nombreArchivo, CambiarArchivo = cambiarArchivo, Sitio = sitioWeb, CambiarSitio = cambiarSitio }, tx);
     }
 
-    /// <summary>
-    /// Borra la cuenta y todo lo suyo. Las búsquedas que publicó se borran con sus postulaciones.
-    /// Devuelve los archivos (foto, CV, logo) que hay que borrar del disco.
-    /// </summary>
     public static (string? Foto, string? CV, string? Logo) EliminarCuenta(int idUsuario)
     {
         using var conexion = Conectar();
@@ -281,7 +253,6 @@ public static class BD
             WHERE fo.IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
             DELETE FROM OfertaLaboral WHERE ID IN (SELECT ID FROM @Ofertas);
 
-            -- La empresa queda (puede figurar en experiencias de otras personas) pero sin cuenta ni CUIT
             UPDATE Empresa SET IDUsuario = NULL, CUIT = NULL, Razon_Social = NULL, Logo = NULL WHERE IDUsuario = @ID;
 
             DELETE FROM Usuario WHERE ID = @ID;", new { ID = idUsuario }, tx);
@@ -289,10 +260,6 @@ public static class BD
         tx.Commit();
         return (foto, cv, logo);
     }
-
-    // =====================================================================
-    // Países y provincias
-    // =====================================================================
 
     public static List<Pais> ObtenerPaises()
     {
@@ -305,10 +272,6 @@ public static class BD
         using var conexion = Conectar();
         return conexion.Query<Provincia>("SELECT ID, IDPais, Nombre FROM Provincia ORDER BY Nombre").ToList();
     }
-
-    // =====================================================================
-    // Perfil, preferencias, habilidades e idiomas
-    // =====================================================================
 
     public static Perfil? ObtenerPerfil(int idUsuario)
     {
@@ -338,7 +301,6 @@ public static class BD
         return conexion.QueryFirstOrDefault<Preferencia>(sql, new { ID = idUsuario });
     }
 
-    /// <summary>Guarda las preferencias, las habilidades, los idiomas y el estado de búsqueda juntos.</summary>
     public static void GuardarBusqueda(int idUsuario, Preferencia preferencia, string? estadoBusqueda, List<string> habilidades, List<(int, string)> idiomas)
     {
         using var conexion = Conectar();
@@ -375,7 +337,6 @@ public static class BD
                                          WHERE uh.IDUsuario = @ID ORDER BY h.Nombre", new { ID = idUsuario }).ToList();
     }
 
-    // Reemplaza las habilidades de la persona. Las que no están en el catálogo se agregan.
     private static void GuardarHabilidades(IDbConnection conexion, IDbTransaction tx, int idUsuario, List<string> nombres)
     {
         conexion.Execute("DELETE FROM UsuarioHabilidad WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
@@ -412,10 +373,6 @@ public static class BD
                 new { ID = idUsuario, IDIdioma = idIdioma, Nivel = nivel }, tx);
         }
     }
-
-    // =====================================================================
-    // Experiencia laboral y formación
-    // =====================================================================
 
     public static List<ExperienciaItem> ObtenerExperiencias(int idUsuario)
     {
@@ -496,14 +453,12 @@ public static class BD
         return conexion.Query<string>("SELECT Institucion FROM Educacion ORDER BY Institucion").ToList();
     }
 
-    // Empresa por nombre (se crea sin cuenta si no existe)
     private static int ObtenerOCrearEmpresa(IDbConnection conexion, IDbTransaction tx, string nombre) =>
         conexion.ExecuteScalar<int>(@"
             IF NOT EXISTS (SELECT 1 FROM Empresa WHERE Nombre = @Nombre)
                 INSERT INTO Empresa (Nombre) VALUES (@Nombre);
             SELECT ID FROM Empresa WHERE Nombre = @Nombre;", new { Nombre = nombre }, tx);
 
-    /// <summary>Junta todo lo que necesitan "Mi perfil" y "Configuración".</summary>
     public static MiPerfilViewModel? ObtenerMiPerfil(int idUsuario)
     {
         var usuario = ObtenerUsuarioPorId(idUsuario);
@@ -526,10 +481,6 @@ public static class BD
         };
     }
 
-    // =====================================================================
-    // Empresas
-    // =====================================================================
-
     private const string SelectEmpresa = @"
         SELECT e.ID, e.Nombre, e.Descripcion, e.Logo, e.Ubicacion, e.Sitio_Web, e.IDUsuario, e.Razon_Social, e.CUIT,
                e.Rubro, e.IDProvincia, e.Telefono, e.Fecha_Registro, pr.Nombre AS Provincia, pa.ID AS IDPais, pa.Nombre AS Pais,
@@ -540,7 +491,6 @@ public static class BD
         LEFT JOIN Provincia pr ON pr.ID = e.IDProvincia
         LEFT JOIN Pais pa ON pa.ID = pr.IDPais";
 
-    // Se muestran las empresas con cuenta y las que tienen búsquedas publicadas
     private const string EmpresaVisible = @"(e.IDUsuario IS NOT NULL OR EXISTS (SELECT 1 FROM OfertaLaboral o
                                               WHERE o.IDEmpresa = e.ID AND o.Estado_Publicacion = N'Aprobada'))";
 
@@ -588,7 +538,6 @@ public static class BD
         return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Empresa WHERE CUIT = @CUIT", new { CUIT = cuit }) > 0;
     }
 
-    /// <summary>Hay una empresa con ese nombre que ya tiene cuenta (otra que la indicada).</summary>
     public static bool NombreEmpresaConCuenta(string nombre, int? exceptoIdEmpresa = null)
     {
         using var conexion = Conectar();
@@ -596,7 +545,6 @@ public static class BD
             new { Nombre = nombre, Excepto = exceptoIdEmpresa }) > 0;
     }
 
-    /// <summary>Hay otra empresa (con o sin cuenta) con ese nombre.</summary>
     public static bool ExisteNombreEmpresa(string nombre, int exceptoIdEmpresa)
     {
         using var conexion = Conectar();
@@ -612,7 +560,6 @@ public static class BD
                            WHERE ID = @ID AND IDUsuario = @IDUsuario", e);
     }
 
-    /// <summary>Cambia el logo y devuelve el anterior (para borrar el archivo).</summary>
     public static string? ActualizarLogo(int idUsuario, string? ruta)
     {
         using var conexion = Conectar();
@@ -623,10 +570,6 @@ public static class BD
         tx.Commit();
         return anterior;
     }
-
-    // =====================================================================
-    // Ofertas de Workly
-    // =====================================================================
 
     private const string SelectOferta = @"
         SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
@@ -647,7 +590,6 @@ public static class BD
 
     private const string OfertaPublica = @"o.Estado_Publicacion = N'Aprobada' AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))";
 
-    /// <summary>Ofertas publicadas y abiertas que cumplen los filtros (las remotas valen para cualquier provincia).</summary>
     public static List<Oferta> BuscarOfertas(FiltrosOfertas f, int idUsuarioActual)
     {
         var sql = $@"{SelectOferta}
@@ -687,7 +629,6 @@ public static class BD
             new { ID = idEmpresa, IDUsuarioActual = idUsuarioActual }).ToList();
     }
 
-    /// <summary>Las búsquedas que publicó una cuenta (cualquier estado), con su cantidad de postulantes.</summary>
     public static List<Oferta> ObtenerOfertasPublicadas(int idUsuario)
     {
         using var conexion = Conectar();
@@ -712,7 +653,6 @@ public static class BD
                                         ORDER BY Fecha DESC", new { Cantidad = cantidad }).ToList();
     }
 
-    /// <summary>Publica una búsqueda. Devuelve su ID.</summary>
     public static int CrearOferta(OfertaNueva o)
     {
         using var conexion = Conectar();
@@ -734,7 +674,6 @@ public static class BD
         return id;
     }
 
-    /// <summary>Cierra una búsqueda propia (deja de aparecer en Buscar trabajo).</summary>
     public static bool CerrarOferta(int idOferta, int idPublicador)
     {
         using var conexion = Conectar();
@@ -744,7 +683,6 @@ public static class BD
             new { ID = idOferta, Publicador = idPublicador }) > 0;
     }
 
-    /// <summary>Borra una búsqueda propia junto con sus postulaciones.</summary>
     public static bool EliminarOferta(int idOferta, int idPublicador)
     {
         using var conexion = Conectar();
@@ -761,8 +699,6 @@ public static class BD
         tx.Commit();
         return esSuya;
     }
-
-    // ---------------------------------------------------- Moderación
 
     public static List<Oferta> ObtenerOfertasPendientes()
     {
@@ -796,11 +732,6 @@ public static class BD
             new { ID = idOferta, Estado = aprobada ? "Aprobada" : "Rechazada", Motivo = aprobada ? null : motivo }) > 0;
     }
 
-    // =====================================================================
-    // Ofertas externas (JSearch)
-    // =====================================================================
-
-    /// <summary>Guarda (o actualiza) las ofertas que trajo JSearch y las devuelve con su ID de Workly.</summary>
     public static List<Oferta> GuardarOfertasExternas(List<OfertaExternaDatos> ofertas)
     {
         if (ofertas.Count == 0)
@@ -831,7 +762,6 @@ public static class BD
         var guardadas = conexion.Query<Oferta>($"{SelectExterna} WHERE x.ID_Externo IN @IDs",
             new { IDs = ofertas.Select(o => o.ID_Externo).ToList(), IDUsuarioActual = 0 })
             .ToDictionary(g => g.ID_Externo!);
-        // Mismo orden que devolvió la API
         return ofertas.Select(o => o.ID_Externo).Distinct().Where(guardadas.ContainsKey).Select(id => guardadas[id]).ToList();
     }
 
@@ -852,7 +782,6 @@ public static class BD
         return conexion.QueryFirstOrDefault<Oferta>($"{SelectExterna} WHERE x.ID = @ID", new { ID = id, IDUsuarioActual = idUsuarioActual });
     }
 
-    /// <summary>Marca cuáles ofertas externas ya registró la persona como postulaciones y cuáles guardó.</summary>
     public static void MarcarPostuladas(List<Oferta> ofertas, int idUsuario)
     {
         var externas = ofertas.Where(o => o.EsExterna).Select(o => o.ID).ToList();
@@ -873,18 +802,12 @@ public static class BD
         }
     }
 
-    // =====================================================================
-    // Ofertas guardadas (Favorito y FavoritoOferta)
-    // =====================================================================
-
-    /// <summary>Guarda una oferta de Workly o externa. Devuelve false si ya estaba guardada o no existe.</summary>
     public static bool GuardarOferta(int idUsuario, int idOferta, bool esExterna)
     {
         using var conexion = Conectar();
         conexion.Open();
         using var tx = conexion.BeginTransaction();
         var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
-        // Las de Workly se pueden guardar solo si están publicadas
         var existe = esExterna
             ? "EXISTS (SELECT 1 FROM OfertaExterna WHERE ID = @IDOferta)"
             : "EXISTS (SELECT 1 FROM OfertaLaboral WHERE ID = @IDOferta AND Estado_Publicacion = N'Aprobada')";
@@ -904,7 +827,6 @@ public static class BD
         return puede;
     }
 
-    /// <summary>Saca una oferta de las guardadas. Devuelve false si no estaba guardada.</summary>
     public static bool QuitarGuardada(int idUsuario, int idOferta, bool esExterna)
     {
         var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
@@ -914,7 +836,6 @@ public static class BD
             new { IDUsuario = idUsuario, IDOferta = idOferta }) > 0;
     }
 
-    /// <summary>Las ofertas que guardó la persona, de la más nueva a la más vieja que guardó.</summary>
     public static List<Oferta> ObtenerGuardadas(int idUsuario)
     {
         var sql = $@"
@@ -943,11 +864,6 @@ public static class BD
         return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Favorito WHERE IDUsuario = @ID", new { ID = idUsuario });
     }
 
-    // =====================================================================
-    // Postulaciones
-    // =====================================================================
-
-    /// <summary>Postulación a una oferta de Workly. Devuelve false si ya estaba postulada.</summary>
     public static bool Postular(int idUsuario, int idOferta)
     {
         using var conexion = Conectar();
@@ -957,7 +873,6 @@ public static class BD
             new { IDUsuario = idUsuario, IDOferta = idOferta }) > 0;
     }
 
-    /// <summary>La persona avisa que se postuló a una oferta externa (para seguirla en su tablero).</summary>
     public static bool RegistrarPostulacionExterna(int idUsuario, int idOfertaExterna)
     {
         using var conexion = Conectar();
@@ -1010,8 +925,6 @@ public static class BD
         return Catalogos.EstadosPostulacion.ToDictionary(e => e.Estado, e => cuentas.GetValueOrDefault(e.Estado));
     }
 
-    // ---------------------------------------------------- Postulantes (para quien publicó)
-
     public static List<Postulante> ObtenerPostulantes(int idOferta)
     {
         const string sql = @"
@@ -1029,10 +942,6 @@ public static class BD
         return conexion.Query<Postulante>(sql, new { ID = idOferta }).ToList();
     }
 
-    /// <summary>
-    /// Devuelve la postulación (persona y oferta) solo si la oferta la publicó esa cuenta.
-    /// Así una empresa ve el perfil y el CV únicamente de quien se postuló a sus búsquedas.
-    /// </summary>
     public static (int IDUsuario, int IDOferta)? ObtenerPostulacionDePublicador(int idPostulacion, int idPublicador)
     {
         using var conexion = Conectar();

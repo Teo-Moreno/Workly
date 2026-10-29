@@ -2,10 +2,6 @@ using System.Security.Claims;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Atajos para leer los datos de la persona logueada desde la cookie de sesión.
-/// Uso en vistas y controladores: User.Nombre(), User.Iniciales(), User.IdUsuario()...
-/// </summary>
 public static class UsuarioActual
 {
     public const string ClaimUbicacion = "workly:ubicacion";
@@ -47,15 +43,12 @@ public static class UsuarioActual
     public static bool EstaLogueado(this ClaimsPrincipal usuario) =>
         usuario.Identity?.IsAuthenticated == true;
 
-    /// <summary>Cuenta de empresa (publica búsquedas y ve a sus postulantes).</summary>
     public static bool EsEmpresa(this ClaimsPrincipal usuario) =>
         usuario.FindFirstValue(ClaimTipo) == Usuario.TipoEmpresa;
 
-    /// <summary>Persona que busca trabajo (se postula y tiene tablero).</summary>
     public static bool EsPersona(this ClaimsPrincipal usuario) =>
         usuario.EstaLogueado() && !usuario.EsEmpresa();
 
-    /// <summary>Revisa las búsquedas que publican las personas.</summary>
     public static bool EsModerador(this ClaimsPrincipal usuario) =>
         usuario.FindFirstValue(ClaimModerador) == "true";
 }

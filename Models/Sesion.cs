@@ -4,11 +4,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Crea o renueva la cookie de sesión con los datos que muestran la navbar y los menús
-/// (nombre, ubicación, foto o logo, tipo de cuenta). Se llama al iniciar sesión, al
-/// registrarse y cada vez que la persona cambia esos datos.
-/// </summary>
 public static class Sesion
 {
     public const string EsquemaExterno = "Externo";
@@ -41,7 +36,6 @@ public static class Sesion
             if (!string.IsNullOrEmpty(perfil?.Provincia)) claims.Add(new Claim(UsuarioActual.ClaimUbicacion, perfil.Provincia));
         }
 
-        // Al renovar la sesión se mantiene si era persistente ("Recordarme")
         var actual = await http.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         var persistente = recordarme ?? actual.Properties?.IsPersistent ?? false;
         var propiedades = new AuthenticationProperties

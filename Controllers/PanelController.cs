@@ -4,8 +4,6 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-// Inicio de la persona logueada: qué le falta al perfil, sus postulaciones y ofertas
-// según lo que contó que busca. Las empresas van directo a sus publicaciones.
 [Authorize]
 public class PanelController : Controller
 {
@@ -33,7 +31,6 @@ public class PanelController : Controller
         var puesto = perfil.Preferencia.Puesto_Buscado;
         if (!string.IsNullOrWhiteSpace(puesto))
         {
-            // Lo que pidió: puesto, dónde quiere trabajar (o donde vive) y modalidad
             var idProvincia = perfil.Preferencia.IDProvincia ?? perfil.Perfil.IDProvincia;
             var provincias = BD.ObtenerProvincias();
             var provincia = provincias.FirstOrDefault(p => p.ID == idProvincia);

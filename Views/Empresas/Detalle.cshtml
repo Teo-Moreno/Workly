@@ -4,7 +4,6 @@
     ViewData["Title"] = empresa.Nombre;
     var abiertas = Model.Ofertas.Where(o => !o.EstaCerrada).ToList();
 }
-@* Perfil de empresa + búsquedas abiertas (Miro › Mapa de sitio › Empresas) *@
 
 <div class="empresa-portada" aria-hidden="true"></div>
 

@@ -4,7 +4,6 @@
         ? Url.Action("Externa", "Empleos", new { id = Model.IDOfertaExterna })
         : Url.Action("Detalle", "Empleos", new { id = Model.IDOfertaLaboral });
 }
-@* Tarjeta del tablero (Figma › Media · WF 03 › Tablero). La persona la mueve arrastrándola o con el selector. *@
 <article class="postulacion" draggable="true" data-postulacion="@Model.ID" aria-label="@Model.Titulo en @Model.Empresa">
     <div class="postulacion__cabecera">
         <partial name="_LogoEmpresa" model='((string?)null, Model.Empresa, "logo-empresa--sm")' />

@@ -3,7 +3,6 @@
     var seleccionada = ViewData["Seleccionada"] is true;
     var enlace = ViewData["Enlace"] as string;
 }
-@* Tarjeta de resultado (Figma › Media · WF 02 › Resultados). Sirve para ofertas de Workly y de otros sitios. *@
 <article class="oferta-tarjeta @(seleccionada ? "es-seleccionada" : "")" data-oferta="@Model.Clave">
     <div class="oferta-tarjeta__cabecera">
         <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa--principal")' />

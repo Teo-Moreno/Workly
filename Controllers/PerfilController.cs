@@ -16,8 +16,6 @@ public class PerfilController : Controller
         _entorno = entorno;
     }
 
-    // ================================================================ Mi perfil
-
     public async Task<IActionResult> Index()
     {
         if (User.EsEmpresa())
@@ -197,7 +195,6 @@ public class PerfilController : Controller
     public IActionResult EliminarFormacion(int id) =>
         Volver(BD.EliminarFormacion(User.IdUsuario(), id) ? "Borramos la formación." : "No encontramos esa formación.");
 
-    // Descarga el CV de la persona logueada (los CV no son públicos)
     public async Task<IActionResult> DescargarCV()
     {
         if (!EsUsuarioDeLaSesion(BD.ObtenerUsuarioPorId(User.IdUsuario())))
@@ -206,8 +203,6 @@ public class PerfilController : Controller
         }
         return ArchivoCV(BD.ObtenerCV(User.IdUsuario()));
     }
-
-    // ================================================================ Configuración
 
     public async Task<IActionResult> Configuracion()
     {
@@ -308,7 +303,6 @@ public class PerfilController : Controller
         {
             ModelState.AddModelError(nameof(formulario.Rubro), "Elegí un rubro de la lista");
         }
-        // El dominio del sitio tiene que seguir siendo el del email con el que se verificó la cuenta
         if (!string.IsNullOrEmpty(formulario.SitioWeb) && !VerificacionEmpresa.EmailCoincideConSitio(User.Email(), formulario.SitioWeb))
         {
             ModelState.AddModelError(nameof(formulario.SitioWeb), $"El sitio tiene que ser del mismo dominio que tu email ({VerificacionEmpresa.DominioDelEmail(User.Email())})");
@@ -423,16 +417,12 @@ public class PerfilController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // Ayuda y soporte: se puede ver sin iniciar sesión
     [AllowAnonymous]
     public IActionResult Ayuda()
     {
         return View();
     }
 
-    // ================================================================ Auxiliares
-
-    // Datos de "Mi perfil" de quien inició sesión, o null si la cookie no corresponde a ese usuario.
     private MiPerfilViewModel? ObtenerMiPerfil()
     {
         var modelo = BD.ObtenerMiPerfil(User.IdUsuario());
@@ -452,8 +442,6 @@ public class PerfilController : Controller
         }
     }
 
-    // Vuelve a mostrar Configuración con los errores del formulario (los valores escritos
-    // vuelven desde ModelState) en la pestaña que corresponde.
     private IActionResult MostrarConfiguracionConErrores(string pestana, object formulario)
     {
         var modelo = ObtenerMiPerfil();
@@ -467,7 +455,6 @@ public class PerfilController : Controller
         return View(nameof(Configuracion), modelo);
     }
 
-    // Vuelve a mostrar el perfil con un pop up abierto y sus errores
     private IActionResult MostrarPerfilConModal(string modal, object formulario)
     {
         var modelo = ObtenerMiPerfil();
@@ -517,12 +504,9 @@ public class PerfilController : Controller
         }
     }
 
-    // La cookie guarda el ID y el email: si la base se volvió a crear, el ID puede no existir
-    // o ser de otra persona. En ese caso no se muestra nada.
     private bool EsUsuarioDeLaSesion(Usuario? usuario) =>
         usuario != null && string.Equals(usuario.Email, User.Email(), StringComparison.OrdinalIgnoreCase);
 
-    // Se cierra la sesión para que el login muestre el formulario (si no, devolvería al panel).
     private async Task<IActionResult> SesionInvalida()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
