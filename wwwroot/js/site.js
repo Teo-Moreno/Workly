@@ -669,15 +669,28 @@
   $$("[data-habilidades]").forEach((grupo) => {
     const lista = $("[data-habilidades-lista]", grupo);
     const entrada = $("[data-habilidad-nueva]", grupo);
+    const sector = $("[data-habilidades-sector]", grupo);
+    const vacio = $("[data-habilidades-vacio]", grupo);
+    const filtrar = () => {
+      const elegido = sector?.value ?? "";
+      $$(".chip-seleccion", lista).forEach((chip) => {
+        chip.hidden = !(!sector || chip.dataset.sector === "" || chip.dataset.sector === elegido || $("input", chip).checked);
+      });
+      if (vacio) vacio.hidden = !sector || elegido !== "";
+    };
+    sector?.addEventListener("change", filtrar);
+    filtrar();
     const agregar = () => {
       const nombre = entrada.value.trim().replace(/\s+/g, " ");
       if (!nombre) return;
       const existente = $$("input[name=Habilidades]", lista).find((c) => c.value.toLowerCase() === nombre.toLowerCase());
       if (existente) {
         existente.checked = true;
+        existente.closest(".chip-seleccion").hidden = false;
       } else {
         const chip = document.createElement("label");
         chip.className = "chip-seleccion";
+        chip.dataset.sector = "";
         const casilla = document.createElement("input");
         casilla.type = "checkbox";
         casilla.name = "Habilidades";

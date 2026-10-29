@@ -111,14 +111,17 @@
                 <div class="progreso progreso--principal onboarding__progreso" role="progressbar" aria-valuenow="@Model.PorcentajeCompleto" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo">
                     <span class="progreso__barra" style="--valor: @(Model.PorcentajeCompleto)%"></span>
                 </div>
-                @if (accion.Modal != null)
-                {
-                    <button class="boton boton--acento boton--lg" type="button" data-modal-abrir="@accion.Modal">@siguiente.Accion<icono nombre="arrow-right" /></button>
-                }
-                else
-                {
-                    <a class="boton boton--acento boton--lg" href="@accion.Url">@siguiente.Accion<icono nombre="arrow-right" /></a>
-                }
+                <div class="onboarding__acciones">
+                    @if (accion.Modal != null)
+                    {
+                        <button class="boton boton--acento boton--lg" type="button" data-modal-abrir="@accion.Modal">@siguiente.Accion<icono nombre="arrow-right" /></button>
+                    }
+                    else
+                    {
+                        <a class="boton boton--acento boton--lg" href="@accion.Url">@siguiente.Accion<icono nombre="arrow-right" /></a>
+                    }
+                    <a class="boton boton--contorno boton--lg" asp-controller="Perfil" asp-action="Completar">Completar todo</a>
+                </div>
             </div>
             @if (pendientes.Count > 1)
             {
