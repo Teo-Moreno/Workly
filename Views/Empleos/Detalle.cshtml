@@ -1,4 +1,5 @@
 @model OfertaDetalleViewModel
+@inject Correo Mail
 @{
     var oferta = Model.Oferta;
     var empresa = Model.Empresa;
@@ -185,7 +186,7 @@
                 <h2 class="modal__titulo" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
                 <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
             </div>
-            <p class="modal__descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones.</p>
+            <p class="modal__descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
             <div class="campo @Html.ClaseError("motivo")">
                 <label class="campo__etiqueta" for="motivo-rechazo">Motivo</label>
                 <textarea class="campo__control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>

@@ -849,6 +849,32 @@
     animar();
   });
 
+  $$("[data-captcha]").forEach((caja) => {
+    const imagen = $("[data-captcha-imagen]", caja);
+    const token = $("[data-captcha-token]", caja);
+    const entrada = $("input[name=CaptchaRespuesta]", caja);
+    $("[data-captcha-otra]", caja)?.addEventListener("click", async () => {
+      try {
+        const respuesta = await fetch(caja.dataset.captchaUrl, { headers: { Accept: "application/json" } });
+        if (!respuesta.ok) throw new Error(String(respuesta.status));
+        const datos = await respuesta.json();
+        imagen.src = datos.imagen;
+        token.value = datos.token;
+        entrada.value = "";
+        entrada.focus();
+      } catch {
+        snackbar("No pudimos cargar otra imagen. Probá de nuevo.", "error");
+      }
+    });
+  });
+
+  $$("[data-aceptar-cookies]").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      document.cookie = `Workly.Cookies=ok; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+      boton.closest("[data-aviso-cookies]")?.remove();
+    });
+  });
+
   $$("[data-snackbars][data-mensaje]").forEach((contenedor) => {
     if (contenedor.dataset.mensaje) snackbar(contenedor.dataset.mensaje, contenedor.dataset.mensajeTipo || "exito");
   });

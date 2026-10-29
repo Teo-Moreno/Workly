@@ -75,6 +75,10 @@
     <rect x="4" y="4" width="16" height="16" rx="2" />
   </symbol>
 
+  <symbol id="refresh" viewBox="0 0 24 24">
+    <path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6" />
+  </symbol>
+
   <symbol id="arrow" viewBox="0 0 24 24">
     <path d="M12 5v14M19 12l-7 7-7-7" />
   </symbol>
