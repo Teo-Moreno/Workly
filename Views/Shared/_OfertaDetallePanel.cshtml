@@ -3,7 +3,6 @@
     var visible = ViewData["Visible"] is true;
     var urlDetalle = Model.EsExterna ? Url.Action("Externa", "Empleos", new { id = Model.ID }) : Url.Action("Detalle", "Empleos", new { id = Model.ID });
 }
-@* Vista previa de la oferta (Figma › Media · WF 02 › Detalle de oferta) *@
 <article class="detalle-panel" data-detalle-oferta="@Model.Clave" hidden="@(!visible)" aria-labelledby="detalle-titulo-@Model.Clave">
     <div class="detalle-panel__barra">
         <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, "logo-empresa--md")' />

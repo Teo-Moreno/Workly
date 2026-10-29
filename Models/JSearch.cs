@@ -3,12 +3,6 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Workly.Models;
 
-/// <summary>
-/// Ofertas de otros sitios (LinkedIn, Bumeran, Indeed...) a través de la API JSearch de RapidAPI.
-/// - La clave se guarda con "dotnet user-secrets set JSearch:ApiKey ..." (nunca en el repositorio).
-/// - Cada búsqueda gasta una consulta del plan: las respuestas se guardan en memoria unas horas
-///   y las ofertas se guardan en la tabla OfertaExterna (para su detalle y para postularse).
-/// </summary>
 public class JSearch
 {
     private const string Host = "jsearch.p.rapidapi.com";
@@ -37,11 +31,9 @@ public class JSearch
         public List<Oferta> Ofertas { get; set; } = new();
         public string? Cursor { get; set; }
 
-        /// <summary>No se pudo consultar (sin clave, sin conexión o límite del plan).</summary>
         public bool Error { get; set; }
     }
 
-    /// <summary>Busca ofertas. "consulta" ya incluye el lugar ("cajero en Córdoba").</summary>
     public async Task<Resultado> Buscar(string consulta, string pais, bool soloRemoto, IEnumerable<string> tiposEmpleo,
                                         string? fecha, string? cursor)
     {
@@ -63,9 +55,9 @@ public class JSearch
         var url = "search-v2?" + string.Join("&", parametros.Where(p => !string.IsNullOrEmpty(p.Value))
                                                              .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
 
-        if (_cache.TryGetValue(url, out Resultado? guardado) && guardado != null)
+        if (_cache.TryGetValue(url, out (List<OfertaExternaDatos> Ofertas, string? Cursor) enMemoria))
         {
-            return guardado;
+            return new Resultado { Ofertas = BD.GuardarOfertasExternas(enMemoria.Ofertas), Cursor = enMemoria.Cursor };
         }
 
         try
@@ -90,13 +82,9 @@ public class JSearch
                 ? c.GetString()
                 : null;
 
-            var resultado = new Resultado
-            {
-                Ofertas = BD.GuardarOfertasExternas(ofertas),
-                Cursor = ofertas.Count > 0 ? siguiente : null
-            };
-            _cache.Set(url, resultado, DuracionBusqueda);
-            return resultado;
+            var cursorSiguiente = ofertas.Count > 0 ? siguiente : null;
+            _cache.Set(url, (ofertas, cursorSiguiente), DuracionBusqueda);
+            return new Resultado { Ofertas = BD.GuardarOfertasExternas(ofertas), Cursor = cursorSiguiente };
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
         {
@@ -105,10 +93,6 @@ public class JSearch
         }
     }
 
-    /// <summary>
-    /// Puestos reales publicados en los últimos días, para la animación del buscador de la landing.
-    /// Si la API no responde, usa las últimas ofertas guardadas en la base.
-    /// </summary>
     public async Task<List<string>> PuestosParaAnimacion()
     {
         if (_cache.TryGetValue("animacion", out List<string>? puestos) && puestos != null)
@@ -150,7 +134,6 @@ public class JSearch
         {
             ubicacion = string.Join(", ", new[] { Texto(j, "job_city"), Texto(j, "job_state") }.Where(t => !string.IsNullOrWhiteSpace(t)));
         }
-        // Algunos sitios agregan "• a través de Bumeran" a la ubicación: la fuente ya se muestra aparte
         ubicacion = System.Text.RegularExpressions.Regex.Replace(ubicacion ?? "", @"\s*[•·]\s*a través de .*$", "").Trim();
 
         return new OfertaExternaDatos
@@ -177,7 +160,6 @@ public class JSearch
         texto == null ? null : texto.Length <= largo ? texto : texto[..largo];
 }
 
-// Una oferta tal como la devuelve JSearch, lista para guardar en OfertaExterna
 public class OfertaExternaDatos
 {
     public string ID_Externo { get; set; } = "";
