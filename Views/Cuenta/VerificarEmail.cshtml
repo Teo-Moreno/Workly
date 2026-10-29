@@ -1,0 +1,29 @@
+@model VerificarEmailViewModel
+@{
+    ViewData["Title"] = "Verificá tu email";
+}
+
+<div class="cuenta-tarjeta">
+    <h1 class="cuenta-tarjeta__titulo">Revisá tu email</h1>
+    <p class="cuenta-tarjeta__bajada">Te mandamos un código de @VerificacionEmail.Digitos números a <strong>@Model.Email</strong>. Escribilo acá para terminar de crear tu cuenta.</p>
+
+    <partial name="_ErroresFormulario" />
+
+    <form class="formulario" asp-controller="Cuenta" asp-action="VerificarEmail" method="post" novalidate data-formulario-real>
+        <input type="hidden" asp-for="Token" />
+        <div class="campo @Html.ClaseError(nameof(Model.Codigo))">
+            <label class="campo__etiqueta" asp-for="Codigo">Código</label>
+            <input class="campo__control codigo-email" asp-for="Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
+                   pattern="\d{@VerificacionEmail.Digitos}" placeholder="000000" required autofocus />
+            <span class="campo__ayuda">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</span>
+            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Codigo), "El código tiene 6 números")</span>
+        </div>
+        <button class="boton boton--acento boton--lg boton--bloque" type="submit">Verificar y crear mi cuenta</button>
+    </form>
+
+    <form asp-controller="Cuenta" asp-action="ReenviarCodigo" method="post">
+        <input type="hidden" name="token" value="@Model.Token" />
+        <button class="boton boton--contorno boton--bloque" type="submit"><icono nombre="refresh" />Mandarme otro código</button>
+    </form>
+    <p class="cuenta-tarjeta__legal">¿Escribiste mal el email? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>
+</div>
