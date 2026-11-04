@@ -10,7 +10,7 @@
         <p class="encabezado-pagina__bajada">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
     </header>
 
-    <form class="filtros-empresas" asp-controller="Empresas" asp-action="Index" method="get" role="search">
+    <form class="filtros-empresas" asp-controller="Empresas" asp-action="Index" method="get" role="search" data-cargando="#empresas-resultados">
         <div class="campo filtros-empresas__buscar">
             <label class="solo-lectores" for="buscar-empresa">Buscar empresa</label>
             <div class="control-con-icono">
@@ -20,7 +20,7 @@
         </div>
         <div class="campo">
             <label class="campo__etiqueta" for="empresas-pais">País</label>
-            <select class="campo__control" id="empresas-pais" name="IDPais" data-selector-pais data-enviar-al-cambiar>
+            <select class="campo__control" id="empresas-pais" name="IDPais" data-selector-pais data-enviar-al-cambiar data-seleccion>
                 @foreach (var pais in Model.Paises)
                 {
                     <option value="@pais.ID" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
@@ -29,7 +29,7 @@
         </div>
         <div class="campo">
             <label class="campo__etiqueta" for="empresas-provincia">Provincia</label>
-            <select class="campo__control" id="empresas-provincia" name="IDProvincia" data-selector-provincia data-enviar-al-cambiar>
+            <select class="campo__control" id="empresas-provincia" name="IDProvincia" data-selector-provincia data-enviar-al-cambiar data-seleccion>
                 <option value="">Todo el país</option>
                 @foreach (var provincia in Model.Provincias)
                 {
@@ -39,7 +39,7 @@
         </div>
         <div class="campo">
             <label class="campo__etiqueta" for="empresas-orden">Ordenar por</label>
-            <select class="campo__control" id="empresas-orden" name="Orden" data-enviar-al-cambiar>
+            <select class="campo__control" id="empresas-orden" name="Orden" data-enviar-al-cambiar data-seleccion>
                 @foreach (var (valor, texto) in Catalogos.Ordenes)
                 {
                     <option value="@valor" selected="@(Model.Orden == valor)">@texto</option>
@@ -49,36 +49,40 @@
         <button class="boton" type="submit"><icono nombre="search" />Buscar</button>
     </form>
 
-    <p class="resultados__titulo">@(Model.Empresas.Count == 1 ? "1 empresa" : $"{Model.Empresas.Count} empresas")</p>
+    <div id="empresas-resultados">
+        <partial name="_CargandoResultados" model='"Buscando empresas…"' />
 
-    @if (Model.Empresas.Count == 0)
-    {
-        <div class="estado-vacio">
-            <span class="caja-icono caja-icono--lg"><icono nombre="building" /></span>
-            @if (filtrando)
-            {
-                <h2 class="estado-vacio__titulo">No encontramos empresas con esa búsqueda</h2>
-                <p>Probá con otro nombre o buscá en todo el país.</p>
-                <a class="boton boton--contorno" asp-controller="Empresas" asp-action="Index" asp-route-IDPais="@Model.IDPais" asp-route-IDProvincia="">Ver todo el país</a>
-            }
-            else
-            {
-                <h2 class="estado-vacio__titulo">Todavía no hay empresas en Workly</h2>
-                <p>Cuando una empresa cree su cuenta o publique una búsqueda, aparece acá.</p>
-            }
-            @if (!User.EstaLogueado())
-            {
-                <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Registrar mi empresa</a>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="grilla-empresas">
-            @foreach (var empresa in Model.Empresas)
-            {
-                <partial name="_EmpresaTarjeta" model="empresa" />
-            }
-        </div>
-    }
+        <p class="resultados__titulo">@(Model.Empresas.Count == 1 ? "1 empresa" : $"{Model.Empresas.Count} empresas")</p>
+
+        @if (Model.Empresas.Count == 0)
+        {
+            <div class="estado-vacio">
+                <span class="caja-icono caja-icono--lg"><icono nombre="building" /></span>
+                @if (filtrando)
+                {
+                    <h2 class="estado-vacio__titulo">No encontramos empresas con esa búsqueda</h2>
+                    <p>Probá con otro nombre o buscá en todo el país.</p>
+                    <a class="boton boton--contorno" asp-controller="Empresas" asp-action="Index" asp-route-IDPais="@Model.IDPais" asp-route-IDProvincia="" data-cargando="#empresas-resultados">Ver todo el país</a>
+                }
+                else
+                {
+                    <h2 class="estado-vacio__titulo">Todavía no hay empresas en Workly</h2>
+                    <p>Cuando una empresa cree su cuenta o publique una búsqueda, aparece acá.</p>
+                }
+                @if (!User.EstaLogueado())
+                {
+                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Registrar mi empresa</a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="grilla-empresas">
+                @foreach (var empresa in Model.Empresas)
+                {
+                    <partial name="_EmpresaTarjeta" model="empresa" />
+                }
+            </div>
+        }
+    </div>
 </div>
