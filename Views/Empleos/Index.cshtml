@@ -14,7 +14,7 @@
         <p class="encabezado-pagina__bajada">Buscamos en las búsquedas publicadas en Workly y en otros sitios de empleo a la vez.</p>
     </header>
 
-    <form class="buscador buscador--app" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+    <form class="buscador buscador--app" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search" data-cargando="#resultados-busqueda">
         <label class="buscador__campo">
             <icono nombre="search" />
             <span class="buscador__textos">
@@ -27,7 +27,7 @@
             <icono nombre="near-me" />
             <span class="buscador__textos">
                 <label class="buscador__etiqueta" for="buscar-pais">País</label>
-                <select class="buscador__input buscador__select" id="buscar-pais" name="IDPais" data-selector-pais>
+                <select class="buscador__input buscador__select" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
                     @foreach (var pais in Model.Paises)
                     {
                         <option value="@pais.ID" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
@@ -36,11 +36,11 @@
             </span>
         </div>
         <span class="buscador__divisor" aria-hidden="true"></span>
-        <label class="buscador__campo">
+        <div class="buscador__campo">
             <icono nombre="building" />
             <span class="buscador__textos">
-                <span class="buscador__etiqueta">Provincia</span>
-                <select class="buscador__input buscador__select" name="IDProvincia" data-selector-provincia>
+                <label class="buscador__etiqueta" for="buscar-provincia">Provincia</label>
+                <select class="buscador__input buscador__select" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
                     <option value="">Todo el país</option>
                     @foreach (var provincia in Model.Provincias)
                     {
@@ -48,7 +48,7 @@
                     }
                 </select>
             </span>
-        </label>
+        </div>
         <button class="boton boton--lg buscador__boton" type="submit"><icono nombre="search" />Buscar</button>
     </form>
 
@@ -62,7 +62,7 @@
                 <h2 class="filtros__titulo">Filtros</h2>
                 @if (Model.CantidadFiltros > 0)
                 {
-                    <a class="boton boton--texto" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q" asp-route-IDPais="@Model.IDPais" asp-route-IDProvincia="@Model.IDProvincia">Limpiar</a>
+                    <a class="boton boton--texto" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q" asp-route-IDPais="@Model.IDPais" asp-route-IDProvincia="@Model.IDProvincia" data-cargando="#resultados-busqueda">Limpiar</a>
                 }
             </div>
 
@@ -118,12 +118,12 @@
             <noscript><button class="boton boton--bloque" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
         </aside>
 
-        <section class="resultados" aria-labelledby="resultados-titulo">
+        <section class="resultados" id="resultados-busqueda" aria-labelledby="resultados-titulo">
             <div class="resultados__cabecera">
                 <h2 class="resultados__titulo" id="resultados-titulo">@titulo</h2>
                 <div class="ordenar">
                     <label for="buscar-orden">Ordenar por:</label>
-                    <select class="campo__control campo__control--sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar>
+                    <select class="campo__control campo__control--sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar data-seleccion="seleccion--derecha">
                         @foreach (var (valor, texto) in Catalogos.Ordenes)
                         {
                             <option value="@valor" selected="@(Model.Orden == valor)">@texto</option>
@@ -131,6 +131,8 @@
                     </select>
                 </div>
             </div>
+
+            <partial name="_CargandoResultados" model='"Buscando ofertas…"' />
 
             @if (Model.ErrorExternas)
             {
@@ -151,7 +153,7 @@
                         <p>Revisá cómo lo escribiste, probá con otra palabra@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
                         @if (Model.CantidadFiltros > 0 || Model.IDProvincia != null)
                         {
-                            <a class="boton boton--contorno" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q">Buscar sin filtros</a>
+                            <a class="boton boton--contorno" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
                         }
                     }
                     else
@@ -172,7 +174,7 @@
                 @if (Model.CursorSiguiente != null)
                 {
                     <div class="resultados__mas">
-                        <a class="boton boton--contorno" href="@(Url.Action("Index", "Empleos") + "?" + string.Join("&", consulta.Where(c => !c.StartsWith("Cursor=")).Append("Cursor=" + Uri.EscapeDataString(Model.CursorSiguiente))))">Ver más ofertas de otros sitios</a>
+                        <a class="boton boton--contorno" href="@(Url.Action("Index", "Empleos") + "?" + string.Join("&", consulta.Where(c => !c.StartsWith("Cursor=")).Append("Cursor=" + Uri.EscapeDataString(Model.CursorSiguiente))))" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
                     </div>
                 }
             }
