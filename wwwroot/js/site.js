@@ -398,7 +398,7 @@
 
     const pintar = () => (texto.textContent = select.selectedOptions[0]?.textContent.trim() ?? "");
     const armar = () => {
-      opciones = [...select.options].filter((opcion) => !opcion.hidden && !opcion.disabled);
+      opciones = [...select.options].filter((opcion) => !opcion.hidden && !opcion.disabled && !(select.required && !opcion.value));
       lista.replaceChildren(...opciones.map((opcion, i) => {
         const item = document.createElement("li");
         item.id = `${id}-opcion-${i}`;
