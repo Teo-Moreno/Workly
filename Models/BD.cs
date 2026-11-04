@@ -368,6 +368,12 @@ public static class BD
                            WHERE IDUsuario = @IDUsuario",
             new { p.IDUsuario, p.Puesto_Buscado, p.Niveles, p.Modalidades, p.Jornada, p.Contratacion, p.IDProvincia, p.Salario_Minimo, p.Salario_Maximo, p.Disponibilidad }, tx);
 
+    public static List<Sector> ObtenerSectores()
+    {
+        using var conexion = Conectar();
+        return conexion.Query<Sector>("SELECT ID, Nombre FROM Sector ORDER BY Orden, Nombre").ToList();
+    }
+
     public static List<Habilidad> ObtenerCatalogoHabilidades()
     {
         using var conexion = Conectar();
@@ -718,9 +724,10 @@ public static class BD
                     CAST(GETDATE() AS DATE), @Fecha_Cierre, @IDUsuario_Publicador, @IDProvincia, @Estado_Publicacion)",
             new { IDEmpresa = idEmpresa, o.Titulo, o.Descripcion, o.Ubicacion, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos,
                   o.Fecha_Cierre, o.IDUsuario_Publicador, o.IDProvincia, o.Estado_Publicacion }, tx);
-        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = @Puesto) INSERT INTO Puesto (Nombre) VALUES (@Puesto);
+        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = @Puesto) INSERT INTO Puesto (Nombre, IDSector) VALUES (@Puesto, @IDSector);
+                           UPDATE Puesto SET IDSector = @IDSector WHERE Nombre = @Puesto AND IDSector IS NULL;
                            INSERT INTO OfertaPuesto (IDOfertaLaboral, IDPuesto) SELECT @ID, ID FROM Puesto WHERE Nombre = @Puesto;",
-            new { ID = id, o.Puesto }, tx);
+            new { ID = id, o.Puesto, o.IDSector }, tx);
         tx.Commit();
         return id;
     }

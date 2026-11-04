@@ -56,6 +56,10 @@ public class PublicacionesController : Controller
         {
             ModelState.AddModelError(nameof(modelo.Modalidad), "Elegí una opción de la lista");
         }
+        if (modelo.IDSector != null && modelo.Sectores.All(s => s.ID != modelo.IDSector))
+        {
+            ModelState.AddModelError(nameof(modelo.IDSector), "Elegí un sector de la lista");
+        }
         if (modelo.TipoEmpleo != null && !Catalogos.TiposEmpleo.Any(t => t.Nombre == modelo.TipoEmpleo))
         {
             ModelState.AddModelError(nameof(modelo.TipoEmpleo), "Elegí una opción de la lista");
@@ -87,6 +91,7 @@ public class PublicacionesController : Controller
             EmpresaNombre = modelo.EmpresaNombre?.Trim(),
             Titulo = modelo.Titulo.Trim(),
             Puesto = modelo.Puesto.Trim(),
+            IDSector = modelo.IDSector!.Value,
             Descripcion = modelo.Descripcion.Trim(),
             Ubicacion = Validaciones.Limpiar(modelo.Ubicacion),
             IDProvincia = provincia?.ID,
@@ -178,6 +183,7 @@ public class PublicacionesController : Controller
         modelo.EsEmpresa = User.EsEmpresa();
         modelo.Paises = BD.ObtenerPaises();
         modelo.Provincias = BD.ObtenerProvincias();
+        modelo.Sectores = BD.ObtenerSectores();
         if (modelo.EsEmpresa)
         {
             var empresa = BD.ObtenerEmpresaDeUsuario(User.IdUsuario());
