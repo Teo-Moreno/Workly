@@ -59,6 +59,7 @@ public class OfertaNueva
     public string? EmpresaNombre { get; set; }
     public string Titulo { get; set; } = "";
     public string Puesto { get; set; } = "";
+    public int IDSector { get; set; }
     public string? Descripcion { get; set; }
     public string? Ubicacion { get; set; }
     public int? IDProvincia { get; set; }
