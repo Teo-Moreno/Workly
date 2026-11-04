@@ -34,6 +34,21 @@
                 <input class="campo__control" asp-for="Puesto" maxlength="100" required placeholder="Ej.: Cajero/a" />
                 <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Puesto), "Escribí el puesto")</span>
             </div>
+            <div class="campo @Html.ClaseError(nameof(Model.IDSector))">
+                <label class="campo__etiqueta" asp-for="IDSector">Sector</label>
+                <select class="campo__control" asp-for="IDSector" required data-seleccion>
+                    <option value="">Elegí el sector</option>
+                    @foreach (var sector in Model.Sectores)
+                    {
+                        <option value="@sector.ID" selected="@(sector.ID == Model.IDSector)">@sector.Nombre</option>
+                    }
+                </select>
+                <span class="campo__ayuda">Lo usamos para comparar el puesto con las habilidades de quienes se postulan.</span>
+                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.IDSector), "Elegí el sector del puesto")</span>
+            </div>
+        </div>
+
+        <div class="formulario__fila">
             @if (Model.EsEmpresa)
             {
                 <div class="campo">
