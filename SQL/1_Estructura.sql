@@ -1,0 +1,983 @@
+﻿USE [master]
+GO
+CREATE DATABASE [Workly]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Workly', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\Workly.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'Workly_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\Workly_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+GO
+ALTER DATABASE [Workly] SET COMPATIBILITY_LEVEL = 140
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Workly].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Workly] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [Workly] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [Workly] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [Workly] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [Workly] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [Workly] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [Workly] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [Workly] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [Workly] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [Workly] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [Workly] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [Workly] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [Workly] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [Workly] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [Workly] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [Workly] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [Workly] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [Workly] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [Workly] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [Workly] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [Workly] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [Workly] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [Workly] SET RECOVERY FULL 
+GO
+ALTER DATABASE [Workly] SET  MULTI_USER 
+GO
+ALTER DATABASE [Workly] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [Workly] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [Workly] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [Workly] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [Workly] SET DELAYED_DURABILITY = DISABLED 
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'Workly', N'ON'
+GO
+ALTER DATABASE [Workly] SET QUERY_STORE = OFF
+GO
+USE [Workly]
+GO
+CREATE USER [alumno] FOR LOGIN [alumno] WITH DEFAULT_SCHEMA=[dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CV](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[Nombre_Archivo] [nvarchar](260) NULL,
+	[Sitio_Web] [nvarchar](200) NULL,
+	[Fecha_Actualizacion] [date] NOT NULL,
+ CONSTRAINT [PK_CV] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Educacion](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Institucion] [nvarchar](150) NOT NULL,
+	[Descripcion] [nvarchar](300) NULL,
+ CONSTRAINT [PK_Educacion] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Empresa](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](100) NOT NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[Logo] [nvarchar](260) NULL,
+	[Ubicacion] [nvarchar](100) NULL,
+	[Sitio_Web] [nvarchar](200) NULL,
+	[IDUsuario] [int] NULL,
+	[Razon_Social] [nvarchar](150) NULL,
+	[CUIT] [char](11) NULL,
+	[Rubro] [nvarchar](60) NULL,
+	[IDProvincia] [int] NULL,
+	[Telefono] [nvarchar](30) NULL,
+	[Fecha_Registro] [date] NOT NULL,
+ CONSTRAINT [PK_Empresa] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ExperienciaLaboral](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDEmpresa] [int] NOT NULL,
+	[Puesto] [nvarchar](100) NOT NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[Fecha_Inicio] [date] NOT NULL,
+	[Fecha_Finalizacion] [date] NULL,
+ CONSTRAINT [PK_ExperienciaLaboral] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Favorito](
+	[ID_favorito] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[fecha_guardado] [date] NOT NULL,
+ CONSTRAINT [PK_Favorito] PRIMARY KEY CLUSTERED 
+(
+	[ID_favorito] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[FavoritoOferta](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDFavorito] [int] NOT NULL,
+	[IDOfertaLaboral] [int] NULL,
+	[IDOfertaExterna] [int] NULL,
+ CONSTRAINT [PK_FavoritoOferta] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Habilidad](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](60) NOT NULL,
+	[IDSector] [int] NULL,
+ CONSTRAINT [PK_Habilidad] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Idioma](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_Idioma] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LoginExterno](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[Proveedor] [nvarchar](20) NOT NULL,
+	[ID_Externo] [nvarchar](200) NOT NULL,
+ CONSTRAINT [PK_LoginExterno] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OfertaExterna](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[ID_Externo] [nvarchar](200) NOT NULL,
+	[Titulo] [nvarchar](300) NOT NULL,
+	[Empresa] [nvarchar](200) NULL,
+	[Logo] [nvarchar](1000) NULL,
+	[Ubicacion] [nvarchar](200) NULL,
+	[Descripcion] [nvarchar](max) NULL,
+	[Es_Remoto] [bit] NOT NULL,
+	[Tipo_Contrato] [nvarchar](50) NULL,
+	[Salario] [nvarchar](100) NULL,
+	[Link_Postulacion] [nvarchar](2000) NULL,
+	[Publicador] [nvarchar](100) NULL,
+	[Fecha_Publicacion] [datetime2](7) NULL,
+	[Fecha_Consulta] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_OfertaExterna] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OfertaLaboral](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDEmpresa] [int] NOT NULL,
+	[Titulo] [nvarchar](150) NOT NULL,
+	[Descripcion] [nvarchar](2000) NULL,
+	[Ubicacion] [nvarchar](100) NULL,
+	[Modalidad] [nvarchar](20) NOT NULL,
+	[Tipo_Contrato] [nvarchar](50) NOT NULL,
+	[Salario] [int] NULL,
+	[Cantidad_Puestos] [int] NOT NULL,
+	[Fecha_Publicacion] [date] NOT NULL,
+	[Fecha_Cierre] [date] NULL,
+	[IDUsuario_Publicador] [int] NULL,
+	[IDProvincia] [int] NULL,
+	[Estado_Publicacion] [nvarchar](20) NOT NULL,
+	[Motivo_Rechazo] [nvarchar](500) NULL,
+	[Fecha_Revision] [date] NULL,
+ CONSTRAINT [PK_OfertaLaboral] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OfertaPuesto](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDOfertaLaboral] [int] NOT NULL,
+	[IDPuesto] [int] NOT NULL,
+ CONSTRAINT [PK_OfertaPuesto] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Pais](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](60) NOT NULL,
+	[Codigo_ISO] [char](2) NOT NULL,
+	[Codigo_Telefono] [nvarchar](5) NOT NULL,
+ CONSTRAINT [PK_Pais] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Perfil](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDProvincia] [int] NULL,
+	[Foto] [nvarchar](260) NULL,
+	[Descripcion] [nvarchar](500) NULL,
+	[Telefono] [nvarchar](30) NULL,
+	[Estado_Busqueda] [nvarchar](30) NULL,
+ CONSTRAINT [PK_Perfil] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Postulacion](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDOfertaLaboral] [int] NULL,
+	[IDOfertaExterna] [int] NULL,
+	[Fecha] [date] NOT NULL,
+	[Estado] [nvarchar](20) NOT NULL,
+ CONSTRAINT [PK_Postulacion] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Preferencia](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[Puesto_Buscado] [nvarchar](100) NULL,
+	[Niveles] [nvarchar](100) NULL,
+	[Modalidades] [nvarchar](60) NULL,
+	[Jornada] [nvarchar](20) NULL,
+	[Contratacion] [nvarchar](40) NULL,
+	[IDProvincia] [int] NULL,
+	[Salario_Minimo] [int] NULL,
+	[Salario_Maximo] [int] NULL,
+	[Disponibilidad] [nvarchar](20) NULL,
+ CONSTRAINT [PK_Preferencia] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Provincia](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDPais] [int] NOT NULL,
+	[Nombre] [nvarchar](80) NOT NULL,
+ CONSTRAINT [PK_Provincia] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Puesto](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](100) NOT NULL,
+	[Descripcion] [nvarchar](300) NULL,
+ CONSTRAINT [PK_Puesto] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RecuperacionClave](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[Token_Hash] [char](64) NOT NULL,
+	[Fecha] [datetime2](0) NOT NULL,
+	[Vence] [datetime2](0) NOT NULL,
+	[Usada] [bit] NOT NULL,
+ CONSTRAINT [PK_RecuperacionClave] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Sector](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](60) NOT NULL,
+	[Orden] [int] NOT NULL,
+ CONSTRAINT [PK_Sector] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Usuario](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NOT NULL,
+	[Apellido] [nvarchar](50) NOT NULL,
+	[Email] [nvarchar](100) NOT NULL,
+	[Contraseña] [nvarchar](200) NULL,
+	[Fecha_Registro] [date] NOT NULL,
+	[Tipo] [nvarchar](10) NOT NULL,
+	[Es_Moderador] [bit] NOT NULL,
+ CONSTRAINT [PK_Usuario] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuarioEducacion](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDEducacion] [int] NOT NULL,
+	[Titulo] [nvarchar](150) NOT NULL,
+	[Fecha_Inicio] [date] NOT NULL,
+	[Fecha_Fin] [date] NULL,
+ CONSTRAINT [PK_UsuarioEducacion] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuarioHabilidad](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDHabilidad] [int] NOT NULL,
+ CONSTRAINT [PK_UsuarioHabilidad] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuarioIdioma](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[IDUsuario] [int] NOT NULL,
+	[IDIdioma] [int] NOT NULL,
+	[Nivel] [nvarchar](20) NOT NULL,
+ CONSTRAINT [PK_UsuarioIdioma] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CV] ADD  CONSTRAINT [UQ_CV_IDUsuario] UNIQUE NONCLUSTERED 
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Educacion] ADD  CONSTRAINT [UQ_Educacion_Institucion] UNIQUE NONCLUSTERED 
+(
+	[Institucion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Empresa] ADD  CONSTRAINT [UQ_Empresa_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Empresa_CUIT] ON [dbo].[Empresa]
+(
+	[CUIT] ASC
+)
+WHERE ([CUIT] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Empresa_IDUsuario] ON [dbo].[Empresa]
+(
+	[IDUsuario] ASC
+)
+WHERE ([IDUsuario] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ExperienciaLaboral_IDUsuario] ON [dbo].[ExperienciaLaboral]
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Favorito_IDUsuario] ON [dbo].[Favorito]
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[FavoritoOferta] ADD  CONSTRAINT [UQ_FavoritoOferta_IDFavorito] UNIQUE NONCLUSTERED 
+(
+	[IDFavorito] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FavoritoOferta_IDOfertaExterna] ON [dbo].[FavoritoOferta]
+(
+	[IDOfertaExterna] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FavoritoOferta_IDOfertaLaboral] ON [dbo].[FavoritoOferta]
+(
+	[IDOfertaLaboral] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Habilidad] ADD  CONSTRAINT [UQ_Habilidad_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Habilidad_IDSector] ON [dbo].[Habilidad]
+(
+	[IDSector] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Idioma] ADD  CONSTRAINT [UQ_Idioma_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[LoginExterno] ADD  CONSTRAINT [UQ_LoginExterno] UNIQUE NONCLUSTERED 
+(
+	[Proveedor] ASC,
+	[ID_Externo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [UQ_OfertaExterna_ID_Externo] UNIQUE NONCLUSTERED 
+(
+	[ID_Externo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+CREATE NONCLUSTERED INDEX [IX_OfertaLaboral_Estado_Publicacion] ON [dbo].[OfertaLaboral]
+(
+	[Estado_Publicacion] ASC,
+	[Fecha_Publicacion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_OfertaLaboral_IDEmpresa] ON [dbo].[OfertaLaboral]
+(
+	[IDEmpresa] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_OfertaLaboral_IDUsuario_Publicador] ON [dbo].[OfertaLaboral]
+(
+	[IDUsuario_Publicador] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[OfertaPuesto] ADD  CONSTRAINT [UQ_OfertaPuesto] UNIQUE NONCLUSTERED 
+(
+	[IDOfertaLaboral] ASC,
+	[IDPuesto] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_OfertaPuesto_IDPuesto] ON [dbo].[OfertaPuesto]
+(
+	[IDPuesto] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Pais] ADD  CONSTRAINT [UQ_Pais_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Perfil] ADD  CONSTRAINT [UQ_Perfil_IDUsuario] UNIQUE NONCLUSTERED 
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Perfil_IDProvincia] ON [dbo].[Perfil]
+(
+	[IDProvincia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Postulacion_IDOfertaLaboral] ON [dbo].[Postulacion]
+(
+	[IDOfertaLaboral] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Postulacion_Usuario_OfertaExterna] ON [dbo].[Postulacion]
+(
+	[IDUsuario] ASC,
+	[IDOfertaExterna] ASC
+)
+WHERE ([IDOfertaExterna] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UX_Postulacion_Usuario_OfertaLaboral] ON [dbo].[Postulacion]
+(
+	[IDUsuario] ASC,
+	[IDOfertaLaboral] ASC
+)
+WHERE ([IDOfertaLaboral] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Preferencia] ADD  CONSTRAINT [UQ_Preferencia_IDUsuario] UNIQUE NONCLUSTERED 
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Provincia] ADD  CONSTRAINT [UQ_Provincia_Pais_Nombre] UNIQUE NONCLUSTERED 
+(
+	[IDPais] ASC,
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Puesto] ADD  CONSTRAINT [UQ_Puesto_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[RecuperacionClave] ADD  CONSTRAINT [UQ_RecuperacionClave_Token_Hash] UNIQUE NONCLUSTERED 
+(
+	[Token_Hash] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_RecuperacionClave_IDUsuario] ON [dbo].[RecuperacionClave]
+(
+	[IDUsuario] ASC,
+	[Fecha] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Sector] ADD  CONSTRAINT [UQ_Sector_Nombre] UNIQUE NONCLUSTERED 
+(
+	[Nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+ALTER TABLE [dbo].[Usuario] ADD  CONSTRAINT [UQ_Usuario_Email] UNIQUE NONCLUSTERED 
+(
+	[Email] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_UsuarioEducacion_IDUsuario] ON [dbo].[UsuarioEducacion]
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[UsuarioHabilidad] ADD  CONSTRAINT [UQ_UsuarioHabilidad] UNIQUE NONCLUSTERED 
+(
+	[IDUsuario] ASC,
+	[IDHabilidad] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_UsuarioHabilidad_IDUsuario] ON [dbo].[UsuarioHabilidad]
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[UsuarioIdioma] ADD  CONSTRAINT [UQ_UsuarioIdioma] UNIQUE NONCLUSTERED 
+(
+	[IDUsuario] ASC,
+	[IDIdioma] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_UsuarioIdioma_IDUsuario] ON [dbo].[UsuarioIdioma]
+(
+	[IDUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CV] ADD  CONSTRAINT [DF_CV_Fecha_Actualizacion]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha_Actualizacion]
+GO
+ALTER TABLE [dbo].[Empresa] ADD  CONSTRAINT [DF_Empresa_Fecha_Registro]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha_Registro]
+GO
+ALTER TABLE [dbo].[Favorito] ADD  CONSTRAINT [DF_Favorito_fecha_guardado]  DEFAULT (CONVERT([date],getdate())) FOR [fecha_guardado]
+GO
+ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Es_Remoto]  DEFAULT ((0)) FOR [Es_Remoto]
+GO
+ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Fecha_Consulta]  DEFAULT (sysutcdatetime()) FOR [Fecha_Consulta]
+GO
+ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Cantidad_Puestos]  DEFAULT ((1)) FOR [Cantidad_Puestos]
+GO
+ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Fecha_Publicacion]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha_Publicacion]
+GO
+ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Estado_Publicacion]  DEFAULT (N'Aprobada') FOR [Estado_Publicacion]
+GO
+ALTER TABLE [dbo].[Postulacion] ADD  CONSTRAINT [DF_Postulacion_Fecha]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[Postulacion] ADD  CONSTRAINT [DF_Postulacion_Estado]  DEFAULT (N'Enviada') FOR [Estado]
+GO
+ALTER TABLE [dbo].[RecuperacionClave] ADD  CONSTRAINT [DF_RecuperacionClave_Fecha]  DEFAULT (sysutcdatetime()) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[RecuperacionClave] ADD  CONSTRAINT [DF_RecuperacionClave_Usada]  DEFAULT ((0)) FOR [Usada]
+GO
+ALTER TABLE [dbo].[Sector] ADD  CONSTRAINT [DF_Sector_Orden]  DEFAULT ((0)) FOR [Orden]
+GO
+ALTER TABLE [dbo].[Usuario] ADD  CONSTRAINT [DF_Usuario_Fecha_Registro]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha_Registro]
+GO
+ALTER TABLE [dbo].[Usuario] ADD  CONSTRAINT [DF_Usuario_Tipo]  DEFAULT (N'Persona') FOR [Tipo]
+GO
+ALTER TABLE [dbo].[Usuario] ADD  CONSTRAINT [DF_Usuario_Es_Moderador]  DEFAULT ((0)) FOR [Es_Moderador]
+GO
+ALTER TABLE [dbo].[CV]  WITH CHECK ADD  CONSTRAINT [FK_CV_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CV] CHECK CONSTRAINT [FK_CV_Usuario]
+GO
+ALTER TABLE [dbo].[Empresa]  WITH CHECK ADD  CONSTRAINT [FK_Empresa_Provincia] FOREIGN KEY([IDProvincia])
+REFERENCES [dbo].[Provincia] ([ID])
+GO
+ALTER TABLE [dbo].[Empresa] CHECK CONSTRAINT [FK_Empresa_Provincia]
+GO
+ALTER TABLE [dbo].[Empresa]  WITH CHECK ADD  CONSTRAINT [FK_Empresa_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE SET NULL
+GO
+ALTER TABLE [dbo].[Empresa] CHECK CONSTRAINT [FK_Empresa_Usuario]
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_ExperienciaLaboral_Empresa] FOREIGN KEY([IDEmpresa])
+REFERENCES [dbo].[Empresa] ([ID])
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral] CHECK CONSTRAINT [FK_ExperienciaLaboral_Empresa]
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_ExperienciaLaboral_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral] CHECK CONSTRAINT [FK_ExperienciaLaboral_Usuario]
+GO
+ALTER TABLE [dbo].[Favorito]  WITH CHECK ADD  CONSTRAINT [FK_Favorito_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Favorito] CHECK CONSTRAINT [FK_Favorito_Usuario]
+GO
+ALTER TABLE [dbo].[FavoritoOferta]  WITH CHECK ADD  CONSTRAINT [FK_FavoritoOferta_Favorito] FOREIGN KEY([IDFavorito])
+REFERENCES [dbo].[Favorito] ([ID_favorito])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[FavoritoOferta] CHECK CONSTRAINT [FK_FavoritoOferta_Favorito]
+GO
+ALTER TABLE [dbo].[FavoritoOferta]  WITH CHECK ADD  CONSTRAINT [FK_FavoritoOferta_OfertaExterna] FOREIGN KEY([IDOfertaExterna])
+REFERENCES [dbo].[OfertaExterna] ([ID])
+GO
+ALTER TABLE [dbo].[FavoritoOferta] CHECK CONSTRAINT [FK_FavoritoOferta_OfertaExterna]
+GO
+ALTER TABLE [dbo].[FavoritoOferta]  WITH CHECK ADD  CONSTRAINT [FK_FavoritoOferta_OfertaLaboral] FOREIGN KEY([IDOfertaLaboral])
+REFERENCES [dbo].[OfertaLaboral] ([ID])
+GO
+ALTER TABLE [dbo].[FavoritoOferta] CHECK CONSTRAINT [FK_FavoritoOferta_OfertaLaboral]
+GO
+ALTER TABLE [dbo].[Habilidad]  WITH CHECK ADD  CONSTRAINT [FK_Habilidad_Sector] FOREIGN KEY([IDSector])
+REFERENCES [dbo].[Sector] ([ID])
+GO
+ALTER TABLE [dbo].[Habilidad] CHECK CONSTRAINT [FK_Habilidad_Sector]
+GO
+ALTER TABLE [dbo].[LoginExterno]  WITH CHECK ADD  CONSTRAINT [FK_LoginExterno_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[LoginExterno] CHECK CONSTRAINT [FK_LoginExterno_Usuario]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_OfertaLaboral_Empresa] FOREIGN KEY([IDEmpresa])
+REFERENCES [dbo].[Empresa] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [FK_OfertaLaboral_Empresa]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_OfertaLaboral_Provincia] FOREIGN KEY([IDProvincia])
+REFERENCES [dbo].[Provincia] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [FK_OfertaLaboral_Provincia]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_OfertaLaboral_Usuario] FOREIGN KEY([IDUsuario_Publicador])
+REFERENCES [dbo].[Usuario] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [FK_OfertaLaboral_Usuario]
+GO
+ALTER TABLE [dbo].[OfertaPuesto]  WITH CHECK ADD  CONSTRAINT [FK_OfertaPuesto_OfertaLaboral] FOREIGN KEY([IDOfertaLaboral])
+REFERENCES [dbo].[OfertaLaboral] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[OfertaPuesto] CHECK CONSTRAINT [FK_OfertaPuesto_OfertaLaboral]
+GO
+ALTER TABLE [dbo].[OfertaPuesto]  WITH CHECK ADD  CONSTRAINT [FK_OfertaPuesto_Puesto] FOREIGN KEY([IDPuesto])
+REFERENCES [dbo].[Puesto] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaPuesto] CHECK CONSTRAINT [FK_OfertaPuesto_Puesto]
+GO
+ALTER TABLE [dbo].[Perfil]  WITH CHECK ADD  CONSTRAINT [FK_Perfil_Provincia] FOREIGN KEY([IDProvincia])
+REFERENCES [dbo].[Provincia] ([ID])
+GO
+ALTER TABLE [dbo].[Perfil] CHECK CONSTRAINT [FK_Perfil_Provincia]
+GO
+ALTER TABLE [dbo].[Perfil]  WITH CHECK ADD  CONSTRAINT [FK_Perfil_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Perfil] CHECK CONSTRAINT [FK_Perfil_Usuario]
+GO
+ALTER TABLE [dbo].[Postulacion]  WITH CHECK ADD  CONSTRAINT [FK_Postulacion_OfertaExterna] FOREIGN KEY([IDOfertaExterna])
+REFERENCES [dbo].[OfertaExterna] ([ID])
+GO
+ALTER TABLE [dbo].[Postulacion] CHECK CONSTRAINT [FK_Postulacion_OfertaExterna]
+GO
+ALTER TABLE [dbo].[Postulacion]  WITH CHECK ADD  CONSTRAINT [FK_Postulacion_OfertaLaboral] FOREIGN KEY([IDOfertaLaboral])
+REFERENCES [dbo].[OfertaLaboral] ([ID])
+GO
+ALTER TABLE [dbo].[Postulacion] CHECK CONSTRAINT [FK_Postulacion_OfertaLaboral]
+GO
+ALTER TABLE [dbo].[Postulacion]  WITH CHECK ADD  CONSTRAINT [FK_Postulacion_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Postulacion] CHECK CONSTRAINT [FK_Postulacion_Usuario]
+GO
+ALTER TABLE [dbo].[Preferencia]  WITH CHECK ADD  CONSTRAINT [FK_Preferencia_Provincia] FOREIGN KEY([IDProvincia])
+REFERENCES [dbo].[Provincia] ([ID])
+GO
+ALTER TABLE [dbo].[Preferencia] CHECK CONSTRAINT [FK_Preferencia_Provincia]
+GO
+ALTER TABLE [dbo].[Preferencia]  WITH CHECK ADD  CONSTRAINT [FK_Preferencia_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Preferencia] CHECK CONSTRAINT [FK_Preferencia_Usuario]
+GO
+ALTER TABLE [dbo].[Provincia]  WITH CHECK ADD  CONSTRAINT [FK_Provincia_Pais] FOREIGN KEY([IDPais])
+REFERENCES [dbo].[Pais] ([ID])
+GO
+ALTER TABLE [dbo].[Provincia] CHECK CONSTRAINT [FK_Provincia_Pais]
+GO
+ALTER TABLE [dbo].[RecuperacionClave]  WITH CHECK ADD  CONSTRAINT [FK_RecuperacionClave_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[RecuperacionClave] CHECK CONSTRAINT [FK_RecuperacionClave_Usuario]
+GO
+ALTER TABLE [dbo].[UsuarioEducacion]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioEducacion_Educacion] FOREIGN KEY([IDEducacion])
+REFERENCES [dbo].[Educacion] ([ID])
+GO
+ALTER TABLE [dbo].[UsuarioEducacion] CHECK CONSTRAINT [FK_UsuarioEducacion_Educacion]
+GO
+ALTER TABLE [dbo].[UsuarioEducacion]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioEducacion_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[UsuarioEducacion] CHECK CONSTRAINT [FK_UsuarioEducacion_Usuario]
+GO
+ALTER TABLE [dbo].[UsuarioHabilidad]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioHabilidad_Habilidad] FOREIGN KEY([IDHabilidad])
+REFERENCES [dbo].[Habilidad] ([ID])
+GO
+ALTER TABLE [dbo].[UsuarioHabilidad] CHECK CONSTRAINT [FK_UsuarioHabilidad_Habilidad]
+GO
+ALTER TABLE [dbo].[UsuarioHabilidad]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioHabilidad_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[UsuarioHabilidad] CHECK CONSTRAINT [FK_UsuarioHabilidad_Usuario]
+GO
+ALTER TABLE [dbo].[UsuarioIdioma]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioIdioma_Idioma] FOREIGN KEY([IDIdioma])
+REFERENCES [dbo].[Idioma] ([ID])
+GO
+ALTER TABLE [dbo].[UsuarioIdioma] CHECK CONSTRAINT [FK_UsuarioIdioma_Idioma]
+GO
+ALTER TABLE [dbo].[UsuarioIdioma]  WITH CHECK ADD  CONSTRAINT [FK_UsuarioIdioma_Usuario] FOREIGN KEY([IDUsuario])
+REFERENCES [dbo].[Usuario] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[UsuarioIdioma] CHECK CONSTRAINT [FK_UsuarioIdioma_Usuario]
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_ExperienciaLaboral_Fechas] CHECK  (([Fecha_Finalizacion] IS NULL OR [Fecha_Finalizacion]>=[Fecha_Inicio]))
+GO
+ALTER TABLE [dbo].[ExperienciaLaboral] CHECK CONSTRAINT [CK_ExperienciaLaboral_Fechas]
+GO
+ALTER TABLE [dbo].[FavoritoOferta]  WITH CHECK ADD  CONSTRAINT [CK_FavoritoOferta_Oferta] CHECK  (([IDOfertaLaboral] IS NULL AND [IDOfertaExterna] IS NOT NULL OR [IDOfertaLaboral] IS NOT NULL AND [IDOfertaExterna] IS NULL))
+GO
+ALTER TABLE [dbo].[FavoritoOferta] CHECK CONSTRAINT [CK_FavoritoOferta_Oferta]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Cantidad_Puestos] CHECK  (([Cantidad_Puestos]>=(1)))
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Cantidad_Puestos]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Estado_Publicacion] CHECK  (([Estado_Publicacion]=N'Rechazada' OR [Estado_Publicacion]=N'Aprobada' OR [Estado_Publicacion]=N'Pendiente'))
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Estado_Publicacion]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Fechas] CHECK  (([Fecha_Cierre] IS NULL OR [Fecha_Cierre]>=[Fecha_Publicacion]))
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Fechas]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Modalidad] CHECK  (([Modalidad]=N'Presencial' OR [Modalidad]=N'Híbrido' OR [Modalidad]=N'Remoto'))
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Modalidad]
+GO
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Salario] CHECK  (([Salario] IS NULL OR [Salario]>=(0)))
+GO
+ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Salario]
+GO
+ALTER TABLE [dbo].[Perfil]  WITH CHECK ADD  CONSTRAINT [CK_Perfil_Estado_Busqueda] CHECK  (([Estado_Busqueda]=N'No estoy buscando' OR [Estado_Busqueda]=N'Abierto a propuestas' OR [Estado_Busqueda]=N'Buscando activamente'))
+GO
+ALTER TABLE [dbo].[Perfil] CHECK CONSTRAINT [CK_Perfil_Estado_Busqueda]
+GO
+ALTER TABLE [dbo].[Postulacion]  WITH CHECK ADD  CONSTRAINT [CK_Postulacion_Estado] CHECK  (([Estado]=N'No pasé' OR [Estado]=N'Pasé' OR [Estado]=N'En revisión' OR [Estado]=N'Enviada'))
+GO
+ALTER TABLE [dbo].[Postulacion] CHECK CONSTRAINT [CK_Postulacion_Estado]
+GO
+ALTER TABLE [dbo].[Postulacion]  WITH CHECK ADD  CONSTRAINT [CK_Postulacion_Oferta] CHECK  (([IDOfertaLaboral] IS NULL AND [IDOfertaExterna] IS NOT NULL OR [IDOfertaLaboral] IS NOT NULL AND [IDOfertaExterna] IS NULL))
+GO
+ALTER TABLE [dbo].[Postulacion] CHECK CONSTRAINT [CK_Postulacion_Oferta]
+GO
+ALTER TABLE [dbo].[Preferencia]  WITH CHECK ADD  CONSTRAINT [CK_Preferencia_Salario] CHECK  ((([Salario_Minimo] IS NULL OR [Salario_Minimo]>=(0)) AND ([Salario_Maximo] IS NULL OR [Salario_Minimo] IS NULL OR [Salario_Maximo]>=[Salario_Minimo])))
+GO
+ALTER TABLE [dbo].[Preferencia] CHECK CONSTRAINT [CK_Preferencia_Salario]
+GO
+ALTER TABLE [dbo].[Usuario]  WITH CHECK ADD  CONSTRAINT [CK_Usuario_Tipo] CHECK  (([Tipo]=N'Empresa' OR [Tipo]=N'Persona'))
+GO
+ALTER TABLE [dbo].[Usuario] CHECK CONSTRAINT [CK_Usuario_Tipo]
+GO
+ALTER TABLE [dbo].[UsuarioEducacion]  WITH CHECK ADD  CONSTRAINT [CK_UsuarioEducacion_Fechas] CHECK  (([Fecha_Fin] IS NULL OR [Fecha_Fin]>=[Fecha_Inicio]))
+GO
+ALTER TABLE [dbo].[UsuarioEducacion] CHECK CONSTRAINT [CK_UsuarioEducacion_Fechas]
+GO
+ALTER TABLE [dbo].[UsuarioIdioma]  WITH CHECK ADD  CONSTRAINT [CK_UsuarioIdioma_Nivel] CHECK  (([Nivel]=N'Nativo' OR [Nivel]=N'Avanzado' OR [Nivel]=N'Intermedio' OR [Nivel]=N'Básico'))
+GO
+ALTER TABLE [dbo].[UsuarioIdioma] CHECK CONSTRAINT [CK_UsuarioIdioma_Nivel]
+GO
+USE [master]
+GO
+ALTER DATABASE [Workly] SET  READ_WRITE 
+GO
