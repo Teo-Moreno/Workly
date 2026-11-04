@@ -101,6 +101,11 @@ public class PublicarViewModel
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string Puesto { get; set; } = "";
 
+    [Required(ErrorMessage = "Elegí el sector del puesto")]
+    public int? IDSector { get; set; }
+
+    public List<Sector> Sectores { get; set; } = new();
+
     [StringLength(100, ErrorMessage = "Usá hasta 100 caracteres")]
     public string? EmpresaNombre { get; set; }
 
