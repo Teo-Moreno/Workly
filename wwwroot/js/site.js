@@ -312,6 +312,13 @@
     mostrar(Math.max(pasoConError, 0), pasoConError >= 0);
   });
 
+  const ponerCargando = (boton) => {
+    if (!boton || boton.classList.contains("esta-cargando")) return;
+    boton.classList.add("esta-cargando");
+    boton.setAttribute("aria-disabled", "true");
+    boton.insertAdjacentHTML("afterbegin", `<span class="spinner spinner--sm${boton.matches(".boton--contorno, .boton--texto") ? "" : " spinner--claro"}" aria-hidden="true" data-spinner-boton></span>`);
+  };
+
   $$("form[data-formulario-real]").forEach((formulario) => {
     formulario.addEventListener("submit", (evento) => {
       const pasoVisible = $$("[data-paso]", formulario).find((paso) => !paso.hidden);
@@ -320,12 +327,7 @@
         snackbar("Revisá los campos marcados en rojo.", "error");
         return;
       }
-      const boton = evento.submitter || $("button[type=submit]", formulario);
-      if (boton) {
-        boton.classList.add("esta-cargando");
-        boton.setAttribute("aria-disabled", "true");
-        boton.insertAdjacentHTML("afterbegin", '<span class="spinner spinner--sm spinner--claro" aria-hidden="true"></span>');
-      }
+      ponerCargando(evento.submitter || $("button[type=submit]", formulario));
       formulario.addEventListener("submit", (e) => e.preventDefault(), { once: true });
     });
   });
@@ -348,6 +350,186 @@
     };
     selectorPais.addEventListener("change", actualizar);
     actualizar();
+  });
+
+  const normalizar = (texto) => texto.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  let selecciones = 0;
+
+  $$("select[data-seleccion]").forEach((select) => {
+    const id = `seleccion-${++selecciones}`;
+    const caja = document.createElement("div");
+    caja.className = `seleccion ${select.dataset.seleccion}`.trim();
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.id = `${id}-boton`;
+    boton.className = `${select.className} seleccion__boton`;
+    boton.setAttribute("aria-haspopup", "listbox");
+    boton.setAttribute("aria-expanded", "false");
+    boton.setAttribute("aria-controls", `${id}-lista`);
+    const texto = document.createElement("span");
+    texto.className = "seleccion__texto";
+    boton.append(texto);
+    boton.insertAdjacentHTML("beforeend", icono("chevron-down", 18));
+    const lista = document.createElement("ul");
+    lista.id = `${id}-lista`;
+    lista.className = "seleccion__lista";
+    lista.setAttribute("role", "listbox");
+    lista.tabIndex = -1;
+    lista.hidden = true;
+
+    const etiqueta = select.id ? $(`label[for="${select.id}"]`) : null;
+    if (etiqueta) {
+      etiqueta.id ||= `${id}-etiqueta`;
+      etiqueta.htmlFor = boton.id;
+      boton.setAttribute("aria-labelledby", `${etiqueta.id} ${boton.id}`);
+      lista.setAttribute("aria-labelledby", etiqueta.id);
+    }
+
+    select.before(caja);
+    caja.append(boton, lista, select);
+    select.classList.add("seleccion__nativo");
+    select.tabIndex = -1;
+    select.setAttribute("aria-hidden", "true");
+
+    let opciones = [];
+    let activa = -1;
+    let escrito = "";
+    let reloj;
+
+    const pintar = () => (texto.textContent = select.selectedOptions[0]?.textContent.trim() ?? "");
+    const armar = () => {
+      opciones = [...select.options].filter((opcion) => !opcion.hidden && !opcion.disabled);
+      lista.replaceChildren(...opciones.map((opcion, i) => {
+        const item = document.createElement("li");
+        item.id = `${id}-opcion-${i}`;
+        item.className = "seleccion__opcion";
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", String(opcion.selected));
+        item.dataset.indice = i;
+        item.textContent = opcion.textContent.trim();
+        item.insertAdjacentHTML("beforeend", icono("check", 18));
+        return item;
+      }));
+    };
+    const marcar = (i) => {
+      if (!opciones.length) return;
+      activa = Math.max(0, Math.min(i, opciones.length - 1));
+      [...lista.children].forEach((item, k) => item.classList.toggle("esta-activa", k === activa));
+      const item = lista.children[activa];
+      lista.setAttribute("aria-activedescendant", item.id);
+      item.scrollIntoView({ block: "nearest" });
+    };
+    const abrir = () => {
+      $$(".seleccion.esta-abierta").forEach((otra) => otra !== caja && otra.dispatchEvent(new Event("cerrar")));
+      armar();
+      lista.hidden = false;
+      caja.classList.add("esta-abierta");
+      boton.setAttribute("aria-expanded", "true");
+      lista.focus({ preventScroll: true });
+      marcar(Math.max(opciones.findIndex((opcion) => opcion.selected), 0));
+    };
+    const cerrar = (enfocar = true) => {
+      if (lista.hidden) return;
+      lista.hidden = true;
+      caja.classList.remove("esta-abierta");
+      boton.setAttribute("aria-expanded", "false");
+      lista.removeAttribute("aria-activedescendant");
+      if (enfocar) boton.focus({ preventScroll: true });
+    };
+    const elegir = (i) => {
+      const opcion = opciones[i];
+      cerrar();
+      if (!opcion || opcion.selected) return;
+      select.value = opcion.value;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+    const buscarPorLetra = (letra) => {
+      clearTimeout(reloj);
+      escrito += letra;
+      reloj = setTimeout(() => (escrito = ""), 700);
+      const desde = escrito.length === 1 ? activa + 1 : activa;
+      const i = opciones.map((_, k) => (k + desde) % opciones.length)
+        .find((k) => normalizar(opciones[k].textContent).startsWith(normalizar(escrito)));
+      if (i !== undefined) marcar(i);
+    };
+
+    caja.addEventListener("cerrar", () => cerrar(false));
+    boton.addEventListener("click", () => (lista.hidden ? abrir() : cerrar()));
+    boton.addEventListener("keydown", (evento) => {
+      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(evento.key)) {
+        evento.preventDefault();
+        abrir();
+      }
+    });
+    lista.addEventListener("click", (evento) => {
+      evento.preventDefault();
+      const item = evento.target.closest(".seleccion__opcion");
+      if (item) elegir(Number(item.dataset.indice));
+    });
+    lista.addEventListener("mousemove", (evento) => {
+      const item = evento.target.closest(".seleccion__opcion");
+      if (item && Number(item.dataset.indice) !== activa) marcar(Number(item.dataset.indice));
+    });
+    lista.addEventListener("keydown", (evento) => {
+      const destino = { ArrowDown: activa + 1, ArrowUp: activa - 1, Home: 0, End: opciones.length - 1, PageDown: activa + 8, PageUp: activa - 8 }[evento.key];
+      if (destino !== undefined) {
+        evento.preventDefault();
+        marcar(destino);
+      } else if (evento.key === "Enter" || (evento.key === " " && !escrito)) {
+        evento.preventDefault();
+        elegir(activa);
+      } else if (evento.key === "Escape") {
+        evento.preventDefault();
+        evento.stopPropagation();
+        cerrar();
+      } else if (evento.key === "Tab") {
+        cerrar(false);
+      } else if (evento.key.length === 1 && !evento.ctrlKey && !evento.metaKey && !evento.altKey) {
+        evento.preventDefault();
+        buscarPorLetra(evento.key);
+      }
+    });
+    caja.addEventListener("focusout", (evento) => {
+      if (!caja.contains(evento.relatedTarget)) cerrar(false);
+    });
+    document.addEventListener("change", pintar);
+    pintar();
+  });
+
+  const mostrarCargando = (destino) => {
+    const contenedor = destino && $(destino);
+    if (!contenedor) return;
+    contenedor.classList.add("esta-buscando");
+    contenedor.setAttribute("aria-busy", "true");
+    const aviso = $("[data-cargando-resultados]", contenedor);
+    if (aviso) $("[data-cargando-titulo]", aviso).textContent = aviso.dataset.texto;
+  };
+
+  document.addEventListener("submit", (evento) => {
+    const formulario = evento.target;
+    if (evento.defaultPrevented || !formulario.matches("form[role=search][method=get]")) return;
+    ponerCargando(evento.submitter || $("button[type=submit]", formulario));
+    mostrarCargando(formulario.dataset.cargando);
+  });
+
+  document.addEventListener("click", (evento) => {
+    const enlace = evento.target.closest("a[data-cargando]");
+    if (!enlace || evento.defaultPrevented || evento.button !== 0 || evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey) return;
+    mostrarCargando(enlace.dataset.cargando);
+  });
+
+  window.addEventListener("pageshow", (evento) => {
+    if (!evento.persisted) return;
+    $$(".esta-buscando").forEach((contenedor) => {
+      contenedor.classList.remove("esta-buscando");
+      contenedor.removeAttribute("aria-busy");
+    });
+    $$("[data-spinner-boton]").forEach((spinner) => {
+      const boton = spinner.parentElement;
+      spinner.remove();
+      boton.classList.remove("esta-cargando");
+      boton.removeAttribute("aria-disabled");
+    });
   });
 
   $$("[data-telefono]").forEach((entrada) => {
