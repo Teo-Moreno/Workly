@@ -4,7 +4,7 @@
     ViewData["Title"] = "Iniciar sesión";
 }
 @section Barra {
-    <p class="texto-suave">¿No tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a></p>
+    <p class="text-body-secondary">¿No tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a></p>
 }
 
 <div class="cuenta-tarjeta">
@@ -18,23 +18,23 @@
     <form class="formulario" asp-controller="Cuenta" asp-action="IniciarSesion" method="post" novalidate data-formulario-real>
         <input type="hidden" id="ReturnUrl" name="ReturnUrl" value="@ViewBag.Formulario.ReturnUrl" />
 
-        <div class="campo @Html.ClaseError("Email") @(Html.ErroresGenerales().Any() ? "campo-error campo-sin-mensaje" : "")">
-            <label class="campo-etiqueta" for="Email">Email</label>
+        <div class="campo @(Html.ErroresGenerales().Any() ? "campo-error" : Html.ClaseError("Email"))" data-sin-mensaje="@(Html.ErroresGenerales().Any() ? "" : null)">
+            <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
-                <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
+                <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
         </div>
 
-        <div class="campo @Html.ClaseError("Contrasena") @(Html.ErroresGenerales().Any() ? "campo-error campo-sin-mensaje" : "")">
-            <label class="campo-etiqueta" for="Contrasena">Contraseña</label>
+        <div class="campo @(Html.ErroresGenerales().Any() ? "campo-error" : Html.ClaseError("Contrasena"))" data-sin-mensaje="@(Html.ErroresGenerales().Any() ? "" : null)">
+            <label class="form-label" for="Contrasena">Contraseña</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
-                <input class="campo-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
+                <input class="form-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
                 <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Ingresá tu contraseña")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Ingresá tu contraseña")</span>
         </div>
 
         @if (ViewBag.PideCaptcha == true)
@@ -43,23 +43,22 @@
         }
 
         <div class="fila fila-entre">
-            <label class="casilla casilla-sm">
-                <input id="Recordarme" name="Recordarme" value="true" checked="@ViewBag.Formulario.Recordarme" type="checkbox" />
-                <span class="casilla-caja"><icono nombre="check" /></span>
-                Recordarme
+            <label class="form-check">
+                <input class="form-check-input" id="Recordarme" name="Recordarme" value="true" checked="@ViewBag.Formulario.Recordarme" type="checkbox" />
+                <span class="form-check-label">Recordarme</span>
             </label>
             @if (Mail.Configurado)
             {
-                <a class="enlace texto-chico" asp-controller="Cuenta" asp-action="RecuperarClave">¿Olvidaste tu contraseña?</a>
+                <a class="enlace small" asp-controller="Cuenta" asp-action="RecuperarClave">¿Olvidaste tu contraseña?</a>
             }
         </div>
 
-        <button class="boton boton-lg boton-bloque" type="submit">Iniciar sesión</button>
+        <button class="btn btn-block-lg" type="submit">Iniciar sesión</button>
     </form>
 
     <div class="separador"><span>o</span></div>
 
-    <a class="boton boton-contorno boton-bloque" asp-controller="Cuenta" asp-action="CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
+    <a class="btn btn-outline-block" asp-controller="Cuenta" asp-action="CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
 
     <p class="cuenta-tarjeta-legal">Al ingresar aceptás los <a class="enlace" asp-controller="Home" asp-action="Terminos">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy">Política de privacidad</a> de Workly.</p>
 </div>

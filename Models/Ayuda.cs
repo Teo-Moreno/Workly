@@ -2,7 +2,10 @@ namespace Workly.Models;
 
 public record CategoriaAyuda(string Id, string Nombre, string Icono, string Texto);
 
-public record PreguntaAyuda(string Categoria, string Pregunta, string Respuesta);
+public record PreguntaAyuda(string Categoria, string Pregunta, string Respuesta)
+{
+    public string Id => "pregunta-" + Array.IndexOf(Ayuda.Preguntas, this);
+}
 
 public static class Ayuda
 {

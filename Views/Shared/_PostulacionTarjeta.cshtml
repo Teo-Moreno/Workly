@@ -8,24 +8,24 @@
         <span class="postulacion-arrastre" aria-hidden="true"><icono nombre="drag" tamano="18" /></span>
     </div>
 
-    <span class="tag">@Model.Fuente</span>
+    <span class="badge tag">@Model.Fuente</span>
 
     <form class="postulacion-estado" asp-controller="Postulaciones" asp-action="CambiarEstado" asp-route-id="@Model.ID" method="post" data-enviar-al-cambiar>
-        <label class="solo-lectores" for="estado-@Model.ID">Etapa de @Model.Titulo</label>
-        <select class="campo-control campo-control-sm" id="estado-@Model.ID" name="estado" data-estado-postulacion>
+        <label class="visually-hidden" for="estado-@Model.ID">Etapa de @Model.Titulo</label>
+        <select class="form-select form-select-sm" id="estado-@Model.ID" name="estado" data-estado-postulacion>
             @foreach (var etapa in Catalogos.EstadosPostulacion)
             {
                 <option selected="@(etapa.Estado == Model.Estado)">@etapa.Estado</option>
             }
         </select>
-        <noscript><button class="boton boton-sm" type="submit">Mover</button></noscript>
+        <noscript><button class="btn btn-sm" type="submit">Mover</button></noscript>
     </form>
 
     <div class="postulacion-pie">
         <span>@Model.FechaTexto</span>
         <form asp-controller="Postulaciones" asp-action="Eliminar" asp-route-id="@Model.ID" method="post"
               data-confirmar="@(Model.EsExterna ? "¿La sacamos de tu tablero?" : "¿La sacamos de tu tablero? Quien publicó la búsqueda deja de verte entre sus postulantes.")">
-            <button class="boton boton-texto boton-sm" type="submit">Quitar</button>
+            <button class="btn btn-link-sm" type="submit">Quitar</button>
         </form>
     </div>
 </article>

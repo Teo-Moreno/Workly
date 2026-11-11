@@ -1,7 +1,7 @@
 <div class="campo @(Model.Error != null ? "campo-error" : Html.ClaseError((string)Model.Nombre))">
-    <label class="campo-etiqueta" for="@Model.Id">@Model.Etiqueta</label>
+    <label class="form-label" for="@Model.Id">@Model.Etiqueta</label>
     <div class="selector-mes" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
-        <input class="campo-control selector-mes-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
+        <input class="form-control selector-mes-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
                inputmode="numeric" maxlength="7" autocomplete="off" pattern="(0[1-9]|1[0-2])/(19|20)[0-9]{2}" required="@Model.Requerido"
                data-selector-mes-entrada />
         <button class="selector-mes-abrir" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir>
@@ -23,5 +23,5 @@
             </div>
         </div>
     </div>
-    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@(Model.Error ?? Html.MensajeError((string)Model.Nombre, "Elegí el mes y el año (MM/AAAA)"))</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@(Model.Error ?? Html.MensajeError((string)Model.Nombre, "Elegí el mes y el año (MM/AAAA)"))</span>
 </div>

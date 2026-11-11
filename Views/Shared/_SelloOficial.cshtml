@@ -1,8 +1,8 @@
 @if (Model.EsOficial)
 {
-    <span class="sello sello-oficial" title="@(Model.EsExterna ? "Publicada por la empresa en otro sitio" : "Publicada por una empresa registrada con su CUIT")"><icono nombre="circle-check" tamano="14" />Oficial</span>
+    <span class="badge sello-oficial" title="@(Model.EsExterna ? "Publicada por la empresa en otro sitio" : "Publicada por una empresa registrada con su CUIT")"><icono nombre="circle-check" tamano="14" />Oficial</span>
 }
 else
 {
-    <span class="sello" title="Publicada por una persona y revisada por Workly">No oficial</span>
+    <span class="badge sello" title="Publicada por una persona y revisada por Workly">No oficial</span>
 }

@@ -1,7 +1,7 @@
 <div class="formulario-fila" data-ubicacion>
     <div class="campo @Html.ClaseError((string)Model.NombrePais)">
-        <label class="campo-etiqueta" for="@Model.IdPais">País</label>
-        <select class="campo-control" id="@Model.IdPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
+        <label class="form-label" for="@Model.IdPais">País</label>
+        <select class="form-select" id="@Model.IdPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
             @if (Model.Paises.Count != 1)
             {
                 <option value="">Elegí el país</option>
@@ -11,17 +11,17 @@
                 <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
             }
         </select>
-        <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError((string)Model.NombrePais, "Elegí el país")</span>
+        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError((string)Model.NombrePais, "Elegí el país")</span>
     </div>
     <div class="campo @Html.ClaseError((string)Model.NombreProvincia)">
-        <label class="campo-etiqueta" for="@Model.IdProvincia">@Model.EtiquetaProvincia</label>
-        <select class="campo-control" id="@Model.IdProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
+        <label class="form-label" for="@Model.IdProvincia">@Model.EtiquetaProvincia</label>
+        <select class="form-select" id="@Model.IdProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
             <option value="">@(Model.TodoElPais ? "Todo el país" : "Elegí la provincia")</option>
             @foreach (Provincia provincia in Model.Provincias)
             {
                 <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == Model.IDProvincia)">@provincia.Nombre</option>
             }
         </select>
-        <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError((string)Model.NombreProvincia, "Elegí la provincia")</span>
+        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError((string)Model.NombreProvincia, "Elegí la provincia")</span>
     </div>
 </div>

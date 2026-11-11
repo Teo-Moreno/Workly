@@ -17,7 +17,7 @@ public static class Vistas
     public static string Activo(this ViewContext vista, string controlador) => vista.Actual(controlador) != null ? "esta-activo" : "";
 
     public static string ClaseLink(this ViewContext vista, string controlador, string? accion = null) =>
-        (accion == null ? vista.Actual(controlador) : vista.ActualAccion(controlador, accion)) != null ? "navbar-link esta-activo" : "navbar-link";
+        (accion == null ? vista.Actual(controlador) : vista.ActualAccion(controlador, accion)) != null ? "nav-link active" : "nav-link";
 
     public static string Volver(this ViewContext vista) =>
         vista.ViewData["Volver"] as string ?? (vista.HttpContext.Request.Path + vista.HttpContext.Request.QueryString);
@@ -74,7 +74,7 @@ public class LogoEmpresa
     {
         Logo = logo;
         Nombre = nombre;
-        Clases = clases;
+        Clases = string.IsNullOrWhiteSpace(clases) ? "logo-empresa" : clases;
     }
 
     public string? Logo { get; }
