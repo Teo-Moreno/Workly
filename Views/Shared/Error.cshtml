@@ -1,20 +1,19 @@
-@model ErrorViewModel
 @{
     ViewData["Title"] = "Algo salió mal";
 }
 
 <section class="contenedor error-pagina">
-    <span class="caja-icono caja-icono--acento error-pagina__icono"><icono nombre="warning-outline" /></span>
+    <span class="caja-icono caja-icono-acento error-pagina-icono"><icono nombre="warning-outline" /></span>
     <h1 class="texto-titulo-1">Algo salió mal</h1>
     <p class="texto-bajada">No pudimos procesar tu pedido. Probá de nuevo en unos minutos o volvé al inicio.</p>
 
-    @if (Model.ShowRequestId)
+    @if (!string.IsNullOrEmpty(ViewBag.CodigoSolicitud))
     {
-        <p class="texto-chico texto-suave">Código de la solicitud: <code>@Model.RequestId</code></p>
+        <p class="texto-chico texto-suave">Código de la solicitud: <code>@ViewBag.CodigoSolicitud</code></p>
     }
 
-    <div class="fila fila--envolver">
+    <div class="fila fila-envolver">
         <a class="boton" asp-controller="Home" asp-action="Index">Volver al inicio</a>
-        <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Ayuda">Ir a la ayuda</a>
+        <a class="boton boton-contorno" asp-controller="Perfil" asp-action="Ayuda">Ir a la ayuda</a>
     </div>
 </section>

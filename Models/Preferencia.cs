@@ -21,6 +21,12 @@ public class Preferencia
 
     public string? Provincia { get; set; }
 
+    public string SalarioTexto =>
+        Salario_Minimo != null && Salario_Maximo != null ? $"{Textos.Pesos(Salario_Minimo.Value)} – {Textos.Pesos(Salario_Maximo.Value)}"
+        : Salario_Minimo != null ? "Desde " + Textos.Pesos(Salario_Minimo.Value)
+        : Salario_Maximo != null ? "Hasta " + Textos.Pesos(Salario_Maximo.Value)
+        : "";
+
     public List<string> ListaNiveles => Lista(Niveles);
     public List<string> ListaModalidades => Lista(Modalidades);
 

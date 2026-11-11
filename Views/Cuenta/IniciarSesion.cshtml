@@ -1,52 +1,51 @@
-@model LoginViewModel
 @inject Correo Mail
+@inject Captcha Generador
 @{
     ViewData["Title"] = "Iniciar sesión";
-    var hayErrorGeneral = Html.ErroresGenerales().Any();
 }
 @section Barra {
     <p class="texto-suave">¿No tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a></p>
 }
 
 <div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta__titulo">Iniciá sesión</h1>
-    <p class="cuenta-tarjeta__bajada">Seguí tu búsqueda donde la dejaste.</p>
+    <h1 class="cuenta-tarjeta-titulo">Iniciá sesión</h1>
+    <p class="cuenta-tarjeta-bajada">Seguí tu búsqueda donde la dejaste.</p>
 
     <partial name="_ErroresFormulario" />
 
-    <partial name="_BotonesExternos" model='("Iniciar sesión", (string?)null, Model.ReturnUrl)' />
+    <partial name="_BotonesExternos" model='new BotonesExternos("Iniciar sesión", null, ViewBag.Formulario.ReturnUrl)' />
 
     <form class="formulario" asp-controller="Cuenta" asp-action="IniciarSesion" method="post" novalidate data-formulario-real>
-        <input type="hidden" asp-for="ReturnUrl" />
+        <input type="hidden" id="ReturnUrl" name="ReturnUrl" value="@ViewBag.Formulario.ReturnUrl" />
 
-        <div class="campo @Html.ClaseError(nameof(Model.Email)) @(hayErrorGeneral ? "campo--error campo--sin-mensaje" : "")">
-            <label class="campo__etiqueta" asp-for="Email">Email</label>
+        <div class="campo @Html.ClaseError("Email") @(Html.ErroresGenerales().Any() ? "campo-error campo-sin-mensaje" : "")">
+            <label class="campo-etiqueta" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
-                <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
+                <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
         </div>
 
-        <div class="campo @Html.ClaseError(nameof(Model.Contrasena)) @(hayErrorGeneral ? "campo--error campo--sin-mensaje" : "")">
-            <label class="campo__etiqueta" asp-for="Contrasena">Contraseña</label>
+        <div class="campo @Html.ClaseError("Contrasena") @(Html.ErroresGenerales().Any() ? "campo-error campo-sin-mensaje" : "")">
+            <label class="campo-etiqueta" for="Contrasena">Contraseña</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
-                <input class="campo__control" asp-for="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
-                <button class="control-con-icono__boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                <input class="campo-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
+                <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
-            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Contrasena), "Ingresá tu contraseña")</span>
+            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Ingresá tu contraseña")</span>
         </div>
 
         @if (ViewBag.PideCaptcha == true)
         {
-            <partial name="_Captcha" />
+            <partial name="_Captcha" model="Generador.Nuevo()" />
         }
 
-        <div class="fila fila--entre">
-            <label class="casilla casilla--sm">
-                <input asp-for="Recordarme" type="checkbox" />
-                <span class="casilla__caja"><icono nombre="check" /></span>
+        <div class="fila fila-entre">
+            <label class="casilla casilla-sm">
+                <input id="Recordarme" name="Recordarme" value="true" checked="@ViewBag.Formulario.Recordarme" type="checkbox" />
+                <span class="casilla-caja"><icono nombre="check" /></span>
                 Recordarme
             </label>
             @if (Mail.Configurado)
@@ -55,12 +54,12 @@
             }
         </div>
 
-        <button class="boton boton--lg boton--bloque" type="submit">Iniciar sesión</button>
+        <button class="boton boton-lg boton-bloque" type="submit">Iniciar sesión</button>
     </form>
 
     <div class="separador"><span>o</span></div>
 
-    <a class="boton boton--contorno boton--bloque" asp-controller="Cuenta" asp-action="CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
+    <a class="boton boton-contorno boton-bloque" asp-controller="Cuenta" asp-action="CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
 
-    <p class="cuenta-tarjeta__legal">Al ingresar aceptás los <a class="enlace" asp-controller="Home" asp-action="Terminos">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy">Política de privacidad</a> de Workly.</p>
+    <p class="cuenta-tarjeta-legal">Al ingresar aceptás los <a class="enlace" asp-controller="Home" asp-action="Terminos">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy">Política de privacidad</a> de Workly.</p>
 </div>

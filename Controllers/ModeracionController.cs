@@ -25,11 +25,9 @@ public class ModeracionController : Controller
 
     public IActionResult Index()
     {
-        return View(new ModeracionViewModel
-        {
-            Pendientes = BD.ObtenerOfertasPendientes(),
-            Revisadas = BD.ObtenerOfertasRevisadas(20)
-        });
+        ViewBag.Pendientes = BD.ObtenerOfertasPendientes();
+        ViewBag.Revisadas = BD.ObtenerOfertasRevisadas(20);
+        return View();
     }
 
     public IActionResult Revisar(int id)
@@ -39,12 +37,13 @@ public class ModeracionController : Controller
         {
             return NotFound();
         }
-        return View("~/Views/Empleos/Detalle.cshtml", new OfertaDetalleViewModel
-        {
-            Oferta = oferta,
-            Empresa = oferta.IDEmpresa.HasValue ? BD.ObtenerEmpresa(oferta.IDEmpresa.Value) : null,
-            EsRevision = true
-        });
+        ViewBag.Oferta = oferta;
+        ViewBag.Empresa = oferta.IDEmpresa.HasValue ? BD.ObtenerEmpresa(oferta.IDEmpresa.Value) : null;
+        ViewBag.EsPropia = false;
+        ViewBag.EsRevision = true;
+        ViewBag.PuedePostular = false;
+        ViewBag.TieneCV = false;
+        return View("~/Views/Empleos/Detalle.cshtml");
     }
 
     [HttpPost]

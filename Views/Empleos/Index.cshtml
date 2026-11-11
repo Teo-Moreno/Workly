@@ -1,132 +1,126 @@
-@model BuscarTrabajoViewModel
 @{
     ViewData["Title"] = "Buscar trabajo";
-    var consulta = Context.Request.Query.Where(q => q.Key != "id").SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
-    string ConOferta(string clave) => Url.Action("Index", "Empleos") + "?" + string.Join("&", consulta.Append("id=" + clave));
-    var volver = Context.Request.Path + Context.Request.QueryString;
-    var titulo = Model.Ofertas.Count == 0 ? "Sin resultados"
-        : $"{Model.Ofertas.Count} {(Model.Ofertas.Count == 1 ? "oferta" : "ofertas")}" + (Model.BuscoAlgo ? $" para “{Model.Q}”" : "");
 }
 
 <div class="contenedor seccion-app">
     <header class="encabezado-pagina">
-        <h1 class="encabezado-pagina__titulo">Buscar trabajo</h1>
-        <p class="encabezado-pagina__bajada">Buscamos en las búsquedas publicadas en Workly y en otros sitios de empleo a la vez.</p>
+        <h1 class="encabezado-pagina-titulo">Buscar trabajo</h1>
+        <p class="encabezado-pagina-bajada">Buscamos en las búsquedas publicadas en Workly y en otros sitios de empleo a la vez.</p>
     </header>
 
-    <form class="buscador buscador--app" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search" data-cargando="#resultados-busqueda">
-        <label class="buscador__campo">
+    <form class="buscador buscador-app" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search" data-cargando="#resultados-busqueda">
+        <label class="buscador-campo">
             <icono nombre="search" />
-            <span class="buscador__textos">
-                <span class="buscador__etiqueta">Puesto o palabra clave</span>
-                <input class="buscador__input" type="search" name="Q" value="@Model.Q" autocomplete="off" placeholder="¿Qué trabajo buscás?" maxlength="100" />
+            <span class="buscador-textos">
+                <span class="buscador-etiqueta">Puesto o palabra clave</span>
+                <input class="buscador-input" type="search" name="Q" value="@ViewBag.Busqueda.Q" autocomplete="off" placeholder="¿Qué trabajo buscás?" maxlength="100" />
             </span>
         </label>
-        <span class="buscador__divisor" aria-hidden="true"></span>
-        <div class="buscador__campo" data-ubicacion>
+        <span class="buscador-divisor" aria-hidden="true"></span>
+        <div class="buscador-campo" data-ubicacion>
             <icono nombre="near-me" />
-            <span class="buscador__textos">
-                <label class="buscador__etiqueta" for="buscar-pais">País</label>
-                <select class="buscador__input buscador__select" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
-                    @foreach (var pais in Model.Paises)
+            <span class="buscador-textos">
+                <label class="buscador-etiqueta" for="buscar-pais">País</label>
+                <select class="buscador-input buscador-select" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
+                    @foreach (Pais pais in ViewBag.Busqueda.Paises)
                     {
-                        <option value="@pais.ID" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
+                        <option value="@pais.ID" selected="@(pais.ID == ViewBag.Busqueda.IDPais)">@pais.Nombre</option>
                     }
                 </select>
             </span>
         </div>
-        <span class="buscador__divisor" aria-hidden="true"></span>
-        <div class="buscador__campo">
+        <span class="buscador-divisor" aria-hidden="true"></span>
+        <div class="buscador-campo">
             <icono nombre="building" />
-            <span class="buscador__textos">
-                <label class="buscador__etiqueta" for="buscar-provincia">Provincia</label>
-                <select class="buscador__input buscador__select" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
+            <span class="buscador-textos">
+                <label class="buscador-etiqueta" for="buscar-provincia">Provincia</label>
+                <select class="buscador-input buscador-select" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
                     <option value="">Todo el país</option>
-                    @foreach (var provincia in Model.Provincias)
+                    @foreach (Provincia provincia in ViewBag.Busqueda.Provincias)
                     {
-                        <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == Model.IDProvincia)">@provincia.Nombre</option>
+                        <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == ViewBag.Busqueda.IDProvincia)">@provincia.Nombre</option>
                     }
                 </select>
             </span>
         </div>
-        <button class="boton boton--lg buscador__boton" type="submit"><icono nombre="search" />Buscar</button>
+        <button class="boton boton-lg buscador-boton" type="submit"><icono nombre="search" />Buscar</button>
     </form>
 
     <div class="buscar">
-        <button class="boton boton--contorno buscar__ver-filtros" type="button" aria-expanded="false" aria-controls="filtros" data-alternar="filtros">
-            <icono nombre="filter-outline" />Filtros@(Model.CantidadFiltros > 0 ? $" ({Model.CantidadFiltros})" : "")
+        <button class="boton boton-contorno buscar-ver-filtros" type="button" aria-expanded="false" aria-controls="filtros" data-alternar="filtros">
+            <icono nombre="filter-outline" />Filtros@(ViewBag.Busqueda.CantidadFiltros > 0 ? $" ({ViewBag.Busqueda.CantidadFiltros})" : "")
         </button>
 
         <aside class="filtros" id="filtros" aria-label="Filtros de búsqueda">
-            <div class="filtros__cabecera">
-                <h2 class="filtros__titulo">Filtros</h2>
-                @if (Model.CantidadFiltros > 0)
+            <div class="filtros-cabecera">
+                <h2 class="filtros-titulo">Filtros</h2>
+                @if (ViewBag.Busqueda.CantidadFiltros > 0)
                 {
-                    <a class="boton boton--texto" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q" asp-route-IDPais="@Model.IDPais" asp-route-IDProvincia="@Model.IDProvincia" data-cargando="#resultados-busqueda">Limpiar</a>
+                    <a class="boton boton-texto" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" asp-route-IDPais="@ViewBag.Busqueda.IDPais" asp-route-IDProvincia="@ViewBag.Busqueda.IDProvincia" data-cargando="#resultados-busqueda">Limpiar</a>
                 }
             </div>
 
-            <fieldset class="filtros__grupo">
-                <legend class="filtros__subtitulo">Modalidad</legend>
+            <fieldset class="filtros-grupo">
+                <legend class="filtros-subtitulo">Modalidad</legend>
                 @foreach (var modalidad in Catalogos.Modalidades)
                 {
-                    <label class="filtros__opcion">
-                        <span class="casilla casilla--sm">
-                            <input type="checkbox" form="form-buscar" name="Modalidad" value="@modalidad" checked="@Model.Modalidad.Contains(modalidad)" data-enviar-al-cambiar />
-                            <span class="casilla__caja"><icono nombre="check" /></span>
+                    <label class="filtros-opcion">
+                        <span class="casilla casilla-sm">
+                            <input type="checkbox" form="form-buscar" name="Modalidad" value="@modalidad" checked="@ViewBag.Busqueda.Modalidad.Contains(modalidad)" data-enviar-al-cambiar />
+                            <span class="casilla-caja"><icono nombre="check" /></span>
                             @modalidad
                         </span>
                     </label>
                 }
             </fieldset>
 
-            <fieldset class="filtros__grupo">
-                <legend class="filtros__subtitulo">Tipo de empleo</legend>
+            <fieldset class="filtros-grupo">
+                <legend class="filtros-subtitulo">Tipo de empleo</legend>
                 @foreach (var (tipo, _) in Catalogos.TiposEmpleo)
                 {
-                    <label class="filtros__opcion">
-                        <span class="casilla casilla--sm">
-                            <input type="checkbox" form="form-buscar" name="Tipo" value="@tipo" checked="@Model.Tipo.Contains(tipo)" data-enviar-al-cambiar />
-                            <span class="casilla__caja"><icono nombre="check" /></span>
+                    <label class="filtros-opcion">
+                        <span class="casilla casilla-sm">
+                            <input type="checkbox" form="form-buscar" name="Tipo" value="@tipo" checked="@ViewBag.Busqueda.Tipo.Contains(tipo)" data-enviar-al-cambiar />
+                            <span class="casilla-caja"><icono nombre="check" /></span>
                             @tipo
                         </span>
                     </label>
                 }
             </fieldset>
 
-            <fieldset class="filtros__grupo">
-                <legend class="filtros__subtitulo">Fecha de publicación</legend>
-                <label class="filtros__opcion">
-                    <span class="opcion opcion--sm">
-                        <input type="radio" form="form-buscar" name="Fecha" value="" checked="@(Model.Fecha == null)" data-enviar-al-cambiar />
-                        <span class="opcion__circulo"></span>
+            <fieldset class="filtros-grupo">
+                <legend class="filtros-subtitulo">Fecha de publicación</legend>
+                <label class="filtros-opcion">
+                    <span class="opcion opcion-sm">
+                        <input type="radio" form="form-buscar" name="Fecha" value="" checked="@(ViewBag.Busqueda.Fecha == null)" data-enviar-al-cambiar />
+                        <span class="opcion-circulo"></span>
                         Cualquier fecha
                     </span>
                 </label>
                 @foreach (var (valor, texto, _) in Catalogos.FechasPublicacion)
                 {
-                    <label class="filtros__opcion">
-                        <span class="opcion opcion--sm">
-                            <input type="radio" form="form-buscar" name="Fecha" value="@valor" checked="@(Model.Fecha == valor)" data-enviar-al-cambiar />
-                            <span class="opcion__circulo"></span>
+                    <label class="filtros-opcion">
+                        <span class="opcion opcion-sm">
+                            <input type="radio" form="form-buscar" name="Fecha" value="@valor" checked="@(ViewBag.Busqueda.Fecha == valor)" data-enviar-al-cambiar />
+                            <span class="opcion-circulo"></span>
                             @texto
                         </span>
                     </label>
                 }
             </fieldset>
 
-            <noscript><button class="boton boton--bloque" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
+            <noscript><button class="boton boton-bloque" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
         </aside>
 
         <section class="resultados" id="resultados-busqueda" aria-labelledby="resultados-titulo">
-            <div class="resultados__cabecera">
-                <h2 class="resultados__titulo" id="resultados-titulo">@titulo</h2>
+            <div class="resultados-cabecera">
+                <h2 class="resultados-titulo" id="resultados-titulo">@ViewBag.Busqueda.Titulo</h2>
                 <div class="ordenar">
                     <label for="buscar-orden">Ordenar por:</label>
-                    <select class="campo__control campo__control--sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar data-seleccion="seleccion--derecha">
+                    <select class="campo-control campo-control-sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar data-seleccion="seleccion-derecha">
                         @foreach (var (valor, texto) in Catalogos.Ordenes)
                         {
-                            <option value="@valor" selected="@(Model.Orden == valor)">@texto</option>
+                            <option value="@valor" selected="@(ViewBag.Busqueda.Orden == valor)">@texto</option>
                         }
                     </select>
                 </div>
@@ -134,58 +128,58 @@
 
             <partial name="_CargandoResultados" model='"Buscando ofertas…"' />
 
-            @if (Model.ErrorExternas)
+            @if (ViewBag.Busqueda.ErrorExternas)
             {
                 <partial name="_AvisoExternas" />
             }
-            @if (!Model.BuscoAlgo && Model.Ofertas.Count > 0)
+            @if (!ViewBag.Busqueda.BuscoAlgo && ViewBag.Busqueda.Ofertas.Count > 0)
             {
-                <p class="texto-chico texto-suave">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @(Model.Provincias.FirstOrDefault(p => p.ID == Model.IDProvincia)?.Nombre ?? Model.Paises.FirstOrDefault(p => p.ID == Model.IDPais)?.Nombre). Escribí un puesto para buscar uno en particular.</p>
+                <p class="texto-chico texto-suave">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @ViewBag.Busqueda.Lugar. Escribí un puesto para buscar uno en particular.</p>
             }
 
-            @if (Model.Ofertas.Count == 0)
+            @if (ViewBag.Busqueda.Ofertas.Count == 0)
             {
                 <div class="estado-vacio">
-                    <span class="caja-icono caja-icono--lg"><icono nombre="search" /></span>
-                    @if (Model.BuscoAlgo)
+                    <span class="caja-icono caja-icono-lg"><icono nombre="search" /></span>
+                    @if (ViewBag.Busqueda.BuscoAlgo)
                     {
-                        <h3 class="estado-vacio__titulo">No encontramos ningún puesto con ese nombre</h3>
-                        <p>Revisá cómo lo escribiste, probá con otra palabra@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
-                        @if (Model.CantidadFiltros > 0 || Model.IDProvincia != null)
+                        <h3 class="estado-vacio-titulo">No encontramos ningún puesto con ese nombre</h3>
+                        <p>Revisá cómo lo escribiste, probá con otra palabra@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
+                        @if (ViewBag.Busqueda.HayFiltros)
                         {
-                            <a class="boton boton--contorno" asp-controller="Empleos" asp-action="Index" asp-route-Q="@Model.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
+                            <a class="boton boton-contorno" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
                         }
                     }
                     else
                     {
-                        <h3 class="estado-vacio__titulo">No encontramos ofertas@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? " con esos filtros" : "")</h3>
-                        <p>Escribí arriba el puesto que buscás@(Model.CantidadFiltros > 0 || Model.IDProvincia != null ? ", sacá algún filtro o buscá en todo el país" : "").</p>
+                        <h3 class="estado-vacio-titulo">No encontramos ofertas@(ViewBag.Busqueda.HayFiltros ? " con esos filtros" : "")</h3>
+                        <p>Escribí arriba el puesto que buscás@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : "").</p>
                     }
                 </div>
             }
             else
             {
-                <div class="resultados__lista" data-resultados>
-                    @foreach (var oferta in Model.Ofertas)
+                <div class="resultados-lista" data-resultados>
+                    @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
                     {
-                        <partial name="_OfertaTarjeta" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Seleccionada", oferta == Model.Seleccionada } }' />
+                        <partial name="_OfertaTarjeta" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Seleccionada", (object)ViewBag.Busqueda.EsSeleccionada(oferta) } }' />
                     }
                 </div>
-                @if (Model.CursorSiguiente != null)
+                @if (ViewBag.Busqueda.CursorSiguiente != null)
                 {
-                    <div class="resultados__mas">
-                        <a class="boton boton--contorno" href="@(Url.Action("Index", "Empleos") + "?" + string.Join("&", consulta.Where(c => !c.StartsWith("Cursor=")).Append("Cursor=" + Uri.EscapeDataString(Model.CursorSiguiente))))" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
+                    <div class="resultados-mas">
+                        <a class="boton boton-contorno" href="@ViewBag.Busqueda.UrlMas" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
                     </div>
                 }
             }
         </section>
 
-        @if (Model.Ofertas.Count > 0)
+        @if (ViewBag.Busqueda.Ofertas.Count > 0)
         {
-            <div class="buscar__detalle" data-detalles>
-                @foreach (var oferta in Model.Ofertas)
+            <div class="buscar-detalle" data-detalles>
+                @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
                 {
-                    <partial name="_OfertaDetallePanel" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Visible", oferta == Model.Seleccionada }, { "Volver", ConOferta(oferta.Clave) } }' />
+                    <partial name="_OfertaDetallePanel" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Visible", (object)ViewBag.Busqueda.EsSeleccionada(oferta) }, { "Volver", (object)ViewBag.Busqueda.ConOferta(oferta.Clave) } }' />
                 }
             </div>
         }

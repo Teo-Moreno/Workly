@@ -17,11 +17,9 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return View(new LandingViewModel
-        {
-            Puestos = await _jsearch.PuestosParaAnimacion(),
-            Empresas = BD.ObtenerEmpresasConBusquedas(12)
-        });
+        ViewBag.Puestos = await _jsearch.PuestosParaAnimacion();
+        ViewBag.Empresas = BD.ObtenerEmpresasConBusquedas(12);
+        return View();
     }
 
     public IActionResult Privacy()
@@ -42,6 +40,7 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        ViewBag.CodigoSolicitud = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+        return View();
     }
 }

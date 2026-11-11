@@ -29,7 +29,8 @@ public class PerfilController : Controller
             return await SesionInvalida();
         }
         modelo.Instituciones = BD.ObtenerInstituciones();
-        return View(modelo);
+        ViewBag.Perfil = modelo;
+        return View();
     }
 
     [HttpPost]
@@ -238,7 +239,8 @@ public class PerfilController : Controller
             SitioWeb = perfil.CV?.Sitio_Web
         };
         CargarCompletar(modelo, perfil);
-        return View(modelo);
+        ViewBag.Completar = modelo;
+        return View();
     }
 
     [HttpPost]
@@ -291,7 +293,8 @@ public class PerfilController : Controller
         }
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            ViewBag.Completar = modelo;
+            return View();
         }
 
         var rutaFoto = await Archivos.GuardarFoto(modelo.Foto, _entorno.WebRootPath);
@@ -324,7 +327,8 @@ public class PerfilController : Controller
             return await SesionInvalida();
         }
         CargarConfiguracion(modelo);
-        return View(modelo);
+        PrepararConfiguracion(modelo, Request.Query["pestana"].ToString(), null);
+        return View();
     }
 
     [HttpPost]
@@ -621,9 +625,27 @@ public class PerfilController : Controller
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
         CargarConfiguracion(modelo);
-        ViewBag.Pestana = pestana;
-        ViewBag.Formulario = formulario;
-        return View(nameof(Configuracion), modelo);
+        PrepararConfiguracion(modelo, pestana, formulario);
+        return View(nameof(Configuracion));
+    }
+
+    private void PrepararConfiguracion(MiPerfilViewModel modelo, string? pestana, object? formulario)
+    {
+        var esEmpresa = modelo.Usuario.EsEmpresa;
+        var pestanas = esEmpresa ? new[] { "cuenta", "seguridad" } : new[] { "cuenta", "busqueda", "seguridad" };
+        var cuenta = formulario as CuentaFormulario;
+        var empresa = formulario as EmpresaFormulario;
+        var busqueda = formulario as BusquedaFormulario;
+        var idPais = cuenta?.IDPais ?? empresa?.IDPais ?? (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais) ?? modelo.Paises.FirstOrDefault()?.ID;
+        ViewBag.Perfil = modelo;
+        ViewBag.EsEmpresa = esEmpresa;
+        ViewBag.Activa = pestanas.Contains(pestana) ? pestana : "cuenta";
+        ViewBag.FormularioCuenta = cuenta;
+        ViewBag.FormularioEmpresa = empresa;
+        ViewBag.IDPais = idPais;
+        ViewBag.CodigoPais = modelo.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
+        ViewBag.CodigoGuardado = modelo.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais))?.Codigo_Telefono;
+        ViewBag.CamposBusqueda = esEmpresa ? null : CamposBusqueda.Desde(modelo, busqueda);
     }
 
     private IActionResult MostrarPerfilConModal(string modal, object formulario)
@@ -636,7 +658,8 @@ public class PerfilController : Controller
         modelo.Instituciones = BD.ObtenerInstituciones();
         ViewBag.ModalAbierto = modal;
         ViewBag.Formulario = formulario;
-        return View(nameof(Index), modelo);
+        ViewBag.Perfil = modelo;
+        return View(nameof(Index));
     }
 
     private IActionResult Volver(string mensaje, string tipo = "exito", string? volver = null)

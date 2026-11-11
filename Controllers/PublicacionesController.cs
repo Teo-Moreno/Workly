@@ -16,11 +16,9 @@ public class PublicacionesController : Controller
 
     public IActionResult Index()
     {
-        return View(new PublicacionesViewModel
-        {
-            Ofertas = BD.ObtenerOfertasPublicadas(User.IdUsuario()),
-            EsEmpresa = User.EsEmpresa()
-        });
+        ViewBag.Ofertas = BD.ObtenerOfertasPublicadas(User.IdUsuario());
+        ViewBag.EsEmpresa = User.EsEmpresa();
+        return View();
     }
 
     [HttpGet]
@@ -28,7 +26,8 @@ public class PublicacionesController : Controller
     {
         var modelo = new PublicarViewModel();
         CargarFormulario(modelo);
-        return View(modelo);
+        ViewBag.Formulario = modelo;
+        return View();
     }
 
     [HttpPost]
@@ -80,7 +79,8 @@ public class PublicacionesController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            ViewBag.Formulario = modelo;
+            return View();
         }
 
         var esPersona = !User.EsEmpresa();
@@ -116,7 +116,9 @@ public class PublicacionesController : Controller
         {
             return NotFound();
         }
-        return View(new PublicacionDetalleViewModel { Oferta = oferta, Postulantes = BD.ObtenerPostulantes(id) });
+        ViewBag.Oferta = oferta;
+        ViewBag.Postulantes = BD.ObtenerPostulantes(id);
+        return View();
     }
 
     public IActionResult Postulante(int id)
@@ -132,7 +134,10 @@ public class PublicacionesController : Controller
         {
             return NotFound();
         }
-        return View(new PostulanteViewModel { IDPostulacion = id, Oferta = oferta, Perfil = perfil });
+        ViewBag.IDPostulacion = id;
+        ViewBag.Oferta = oferta;
+        ViewBag.Perfil = perfil;
+        return View();
     }
 
     public IActionResult CV(int id)

@@ -2,12 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Workly.Models;
 
-public class LandingViewModel
-{
-    public List<string> Puestos { get; set; } = new();
-    public List<Empresa> Empresas { get; set; } = new();
-}
-
 public class BuscarTrabajoViewModel
 {
     public string? Q { get; set; }
@@ -28,29 +22,22 @@ public class BuscarTrabajoViewModel
 
     public bool ErrorExternas { get; set; }
 
+    public List<string> Consulta { get; set; } = new();
+
     public bool BuscoAlgo => !string.IsNullOrWhiteSpace(Q);
     public int CantidadFiltros => Modalidad.Count + Tipo.Count + (Fecha != null ? 1 : 0);
-}
+    public bool HayFiltros => CantidadFiltros > 0 || IDProvincia != null;
 
-public class OfertaDetalleViewModel
-{
-    public Oferta Oferta { get; set; } = new();
-    public Empresa? Empresa { get; set; }
+    public string Titulo => Ofertas.Count == 0 ? "Sin resultados"
+        : $"{Ofertas.Count} {(Ofertas.Count == 1 ? "oferta" : "ofertas")}" + (BuscoAlgo ? $" para “{Q}”" : "");
 
-    public bool EsPropia { get; set; }
+    public string? Lugar => Provincias.FirstOrDefault(p => p.ID == IDProvincia)?.Nombre ?? Paises.FirstOrDefault(p => p.ID == IDPais)?.Nombre;
 
-    public bool EsRevision { get; set; }
+    public string ConOferta(string clave) => "/Empleos?" + string.Join("&", Consulta.Where(c => !c.StartsWith("id=")).Append("id=" + clave));
 
-    public bool PuedePostular { get; set; }
+    public string UrlMas => "/Empleos?" + string.Join("&", Consulta.Where(c => !c.StartsWith("Cursor=") && !c.StartsWith("id=")).Append("Cursor=" + Uri.EscapeDataString(CursorSiguiente ?? "")));
 
-    public bool TieneCV { get; set; }
-}
-
-public class PanelViewModel
-{
-    public MiPerfilViewModel Perfil { get; set; } = new();
-    public List<Oferta> ParaVos { get; set; } = new();
-    public bool ErrorExternas { get; set; }
+    public bool EsSeleccionada(Oferta oferta) => oferta == Seleccionada;
 }
 
 public class EmpresasViewModel
@@ -63,32 +50,6 @@ public class EmpresasViewModel
     public List<Empresa> Empresas { get; set; } = new();
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
-}
-
-public class EmpresaDetalleViewModel
-{
-    public Empresa Empresa { get; set; } = new();
-    public List<Oferta> Ofertas { get; set; } = new();
-    public bool EsPropia { get; set; }
-}
-
-public class PublicacionesViewModel
-{
-    public List<Oferta> Ofertas { get; set; } = new();
-    public bool EsEmpresa { get; set; }
-}
-
-public class PublicacionDetalleViewModel
-{
-    public Oferta Oferta { get; set; } = new();
-    public List<Postulante> Postulantes { get; set; } = new();
-}
-
-public class PostulanteViewModel
-{
-    public int IDPostulacion { get; set; }
-    public Oferta Oferta { get; set; } = new();
-    public MiPerfilViewModel Perfil { get; set; } = new();
 }
 
 public class PublicarViewModel
@@ -140,10 +101,4 @@ public class PublicarViewModel
     public string? EmpresaFija { get; set; }
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
-}
-
-public class ModeracionViewModel
-{
-    public List<Oferta> Pendientes { get; set; } = new();
-    public List<Oferta> Revisadas { get; set; } = new();
 }
