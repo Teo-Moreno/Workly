@@ -8,52 +8,52 @@
     <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 
     <header class="navbar" data-navbar>
-        <div class="contenedor navbar__interior">
+        <div class="contenedor navbar-interior">
             <a class="logo" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
-                <span class="logo__isotipo" aria-hidden="true">W<span class="logo__acento"></span></span>
-                <span class="logo__texto">Workly</span>
+                <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
+                <span class="logo-texto">Workly</span>
             </a>
 
-            <nav class="navbar__links" aria-label="Principal">
-                <a class="navbar__link" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
-                <a class="navbar__link" asp-controller="Empresas" asp-action="Index">Empresas</a>
-                <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
-                <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
+            <nav class="navbar-links" aria-label="Principal">
+                <a class="navbar-link" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+                <a class="navbar-link" asp-controller="Empresas" asp-action="Index">Empresas</a>
+                <a class="navbar-link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
+                <a class="navbar-link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
             </nav>
 
-            <div class="navbar__acciones">
+            <div class="navbar-acciones">
                 @if (User.EstaLogueado())
                 {
-                    <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Index">
-                        <span class="avatar avatar--mini" aria-hidden="true">@if (!string.IsNullOrEmpty(User.Foto())) {<img src="@User.Foto()" alt="" />} else {@User.Iniciales()}</span>@User.Nombre()
+                    <a class="boton boton-contorno" asp-controller="Perfil" asp-action="Index">
+                        <span class="avatar avatar-mini" aria-hidden="true">@if (!string.IsNullOrEmpty(User.Foto())) {<img src="@User.Foto()" alt="" />} else {@User.Iniciales()}</span>@User.Nombre()
                     </a>
                     <a class="boton" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
                 }
                 else
                 {
-                    <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="boton boton-contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
                     <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
                 }
-                <button class="navbar__hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
+                <button class="navbar-hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
                     <icono nombre="menu" etiqueta="Abrir menú" />
                 </button>
             </div>
         </div>
 
-        <nav class="navbar__movil" id="menu-movil" aria-label="Menú móvil">
-            <a class="navbar__link" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
-            <a class="navbar__link" asp-controller="Empresas" asp-action="Index">Empresas</a>
-            <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
-            <a class="navbar__link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
-            <div class="navbar__movil-acciones">
+        <nav class="navbar-movil" id="menu-movil" aria-label="Menú móvil">
+            <a class="navbar-link" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+            <a class="navbar-link" asp-controller="Empresas" asp-action="Index">Empresas</a>
+            <a class="navbar-link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a>
+            <a class="navbar-link" asp-controller="Home" asp-action="Index" asp-fragment="para-empresas">Para empresas</a>
+            <div class="navbar-movil-acciones">
                 @if (User.EstaLogueado())
                 {
-                    <a class="boton boton--contorno" asp-controller="Perfil" asp-action="Index">Mi perfil</a>
+                    <a class="boton boton-contorno" asp-controller="Perfil" asp-action="Index">Mi perfil</a>
                     <a class="boton" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
                 }
                 else
                 {
-                    <a class="boton boton--contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="boton boton-contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
                     <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
                 }
             </div>
@@ -65,13 +65,13 @@
     </main>
 
     <footer class="pie">
-        <div class="contenedor pie__interior">
-            <a class="logo logo--claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
-                <span class="logo__isotipo" aria-hidden="true">W</span>
-                <span class="logo__texto">Workly</span>
+        <div class="contenedor pie-interior">
+            <a class="logo logo-claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
+                <span class="logo-isotipo" aria-hidden="true">W</span>
+                <span class="logo-texto">Workly</span>
             </a>
-            <p class="pie__copy">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
-            <nav class="pie__links" aria-label="Legales y ayuda">
+            <p class="pie-copy">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
+            <nav class="pie-links" aria-label="Legales y ayuda">
                 <a asp-controller="Home" asp-action="Terminos">Términos</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 <a asp-controller="Home" asp-action="Cookies">Cookies</a>

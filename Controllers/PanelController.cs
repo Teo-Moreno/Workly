@@ -27,7 +27,10 @@ public class PanelController : Controller
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
 
-        var modelo = new PanelViewModel { Perfil = perfil };
+        ViewBag.Perfil = perfil;
+        ViewBag.Puesto = perfil.Preferencia.Puesto_Buscado;
+        ViewBag.ErrorExternas = false;
+        ViewBag.ParaVos = new List<Oferta>();
         var puesto = perfil.Preferencia.Puesto_Buscado;
         if (!string.IsNullOrWhiteSpace(puesto))
         {
@@ -43,12 +46,12 @@ public class PanelController : Controller
                 var soloRemoto = modalidades.Count == 1 && modalidades[0] == "Remoto";
                 var resultado = await _jsearch.Buscar($"{puesto} en {provincia?.Nombre ?? pais.Nombre}", pais.Codigo_ISO, soloRemoto,
                                                       Array.Empty<string>(), "month", null);
-                modelo.ErrorExternas = resultado.Error;
+                ViewBag.ErrorExternas = resultado.Error;
                 BD.MarcarPostuladas(resultado.Ofertas, User.IdUsuario());
                 ofertas.AddRange(resultado.Ofertas);
             }
-            modelo.ParaVos = ofertas.Where(o => !o.YaPostulado).Take(6).ToList();
+            ViewBag.ParaVos = ofertas.Where(o => !o.YaPostulado).Take(6).ToList();
         }
-        return View(modelo);
+        return View();
     }
 }

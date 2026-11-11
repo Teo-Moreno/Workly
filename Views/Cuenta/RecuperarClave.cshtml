@@ -1,4 +1,4 @@
-@model RecuperarClaveViewModel
+@inject Captcha Generador
 @{
     ViewData["Title"] = "Recuperar contraseña";
 }
@@ -7,23 +7,23 @@
 }
 
 <div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta__titulo">Creá una contraseña nueva</h1>
-    <p class="cuenta-tarjeta__bajada">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
+    <h1 class="cuenta-tarjeta-titulo">Creá una contraseña nueva</h1>
+    <p class="cuenta-tarjeta-bajada">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
 
     <partial name="_ErroresFormulario" />
 
     <form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
-        <div class="campo @Html.ClaseError(nameof(Model.Email))">
-            <label class="campo__etiqueta" asp-for="Email">Email</label>
+        <div class="campo @Html.ClaseError("Email")">
+            <label class="campo-etiqueta" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
-                <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
+                <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
         </div>
 
-        <partial name="_Captcha" />
+        <partial name="_Captcha" model="Generador.Nuevo()" />
 
-        <button class="boton boton--lg boton--bloque" type="submit"><icono nombre="send" />Mandarme el link</button>
+        <button class="boton boton-lg boton-bloque" type="submit"><icono nombre="send" />Mandarme el link</button>
     </form>
 </div>

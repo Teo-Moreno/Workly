@@ -1,10 +1,7 @@
-@{
-    var errores = Html.ErroresGenerales().ToList();
-}
-@if (errores.Count > 0)
+@if (Html.ErroresGenerales().Any())
 {
-    <div class="snackbar snackbar--error aviso" role="alert" data-error-formulario>
+    <div class="snackbar snackbar-error aviso" role="alert" data-error-formulario>
         <icono nombre="error" />
-        <span class="snackbar__texto">@string.Join(" ", errores)</span>
+        <span class="snackbar-texto">@string.Join(" ", Html.ErroresGenerales())</span>
     </div>
 }

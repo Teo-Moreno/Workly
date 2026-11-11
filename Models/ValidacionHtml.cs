@@ -5,7 +5,7 @@ namespace Workly.Models;
 public static class ValidacionHtml
 {
     public static string ClaseError(this IHtmlHelper html, string campo) =>
-        TieneError(html, campo) ? "campo--error" : "";
+        TieneError(html, campo) ? "campo-error" : "";
 
     public static string MensajeError(this IHtmlHelper html, string campo, string porDefecto) =>
         html.ViewData.ModelState.TryGetValue(campo, out var estado) && estado.Errors.Count > 0

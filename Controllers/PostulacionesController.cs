@@ -13,7 +13,10 @@ public class PostulacionesController : Controller
         {
             return RedirectToAction("Index", "Publicaciones");
         }
-        return View(BD.ObtenerPostulaciones(User.IdUsuario()));
+        var postulaciones = BD.ObtenerPostulaciones(User.IdUsuario());
+        ViewBag.HayPostulaciones = postulaciones.Count > 0;
+        ViewBag.Columnas = ColumnaTablero.Armar(postulaciones);
+        return View();
     }
 
     [HttpPost]

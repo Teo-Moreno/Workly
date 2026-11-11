@@ -1,5 +1,7 @@
 namespace Workly.Models;
 
+public record DatoOferta(string Etiqueta, string Valor);
+
 public class Oferta
 {
     public bool EsExterna { get; set; }
@@ -55,6 +57,46 @@ public class Oferta
         string.Join(" · ", new[] { Ubicacion, Provincia }.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct()) is { Length: > 0 } t ? t : null;
 
     public bool EsOficial => EsExterna || TipoPublicador == Usuario.TipoEmpresa;
+
+    public string Enlace => EsExterna ? "/Empleos/Externa/" + ID : "/Empleos/Detalle/" + ID;
+
+    public bool NoDisponible => !EsExterna && (EstaCerrada || Estado_Publicacion != "Aprobada");
+
+    public string Resumen => string.Join(" · ", new[] { Empresa, UbicacionVisible, SalarioVisible }.Where(t => !string.IsNullOrEmpty(t)));
+
+    public string ResumenPublicada => string.Join(" · ", new[] { Empresa, UbicacionVisible, PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)));
+
+    public List<string> DatosCabecera => new[] { UbicacionVisible, PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)).Select(t => t!).ToList();
+
+    public List<string> ListaPuestos => (Puestos ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    public List<DatoOferta> Datos
+    {
+        get
+        {
+            var datos = new List<DatoOferta>();
+            if (SalarioVisible != null) datos.Add(new DatoOferta("Salario", SalarioVisible));
+            if (!EsExterna) datos.Add(new DatoOferta("Vacantes", Cantidad_Puestos.ToString()));
+            if (Fecha_Cierre.HasValue) datos.Add(new DatoOferta("Recibe postulaciones hasta", Vistas.Fecha(Fecha_Cierre)));
+            return datos;
+        }
+    }
+
+    public string EstadoTexto => Estado_Publicacion switch
+    {
+        "Pendiente" => "En revisión",
+        "Rechazada" => "Rechazada",
+        _ when EstaCerrada => "Cerrada",
+        _ => "Publicada"
+    };
+
+    public string EstadoColor => Estado_Publicacion switch
+    {
+        "Pendiente" => "advertencia",
+        "Rechazada" => "error",
+        _ when EstaCerrada => "gris",
+        _ => "exito"
+    };
 
     public string Fuente => EsExterna ? (string.IsNullOrWhiteSpace(Publicador) ? "otro sitio" : Publicador!) : "Workly";
 }

@@ -19,19 +19,19 @@
     const contenedor = $("[data-snackbars]");
     if (!contenedor) return;
     const elemento = document.createElement("div");
-    elemento.className = `snackbar ${tipo ? `snackbar--${tipo}` : ""}`;
+    elemento.className = `snackbar ${tipo ? `snackbar-${tipo}` : ""}`;
     elemento.setAttribute("role", tipo === "error" ? "alert" : "status");
     elemento.innerHTML = `${icono(iconosSnackbar[tipo] || "info", 22)}
-      <span class="snackbar__texto"></span>
-      <button class="snackbar__cerrar" type="button" aria-label="Cerrar aviso">${icono("close-big", 20)}</button>`;
-    elemento.querySelector(".snackbar__texto").textContent = texto;
+      <span class="snackbar-texto"></span>
+      <button class="snackbar-cerrar" type="button" aria-label="Cerrar aviso">${icono("close-big", 20)}</button>`;
+    elemento.querySelector(".snackbar-texto").textContent = texto;
     contenedor.appendChild(elemento);
 
     const cerrar = () => {
       elemento.classList.add("esta-saliendo");
       elemento.addEventListener("animationend", () => elemento.remove(), { once: true });
     };
-    elemento.querySelector(".snackbar__cerrar").addEventListener("click", cerrar);
+    elemento.querySelector(".snackbar-cerrar").addEventListener("click", cerrar);
     setTimeout(cerrar, 4200);
   }
 
@@ -163,15 +163,15 @@
         ok = control.checked;
       } else if (control.value.trim() === "") {
         if (!control.required) {
-          campo?.classList.remove("campo--error");
+          campo?.classList.remove("campo-error");
           return;
         }
         ok = false;
       } else {
         ok = control.checkValidity();
       }
-      campo?.classList.toggle("campo--error", !ok);
-      if (!ok) campo?.classList.remove("campo--sin-mensaje");
+      campo?.classList.toggle("campo-error", !ok);
+      if (!ok) campo?.classList.remove("campo-sin-mensaje");
       if (!ok && valido) {
         control.focus();
         valido = false;
@@ -183,10 +183,10 @@
   $$("form .campo input, form .campo select, form .campo textarea").forEach((control) => {
     const quitarError = () => {
       const campo = control.closest(".campo");
-      if (!campo?.classList.contains("campo--error")) return;
-      campo.classList.remove("campo--sin-mensaje");
+      if (!campo?.classList.contains("campo-error")) return;
+      campo.classList.remove("campo-sin-mensaje");
       const ok = control.type === "radio" ? true : control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
-      if (ok) campo.classList.remove("campo--error");
+      if (ok) campo.classList.remove("campo-error");
     };
     control.addEventListener("input", quitarError);
     control.addEventListener("change", quitarError);
@@ -212,12 +212,12 @@
     if (extensiones.length && !extensiones.includes(extension)) error = input.dataset.errorFormato || "Formato no permitido";
     else if (archivo.size > maximo) error = `El archivo pesa más de ${Math.round(maximo / 1024 / 1024)} MB`;
 
-    campo?.classList.toggle("campo--error", Boolean(error));
-    campo?.classList.remove("campo--sin-mensaje");
+    campo?.classList.toggle("campo-error", Boolean(error));
+    campo?.classList.remove("campo-sin-mensaje");
     if (!error) return true;
 
     input.value = "";
-    const mensaje = campo && $(".campo__mensaje--error", campo);
+    const mensaje = campo && $(".campo-mensaje-error", campo);
     if (mensaje) {
       [...mensaje.childNodes].filter((nodo) => nodo.nodeType === Node.TEXT_NODE).forEach((nodo) => nodo.remove());
       mensaje.append(error);
@@ -275,7 +275,7 @@
       });
       $("[data-paso-actual]")?.replaceChildren(String(indice + 1));
       if (enfocar) {
-        const primerCampo = $(".campo--error .campo__control, .campo--error input", pasos[indice]) ||
+        const primerCampo = $(".campo-error .campo-control, .campo-error input", pasos[indice]) ||
           pasos[indice].querySelector("input:not([type=hidden]), select, textarea");
         primerCampo?.focus({ preventScroll: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -308,7 +308,7 @@
       snackbar("Revisá los campos marcados en rojo.", "error");
     });
 
-    const pasoConError = pasos.findIndex((paso) => paso.querySelector(".campo--error"));
+    const pasoConError = pasos.findIndex((paso) => paso.querySelector(".campo-error"));
     mostrar(Math.max(pasoConError, 0), pasoConError >= 0);
   });
 
@@ -316,7 +316,7 @@
     if (!boton || boton.classList.contains("esta-cargando")) return;
     boton.classList.add("esta-cargando");
     boton.setAttribute("aria-disabled", "true");
-    boton.insertAdjacentHTML("afterbegin", `<span class="spinner spinner--sm${boton.matches(".boton--contorno, .boton--texto") ? "" : " spinner--claro"}" aria-hidden="true" data-spinner-boton></span>`);
+    boton.insertAdjacentHTML("afterbegin", `<span class="spinner spinner-sm${boton.matches(".boton-contorno, .boton-texto") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
   };
 
   $$("form[data-formulario-real]").forEach((formulario) => {
@@ -362,17 +362,17 @@
     const boton = document.createElement("button");
     boton.type = "button";
     boton.id = `${id}-boton`;
-    boton.className = `${select.className} seleccion__boton`;
+    boton.className = `${select.className} seleccion-boton`;
     boton.setAttribute("aria-haspopup", "listbox");
     boton.setAttribute("aria-expanded", "false");
     boton.setAttribute("aria-controls", `${id}-lista`);
     const texto = document.createElement("span");
-    texto.className = "seleccion__texto";
+    texto.className = "seleccion-texto";
     boton.append(texto);
     boton.insertAdjacentHTML("beforeend", icono("chevron-down", 18));
     const lista = document.createElement("ul");
     lista.id = `${id}-lista`;
-    lista.className = "seleccion__lista";
+    lista.className = "seleccion-lista";
     lista.setAttribute("role", "listbox");
     lista.tabIndex = -1;
     lista.hidden = true;
@@ -387,7 +387,7 @@
 
     select.before(caja);
     caja.append(boton, lista, select);
-    select.classList.add("seleccion__nativo");
+    select.classList.add("seleccion-nativo");
     select.tabIndex = -1;
     select.setAttribute("aria-hidden", "true");
 
@@ -402,7 +402,7 @@
       lista.replaceChildren(...opciones.map((opcion, i) => {
         const item = document.createElement("li");
         item.id = `${id}-opcion-${i}`;
-        item.className = "seleccion__opcion";
+        item.className = "seleccion-opcion";
         item.setAttribute("role", "option");
         item.setAttribute("aria-selected", String(opcion.selected));
         item.dataset.indice = i;
@@ -463,11 +463,11 @@
     });
     lista.addEventListener("click", (evento) => {
       evento.preventDefault();
-      const item = evento.target.closest(".seleccion__opcion");
+      const item = evento.target.closest(".seleccion-opcion");
       if (item) elegir(Number(item.dataset.indice));
     });
     lista.addEventListener("mousemove", (evento) => {
-      const item = evento.target.closest(".seleccion__opcion");
+      const item = evento.target.closest(".seleccion-opcion");
       if (item && Number(item.dataset.indice) !== activa) marcar(Number(item.dataset.indice));
     });
     lista.addEventListener("keydown", (evento) => {
@@ -740,7 +740,7 @@
         entrada.required = !casilla.checked;
         if (casilla.checked) {
           entrada.value = "";
-          entrada.closest(".campo")?.classList.remove("campo--error");
+          entrada.closest(".campo")?.classList.remove("campo-error");
         }
       });
     };
@@ -753,7 +753,7 @@
     const hayItems = $$("[data-item-local]", lista).length > 0;
     if (!hayItems && !vacio && lista.dataset.vacio) {
       vacio = document.createElement("li");
-      vacio.className = "lista-local__vacio";
+      vacio.className = "lista-local-vacio";
       vacio.setAttribute("data-lista-vacia", "");
       vacio.textContent = lista.dataset.vacio;
       lista.appendChild(vacio);
@@ -805,8 +805,8 @@
       const fin = aMes(valores.Fin);
       const campoFin = formulario.elements.Fin?.closest(".campo");
       if (fin !== null && inicio !== null && fin < inicio) {
-        campoFin?.classList.add("campo--error");
-        const mensaje = campoFin && $(".campo__mensaje--error", campoFin);
+        campoFin?.classList.add("campo-error");
+        const mensaje = campoFin && $(".campo-mensaje-error", campoFin);
         if (mensaje) {
           [...mensaje.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).forEach((n) => n.remove());
           mensaje.append("La finalización no puede ser anterior al inicio");
@@ -834,7 +834,7 @@
       });
       const quitar = document.createElement("button");
       quitar.type = "button";
-      quitar.className = "boton boton--texto";
+      quitar.className = "boton boton-texto";
       quitar.setAttribute("data-quitar-item", "");
       quitar.textContent = "Quitar";
       item.appendChild(quitar);
@@ -990,7 +990,7 @@
           return evento.clientY < caja.top + caja.height / 2;
         });
         if (despues) lista.insertBefore(arrastrando, despues);
-        else lista.insertBefore(arrastrando, $(".tablero__vacio", lista));
+        else lista.insertBefore(arrastrando, $(".tablero-vacio", lista));
       });
       columna.addEventListener("dragleave", (evento) => {
         if (!columna.contains(evento.relatedTarget)) columna.classList.remove("es-destino");
@@ -1075,7 +1075,7 @@
   });
 
   $$("[data-filtrar-preguntas]").forEach((input) => {
-    const items = $$("[data-acordeon] .acordeon__item");
+    const items = $$("[data-acordeon] .acordeon-item");
     const vacio = $("[data-acordeon-vacio]");
     input.form?.addEventListener("submit", (evento) => evento.preventDefault());
     input.addEventListener("input", () => {

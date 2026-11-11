@@ -1,64 +1,62 @@
-@model RegistroPersonaViewModel
 @{
     ViewData["Title"] = "Crear cuenta";
-    var externo = Model.ProveedorExterno != null;
 }
 @section Barra {
     <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<div class="cuenta-tarjeta cuenta-tarjeta--ancha">
-    <h1 class="cuenta-tarjeta__titulo">Creá tu cuenta</h1>
-    <p class="cuenta-tarjeta__bajada">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
+<div class="cuenta-tarjeta cuenta-tarjeta-ancha">
+    <h1 class="cuenta-tarjeta-titulo">Creá tu cuenta</h1>
+    <p class="cuenta-tarjeta-bajada">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
 
     <partial name="_TipoCuenta" model='"persona"' />
 
     <partial name="_ErroresFormulario" />
 
-    @if (!externo)
+    @if (!ViewBag.Formulario.EsExterno)
     {
-        <partial name="_BotonesExternos" model='("Registrarte", "persona", (string?)null)' />
+        <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "persona", null)' />
     }
 
     <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" novalidate data-formulario-real>
-        <fieldset class="formulario registro__paso">
+        <fieldset class="formulario registro-paso">
             <legend class="solo-lectores">Tus datos</legend>
-            @if (externo)
+            @if (ViewBag.Formulario.EsExterno)
             {
-                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @Model.ProveedorExterno. No necesitás contraseña.</p>
+                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
-            <div class="formulario__fila">
-                <div class="campo @Html.ClaseError(nameof(Model.Nombre))">
-                    <label class="campo__etiqueta" asp-for="Nombre">Nombre</label>
-                    <input class="campo__control" asp-for="Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Nombre), "Completá tu nombre")</span>
+            <div class="formulario-fila">
+                <div class="campo @Html.ClaseError("Nombre")">
+                    <label class="campo-etiqueta" for="Nombre">Nombre</label>
+                    <input class="campo-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
                 </div>
-                <div class="campo @Html.ClaseError(nameof(Model.Apellido))">
-                    <label class="campo__etiqueta" asp-for="Apellido">Apellido</label>
-                    <input class="campo__control" asp-for="Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Apellido), "Completá tu apellido")</span>
+                <div class="campo @Html.ClaseError("Apellido")">
+                    <label class="campo-etiqueta" for="Apellido">Apellido</label>
+                    <input class="campo-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
-            <div class="campo @Html.ClaseError(nameof(Model.Email))">
-                <label class="campo__etiqueta" asp-for="Email">Email</label>
+            <div class="campo @Html.ClaseError("Email")">
+                <label class="campo-etiqueta" for="Email">Email</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
-                    <input class="campo__control" asp-for="Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@externo" />
+                    <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
                 </div>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(nameof(Model.Email), "Ingresá un email válido")</span>
+                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
             </div>
 
-            @if (!externo)
+            @if (!ViewBag.Formulario.EsExterno)
             {
                 <partial name="_CampoContrasena" />
             }
 
             <partial name="_AceptaTerminos" />
 
-            <div class="registro__acciones">
+            <div class="registro-acciones">
                 <span></span>
-                <button class="boton boton--acento boton--lg" type="submit">Crear mi cuenta</button>
+                <button class="boton boton-acento boton-lg" type="submit">Crear mi cuenta</button>
             </div>
         </fieldset>
     </form>

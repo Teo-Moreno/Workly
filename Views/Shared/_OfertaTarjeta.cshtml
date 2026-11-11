@@ -1,34 +1,29 @@
-@model Oferta
-@{
-    var seleccionada = ViewData["Seleccionada"] is true;
-    var enlace = ViewData["Enlace"] as string;
-}
-<article class="oferta-tarjeta @(seleccionada ? "es-seleccionada" : "")" data-oferta="@Model.Clave">
-    <div class="oferta-tarjeta__cabecera">
-        <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa--principal")' />
-        <div class="oferta-tarjeta__datos">
-            <h3 class="oferta-tarjeta__puesto">
-                <a href="@(enlace ?? (Model.EsExterna ? Url.Action("Externa", "Empleos", new { id = Model.ID }) : Url.Action("Detalle", "Empleos", new { id = Model.ID })))" data-oferta-enlace>@Model.Titulo</a>
+<article class="oferta-tarjeta @(ViewData["Seleccionada"] is true ? "es-seleccionada" : "")" data-oferta="@Model.Clave">
+    <div class="oferta-tarjeta-cabecera">
+        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa-principal")' />
+        <div class="oferta-tarjeta-datos">
+            <h3 class="oferta-tarjeta-puesto">
+                <a href="@(ViewData["Enlace"] as string ?? Model.Enlace)" data-oferta-enlace>@Model.Titulo</a>
             </h3>
-            <p class="oferta-tarjeta__meta">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
+            <p class="oferta-tarjeta-meta">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
         </div>
         @if (Model.YaPostulado)
         {
-            <span class="etiqueta etiqueta--exito"><icono nombre="circle-check" tamano="16" />Postulado</span>
+            <span class="etiqueta etiqueta-exito"><icono nombre="circle-check" tamano="16" />Postulado</span>
         }
         else if (Model.Guardada)
         {
-            <span class="etiqueta etiqueta--principal"><icono nombre="bookmark-fill" tamano="16" />Guardada</span>
+            <span class="etiqueta etiqueta-principal"><icono nombre="bookmark-fill" tamano="16" />Guardada</span>
         }
     </div>
     <div class="lista-tags">
         <partial name="_SelloOficial" model="Model" />
-        @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde">@Model.Modalidad</span> }
-        @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde">@Model.Tipo_Contrato</span> }
-        <span class="tag @(Model.EsExterna ? "" : "tag--principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>
+        @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag-borde">@Model.Modalidad</span> }
+        @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag-borde">@Model.Tipo_Contrato</span> }
+        <span class="tag @(Model.EsExterna ? "" : "tag-principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>
     </div>
-    <div class="oferta-tarjeta__pie">
-        <span class="oferta-tarjeta__salario">@(Model.SalarioVisible ?? "")</span>
-        <span class="oferta-tarjeta__fecha">@Model.PublicadaTexto</span>
+    <div class="oferta-tarjeta-pie">
+        <span class="oferta-tarjeta-salario">@(Model.SalarioVisible ?? "")</span>
+        <span class="oferta-tarjeta-fecha">@Model.PublicadaTexto</span>
     </div>
 </article>
