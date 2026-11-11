@@ -2,7 +2,7 @@
     ViewData["Title"] = "Mis postulaciones";
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="encabezado-pagina">
         <div class="encabezado-pagina-fila">
             <div>
@@ -10,7 +10,7 @@
                 <p class="encabezado-pagina-bajada">Mové cada tarjeta a medida que avanza el proceso: arrastrala a otra columna o elegí la etapa en la tarjeta.</p>
             </div>
             <div class="encabezado-pagina-acciones">
-                <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
     </header>
@@ -18,10 +18,10 @@
     @if (!ViewBag.HayPostulaciones)
     {
         <div class="estado-vacio">
-            <span class="caja-icono caja-icono-lg"><icono nombre="send" /></span>
+            <span class="caja-icono-lg"><icono nombre="send" /></span>
             <h2 class="estado-vacio-titulo">Todavía no tenés postulaciones</h2>
             <p>Cuando te postules a una búsqueda de Workly, o toques "Ya me postulé" en una de otro sitio, aparece acá para que le hagas el seguimiento.</p>
-            <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else

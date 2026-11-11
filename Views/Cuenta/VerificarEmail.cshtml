@@ -11,18 +11,18 @@
     <form class="formulario" asp-controller="Cuenta" asp-action="VerificarEmail" method="post" novalidate data-formulario-real>
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
         <div class="campo @Html.ClaseError("Codigo")">
-            <label class="campo-etiqueta" for="Codigo">Código</label>
-            <input class="campo-control codigo-email" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
+            <label class="form-label" for="Codigo">Código</label>
+            <input class="form-control codigo-email" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
                    pattern="\d{@VerificacionEmail.Digitos}" placeholder="000000" required autofocus />
-            <span class="campo-ayuda">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</span>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Codigo", "El código tiene 6 números")</span>
+            <span class="form-text">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Codigo", "El código tiene 6 números")</span>
         </div>
-        <button class="boton boton-acento boton-lg boton-bloque" type="submit">Verificar y crear mi cuenta</button>
+        <button class="btn btn-warning-block" type="submit">Verificar y crear mi cuenta</button>
     </form>
 
     <form asp-controller="Cuenta" asp-action="ReenviarCodigo" method="post">
         <input type="hidden" name="token" value="@ViewBag.Formulario.Token" />
-        <button class="boton boton-contorno boton-bloque" type="submit"><icono nombre="refresh" />Mandarme otro código</button>
+        <button class="btn btn-outline-block" type="submit"><icono nombre="refresh" />Mandarme otro código</button>
     </form>
     <p class="cuenta-tarjeta-legal">¿Escribiste mal el email? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>
 </div>

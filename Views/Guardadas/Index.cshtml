@@ -2,7 +2,7 @@
     ViewData["Title"] = "Guardadas";
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="encabezado-pagina">
         <div class="encabezado-pagina-fila">
             <div>
@@ -10,7 +10,7 @@
                 <p class="encabezado-pagina-bajada">Las ofertas que guardaste para ver después o postularte más tarde.</p>
             </div>
             <div class="encabezado-pagina-acciones">
-                <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
     </header>
@@ -18,10 +18,10 @@
     @if (ViewBag.Guardadas.Count == 0)
     {
         <div class="estado-vacio">
-            <span class="caja-icono caja-icono-lg"><icono nombre="bookmark" /></span>
+            <span class="caja-icono-lg"><icono nombre="bookmark" /></span>
             <h2 class="estado-vacio-titulo">Todavía no guardaste ofertas</h2>
             <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
-            <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
@@ -36,23 +36,23 @@
                         <p class="guardada-meta">@oferta.Resumen</p>
                         <div class="lista-tags">
                             <partial name="_SelloOficial" model="oferta" />
-                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="tag tag-borde">@oferta.Modalidad</span> }
-                            <span class="tag @(oferta.EsExterna ? "" : "tag-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
-                            @if (oferta.YaPostulado) { <span class="etiqueta etiqueta-exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
-                            @if (oferta.NoDisponible) { <span class="etiqueta etiqueta-error">Ya no recibe postulaciones</span> }
+                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge tag-borde">@oferta.Modalidad</span> }
+                            <span class="badge @(oferta.EsExterna ? "tag" : "tag-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
+                            @if (oferta.YaPostulado) { <span class="badge badge-exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
+                            @if (oferta.NoDisponible) { <span class="badge badge-error">Ya no recibe postulaciones</span> }
                         </div>
                         @if (oferta.Fecha_Guardado.HasValue)
                         {
-                            <p class="texto-chico texto-suave">Guardada el @Vistas.Fecha(oferta.Fecha_Guardado)</p>
+                            <p class="small text-body-secondary">Guardada el @Vistas.Fecha(oferta.Fecha_Guardado)</p>
                         }
                     </div>
                     <div class="guardada-acciones">
-                        <a class="boton boton-sm" href="@oferta.Enlace">Ver oferta</a>
+                        <a class="btn btn-sm" href="@oferta.Enlace">Ver oferta</a>
                         <form asp-controller="Guardadas" asp-action="Quitar" method="post">
                             <input type="hidden" name="id" value="@oferta.ID" />
                             <input type="hidden" name="externa" value="@(oferta.EsExterna ? "true" : "false")" />
                             <input type="hidden" name="volver" value="@Url.Action("Index", "Guardadas")" />
-                            <button class="boton boton-texto boton-sm" type="submit"><icono nombre="trash-full" />Quitar</button>
+                            <button class="btn btn-link-sm" type="submit"><icono nombre="trash-full" />Quitar</button>
                         </form>
                     </div>
                 </li>

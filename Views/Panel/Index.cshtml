@@ -2,7 +2,7 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="panel-saludo">
         <div>
             <p class="panel-saludo-fecha">@Vistas.Hoy</p>
@@ -16,27 +16,27 @@
         <form class="panel-saludo-buscador" asp-controller="Empleos" asp-action="Index" method="get" role="search">
             <div class="control-con-icono">
                 <icono nombre="search" />
-                <label class="solo-lectores" for="panel-busqueda">Buscar trabajo</label>
-                <input class="campo-control" id="panel-busqueda" type="search" name="Q" maxlength="100" placeholder="¿Qué trabajo buscás?" />
+                <label class="visually-hidden" for="panel-busqueda">Buscar trabajo</label>
+                <input class="form-control" id="panel-busqueda" type="search" name="Q" maxlength="100" placeholder="¿Qué trabajo buscás?" />
             </div>
-            <button class="boton" type="submit">Buscar</button>
+            <button class="btn btn-primary" type="submit">Buscar</button>
         </form>
     </header>
 
     @if (ViewBag.Perfil.SiguientePaso != null)
     {
         <a class="aviso-perfil" asp-controller="Perfil" asp-action="Completar">
-            <span class="caja-icono caja-icono-sm"><icono nombre="user-square" /></span>
+            <span class="caja-icono-sm"><icono nombre="user-square" /></span>
             <span class="aviso-perfil-texto"><strong>Tu perfil está al @ViewBag.Perfil.PorcentajeCompleto%.</strong> Te falta: @ViewBag.Perfil.SiguientePaso.Texto.ToLower(Vistas.Cultura). Quienes publican búsquedas lo ven cuando te postulás.</span>
-            <span class="boton boton-sm">Completar perfil</span>
+            <span class="btn btn-sm">Completar perfil</span>
         </a>
     }
 
     <div class="panel-grilla">
         <div class="panel-grilla-principal">
-            <section class="tarjeta" aria-labelledby="panel-para-vos">
-                <div class="tarjeta-encabezado">
-                    <h2 class="tarjeta-titulo" id="panel-para-vos">@(string.IsNullOrWhiteSpace(ViewBag.Puesto) ? "Ofertas para vos" : $"Ofertas de {ViewBag.Puesto}")</h2>
+            <section class="card" aria-labelledby="panel-para-vos">
+                <div class="card-header">
+                    <h2 class="card-title" id="panel-para-vos">@(string.IsNullOrWhiteSpace(ViewBag.Puesto) ? "Ofertas para vos" : $"Ofertas de {ViewBag.Puesto}")</h2>
                     @if (!string.IsNullOrWhiteSpace(ViewBag.Puesto))
                     {
                         <a class="enlace" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Puesto">Ver todas →</a>
@@ -46,7 +46,7 @@
                 {
                     <div class="estado-vacio estado-vacio-chico">
                         <p>Contanos qué puesto buscás y acá te mostramos las ofertas de Workly y de otros sitios que coinciden.</p>
-                        <a class="boton boton-contorno boton-sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="plus" />Completar qué busco</a>
+                        <a class="btn btn-outline-sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="plus" />Completar qué busco</a>
                     </div>
                 }
                 else
@@ -59,7 +59,7 @@
                     {
                         <div class="estado-vacio estado-vacio-chico">
                             <p>No encontramos ningún puesto de "@ViewBag.Puesto" nuevo para vos. Probá buscar con otras palabras.</p>
-                            <a class="boton boton-contorno boton-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                            <a class="btn btn-outline-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
                         </div>
                     }
                     else
@@ -76,9 +76,9 @@
         </div>
 
         <aside class="panel-grilla-lateral">
-            <section class="tarjeta">
-                <div class="tarjeta-encabezado">
-                    <h2 class="tarjeta-titulo">Tus postulaciones</h2>
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Tus postulaciones</h2>
                     @if (ViewBag.Perfil.TotalPostulaciones > 0)
                     {
                         <a class="enlace" asp-controller="Postulaciones" asp-action="Index">Ir al tablero →</a>
@@ -101,10 +101,10 @@
                 }
             </section>
 
-            <section class="tarjeta">
-                <h2 class="tarjeta-titulo">¿Buscás a alguien?</h2>
-                <p class="texto-suave">También podés publicar una búsqueda. La revisamos antes de publicarla.</p>
-                <a class="boton boton-contorno boton-bloque" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+            <section class="card">
+                <h2 class="card-title">¿Buscás a alguien?</h2>
+                <p class="text-body-secondary">También podés publicar una búsqueda. La revisamos antes de publicarla.</p>
+                <a class="btn btn-outline-block" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
             </section>
         </aside>
     </div>

@@ -2,7 +2,7 @@
     ViewData["Title"] = "Mis publicaciones";
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="encabezado-pagina">
         <div class="encabezado-pagina-fila">
             <div>
@@ -14,7 +14,7 @@
                 </p>
             </div>
             <div class="encabezado-pagina-acciones">
-                <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
             </div>
         </div>
     </header>
@@ -22,10 +22,10 @@
     @if (ViewBag.Ofertas.Count == 0)
     {
         <div class="estado-vacio">
-            <span class="caja-icono caja-icono-lg"><icono nombre="briefcase" /></span>
+            <span class="caja-icono-lg"><icono nombre="briefcase" /></span>
             <h2 class="estado-vacio-titulo">Todavía no publicaste ninguna búsqueda</h2>
             <p>Contá qué puesto querés cubrir y en qué condiciones. Las personas se postulan con su perfil y su CV, y las ves acá.</p>
-            <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
+            <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
         </div>
     }
     else
@@ -42,7 +42,7 @@
                             <p class="publicacion-motivo"><strong>Motivo:</strong> @oferta.Motivo_Rechazo</p>
                         }
                     </div>
-                    <span class="etiqueta etiqueta-@oferta.EstadoColor">@oferta.EstadoTexto</span>
+                    <span class="badge badge-@oferta.EstadoColor">@oferta.EstadoTexto</span>
                     <a class="publicacion-postulantes" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">
                         <strong>@oferta.CantidadPostulantes</strong>
                         <span>@(oferta.CantidadPostulantes == 1 ? "postulante" : "postulantes")</span>

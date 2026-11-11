@@ -3,20 +3,20 @@
 }
 
 <section class="ayuda-hero">
-    <div class="contenedor ayuda-hero-interior">
-        <span class="etiqueta etiqueta-acento">Centro de ayuda</span>
+    <div class="container ayuda-hero-interior">
+        <span class="badge badge-acento">Centro de ayuda</span>
         <h1 class="ayuda-hero-titulo">¿En qué te podemos ayudar?</h1>
         <form class="ayuda-hero-buscador" role="search">
             <div class="control-con-icono">
                 <icono nombre="search" />
-                <label class="solo-lectores" for="buscar-ayuda">Buscar en la ayuda</label>
-                <input class="campo-control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
+                <label class="visually-hidden" for="buscar-ayuda">Buscar en la ayuda</label>
+                <input class="form-control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
             </div>
         </form>
     </div>
 </section>
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <ul class="ayuda-categorias" role="list">
         @foreach (var categoria in Ayuda.Categorias)
         {
@@ -31,20 +31,21 @@
     </ul>
 
     <section class="ayuda-preguntas ayuda-preguntas-sola" id="preguntas" aria-labelledby="preguntas-titulo">
-        <h2 class="texto-titulo-4" id="preguntas-titulo">Preguntas frecuentes</h2>
-        <div class="acordeon" data-acordeon>
+        <h2 class="h4" id="preguntas-titulo">Preguntas frecuentes</h2>
+        <div class="accordion" data-acordeon>
             @foreach (var categoria in Ayuda.Categorias)
             {
                 <h3 class="acordeon-grupo" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
                 @foreach (var item in Ayuda.PreguntasDe(categoria.Id))
                 {
-                    <details class="acordeon-item" data-grupo="@categoria.Id">
-                        <summary class="acordeon-pregunta">
-                            <span>@item.Pregunta</span>
-                            <icono nombre="chevron-down" />
-                        </summary>
-                        <p class="acordeon-respuesta">@item.Respuesta</p>
-                    </details>
+                    <div class="accordion-item" data-grupo="@categoria.Id">
+                        <div class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@item.Id" aria-expanded="false" aria-controls="@item.Id">@item.Pregunta</button>
+                        </div>
+                        <div class="accordion-collapse collapse" id="@item.Id">
+                            <p class="accordion-body">@item.Respuesta</p>
+                        </div>
+                    </div>
                 }
             }
         </div>

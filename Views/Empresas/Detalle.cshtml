@@ -4,14 +4,15 @@
 
 <div class="empresa-portada" aria-hidden="true"></div>
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="empresa-cabecera">
         <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "logo-empresa-xl")' />
         <div class="empresa-cabecera-datos">
-            <nav class="migas migas-chica" aria-label="Estás en">
-                <a asp-controller="Empresas" asp-action="Index">Empresas</a>
-                <icono nombre="chevron-right" />
-                <span aria-current="page">@ViewBag.Empresa.Nombre</span>
+            <nav aria-label="Estás en">
+                <ol class="breadcrumb breadcrumb-chica">
+                    <li class="breadcrumb-item"><a asp-controller="Empresas" asp-action="Index">Empresas</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@ViewBag.Empresa.Nombre</li>
+                </ol>
             </nav>
             <h1 class="empresa-cabecera-nombre">@ViewBag.Empresa.Nombre</h1>
             <p class="empresa-cabecera-meta">
@@ -23,15 +24,15 @@
         @if (ViewBag.EsPropia)
         {
             <div class="empresa-cabecera-acciones">
-                <a class="boton boton-contorno" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar datos</a>
-                <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar datos</a>
+                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
             </div>
         }
     </header>
 
     <div class="empresa-cuerpo">
-        <section class="tarjeta">
-            <h2 class="tarjeta-titulo">Sobre la empresa</h2>
+        <section class="card">
+            <h2 class="card-title">Sobre la empresa</h2>
             @if (string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion))
             {
                 <p class="perfil-vacio">La empresa todavía no contó a qué se dedica.</p>
@@ -42,19 +43,19 @@
             }
             @if (ViewBag.Empresa.TieneCuenta)
             {
-                <p class="texto-chico texto-suave empresa-verificada"><icono nombre="circle-check" tamano="16" />Registrada en Workly con su CUIT</p>
+                <p class="small empresa-verificada"><icono nombre="circle-check" tamano="16" />Registrada en Workly con su CUIT</p>
             }
         </section>
 
         <section class="empresa-ofertas" id="ofertas" aria-labelledby="ofertas-titulo">
-            <h2 class="texto-titulo-4" id="ofertas-titulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
+            <h2 class="h4" id="ofertas-titulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
             @if (ViewBag.Abiertas.Count == 0)
             {
                 <div class="estado-vacio estado-vacio-chico">
                     <p>@(ViewBag.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
                     @if (ViewBag.EsPropia)
                     {
-                        <a class="boton" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
+                        <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
                     }
                 </div>
             }

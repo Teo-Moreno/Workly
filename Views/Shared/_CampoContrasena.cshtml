@@ -1,11 +1,11 @@
 <div class="campo @Html.ClaseError("Contrasena")">
-    <label class="campo-etiqueta" for="Contrasena">Contraseña</label>
+    <label class="form-label" for="Contrasena">Contraseña</label>
     <div class="control-con-icono">
         <icono nombre="lock" />
-        <input class="campo-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+        <input class="form-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="new-password" placeholder="Mínimo 8 caracteres"
                minlength="8" maxlength="100" pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
         <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
     </div>
-    <span class="campo-ayuda">Al menos 8 caracteres, con letras y números.</span>
-    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Usá al menos 8 caracteres, con una letra y un número")</span>
+    <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Usá al menos 8 caracteres, con una letra y un número")</span>
 </div>

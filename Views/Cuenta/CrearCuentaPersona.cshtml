@@ -2,7 +2,7 @@
     ViewData["Title"] = "Crear cuenta";
 }
 @section Barra {
-    <p class="texto-suave">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
 <div class="cuenta-tarjeta cuenta-tarjeta-ancha">
@@ -20,31 +20,31 @@
 
     <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" novalidate data-formulario-real>
         <fieldset class="formulario registro-paso">
-            <legend class="solo-lectores">Tus datos</legend>
+            <legend class="visually-hidden">Tus datos</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
                 <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
             <div class="formulario-fila">
                 <div class="campo @Html.ClaseError("Nombre")">
-                    <label class="campo-etiqueta" for="Nombre">Nombre</label>
-                    <input class="campo-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
+                    <label class="form-label" for="Nombre">Nombre</label>
+                    <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
                 </div>
                 <div class="campo @Html.ClaseError("Apellido")">
-                    <label class="campo-etiqueta" for="Apellido">Apellido</label>
-                    <input class="campo-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
+                    <label class="form-label" for="Apellido">Apellido</label>
+                    <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
             <div class="campo @Html.ClaseError("Email")">
-                <label class="campo-etiqueta" for="Email">Email</label>
+                <label class="form-label" for="Email">Email</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
-                    <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
+                    <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
                 </div>
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
             </div>
 
             @if (!ViewBag.Formulario.EsExterno)
@@ -56,7 +56,7 @@
 
             <div class="registro-acciones">
                 <span></span>
-                <button class="boton boton-acento boton-lg" type="submit">Crear mi cuenta</button>
+                <button class="btn btn-warning-lg" type="submit">Crear mi cuenta</button>
             </div>
         </fieldset>
     </form>
