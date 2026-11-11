@@ -2,12 +2,13 @@
     ViewData["Title"] = "Publicar búsqueda";
 }
 
-<div class="contenedor seccion-app seccion-app-angosta">
+<div class="container seccion-app-angosta">
     <header class="encabezado-pagina">
-        <nav class="migas migas-chica" aria-label="Estás en">
-            <a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
-            <icono nombre="chevron-right" />
-            <span aria-current="page">Publicar búsqueda</span>
+        <nav aria-label="Estás en">
+            <ol class="breadcrumb breadcrumb-chica">
+                <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Publicar búsqueda</li>
+            </ol>
         </nav>
         <h1 class="encabezado-pagina-titulo">Publicar una búsqueda</h1>
         <p class="encabezado-pagina-bajada">
@@ -19,30 +20,30 @@
 
     <partial name="_ErroresFormulario" />
 
-    <form class="formulario tarjeta" asp-controller="Publicaciones" asp-action="Nueva" method="post" novalidate data-formulario-real>
+    <form class="formulario card" asp-controller="Publicaciones" asp-action="Nueva" method="post" novalidate data-formulario-real>
         <div class="campo @Html.ClaseError("Titulo")">
-            <label class="campo-etiqueta" for="Titulo">Título de la búsqueda</label>
-            <input class="campo-control" id="Titulo" name="Titulo" value="@ViewBag.Formulario.Titulo" maxlength="150" required placeholder="Ej.: Cajero/a para supermercado en Palermo" />
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Titulo", "Escribí el título de la búsqueda")</span>
+            <label class="form-label" for="Titulo">Título de la búsqueda</label>
+            <input class="form-control" id="Titulo" name="Titulo" value="@ViewBag.Formulario.Titulo" maxlength="150" required placeholder="Ej.: Cajero/a para supermercado en Palermo" />
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Titulo", "Escribí el título de la búsqueda")</span>
         </div>
 
         <div class="formulario-fila">
             <div class="campo @Html.ClaseError("Puesto")">
-                <label class="campo-etiqueta" for="Puesto">Puesto</label>
-                <input class="campo-control" id="Puesto" name="Puesto" value="@ViewBag.Formulario.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a" />
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Puesto", "Escribí el puesto")</span>
+                <label class="form-label" for="Puesto">Puesto</label>
+                <input class="form-control" id="Puesto" name="Puesto" value="@ViewBag.Formulario.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a" />
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Puesto", "Escribí el puesto")</span>
             </div>
             <div class="campo @Html.ClaseError("IDSector")">
-                <label class="campo-etiqueta" for="IDSector">Sector</label>
-                <select class="campo-control" id="IDSector" name="IDSector" required data-seleccion>
+                <label class="form-label" for="IDSector">Sector</label>
+                <select class="form-select" id="IDSector" name="IDSector" required data-seleccion>
                     <option value="">Elegí el sector</option>
                     @foreach (Sector sector in ViewBag.Formulario.Sectores)
                     {
                         <option value="@sector.ID" selected="@(sector.ID == ViewBag.Formulario.IDSector)">@sector.Nombre</option>
                     }
                 </select>
-                <span class="campo-ayuda">Lo usamos para comparar el puesto con las habilidades de quienes se postulan.</span>
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("IDSector", "Elegí el sector del puesto")</span>
+                <span class="form-text">Lo usamos para comparar el puesto con las habilidades de quienes se postulan.</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("IDSector", "Elegí el sector del puesto")</span>
             </div>
         </div>
 
@@ -50,82 +51,82 @@
             @if (ViewBag.Formulario.EsEmpresa)
             {
                 <div class="campo">
-                    <span class="campo-etiqueta">Empresa</span>
-                    <p class="campo-control campo-control-fijo">@ViewBag.Formulario.EmpresaFija</p>
+                    <span class="form-label">Empresa</span>
+                    <p class="form-control control-fijo">@ViewBag.Formulario.EmpresaFija</p>
                 </div>
             }
             else
             {
                 <div class="campo @Html.ClaseError("EmpresaNombre")">
-                    <label class="campo-etiqueta" for="EmpresaNombre">Empresa o negocio que contrata</label>
-                    <input class="campo-control" id="EmpresaNombre" name="EmpresaNombre" value="@ViewBag.Formulario.EmpresaNombre" maxlength="100" required placeholder="Ej.: Almacén Don Pedro" />
-                    <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("EmpresaNombre", "Escribí el nombre de la empresa o el negocio")</span>
+                    <label class="form-label" for="EmpresaNombre">Empresa o negocio que contrata</label>
+                    <input class="form-control" id="EmpresaNombre" name="EmpresaNombre" value="@ViewBag.Formulario.EmpresaNombre" maxlength="100" required placeholder="Ej.: Almacén Don Pedro" />
+                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("EmpresaNombre", "Escribí el nombre de la empresa o el negocio")</span>
                 </div>
             }
         </div>
 
         <div class="campo @Html.ClaseError("Descripcion")">
-            <label class="campo-etiqueta" for="Descripcion">Descripción</label>
-            <textarea class="campo-control" id="Descripcion" name="Descripcion" rows="8" minlength="40" maxlength="2000" required
+            <label class="form-label" for="Descripcion">Descripción</label>
+            <textarea class="form-control" id="Descripcion" name="Descripcion" rows="8" minlength="40" maxlength="2000" required
                       placeholder="Qué tareas tiene el puesto, qué pedís (experiencia, estudios, horarios) y qué ofrecés.">@ViewBag.Formulario.Descripcion</textarea>
-            <span class="campo-ayuda">Entre 40 y 2000 caracteres.</span>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Usá entre 40 y 2000 caracteres")</span>
+            <span class="form-text">Entre 40 y 2000 caracteres.</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Usá entre 40 y 2000 caracteres")</span>
         </div>
 
         <div class="formulario-fila">
             <div class="campo @Html.ClaseError("Modalidad")">
-                <label class="campo-etiqueta" for="Modalidad">Modalidad</label>
-                <select class="campo-control" id="Modalidad" name="Modalidad" required>
+                <label class="form-label" for="Modalidad">Modalidad</label>
+                <select class="form-select" id="Modalidad" name="Modalidad" required>
                     <option value="">Elegí una opción</option>
                     @foreach (var modalidad in Catalogos.Modalidades)
                     {
                         <option selected="@(ViewBag.Formulario.Modalidad == modalidad)">@modalidad</option>
                     }
                 </select>
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Modalidad", "Elegí la modalidad")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Modalidad", "Elegí la modalidad")</span>
             </div>
             <div class="campo @Html.ClaseError("TipoEmpleo")">
-                <label class="campo-etiqueta" for="TipoEmpleo">Tipo de empleo</label>
-                <select class="campo-control" id="TipoEmpleo" name="TipoEmpleo" required>
+                <label class="form-label" for="TipoEmpleo">Tipo de empleo</label>
+                <select class="form-select" id="TipoEmpleo" name="TipoEmpleo" required>
                     <option value="">Elegí una opción</option>
                     @foreach (var (tipo, _) in Catalogos.TiposEmpleo)
                     {
                         <option selected="@(ViewBag.Formulario.TipoEmpleo == tipo)">@tipo</option>
                     }
                 </select>
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("TipoEmpleo", "Elegí el tipo de empleo")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("TipoEmpleo", "Elegí el tipo de empleo")</span>
             </div>
         </div>
 
         <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = ViewBag.Formulario.Paises, Provincias = ViewBag.Formulario.Provincias, IDPais = ViewBag.Formulario.IDPais, IDProvincia = ViewBag.Formulario.IDProvincia, EtiquetaProvincia = "Provincia del trabajo" }' />
 
         <div class="campo @Html.ClaseError("Ubicacion")">
-            <label class="campo-etiqueta" for="Ubicacion">Localidad o barrio <span class="campo-opcional">(opcional)</span></label>
-            <input class="campo-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" maxlength="100" placeholder="Ej.: Palermo" />
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Ubicacion", "Usá hasta 100 caracteres")</span>
+            <label class="form-label" for="Ubicacion">Localidad o barrio <span class="campo-opcional">(opcional)</span></label>
+            <input class="form-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" maxlength="100" placeholder="Ej.: Palermo" />
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Ubicacion", "Usá hasta 100 caracteres")</span>
         </div>
 
         <div class="formulario-fila formulario-fila-tres">
             <div class="campo @Html.ClaseError("Salario")">
-                <label class="campo-etiqueta" for="Salario">Salario bruto por mes <span class="campo-opcional">(opcional)</span></label>
-                <input class="campo-control" id="Salario" name="Salario" value="@ViewBag.Formulario.Salario" type="number" min="0" step="1000" placeholder="En pesos" />
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Salario", "Ingresá un monto válido")</span>
+                <label class="form-label" for="Salario">Salario bruto por mes <span class="campo-opcional">(opcional)</span></label>
+                <input class="form-control" id="Salario" name="Salario" value="@ViewBag.Formulario.Salario" type="number" min="0" step="1000" placeholder="En pesos" />
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Salario", "Ingresá un monto válido")</span>
             </div>
             <div class="campo @Html.ClaseError("CantidadPuestos")">
-                <label class="campo-etiqueta" for="CantidadPuestos">Vacantes</label>
-                <input class="campo-control" id="CantidadPuestos" name="CantidadPuestos" value="@ViewBag.Formulario.CantidadPuestos" type="number" min="1" max="999" required />
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("CantidadPuestos", "Ingresá entre 1 y 999")</span>
+                <label class="form-label" for="CantidadPuestos">Vacantes</label>
+                <input class="form-control" id="CantidadPuestos" name="CantidadPuestos" value="@ViewBag.Formulario.CantidadPuestos" type="number" min="1" max="999" required />
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("CantidadPuestos", "Ingresá entre 1 y 999")</span>
             </div>
             <div class="campo @Html.ClaseError("FechaCierre")">
-                <label class="campo-etiqueta" for="FechaCierre">Recibe postulaciones hasta <span class="campo-opcional">(opcional)</span></label>
-                <input class="campo-control" id="FechaCierre" name="FechaCierre" value="@(ViewBag.Formulario.FechaCierre?.ToString("yyyy-MM-dd"))" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("FechaCierre", "Elegí una fecha desde hoy")</span>
+                <label class="form-label" for="FechaCierre">Recibe postulaciones hasta <span class="campo-opcional">(opcional)</span></label>
+                <input class="form-control" id="FechaCierre" name="FechaCierre" value="@(ViewBag.Formulario.FechaCierre?.ToString("yyyy-MM-dd"))" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("FechaCierre", "Elegí una fecha desde hoy")</span>
             </div>
         </div>
 
         <div class="formulario-acciones">
-            <a class="boton boton-gris" asp-controller="Publicaciones" asp-action="Index">Cancelar</a>
-            <button class="boton boton-acento" type="submit">@(ViewBag.Formulario.EsEmpresa ? "Publicar búsqueda" : "Enviar a revisión")</button>
+            <a class="btn btn-secondary" asp-controller="Publicaciones" asp-action="Index">Cancelar</a>
+            <button class="btn btn-warning" type="submit">@(ViewBag.Formulario.EsEmpresa ? "Publicar búsqueda" : "Enviar a revisión")</button>
         </div>
     </form>
 </div>

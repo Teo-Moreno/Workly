@@ -8,21 +8,21 @@
     <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 
     <header class="navbar navbar-app" data-navbar>
-        <div class="contenedor navbar-interior">
-            <a class="logo" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
+        <div class="container navbar-interior">
+            <a class="navbar-brand logo" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
 
-            <nav class="navbar-links" aria-label="Principal">
+            <nav class="navbar-nav" aria-label="Principal">
                 <partial name="_LinksApp" />
             </nav>
 
             <div class="navbar-acciones">
                 @if (User.EstaLogueado())
                 {
-                <div class="desplegable" data-desplegable>
-                    <button class="boton-usuario" type="button" aria-expanded="false" aria-controls="menu-usuario" data-desplegable-boton>
+                <div class="dropdown">
+                    <button class="boton-usuario" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-controls="menu-usuario">
                         <span class="avatar" aria-hidden="true">
                             @if (!string.IsNullOrEmpty(User.Foto()))
                             {
@@ -38,31 +38,31 @@
                             <span class="boton-usuario-rol">@(User.Ubicacion() ?? "Mi cuenta")</span>
                         </span>
                         <icono nombre="chevron-down" />
-                        <span class="solo-lectores">Abrir menú de cuenta</span>
+                        <span class="visually-hidden">Abrir menú de cuenta</span>
                     </button>
-                    <div class="desplegable-panel" id="menu-usuario" data-desplegable-panel>
-                        <div class="menu-cabecera">
+                    <div class="dropdown-menu dropdown-menu-end" id="menu-usuario">
+                        <div class="dropdown-header">
                             <strong class="boton-usuario-nombre">@User.NombreCompleto()</strong>
                             <span class="boton-usuario-rol">@User.Email()</span>
                         </div>
-                        <ul class="menu" role="list">
+                        <ul role="list">
                             @if (User.EsEmpresa())
                             {
-                                <li><a class="menu-item" asp-controller="Perfil" asp-action="Index"><icono nombre="building" />Perfil de la empresa</a></li>
-                                <li><a class="menu-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar una búsqueda</a></li>
+                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Index"><icono nombre="building" />Perfil de la empresa</a></li>
+                                <li><a class="dropdown-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar una búsqueda</a></li>
                             }
                             else
                             {
-                                <li><a class="menu-item" asp-controller="Perfil" asp-action="Index"><icono nombre="user-square" />Mi perfil</a></li>
-                                <li><a class="menu-item" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="busqueda"><icono nombre="slider-03" />Qué estoy buscando</a></li>
-                                <li><a class="menu-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar un trabajo</a></li>
+                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Index"><icono nombre="user-square" />Mi perfil</a></li>
+                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="busqueda"><icono nombre="slider-03" />Qué estoy buscando</a></li>
+                                <li><a class="dropdown-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar un trabajo</a></li>
                             }
-                            <li><a class="menu-item" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="settings" />Configuración</a></li>
-                            <li><a class="menu-item" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda</a></li>
-                            <li class="menu-separador" role="separator"></li>
+                            <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="settings" />Configuración</a></li>
+                            <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda</a></li>
+                            <li><hr class="dropdown-divider" /></li>
                             <li>
                                 <form asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
-                                    <button class="menu-item menu-item-peligro" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                                    <button class="dropdown-item text-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
                                 </form>
                             </li>
                         </ul>
@@ -71,30 +71,30 @@
                 }
                 else
                 {
-                    <a class="boton boton-contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                    <a class="btn btn-outline-primary" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
                 }
 
-                <button class="navbar-hamburguesa" type="button" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-movil" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
                     <icono nombre="menu" etiqueta="Abrir menú" />
                 </button>
             </div>
         </div>
 
-        <nav class="navbar-movil" id="menu-movil" aria-label="Menú móvil">
+        <nav class="collapse navbar-movil" id="menu-movil" aria-label="Menú móvil">
             <partial name="_LinksApp" />
             @if (User.EstaLogueado())
             {
-                <a class="navbar-link" asp-controller="Perfil" asp-action="Configuracion">Configuración</a>
+                <a class="nav-link" asp-controller="Perfil" asp-action="Configuracion">Configuración</a>
                 <form class="navbar-movil-salir" asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
-                    <button class="boton boton-contorno boton-peligro boton-bloque" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                    <button class="btn btn-outline-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
                 </form>
             }
             else
             {
                 <div class="navbar-movil-acciones">
-                    <a class="boton boton-contorno" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                    <a class="boton" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                    <a class="btn btn-outline-primary" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
+                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
                 </div>
             }
         </nav>
@@ -105,7 +105,7 @@
     </main>
 
     <footer class="pie pie-app">
-        <div class="contenedor pie-interior">
+        <div class="container pie-interior">
             <a class="logo logo-chico" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
@@ -121,8 +121,9 @@
     </footer>
 
     <partial name="_AvisoCookies" />
-    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
+    <div class="toast-container" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

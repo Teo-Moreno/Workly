@@ -1,32 +1,32 @@
-<dialog class="modal" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(Model.Abierto ? "true" : null)">
-    <form class="modal-contenido formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
+<div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(Model.Abierto ? "true" : null)"><div class="modal-dialog"><div class="modal-content">
+    <form class="modal-body formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
           action="@(Model.EnServidor ? Url.Action("AgregarFormacion", "Perfil") : null)"
           data-modal-local="@(Model.EnServidor ? null : "formacion")" data-formulario-real="@(Model.EnServidor ? "" : null)">
         @if (Model.EnServidor)
         {
             @Html.AntiForgeryToken()
         }
-        <div class="modal-cabecera">
-            <h2 class="modal-titulo" id="modal-formacion-titulo">Agregar formación</h2>
-            <button class="modal-cerrar" type="button" value="cancelar" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+        <div class="modal-header">
+            <h2 class="modal-title" id="modal-formacion-titulo">Agregar formación</h2>
+            <button class="modal-cerrar" type="button" value="cancelar" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
         </div>
         <p class="modal-descripcion">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
 
         <div class="campo @(Model.Abierto ? Html.ClaseError("Titulo") : "")">
-            <label class="campo-etiqueta" for="for-titulo">Título o curso</label>
-            <input class="campo-control" id="for-titulo" name="Titulo" value="@Model.Valores.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Titulo", "Completá el título o curso") : "Completá el título o curso")</span>
+            <label class="form-label" for="for-titulo">Título o curso</label>
+            <input class="form-control" id="for-titulo" name="Titulo" value="@Model.Valores.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
+            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Titulo", "Completá el título o curso") : "Completá el título o curso")</span>
         </div>
         <div class="campo @(Model.Abierto ? Html.ClaseError("Institucion") : "")">
-            <label class="campo-etiqueta" for="for-institucion">Institución</label>
-            <input class="campo-control" id="for-institucion" name="Institucion" value="@Model.Valores.Institucion" maxlength="150" required list="lista-instituciones" placeholder="Escuela, universidad o academia" />
+            <label class="form-label" for="for-institucion">Institución</label>
+            <input class="form-control" id="for-institucion" name="Institucion" value="@Model.Valores.Institucion" maxlength="150" required list="lista-instituciones" placeholder="Escuela, universidad o academia" />
             <datalist id="lista-instituciones">
                 @foreach (string institucion in Model.Instituciones)
                 {
                     <option value="@institucion"></option>
                 }
             </datalist>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Institucion", "Completá la institución") : "Completá la institución")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Institucion", "Completá la institución") : "Completá la institución")</span>
         </div>
 
         <div class="formulario-fila">
@@ -36,15 +36,14 @@
             </div>
         </div>
 
-        <label class="interruptor interruptor-etiqueta">
-            <input type="checkbox" id="for-en-curso" name="EnCurso" value="true" checked="@Model.Valores.EnCurso" data-alternar-fin />
-            <span class="interruptor-pista"></span>
-            La estoy cursando
+        <label class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="for-en-curso" name="EnCurso" value="true" checked="@Model.Valores.EnCurso" data-alternar-fin />
+            <span class="form-check-label">La estoy cursando</span>
         </label>
 
-        <div class="modal-acciones">
-            <button class="boton boton-gris" type="button" value="cancelar" data-modal-cerrar>Cancelar</button>
-            <button class="boton" type="submit">Agregar</button>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" value="cancelar" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="submit">Agregar</button>
         </div>
     </form>
-</dialog>
+</div></div></div>

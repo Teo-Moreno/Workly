@@ -2,7 +2,7 @@
     ViewData["Title"] = "Buscar trabajo";
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="encabezado-pagina">
         <h1 class="encabezado-pagina-titulo">Buscar trabajo</h1>
         <p class="encabezado-pagina-bajada">Buscamos en las búsquedas publicadas en Workly y en otros sitios de empleo a la vez.</p>
@@ -21,7 +21,7 @@
             <icono nombre="near-me" />
             <span class="buscador-textos">
                 <label class="buscador-etiqueta" for="buscar-pais">País</label>
-                <select class="buscador-input buscador-select" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
+                <select class="buscador-select" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
                     @foreach (Pais pais in ViewBag.Busqueda.Paises)
                     {
                         <option value="@pais.ID" selected="@(pais.ID == ViewBag.Busqueda.IDPais)">@pais.Nombre</option>
@@ -34,7 +34,7 @@
             <icono nombre="building" />
             <span class="buscador-textos">
                 <label class="buscador-etiqueta" for="buscar-provincia">Provincia</label>
-                <select class="buscador-input buscador-select" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
+                <select class="buscador-select" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
                     <option value="">Todo el país</option>
                     @foreach (Provincia provincia in ViewBag.Busqueda.Provincias)
                     {
@@ -43,20 +43,20 @@
                 </select>
             </span>
         </div>
-        <button class="boton boton-lg buscador-boton" type="submit"><icono nombre="search" />Buscar</button>
+        <button class="btn buscador-boton" type="submit"><icono nombre="search" />Buscar</button>
     </form>
 
     <div class="buscar">
-        <button class="boton boton-contorno buscar-ver-filtros" type="button" aria-expanded="false" aria-controls="filtros" data-alternar="filtros">
+        <button class="btn buscar-ver-filtros" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros">
             <icono nombre="filter-outline" />Filtros@(ViewBag.Busqueda.CantidadFiltros > 0 ? $" ({ViewBag.Busqueda.CantidadFiltros})" : "")
         </button>
 
-        <aside class="filtros" id="filtros" aria-label="Filtros de búsqueda">
+        <aside class="filtros collapse" id="filtros" aria-label="Filtros de búsqueda">
             <div class="filtros-cabecera">
                 <h2 class="filtros-titulo">Filtros</h2>
                 @if (ViewBag.Busqueda.CantidadFiltros > 0)
                 {
-                    <a class="boton boton-texto" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" asp-route-IDPais="@ViewBag.Busqueda.IDPais" asp-route-IDProvincia="@ViewBag.Busqueda.IDProvincia" data-cargando="#resultados-busqueda">Limpiar</a>
+                    <a class="btn btn-link" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" asp-route-IDPais="@ViewBag.Busqueda.IDPais" asp-route-IDProvincia="@ViewBag.Busqueda.IDProvincia" data-cargando="#resultados-busqueda">Limpiar</a>
                 }
             </div>
 
@@ -65,10 +65,9 @@
                 @foreach (var modalidad in Catalogos.Modalidades)
                 {
                     <label class="filtros-opcion">
-                        <span class="casilla casilla-sm">
-                            <input type="checkbox" form="form-buscar" name="Modalidad" value="@modalidad" checked="@ViewBag.Busqueda.Modalidad.Contains(modalidad)" data-enviar-al-cambiar />
-                            <span class="casilla-caja"><icono nombre="check" /></span>
-                            @modalidad
+                        <span class="form-check">
+                            <input class="form-check-input" type="checkbox" form="form-buscar" name="Modalidad" value="@modalidad" checked="@ViewBag.Busqueda.Modalidad.Contains(modalidad)" data-enviar-al-cambiar />
+                            <span class="form-check-label">@modalidad</span>
                         </span>
                     </label>
                 }
@@ -79,10 +78,9 @@
                 @foreach (var (tipo, _) in Catalogos.TiposEmpleo)
                 {
                     <label class="filtros-opcion">
-                        <span class="casilla casilla-sm">
-                            <input type="checkbox" form="form-buscar" name="Tipo" value="@tipo" checked="@ViewBag.Busqueda.Tipo.Contains(tipo)" data-enviar-al-cambiar />
-                            <span class="casilla-caja"><icono nombre="check" /></span>
-                            @tipo
+                        <span class="form-check">
+                            <input class="form-check-input" type="checkbox" form="form-buscar" name="Tipo" value="@tipo" checked="@ViewBag.Busqueda.Tipo.Contains(tipo)" data-enviar-al-cambiar />
+                            <span class="form-check-label">@tipo</span>
                         </span>
                     </label>
                 }
@@ -91,25 +89,23 @@
             <fieldset class="filtros-grupo">
                 <legend class="filtros-subtitulo">Fecha de publicación</legend>
                 <label class="filtros-opcion">
-                    <span class="opcion opcion-sm">
-                        <input type="radio" form="form-buscar" name="Fecha" value="" checked="@(ViewBag.Busqueda.Fecha == null)" data-enviar-al-cambiar />
-                        <span class="opcion-circulo"></span>
-                        Cualquier fecha
+                    <span class="form-check">
+                        <input class="form-check-input" type="radio" form="form-buscar" name="Fecha" value="" checked="@(ViewBag.Busqueda.Fecha == null)" data-enviar-al-cambiar />
+                        <span class="form-check-label">Cualquier fecha</span>
                     </span>
                 </label>
                 @foreach (var (valor, texto, _) in Catalogos.FechasPublicacion)
                 {
                     <label class="filtros-opcion">
-                        <span class="opcion opcion-sm">
-                            <input type="radio" form="form-buscar" name="Fecha" value="@valor" checked="@(ViewBag.Busqueda.Fecha == valor)" data-enviar-al-cambiar />
-                            <span class="opcion-circulo"></span>
-                            @texto
+                        <span class="form-check">
+                            <input class="form-check-input" type="radio" form="form-buscar" name="Fecha" value="@valor" checked="@(ViewBag.Busqueda.Fecha == valor)" data-enviar-al-cambiar />
+                            <span class="form-check-label">@texto</span>
                         </span>
                     </label>
                 }
             </fieldset>
 
-            <noscript><button class="boton boton-bloque" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
+            <noscript><button class="btn btn-block" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
         </aside>
 
         <section class="resultados" id="resultados-busqueda" aria-labelledby="resultados-titulo">
@@ -117,7 +113,7 @@
                 <h2 class="resultados-titulo" id="resultados-titulo">@ViewBag.Busqueda.Titulo</h2>
                 <div class="ordenar">
                     <label for="buscar-orden">Ordenar por:</label>
-                    <select class="campo-control campo-control-sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar data-seleccion="seleccion-derecha">
+                    <select class="form-select form-select-sm" id="buscar-orden" form="form-buscar" name="Orden" data-enviar-al-cambiar data-seleccion="seleccion-derecha">
                         @foreach (var (valor, texto) in Catalogos.Ordenes)
                         {
                             <option value="@valor" selected="@(ViewBag.Busqueda.Orden == valor)">@texto</option>
@@ -134,20 +130,20 @@
             }
             @if (!ViewBag.Busqueda.BuscoAlgo && ViewBag.Busqueda.Ofertas.Count > 0)
             {
-                <p class="texto-chico texto-suave">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @ViewBag.Busqueda.Lugar. Escribí un puesto para buscar uno en particular.</p>
+                <p class="small text-body-secondary">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @ViewBag.Busqueda.Lugar. Escribí un puesto para buscar uno en particular.</p>
             }
 
             @if (ViewBag.Busqueda.Ofertas.Count == 0)
             {
                 <div class="estado-vacio">
-                    <span class="caja-icono caja-icono-lg"><icono nombre="search" /></span>
+                    <span class="caja-icono-lg"><icono nombre="search" /></span>
                     @if (ViewBag.Busqueda.BuscoAlgo)
                     {
                         <h3 class="estado-vacio-titulo">No encontramos ningún puesto con ese nombre</h3>
                         <p>Revisá cómo lo escribiste, probá con otra palabra@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
                         @if (ViewBag.Busqueda.HayFiltros)
                         {
-                            <a class="boton boton-contorno" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
+                            <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
                         }
                     }
                     else
@@ -168,7 +164,7 @@
                 @if (ViewBag.Busqueda.CursorSiguiente != null)
                 {
                     <div class="resultados-mas">
-                        <a class="boton boton-contorno" href="@ViewBag.Busqueda.UrlMas" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
+                        <a class="btn btn-outline-primary" href="@ViewBag.Busqueda.UrlMas" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
                     </div>
                 }
             }

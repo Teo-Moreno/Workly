@@ -3,11 +3,11 @@
 }
 
 <section class="hero">
-    <div class="contenedor hero-interior hero-interior-solo">
+    <div class="container hero-interior">
         <div class="hero-texto">
-            <h1 class="hero-titulo texto-display">Encontrá el trabajo que <span class="texto-secundario">encaja</span> con vos.</h1>
+            <h1 class="hero-titulo display-1">Encontrá el trabajo que <span class="text-secondary">encaja</span> con vos.</h1>
 
-            <p class="hero-bajada texto-bajada">
+            <p class="hero-bajada lead">
                 Buscá en un solo lugar las ofertas publicadas en Workly y en otros sitios como LinkedIn o Bumeran,
                 postulate y seguí cada proceso desde tu tablero.
             </p>
@@ -21,23 +21,23 @@
                                data-animar-puestos="@string.Join("|", ViewBag.Puestos)" />
                     </span>
                 </label>
-                <button class="boton boton-lg buscador-boton" type="submit">Buscar trabajo</button>
+                <button class="btn buscador-boton" type="submit">Buscar trabajo</button>
             </form>
         </div>
     </div>
 </section>
 
 <section class="como-funciona" id="como-funciona" aria-labelledby="como-funciona-titulo">
-    <div class="contenedor">
+    <div class="container">
         <header class="seccion-encabezado">
-            <span class="etiqueta">Cómo funciona</span>
-            <h2 class="texto-titulo-1" id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
+            <span class="badge">Cómo funciona</span>
+            <h2 class="h1" id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
         </header>
 
         <ol class="pasos-landing" role="list">
             <li class="paso-landing">
                 <div class="paso-landing-cabecera">
-                    <span class="caja-icono caja-icono-principal paso-landing-icono"><icono nombre="user-square" /></span>
+                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="user-square" /></span>
                     <span class="paso-landing-numero" aria-hidden="true">01</span>
                 </div>
                 <h3 class="paso-landing-titulo">Creá tu perfil laboral</h3>
@@ -45,7 +45,7 @@
             </li>
             <li class="paso-landing">
                 <div class="paso-landing-cabecera">
-                    <span class="caja-icono caja-icono-principal paso-landing-icono"><icono nombre="search" /></span>
+                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="search" /></span>
                     <span class="paso-landing-numero" aria-hidden="true">02</span>
                 </div>
                 <h3 class="paso-landing-titulo">Buscá en todos lados a la vez</h3>
@@ -53,7 +53,7 @@
             </li>
             <li class="paso-landing">
                 <div class="paso-landing-cabecera">
-                    <span class="caja-icono caja-icono-principal paso-landing-icono"><icono nombre="circle-check" /></span>
+                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="circle-check" /></span>
                     <span class="paso-landing-numero" aria-hidden="true">03</span>
                 </div>
                 <h3 class="paso-landing-titulo">Postulate y hacé seguimiento</h3>
@@ -64,32 +64,32 @@
 </section>
 
 <section class="diferenciales" aria-labelledby="diferenciales-titulo">
-    <div class="contenedor diferenciales-interior">
+    <div class="container diferenciales-interior">
         <div class="diferenciales-texto">
-            <span class="etiqueta etiqueta-acento">Por qué Workly</span>
+            <span class="badge badge-acento">Por qué Workly</span>
             <h2 class="diferenciales-titulo" id="diferenciales-titulo">No es otra página de avisos.</h2>
             <p class="diferenciales-bajada">Una sola búsqueda, un solo perfil y un solo tablero para toda tu búsqueda laboral.</p>
-            <a class="boton boton-acento" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil</a>
+            <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil</a>
         </div>
 
         <ul class="diferenciales-grilla" role="list">
             <li class="diferencial">
-                <span class="caja-icono caja-icono-secundario diferencial-icono"><icono nombre="search" /></span>
+                <span class="caja-icono-secundario diferencial-icono"><icono nombre="search" /></span>
                 <h3 class="diferencial-titulo">Más ofertas</h3>
                 <p class="diferencial-texto">Las búsquedas que publican empresas y personas en Workly, junto con las de otros sitios.</p>
             </li>
             <li class="diferencial">
-                <span class="caja-icono caja-icono-secundario diferencial-icono"><icono nombre="circle-check-outline" /></span>
+                <span class="caja-icono-secundario diferencial-icono"><icono nombre="circle-check-outline" /></span>
                 <h3 class="diferencial-titulo">Búsquedas revisadas</h3>
                 <p class="diferencial-texto">Las empresas se registran con su CUIT y las búsquedas que publican las personas se revisan antes de salir.</p>
             </li>
             <li class="diferencial">
-                <span class="caja-icono caja-icono-secundario diferencial-icono"><icono nombre="settings" /></span>
+                <span class="caja-icono-secundario diferencial-icono"><icono nombre="settings" /></span>
                 <h3 class="diferencial-titulo">A tu medida</h3>
                 <p class="diferencial-texto">Filtrá por modalidad, tipo de empleo, fecha y provincia, y guardá qué estás buscando en tu perfil.</p>
             </li>
             <li class="diferencial">
-                <span class="caja-icono caja-icono-secundario diferencial-icono"><icono nombre="checkbox-checked" /></span>
+                <span class="caja-icono-secundario diferencial-icono"><icono nombre="checkbox-checked" /></span>
                 <h3 class="diferencial-titulo">Más organizado</h3>
                 <p class="diferencial-texto">Todas tus postulaciones en un tablero que movés vos, sin planillas ni mails perdidos.</p>
             </li>
@@ -100,7 +100,7 @@
 @if (ViewBag.Empresas.Count > 0)
 {
     <section class="empresas-landing" aria-labelledby="empresas-landing-titulo">
-        <div class="contenedor">
+        <div class="container">
             <h2 class="empresas-landing-titulo" id="empresas-landing-titulo">Empresas con búsquedas abiertas en Workly</h2>
             <ul class="empresas-landing-lista" role="list">
                 @foreach (Empresa empresa in ViewBag.Empresas)
@@ -117,15 +117,15 @@
     </section>
 }
 
-<section class="contenedor cta" id="para-empresas" aria-labelledby="cta-titulo">
+<section class="container cta" id="para-empresas" aria-labelledby="cta-titulo">
     <div class="cta-tarjeta">
         <div class="cta-texto">
-            <h2 class="cta-titulo" id="cta-titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></h2>
+            <h2 class="cta-titulo" id="cta-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></h2>
             <p class="cta-bajada">Creá tu perfil gratis. ¿Tenés una empresa? Registrala con su CUIT, publicá tus búsquedas y mirá quién se postula.</p>
         </div>
         <div class="cta-acciones">
-            <a class="boton boton-acento" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil gratis</a>
-            <a class="boton boton-contorno-blanco" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Soy empresa</a>
+            <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil gratis</a>
+            <a class="btn btn-outline-light" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Soy empresa</a>
         </div>
     </div>
 </section>

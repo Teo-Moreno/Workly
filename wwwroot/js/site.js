@@ -4,6 +4,7 @@
   const $ = (selector, raiz = document) => raiz.querySelector(selector);
   const $$ = (selector, raiz = document) => Array.from(raiz.querySelectorAll(selector));
   const rutaIconos = "/img/iconos.svg";
+  const CAMPO = ".campo, .formulario-grupo, .lista-local";
 
   const icono = (nombre, tamano = 24) =>
     `<svg class="icono" width="${tamano}" height="${tamano}" aria-hidden="true" focusable="false"><use href="${rutaIconos}#${nombre}"></use></svg>`;
@@ -19,109 +20,33 @@
     const contenedor = $("[data-snackbars]");
     if (!contenedor) return;
     const elemento = document.createElement("div");
-    elemento.className = `snackbar ${tipo ? `snackbar-${tipo}` : ""}`;
+    elemento.className = tipo ? `toast toast-${tipo}` : "toast";
     elemento.setAttribute("role", tipo === "error" ? "alert" : "status");
+    elemento.setAttribute("aria-atomic", "true");
     elemento.innerHTML = `${icono(iconosSnackbar[tipo] || "info", 22)}
-      <span class="snackbar-texto"></span>
-      <button class="snackbar-cerrar" type="button" aria-label="Cerrar aviso">${icono("close-big", 20)}</button>`;
-    elemento.querySelector(".snackbar-texto").textContent = texto;
+      <span class="toast-body"></span>
+      <button class="toast-cerrar" type="button" aria-label="Cerrar aviso" data-bs-dismiss="toast">${icono("close-big", 20)}</button>`;
+    elemento.querySelector(".toast-body").textContent = texto;
     contenedor.appendChild(elemento);
-
-    const cerrar = () => {
-      elemento.classList.add("esta-saliendo");
-      elemento.addEventListener("animationend", () => elemento.remove(), { once: true });
-    };
-    elemento.querySelector(".snackbar-cerrar").addEventListener("click", cerrar);
-    setTimeout(cerrar, 4200);
+    elemento.addEventListener("hidden.bs.toast", () => elemento.remove());
+    bootstrap.Toast.getOrCreateInstance(elemento, { delay: 4200 }).show();
   }
-
-  document.addEventListener("click", (evento) => {
-    const cerrar = evento.target.closest("[data-cerrar-aviso]");
-    if (cerrar) cerrar.closest(".snackbar")?.remove();
-  });
 
   $$("[data-menu-movil]").forEach((boton) => {
-    boton.addEventListener("click", () => {
-      const navbar = boton.closest("[data-navbar]");
-      const abierto = navbar.classList.toggle("esta-abierta");
-      boton.setAttribute("aria-expanded", String(abierto));
-      cambiarIcono(boton, abierto ? "close-big" : "menu");
-    });
+    const panel = document.getElementById(boton.getAttribute("aria-controls"));
+    panel?.addEventListener("show.bs.collapse", () => cambiarIcono(boton, "close-big"));
+    panel?.addEventListener("hide.bs.collapse", () => cambiarIcono(boton, "menu"));
   });
 
-  const cerrarDesplegables = (excepto) => {
-    $$("[data-desplegable].esta-abierto").forEach((desplegable) => {
-      if (desplegable === excepto) return;
-      desplegable.classList.remove("esta-abierto");
-      $("[data-desplegable-boton]", desplegable)?.setAttribute("aria-expanded", "false");
-    });
-  };
-
-  $$("[data-desplegable]").forEach((desplegable) => {
-    const boton = $("[data-desplegable-boton]", desplegable);
-    boton?.addEventListener("click", (evento) => {
-      evento.stopPropagation();
-      const abierto = !desplegable.classList.contains("esta-abierto");
-      cerrarDesplegables(desplegable);
-      desplegable.classList.toggle("esta-abierto", abierto);
-      boton.setAttribute("aria-expanded", String(abierto));
-    });
-    $$("[data-desplegable-cerrar]", desplegable).forEach((cerrar) =>
-      cerrar.addEventListener("click", () => cerrarDesplegables())
-    );
-  });
-
-  document.addEventListener("click", (evento) => {
-    if (!evento.target.closest("[data-desplegable-panel]")) cerrarDesplegables();
-  });
-
-  document.addEventListener("keydown", (evento) => {
-    if (evento.key === "Escape") cerrarDesplegables();
-  });
-
-  function activarPestana(contenedor, id, actualizarHash = false) {
-    const botones = $$("[data-pestana]", contenedor).filter((b) => b.closest("[data-pestanas]") === contenedor);
-    const paneles = $$("[data-panel]", contenedor).filter((p) => p.closest("[data-pestanas]") === contenedor);
-    if (!paneles.some((panel) => panel.dataset.panel === id)) return false;
-
-    botones.forEach((boton) => {
-      const activa = boton.dataset.pestana === id;
-      boton.classList.toggle("esta-activa", activa);
-      boton.classList.toggle("esta-activo", activa);
-      if (boton.getAttribute("role") === "tab") boton.setAttribute("aria-selected", String(activa));
-      else if (activa) boton.setAttribute("aria-current", "true");
-      else boton.removeAttribute("aria-current");
-    });
-    paneles.forEach((panel) => (panel.hidden = panel.dataset.panel !== id));
-    if (actualizarHash && contenedor.hasAttribute("data-pestanas-hash")) history.replaceState(null, "", `#${id}`);
-    return true;
-  }
-
-  $$("[data-pestanas]").forEach((contenedor) => {
-    contenedor.addEventListener("click", (evento) => {
-      const boton = evento.target.closest("[data-pestana]");
-      if (!boton || boton.closest("[data-pestanas]") !== contenedor) return;
-      evento.preventDefault();
-      activarPestana(contenedor, boton.dataset.pestana, true);
-    });
-
-    if (contenedor.hasAttribute("data-pestanas-hash") && location.hash) {
-      activarPestana(contenedor, decodeURIComponent(location.hash.slice(1)));
-    }
-  });
-
-  window.addEventListener("hashchange", () => {
-    $$("[data-pestanas][data-pestanas-hash]").forEach((contenedor) =>
-      activarPestana(contenedor, decodeURIComponent(location.hash.slice(1)))
-    );
-  });
-
-  $$("[data-alternar]").forEach((boton) => {
-    boton.addEventListener("click", () => {
-      const panel = document.getElementById(boton.dataset.alternar);
-      const abierto = panel.classList.toggle("esta-abierto");
-      boton.setAttribute("aria-expanded", String(abierto));
-    });
+  $$("[data-pestanas-hash]").forEach((contenedor) => {
+    const mostrar = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const pestana = id && $(`[data-bs-toggle="pill"][href="#${CSS.escape(id)}"]`, contenedor);
+      if (pestana) bootstrap.Tab.getOrCreateInstance(pestana).show();
+    };
+    contenedor.addEventListener("shown.bs.tab", (evento) => history.replaceState(null, "", evento.target.getAttribute("href")));
+    mostrar();
+    window.addEventListener("hashchange", mostrar);
   });
 
   const panelDetalles = $("[data-detalles]");
@@ -150,7 +75,7 @@
     $$("input, select, textarea", formulario).forEach((control) => {
       const oculto = control.closest("[hidden]");
       if ((oculto && oculto !== formulario) || ["hidden", "submit", "button"].includes(control.type)) return;
-      const campo = control.closest(".campo");
+      const campo = control.closest(CAMPO);
       let ok;
       if (control.type === "file") {
         if (!control.required) return;
@@ -171,7 +96,7 @@
         ok = control.checkValidity();
       }
       campo?.classList.toggle("campo-error", !ok);
-      if (!ok) campo?.classList.remove("campo-sin-mensaje");
+      if (!ok) campo?.removeAttribute("data-sin-mensaje");
       if (!ok && valido) {
         control.focus();
         valido = false;
@@ -182,9 +107,9 @@
 
   $$("form .campo input, form .campo select, form .campo textarea").forEach((control) => {
     const quitarError = () => {
-      const campo = control.closest(".campo");
+      const campo = control.closest(CAMPO);
       if (!campo?.classList.contains("campo-error")) return;
-      campo.classList.remove("campo-sin-mensaje");
+      campo.removeAttribute("data-sin-mensaje");
       const ok = control.type === "radio" ? true : control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
       if (ok) campo.classList.remove("campo-error");
     };
@@ -204,7 +129,7 @@
   });
 
   function archivoValido(input, archivo) {
-    const campo = input.closest(".campo");
+    const campo = input.closest(CAMPO);
     const extensiones = input.accept.split(",").map((e) => e.trim().toLowerCase()).filter((e) => e.startsWith("."));
     const extension = archivo.name.includes(".") ? archivo.name.slice(archivo.name.lastIndexOf(".")).toLowerCase() : "";
     const maximo = Number(input.dataset.tamanoMaximo) || Infinity;
@@ -213,11 +138,11 @@
     else if (archivo.size > maximo) error = `El archivo pesa más de ${Math.round(maximo / 1024 / 1024)} MB`;
 
     campo?.classList.toggle("campo-error", Boolean(error));
-    campo?.classList.remove("campo-sin-mensaje");
+    campo?.removeAttribute("data-sin-mensaje");
     if (!error) return true;
 
     input.value = "";
-    const mensaje = campo && $(".campo-mensaje-error", campo);
+    const mensaje = campo && $(".invalid-feedback", campo);
     if (mensaje) {
       [...mensaje.childNodes].filter((nodo) => nodo.nodeType === Node.TEXT_NODE).forEach((nodo) => nodo.remove());
       mensaje.append(error);
@@ -275,7 +200,7 @@
       });
       $("[data-paso-actual]")?.replaceChildren(String(indice + 1));
       if (enfocar) {
-        const primerCampo = $(".campo-error .campo-control, .campo-error input", pasos[indice]) ||
+        const primerCampo = $(".campo-error .form-control, .campo-error .form-select, .campo-error input", pasos[indice]) ||
           pasos[indice].querySelector("input:not([type=hidden]), select, textarea");
         primerCampo?.focus({ preventScroll: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -316,7 +241,7 @@
     if (!boton || boton.classList.contains("esta-cargando")) return;
     boton.classList.add("esta-cargando");
     boton.setAttribute("aria-disabled", "true");
-    boton.insertAdjacentHTML("afterbegin", `<span class="spinner spinner-sm${boton.matches(".boton-contorno, .boton-texto") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
+    boton.insertAdjacentHTML("afterbegin", `<span class="spinner-border-sm${boton.matches("[class*='btn-outline'], [class*='btn-link'], .btn-externo, .btn-archivo, .btn-archivo-block, .btn-guardada, .buscar-ver-filtros, .btn-chip") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
   };
 
   $$("form[data-formulario-real]").forEach((formulario) => {
@@ -362,7 +287,7 @@
     const boton = document.createElement("button");
     boton.type = "button";
     boton.id = `${id}-boton`;
-    boton.className = `${select.className} seleccion-boton`;
+    boton.className = select.classList.contains("form-select-sm") ? "form-control-sm seleccion-boton" : select.classList.contains("form-select") ? "form-control seleccion-boton" : `${select.classList[select.classList.length - 1]} seleccion-boton`;
     boton.setAttribute("aria-haspopup", "listbox");
     boton.setAttribute("aria-expanded", "false");
     boton.setAttribute("aria-controls", `${id}-lista`);
@@ -597,28 +522,7 @@
     });
   });
 
-  document.addEventListener("click", (evento) => {
-    const abrir = evento.target.closest("[data-modal-abrir]");
-    if (abrir) {
-      evento.preventDefault();
-      document.getElementById(abrir.dataset.modalAbrir)?.showModal();
-      return;
-    }
-    const cerrar = evento.target.closest("[data-modal-cerrar]");
-    if (cerrar) {
-      evento.preventDefault();
-      cerrar.closest("dialog")?.close();
-      return;
-    }
-    if (evento.target.tagName === "DIALOG" && evento.target.open) {
-      const caja = evento.target.getBoundingClientRect();
-      const fuera =
-        evento.clientX < caja.left || evento.clientX > caja.right || evento.clientY < caja.top || evento.clientY > caja.bottom;
-      if (fuera) evento.target.close();
-    }
-  });
-
-  $$('dialog[data-abrir-al-cargar="true"]').forEach((dialogo) => dialogo.showModal());
+  $$('.modal[data-abrir-al-cargar="true"]').forEach((modal) => bootstrap.Modal.getOrCreateInstance(modal).show());
 
   document.addEventListener("submit", (evento) => {
     const formulario = evento.target;
@@ -740,7 +644,7 @@
         entrada.required = !casilla.checked;
         if (casilla.checked) {
           entrada.value = "";
-          entrada.closest(".campo")?.classList.remove("campo-error");
+          entrada.closest(CAMPO)?.classList.remove("campo-error");
         }
       });
     };
@@ -803,10 +707,10 @@
 
       const inicio = aMes(valores.Inicio);
       const fin = aMes(valores.Fin);
-      const campoFin = formulario.elements.Fin?.closest(".campo");
+      const campoFin = formulario.elements.Fin?.closest(CAMPO);
       if (fin !== null && inicio !== null && fin < inicio) {
         campoFin?.classList.add("campo-error");
-        const mensaje = campoFin && $(".campo-mensaje-error", campoFin);
+        const mensaje = campoFin && $(".invalid-feedback", campoFin);
         if (mensaje) {
           [...mensaje.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).forEach((n) => n.remove());
           mensaje.append("La finalización no puede ser anterior al inicio");
@@ -834,7 +738,7 @@
       });
       const quitar = document.createElement("button");
       quitar.type = "button";
-      quitar.className = "boton boton-texto";
+      quitar.className = "btn btn-link";
       quitar.setAttribute("data-quitar-item", "");
       quitar.textContent = "Quitar";
       item.appendChild(quitar);
@@ -843,7 +747,7 @@
 
       formulario.reset();
       $$("[data-alternar-fin]", formulario).forEach((c) => c.dispatchEvent(new Event("change")));
-      formulario.closest("dialog")?.close();
+      bootstrap.Modal.getInstance(formulario.closest(".modal"))?.hide();
       snackbar(tipo === "experiencia" ? "Sumamos la experiencia." : "Sumamos la formación.", "exito");
     });
   });
@@ -875,10 +779,12 @@
         chip.dataset.sector = "";
         const casilla = document.createElement("input");
         casilla.type = "checkbox";
+        casilla.className = "btn-check";
         casilla.name = "Habilidades";
         casilla.value = nombre.slice(0, 60);
         casilla.checked = true;
         const texto = document.createElement("span");
+        texto.className = "btn btn-chip";
         texto.textContent = casilla.value;
         chip.append(casilla, texto);
         lista.appendChild(chip);
@@ -1075,7 +981,7 @@
   });
 
   $$("[data-filtrar-preguntas]").forEach((input) => {
-    const items = $$("[data-acordeon] .acordeon-item");
+    const items = $$("[data-acordeon] .accordion-item");
     const vacio = $("[data-acordeon-vacio]");
     input.form?.addEventListener("submit", (evento) => evento.preventDefault());
     input.addEventListener("input", () => {
@@ -1085,7 +991,7 @@
         const coincide = !texto || item.textContent.toLowerCase().includes(texto);
         item.hidden = !coincide;
         if (coincide) visibles++;
-        if (texto && coincide) item.open = true;
+        if (texto && coincide) bootstrap.Collapse.getOrCreateInstance($(".accordion-collapse", item), { toggle: false }).show();
       });
       if (vacio) vacio.hidden = visibles > 0;
       $$("[data-acordeon-grupo]").forEach((grupo) => {
