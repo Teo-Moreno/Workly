@@ -22,8 +22,15 @@ public class EmpresasController : Controller
         modelo.IDProvincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia && p.IDPais == modelo.IDPais)?.ID;
         if (!Catalogos.Ordenes.Any(o => o.Valor == modelo.Orden)) modelo.Orden = "recientes";
 
-        modelo.Empresas = BD.BuscarEmpresas(modelo.Q, null, modelo.IDPais, modelo.IDProvincia, modelo.Orden);
-        return View(modelo);
+        ViewBag.Q = modelo.Q;
+        ViewBag.IDPais = modelo.IDPais;
+        ViewBag.IDProvincia = modelo.IDProvincia;
+        ViewBag.Orden = modelo.Orden;
+        ViewBag.Paises = modelo.Paises;
+        ViewBag.Provincias = modelo.Provincias;
+        ViewBag.Filtrando = modelo.Q != null || modelo.IDProvincia != null;
+        ViewBag.Empresas = BD.BuscarEmpresas(modelo.Q, null, modelo.IDPais, modelo.IDProvincia, modelo.Orden);
+        return View();
     }
 
     public IActionResult Detalle(int id)
@@ -34,11 +41,9 @@ public class EmpresasController : Controller
             return NotFound();
         }
         var esPropia = User.EsEmpresa() && empresa.IDUsuario == User.IdUsuario();
-        return View(new EmpresaDetalleViewModel
-        {
-            Empresa = empresa,
-            Ofertas = BD.ObtenerOfertasDeEmpresa(id, User.IdUsuario()),
-            EsPropia = esPropia
-        });
+        ViewBag.Empresa = empresa;
+        ViewBag.Abiertas = BD.ObtenerOfertasDeEmpresa(id, User.IdUsuario()).Where(o => !o.EstaCerrada).ToList();
+        ViewBag.EsPropia = esPropia;
+        return View();
     }
 }

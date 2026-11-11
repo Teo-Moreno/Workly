@@ -20,5 +20,7 @@ public class Perfil
     public string? Pais { get; set; }
     public string? Codigo_Telefono { get; set; }
 
+    public string TelefonoLink => (Telefono ?? "").Replace(" ", "").Replace("-", "");
+
     public string? Ubicacion => Provincia == null ? null : $"{Provincia}, {Pais}";
 }

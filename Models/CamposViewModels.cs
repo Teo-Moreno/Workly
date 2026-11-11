@@ -14,6 +14,9 @@ public class CampoUbicacion
     public bool TodoElPais { get; set; }
 
     public bool Requerido { get; set; } = true;
+
+    public string IdPais => Prefijo + NombrePais;
+    public string IdProvincia => Prefijo + NombreProvincia;
 }
 
 public class CampoTelefono
@@ -35,6 +38,8 @@ public class CampoMes
     public bool PermitirFuturo { get; set; }
 
     public string? Error { get; set; }
+
+    public static readonly string[] Meses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic" };
 }
 
 public class CamposBusqueda
@@ -58,6 +63,16 @@ public class CamposBusqueda
     public List<Idioma> CatalogoIdiomas { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
     public int? IDPais { get; set; }
+
+    public List<string> HabilidadesPropias =>
+        Habilidades.Where(h => !CatalogoHabilidades.Any(c => string.Equals(c.Nombre, h, StringComparison.OrdinalIgnoreCase))).ToList();
+
+    public List<(int IDSector, string Sector)> Sectores =>
+        CatalogoHabilidades.GroupBy(h => (h.IDSector, h.Sector)).Select(g => g.Key).ToList();
+
+    public List<Provincia> ProvinciasDelPais => Provincias.Where(p => IDPais == null || p.IDPais == IDPais).ToList();
+
+    public bool Elegida(string habilidad) => Habilidades.Contains(habilidad, StringComparer.OrdinalIgnoreCase);
 
     public static CamposBusqueda Desde(CompletarPerfilViewModel m) => new()
     {
@@ -120,4 +135,34 @@ public class CamposBusqueda
         }
         return c;
     }
+}
+
+public class ModalExperiencia
+{
+    public ModalExperiencia(bool enServidor, ExperienciaFormulario? valores, string? modalAbierto)
+    {
+        EnServidor = enServidor;
+        Valores = valores ?? new ExperienciaFormulario();
+        Abierto = enServidor && modalAbierto == "modal-experiencia";
+    }
+
+    public bool EnServidor { get; }
+    public ExperienciaFormulario Valores { get; }
+    public bool Abierto { get; }
+}
+
+public class ModalFormacion
+{
+    public ModalFormacion(bool enServidor, FormacionFormulario? valores, List<string> instituciones, string? modalAbierto)
+    {
+        EnServidor = enServidor;
+        Valores = valores ?? new FormacionFormulario();
+        Instituciones = instituciones;
+        Abierto = enServidor && modalAbierto == "modal-formacion";
+    }
+
+    public bool EnServidor { get; }
+    public FormacionFormulario Valores { get; }
+    public List<string> Instituciones { get; }
+    public bool Abierto { get; }
 }

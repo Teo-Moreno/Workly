@@ -1,27 +1,23 @@
-@model OfertaDetalleViewModel
 @inject Correo Mail
 @{
-    var oferta = Model.Oferta;
-    var empresa = Model.Empresa;
-    ViewData["Title"] = $"{oferta.Titulo} en {oferta.Empresa}";
-    var es = new System.Globalization.CultureInfo("es-AR");
+    ViewData["Title"] = $"{ViewBag.Oferta.Titulo} en {ViewBag.Oferta.Empresa}";
 }
 
 <div class="contenedor seccion-app">
-    @if (Model.EsRevision)
+    @if (ViewBag.EsRevision)
     {
         <div class="barra-revision" role="region" aria-label="Revisión de la búsqueda">
             <div>
-                <span class="etiqueta etiqueta--advertencia">@oferta.Estado_Publicacion</span>
-                <p class="barra-revision__texto">Así la van a ver las personas si la aceptás.</p>
+                <span class="etiqueta etiqueta-advertencia">@ViewBag.Oferta.Estado_Publicacion</span>
+                <p class="barra-revision-texto">Así la van a ver las personas si la aceptás.</p>
             </div>
-            @if (oferta.Estado_Publicacion == "Pendiente")
+            @if (ViewBag.Oferta.Estado_Publicacion == "Pendiente")
             {
-                <div class="fila fila--envolver">
-                    <form asp-controller="Moderacion" asp-action="Aceptar" asp-route-id="@oferta.ID" method="post">
+                <div class="fila fila-envolver">
+                    <form asp-controller="Moderacion" asp-action="Aceptar" asp-route-id="@ViewBag.Oferta.ID" method="post">
                         <button class="boton" type="submit"><icono nombre="check" />Aceptar y publicar</button>
                     </form>
-                    <button class="boton boton--peligro-contorno" type="button" data-modal-abrir="modal-rechazar">Rechazar</button>
+                    <button class="boton boton-peligro-contorno" type="button" data-modal-abrir="modal-rechazar">Rechazar</button>
                 </div>
             }
             <a class="enlace" asp-controller="Moderacion" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
@@ -33,61 +29,61 @@
             <nav class="migas" aria-label="Estás en">
                 <a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
                 <icono nombre="chevron-right" />
-                <span aria-current="page">@oferta.Titulo</span>
+                <span aria-current="page">@ViewBag.Oferta.Titulo</span>
             </nav>
         </div>
     }
 
-    @if (Model.EsPropia && oferta.Estado_Publicacion != "Aprobada")
+    @if (ViewBag.EsPropia && ViewBag.Oferta.Estado_Publicacion != "Aprobada")
     {
-        <p class="aviso @(oferta.Estado_Publicacion == "Rechazada" ? "aviso--error" : "aviso--advertencia")">
+        <p class="aviso @(ViewBag.Oferta.Estado_Publicacion == "Rechazada" ? "aviso-error" : "aviso-advertencia")">
             <icono nombre="warning-outline" />
-            @(oferta.Estado_Publicacion == "Pendiente"
+            @(ViewBag.Oferta.Estado_Publicacion == "Pendiente"
                 ? "Esta búsqueda está en revisión: todavía no la ve nadie más que vos."
-                : $"Esta búsqueda no se publicó. Motivo: {oferta.Motivo_Rechazo}")
+                : $"Esta búsqueda no se publicó. Motivo: {ViewBag.Oferta.Motivo_Rechazo}")
         </p>
     }
 
     <header class="oferta-cabecera">
-        <div class="oferta-cabecera__principal">
-            <partial name="_LogoEmpresa" model='(oferta.Logo, oferta.Empresa, "logo-empresa--lg")' />
-            <div class="oferta-cabecera__textos">
-                <h1 class="oferta-cabecera__titulo">@oferta.Titulo</h1>
-                <p class="oferta-cabecera__meta">
-                    @if (empresa?.TieneCuenta == true)
+        <div class="oferta-cabecera-principal">
+            <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Oferta.Logo, ViewBag.Oferta.Empresa, "logo-empresa-lg")' />
+            <div class="oferta-cabecera-textos">
+                <h1 class="oferta-cabecera-titulo">@ViewBag.Oferta.Titulo</h1>
+                <p class="oferta-cabecera-meta">
+                    @if (ViewBag.Empresa?.TieneCuenta == true)
                     {
-                        <a class="enlace enlace--principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">@oferta.Empresa</a>
+                        <a class="enlace enlace-principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">@ViewBag.Oferta.Empresa</a>
                     }
                     else
                     {
-                        @oferta.Empresa
+                        @ViewBag.Oferta.Empresa
                     }
-                    @foreach (var dato in new[] { oferta.UbicacionVisible, oferta.PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)))
+                    @foreach (string dato in ViewBag.Oferta.DatosCabecera)
                     {
                         <text> · @dato</text>
                     }
                 </p>
                 <div class="lista-tags">
-                    <partial name="_SelloOficial" model="oferta" />
-                    @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="tag tag--borde tag--lg">@oferta.Modalidad</span> }
-                    @if (!string.IsNullOrEmpty(oferta.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@oferta.Tipo_Contrato</span> }
-                    <span class="tag @(oferta.EsExterna ? "" : "tag--principal") tag--lg">@(oferta.EsExterna ? "Publicada en " + oferta.Fuente : "Publicada en Workly")</span>
+                    <partial name="_SelloOficial" model="ViewBag.Oferta" />
+                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Modalidad)) { <span class="tag tag-borde tag-lg">@ViewBag.Oferta.Modalidad</span> }
+                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Tipo_Contrato)) { <span class="tag tag-borde tag-lg">@ViewBag.Oferta.Tipo_Contrato</span> }
+                    <span class="tag @(ViewBag.Oferta.EsExterna ? "" : "tag-principal") tag-lg">@(ViewBag.Oferta.EsExterna ? "Publicada en " + ViewBag.Oferta.Fuente : "Publicada en Workly")</span>
                 </div>
             </div>
         </div>
 
-        @if (!Model.EsRevision)
+        @if (!ViewBag.EsRevision)
         {
-            <div class="oferta-cabecera__acciones">
-                <div class="fila fila--envolver">
-                    <partial name="_AccionesOferta" model="oferta" />
-                    <partial name="_BotonGuardar" model="oferta" />
+            <div class="oferta-cabecera-acciones">
+                <div class="fila fila-envolver">
+                    <partial name="_AccionesOferta" model="ViewBag.Oferta" />
+                    <partial name="_BotonGuardar" model="ViewBag.Oferta" />
                 </div>
-                @if (Model.PuedePostular && User.EsPersona() && !Model.TieneCV)
+                @if (ViewBag.PuedePostular && User.EsPersona() && !ViewBag.TieneCV)
                 {
                     <p class="texto-chico texto-suave">Para postularte necesitás tu CV. <a class="enlace" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>
                 }
-                @if (oferta.EsExterna)
+                @if (ViewBag.Oferta.EsExterna)
                 {
                     <p class="texto-chico texto-suave">Te postulás en el sitio original. Después tocá "Ya me postulé" para seguirla en tu tablero.</p>
                 }
@@ -97,45 +93,39 @@
 
     <div class="oferta-cuerpo">
         <article class="oferta-principal">
-            @{
-                var datos = new List<(string Etiqueta, string Valor)>();
-                if (oferta.SalarioVisible != null) datos.Add(("Salario", oferta.SalarioVisible));
-                if (!oferta.EsExterna) datos.Add(("Vacantes", oferta.Cantidad_Puestos.ToString()));
-                if (oferta.Fecha_Cierre.HasValue) datos.Add(("Recibe postulaciones hasta", oferta.Fecha_Cierre.Value.ToString("d 'de' MMMM", es)));
-            }
-            @if (datos.Count > 0)
+            @if (ViewBag.Oferta.Datos.Count > 0)
             {
-                <div class="cajas-dato cajas-dato--grande">
-                    @foreach (var (etiqueta, valor) in datos)
+                <div class="cajas-dato cajas-dato-grande">
+                    @foreach (DatoOferta dato in ViewBag.Oferta.Datos)
                     {
                         <div class="caja-dato">
-                            <span class="caja-dato__etiqueta">@etiqueta</span>
-                            <strong class="caja-dato__valor">@valor</strong>
+                            <span class="caja-dato-etiqueta">@dato.Etiqueta</span>
+                            <strong class="caja-dato-valor">@dato.Valor</strong>
                         </div>
                     }
                 </div>
             }
 
             <section class="oferta-seccion">
-                <h2 class="oferta-seccion__titulo">Sobre el puesto</h2>
-                @if (string.IsNullOrWhiteSpace(oferta.Descripcion))
+                <h2 class="oferta-seccion-titulo">Sobre el puesto</h2>
+                @if (string.IsNullOrWhiteSpace(ViewBag.Oferta.Descripcion))
                 {
-                    <p class="texto-suave">@(oferta.EsExterna ? "El sitio original no mandó la descripción. Mirala en la publicación original." : "Sin descripción.")</p>
+                    <p class="texto-suave">@(ViewBag.Oferta.EsExterna ? "El sitio original no mandó la descripción. Mirala en la publicación original." : "Sin descripción.")</p>
                 }
                 else
                 {
-                    <p class="texto-con-saltos">@oferta.Descripcion</p>
+                    <p class="texto-con-saltos">@ViewBag.Oferta.Descripcion</p>
                 }
             </section>
 
-            @if (!string.IsNullOrEmpty(oferta.Puestos))
+            @if (!string.IsNullOrEmpty(ViewBag.Oferta.Puestos))
             {
                 <section class="oferta-seccion">
-                    <h2 class="oferta-seccion__titulo">Puesto</h2>
+                    <h2 class="oferta-seccion-titulo">Puesto</h2>
                     <ul class="lista-tags" role="list">
-                        @foreach (var puesto in oferta.Puestos.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        @foreach (string puesto in ViewBag.Oferta.ListaPuestos)
                         {
-                            <li class="tag tag--borde">@puesto</li>
+                            <li class="tag tag-borde">@puesto</li>
                         }
                     </ul>
                 </section>
@@ -143,58 +133,58 @@
         </article>
 
         <aside class="oferta-lateral">
-            @if (empresa != null && (empresa.TieneCuenta || !string.IsNullOrWhiteSpace(empresa.Descripcion) || empresa.UbicacionCompleta != null || empresa.EnlaceSitio != null))
+            @if (ViewBag.Empresa != null && (ViewBag.Empresa.TieneCuenta || !string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion) || ViewBag.Empresa.UbicacionCompleta != null || ViewBag.Empresa.EnlaceSitio != null))
             {
                 <section class="tarjeta">
                     <div class="fila">
-                        <partial name="_LogoEmpresa" model='(empresa.Logo, empresa.Nombre, "logo-empresa--md")' />
+                        <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "logo-empresa-md")' />
                         <div>
-                            <h2 class="tarjeta__titulo">@empresa.Nombre</h2>
-                            @if (empresa.Rubro != null) { <p class="texto-chico texto-suave">@empresa.Rubro</p> }
+                            <h2 class="tarjeta-titulo">@ViewBag.Empresa.Nombre</h2>
+                            @if (ViewBag.Empresa.Rubro != null) { <p class="texto-chico texto-suave">@ViewBag.Empresa.Rubro</p> }
                         </div>
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(empresa.Descripcion))
+                    @if (!string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion))
                     {
-                        <p class="perfil-texto">@empresa.Descripcion</p>
+                        <p class="perfil-texto">@ViewBag.Empresa.Descripcion</p>
                     }
                     <dl class="lista-clave-valor">
-                        @if (empresa.UbicacionCompleta != null) { <div><dt>Ubicación</dt><dd>@empresa.UbicacionCompleta</dd></div> }
-                        @if (empresa.EnlaceSitio != null) { <div><dt>Sitio web</dt><dd><a class="enlace" href="@empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@empresa.Sitio_Web</a></dd></div> }
+                        @if (ViewBag.Empresa.UbicacionCompleta != null) { <div><dt>Ubicación</dt><dd>@ViewBag.Empresa.UbicacionCompleta</dd></div> }
+                        @if (ViewBag.Empresa.EnlaceSitio != null) { <div><dt>Sitio web</dt><dd><a class="enlace" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></dd></div> }
                     </dl>
-                    @if (empresa.TieneCuenta && !Model.EsRevision)
+                    @if (ViewBag.Empresa.TieneCuenta && !ViewBag.EsRevision)
                     {
-                        <a class="boton boton--contorno boton--bloque" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">Ver la empresa</a>
+                        <a class="boton boton-contorno boton-bloque" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">Ver la empresa</a>
                     }
                 </section>
             }
-            else if (oferta.EsExterna)
+            else if (ViewBag.Oferta.EsExterna)
             {
                 <section class="tarjeta">
-                    <h2 class="tarjeta__titulo">De dónde sale esta oferta</h2>
-                    <p class="texto-suave">La encontramos en @oferta.Fuente. La postulación se hace en ese sitio.</p>
+                    <h2 class="tarjeta-titulo">De dónde sale esta oferta</h2>
+                    <p class="texto-suave">La encontramos en @ViewBag.Oferta.Fuente. La postulación se hace en ese sitio.</p>
                 </section>
             }
         </aside>
     </div>
 </div>
 
-@if (Model.EsRevision && oferta.Estado_Publicacion == "Pendiente")
+@if (ViewBag.EsRevision && ViewBag.Oferta.Estado_Publicacion == "Pendiente")
 {
     <dialog class="modal" id="modal-rechazar" aria-labelledby="modal-rechazar-titulo">
-        <form class="modal__contenido formulario" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@oferta.ID" method="post" novalidate data-formulario-real>
-            <div class="modal__cabecera">
-                <h2 class="modal__titulo" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
-                <button class="modal__cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
+        <form class="modal-contenido formulario" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@ViewBag.Oferta.ID" method="post" novalidate data-formulario-real>
+            <div class="modal-cabecera">
+                <h2 class="modal-titulo" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
+                <button class="modal-cerrar" type="button" aria-label="Cerrar" data-modal-cerrar><icono nombre="close-big" /></button>
             </div>
-            <p class="modal__descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
+            <p class="modal-descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
             <div class="campo @Html.ClaseError("motivo")">
-                <label class="campo__etiqueta" for="motivo-rechazo">Motivo</label>
-                <textarea class="campo__control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>
-                <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError("motivo", "Escribí el motivo (entre 10 y 500 caracteres)")</span>
+                <label class="campo-etiqueta" for="motivo-rechazo">Motivo</label>
+                <textarea class="campo-control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>
+                <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("motivo", "Escribí el motivo (entre 10 y 500 caracteres)")</span>
             </div>
-            <div class="modal__acciones">
-                <button class="boton boton--gris" type="button" data-modal-cerrar>Cancelar</button>
-                <button class="boton boton--peligro-lleno" type="submit">Rechazar</button>
+            <div class="modal-acciones">
+                <button class="boton boton-gris" type="button" data-modal-cerrar>Cancelar</button>
+                <button class="boton boton-peligro-lleno" type="submit">Rechazar</button>
             </div>
         </form>
     </dialog>

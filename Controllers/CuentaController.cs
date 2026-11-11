@@ -47,7 +47,7 @@ public class CuentaController : Controller
             return RedirigirDespuesDeIngresar(returnUrl);
         }
         await CargarProveedores();
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        return Formulario(new LoginViewModel { ReturnUrl = returnUrl });
     }
 
     [HttpPost]
@@ -60,7 +60,7 @@ public class CuentaController : Controller
         ViewBag.PideCaptcha = _intentos.PideCaptcha(email, ip);
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         if (_intentos.Bloqueado(email) is { } espera)
@@ -69,14 +69,14 @@ public class CuentaController : Controller
             ModelState.AddModelError(string.Empty,
                 $"Por seguridad frenamos el ingreso con este email después de varios intentos fallidos. Probá de nuevo en {minutos} {(minutos == 1 ? "minuto" : "minutos")}.");
             modelo.Contrasena = "";
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         if (ViewBag.PideCaptcha == true && !_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
         {
             ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
             modelo.Contrasena = "";
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         Usuario? usuario;
@@ -88,7 +88,7 @@ public class CuentaController : Controller
         {
             _logger.LogError(ex, "Error de base de datos al iniciar sesión");
             ModelState.AddModelError(string.Empty, ErrorConexion);
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         if (!Contrasenas.Verificar(modelo.Contrasena, usuario?.Contraseña) || usuario == null)
@@ -100,7 +100,7 @@ public class CuentaController : Controller
                 ? "Esta cuenta entra con Google o LinkedIn. Usá el botón de abajo, o creá una contraseña desde Configuración."
                 : "El email o la contraseña no son correctos.");
             modelo.Contrasena = "";
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         _intentos.Exito(email);
@@ -116,7 +116,7 @@ public class CuentaController : Controller
         {
             return NotFound();
         }
-        return View(new RecuperarClaveViewModel());
+        return Formulario(new RecuperarClaveViewModel());
     }
 
     [HttpPost]
@@ -133,7 +133,7 @@ public class CuentaController : Controller
         }
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         var email = NormalizarEmail(modelo.Email);
@@ -158,7 +158,7 @@ public class CuentaController : Controller
         {
             _logger.LogError(ex, "Error de base de datos al recuperar la contraseña");
             ModelState.AddModelError(string.Empty, ErrorConexion);
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         TempData["Mensaje"] = "Si hay una cuenta con ese email, te mandamos un link para crear una contraseña nueva. Revisá tu correo (y la carpeta de spam).";
@@ -172,7 +172,7 @@ public class CuentaController : Controller
         {
             return View("LinkVencido");
         }
-        return View(new NuevaClaveViewModel { Token = token });
+        return Formulario(new NuevaClaveViewModel { Token = token });
     }
 
     [HttpPost]
@@ -181,7 +181,7 @@ public class CuentaController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            return Formulario(modelo);
         }
         if (!BD.UsarRecuperacion(HashDeToken(modelo.Token), Contrasenas.Hashear(modelo.Nueva)))
         {
@@ -209,12 +209,12 @@ public class CuentaController : Controller
             var empresa = new RegistroEmpresaViewModel();
             CompletarConExterno(empresa, externo);
             CargarListas(empresa);
-            return View("CrearCuentaEmpresa", empresa);
+            return Formulario(empresa, "CrearCuentaEmpresa");
         }
 
         var persona = new RegistroPersonaViewModel();
         CompletarConExterno(persona, externo);
-        return View("CrearCuentaPersona", persona);
+        return Formulario(persona, "CrearCuentaPersona");
     }
 
     [HttpPost]
@@ -396,7 +396,7 @@ public class CuentaController : Controller
         {
             return CodigoVencido();
         }
-        return View(new VerificarEmailViewModel { Token = token!, Email = pendiente.Email });
+        return Formulario(new VerificarEmailViewModel { Token = token!, Email = pendiente.Email });
     }
 
     [HttpPost]
@@ -411,7 +411,7 @@ public class CuentaController : Controller
         modelo.Email = pendiente.Email;
         if (!ModelState.IsValid)
         {
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         switch (_verificacion.Verificar(modelo.Token, modelo.Codigo))
@@ -426,7 +426,7 @@ public class CuentaController : Controller
             case VerificacionEmail.Resultado.Incorrecto:
                 ModelState.AddModelError(nameof(modelo.Codigo), "El código no es correcto. Revisalo y probá de nuevo.");
                 modelo.Codigo = "";
-                return View(modelo);
+                return Formulario(modelo);
         }
 
         int id;
@@ -438,7 +438,7 @@ public class CuentaController : Controller
         {
             ManejarErrorDeRegistro(ex, string.Empty);
             modelo.Codigo = "";
-            return View(modelo);
+            return Formulario(modelo);
         }
 
         _verificacion.Terminar(modelo.Token);
@@ -744,7 +744,13 @@ public class CuentaController : Controller
         {
             ModelState.AddModelError(nameof(modelo.Contrasena), "Por seguridad, volvé a escribir tu contraseña");
         }
-        return View(vista, modelo);
+        return Formulario(modelo, vista);
+    }
+
+    private IActionResult Formulario(object modelo, string? vista = null)
+    {
+        ViewBag.Formulario = modelo;
+        return vista == null ? View() : View(vista);
     }
 
     private IActionResult RedirigirDespuesDeIngresar(string? returnUrl) =>

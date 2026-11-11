@@ -1,21 +1,20 @@
-@model Empresa
 <article class="empresa-tarjeta">
-    <div class="empresa-tarjeta__cabecera">
-        <partial name="_LogoEmpresa" model='(Model.Logo, Model.Nombre, "logo-empresa--md")' />
-        <div class="empresa-tarjeta__datos">
-            <h3 class="empresa-tarjeta__nombre">
+    <div class="empresa-tarjeta-cabecera">
+        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Nombre, "logo-empresa-md")' />
+        <div class="empresa-tarjeta-datos">
+            <h3 class="empresa-tarjeta-nombre">
                 <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID">@Model.Nombre</a>
             </h3>
-            <p class="empresa-tarjeta__industria">@string.Join(" · ", new[] { Model.Rubro, Model.Provincia }.Where(t => !string.IsNullOrEmpty(t)))</p>
+            <p class="empresa-tarjeta-industria">@Model.Resumen</p>
         </div>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
     {
-        <p class="empresa-tarjeta__descripcion">@Textos.Recortar(Model.Descripcion, 160)</p>
+        <p class="empresa-tarjeta-descripcion">@Textos.Recortar(Model.Descripcion, 160)</p>
     }
 
-    <div class="empresa-tarjeta__pie">
+    <div class="empresa-tarjeta-pie">
         <a class="enlace" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID" asp-fragment="ofertas">
             @(Model.BusquedasActivas == 0 ? "Sin búsquedas abiertas" : Model.BusquedasActivas == 1 ? "Ver 1 búsqueda abierta →" : $"Ver {Model.BusquedasActivas} búsquedas abiertas →")
         </a>

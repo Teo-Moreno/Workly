@@ -1,32 +1,27 @@
-@model CampoUbicacion
-@{
-    var idPais = $"{Model.Prefijo}{Model.NombrePais}";
-    var idProvincia = $"{Model.Prefijo}{Model.NombreProvincia}";
-}
-<div class="formulario__fila" data-ubicacion>
-    <div class="campo @Html.ClaseError(Model.NombrePais)">
-        <label class="campo__etiqueta" for="@idPais">País</label>
-        <select class="campo__control" id="@idPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
+<div class="formulario-fila" data-ubicacion>
+    <div class="campo @Html.ClaseError((string)Model.NombrePais)">
+        <label class="campo-etiqueta" for="@Model.IdPais">País</label>
+        <select class="campo-control" id="@Model.IdPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
             @if (Model.Paises.Count != 1)
             {
                 <option value="">Elegí el país</option>
             }
-            @foreach (var pais in Model.Paises)
+            @foreach (Pais pais in Model.Paises)
             {
                 <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
             }
         </select>
-        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Model.NombrePais, "Elegí el país")</span>
+        <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError((string)Model.NombrePais, "Elegí el país")</span>
     </div>
-    <div class="campo @Html.ClaseError(Model.NombreProvincia)">
-        <label class="campo__etiqueta" for="@idProvincia">@Model.EtiquetaProvincia</label>
-        <select class="campo__control" id="@idProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
+    <div class="campo @Html.ClaseError((string)Model.NombreProvincia)">
+        <label class="campo-etiqueta" for="@Model.IdProvincia">@Model.EtiquetaProvincia</label>
+        <select class="campo-control" id="@Model.IdProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
             <option value="">@(Model.TodoElPais ? "Todo el país" : "Elegí la provincia")</option>
-            @foreach (var provincia in Model.Provincias)
+            @foreach (Provincia provincia in Model.Provincias)
             {
                 <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == Model.IDProvincia)">@provincia.Nombre</option>
             }
         </select>
-        <span class="campo__mensaje campo__mensaje--error"><icono nombre="warning" />@Html.MensajeError(Model.NombreProvincia, "Elegí la provincia")</span>
+        <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError((string)Model.NombreProvincia, "Elegí la provincia")</span>
     </div>
 </div>

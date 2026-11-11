@@ -1,26 +1,25 @@
-@model List<PostulacionItem>
 @{
     ViewData["Title"] = "Mis postulaciones";
 }
 
 <div class="contenedor seccion-app">
     <header class="encabezado-pagina">
-        <div class="encabezado-pagina__fila">
+        <div class="encabezado-pagina-fila">
             <div>
-                <h1 class="encabezado-pagina__titulo">Mis postulaciones</h1>
-                <p class="encabezado-pagina__bajada">Mové cada tarjeta a medida que avanza el proceso: arrastrala a otra columna o elegí la etapa en la tarjeta.</p>
+                <h1 class="encabezado-pagina-titulo">Mis postulaciones</h1>
+                <p class="encabezado-pagina-bajada">Mové cada tarjeta a medida que avanza el proceso: arrastrala a otra columna o elegí la etapa en la tarjeta.</p>
             </div>
-            <div class="encabezado-pagina__acciones">
+            <div class="encabezado-pagina-acciones">
                 <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
     </header>
 
-    @if (Model.Count == 0)
+    @if (!ViewBag.HayPostulaciones)
     {
         <div class="estado-vacio">
-            <span class="caja-icono caja-icono--lg"><icono nombre="send" /></span>
-            <h2 class="estado-vacio__titulo">Todavía no tenés postulaciones</h2>
+            <span class="caja-icono caja-icono-lg"><icono nombre="send" /></span>
+            <h2 class="estado-vacio-titulo">Todavía no tenés postulaciones</h2>
             <p>Cuando te postules a una búsqueda de Workly, o toques "Ya me postulé" en una de otro sitio, aparece acá para que le hagas el seguimiento.</p>
             <a class="boton" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
@@ -29,21 +28,20 @@
     {
         <div class="tablero" data-tablero data-url-estado="@Url.Action("CambiarEstado", "Postulaciones")">
             @Html.AntiForgeryToken()
-            @foreach (var (estado, columna, color) in Catalogos.EstadosPostulacion)
+            @foreach (ColumnaTablero columna in ViewBag.Columnas)
             {
-                var tarjetas = Model.Where(p => p.Estado == estado).ToList();
-                <section class="tablero__columna @(tarjetas.Count == 0 ? "esta-vacia" : "")" data-columna="@estado" aria-labelledby="columna-@color">
-                    <header class="tablero__cabecera">
-                        <span class="punto punto--@color" aria-hidden="true"></span>
-                        <h2 class="tablero__titulo" id="columna-@color" data-columna-nombre>@columna</h2>
-                        <span class="tablero__contador" data-columna-contador>@tarjetas.Count</span>
+                <section class="tablero-columna @(columna.Tarjetas.Count == 0 ? "esta-vacia" : "")" data-columna="@columna.Estado" aria-labelledby="columna-@columna.Color">
+                    <header class="tablero-cabecera">
+                        <span class="punto punto-@columna.Color" aria-hidden="true"></span>
+                        <h2 class="tablero-titulo" id="columna-@columna.Color" data-columna-nombre>@columna.Nombre</h2>
+                        <span class="tablero-contador" data-columna-contador>@columna.Tarjetas.Count</span>
                     </header>
-                    <div class="tablero__lista" data-columna-lista>
-                        @foreach (var postulacion in tarjetas)
+                    <div class="tablero-lista" data-columna-lista>
+                        @foreach (PostulacionItem postulacion in columna.Tarjetas)
                         {
                             <partial name="_PostulacionTarjeta" model="postulacion" />
                         }
-                        <p class="tablero__vacio">Arrastrá una tarjeta acá</p>
+                        <p class="tablero-vacio">Arrastrá una tarjeta acá</p>
                     </div>
                 </section>
             }

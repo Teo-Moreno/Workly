@@ -1,22 +1,17 @@
-@model Oferta
-@{
-    var visible = ViewData["Visible"] is true;
-    var urlDetalle = Model.EsExterna ? Url.Action("Externa", "Empleos", new { id = Model.ID }) : Url.Action("Detalle", "Empleos", new { id = Model.ID });
-}
-<article class="detalle-panel" data-detalle-oferta="@Model.Clave" hidden="@(!visible)" aria-labelledby="detalle-titulo-@Model.Clave">
-    <div class="detalle-panel__barra">
-        <partial name="_LogoEmpresa" model='(Model.Logo, Model.Empresa, "logo-empresa--md")' />
-        <span class="tag @(Model.EsExterna ? "" : "tag--principal")">@(Model.EsExterna ? "Publicada en " + Model.Fuente : "Publicada en Workly")</span>
+<article class="detalle-panel" data-detalle-oferta="@Model.Clave" hidden="@(ViewData["Visible"] is not true)" aria-labelledby="detalle-titulo-@Model.Clave">
+    <div class="detalle-panel-barra">
+        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, "logo-empresa-md")' />
+        <span class="tag @(Model.EsExterna ? "" : "tag-principal")">@(Model.EsExterna ? "Publicada en " + Model.Fuente : "Publicada en Workly")</span>
     </div>
 
-    <header class="detalle-panel__encabezado">
-        <h2 class="detalle-panel__titulo" id="detalle-titulo-@Model.Clave">@Model.Titulo</h2>
-        <p class="detalle-panel__meta">@string.Join(" · ", new[] { Model.Empresa, Model.UbicacionVisible, Model.PublicadaTexto }.Where(t => !string.IsNullOrEmpty(t)))</p>
+    <header class="detalle-panel-encabezado">
+        <h2 class="detalle-panel-titulo" id="detalle-titulo-@Model.Clave">@Model.Titulo</h2>
+        <p class="detalle-panel-meta">@Model.ResumenPublicada</p>
         <div class="lista-tags">
             <partial name="_SelloOficial" model="Model" />
-            @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag--borde tag--lg">@Model.Modalidad</span> }
-            @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag--borde tag--lg">@Model.Tipo_Contrato</span> }
-            @if (!Model.EsExterna && Model.Cantidad_Puestos > 1) { <span class="tag tag--borde tag--lg">@Model.Cantidad_Puestos vacantes</span> }
+            @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="tag tag-borde tag-lg">@Model.Modalidad</span> }
+            @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="tag tag-borde tag-lg">@Model.Tipo_Contrato</span> }
+            @if (!Model.EsExterna && Model.Cantidad_Puestos > 1) { <span class="tag tag-borde tag-lg">@Model.Cantidad_Puestos vacantes</span> }
         </div>
     </header>
 
@@ -24,23 +19,23 @@
     {
         <div class="cajas-dato">
             <div class="caja-dato">
-                <span class="caja-dato__etiqueta">Salario</span>
-                <strong class="caja-dato__valor">@Model.SalarioVisible</strong>
+                <span class="caja-dato-etiqueta">Salario</span>
+                <strong class="caja-dato-valor">@Model.SalarioVisible</strong>
             </div>
         </div>
     }
 
     @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
     {
-        <section class="detalle-panel__seccion">
-            <h3 class="detalle-panel__subtitulo">Sobre el puesto</h3>
+        <section class="detalle-panel-seccion">
+            <h3 class="detalle-panel-subtitulo">Sobre el puesto</h3>
             <p class="texto-con-saltos">@Textos.Recortar(Model.Descripcion, 700)</p>
         </section>
     }
 
-    <div class="detalle-panel__acciones">
+    <div class="detalle-panel-acciones">
         <partial name="_AccionesOferta" model="Model" />
         <partial name="_BotonGuardar" model="Model" />
-        <a class="boton boton--contorno boton--lg" href="@urlDetalle">Ver oferta completa</a>
+        <a class="boton boton-contorno boton-lg" href="@Model.Enlace">Ver oferta completa</a>
     </div>
 </article>

@@ -13,7 +13,8 @@ public class GuardadasController : Controller
         {
             return RedirectToAction("Index", "Publicaciones");
         }
-        return View(BD.ObtenerGuardadas(User.IdUsuario()));
+        ViewBag.Guardadas = BD.ObtenerGuardadas(User.IdUsuario());
+        return View();
     }
 
     [HttpPost]

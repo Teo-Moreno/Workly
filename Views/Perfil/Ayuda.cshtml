@@ -1,37 +1,16 @@
 @{
     ViewData["Title"] = "Ayuda y soporte";
-    var categorias = new[]
-    {
-        (Id: "postulaciones", Nombre: "Postulaciones", Icono: "send", Texto: "Postularte y seguir cada proceso"),
-        (Id: "perfil", Nombre: "Mi perfil", Icono: "user-square", Texto: "Datos, CV y qué buscás"),
-        (Id: "cuenta", Nombre: "Cuenta y seguridad", Icono: "lock", Texto: "Contraseña y datos de la cuenta"),
-        (Id: "publicar", Nombre: "Publicar búsquedas", Icono: "building", Texto: "Empresas y personas")
-    };
-    var preguntas = new[]
-    {
-        (Categoria: "postulaciones", Pregunta: "¿Cómo me postulo a una búsqueda?", Respuesta: "En las búsquedas publicadas en Workly tocá \"Postularme\": quien la publicó recibe tu perfil y tu CV. Para eso necesitás tener tu CV cargado. Las búsquedas de otros sitios se abren en su página original; cuando te postules ahí, tocá \"Ya me postulé\" para sumarla a tu tablero."),
-        (Categoria: "postulaciones", Pregunta: "¿Cómo sé en qué etapa está mi postulación?", Respuesta: "En Mis postulaciones tenés un tablero con cuatro columnas: Enviadas, En revisión, Pasé y No pasé. Las tarjetas las movés vos a medida que avanza cada proceso, arrastrándolas o eligiendo la etapa en cada tarjeta."),
-        (Categoria: "postulaciones", Pregunta: "¿Cómo guardo una oferta para verla después?", Respuesta: "Abrí la oferta y tocá \"Guardar\". Las encontrás todas en Guardadas, donde también las podés quitar. Se pueden guardar búsquedas de Workly y ofertas de otros sitios."),
-        (Categoria: "postulaciones", Pregunta: "¿Puedo sacar una postulación del tablero?", Respuesta: "Sí. En la tarjeta de la postulación tocá \"Quitar\". Si era una búsqueda de Workly, quien la publicó deja de verte entre sus postulantes."),
-        (Categoria: "perfil", Pregunta: "¿Quién ve mi perfil?", Respuesta: "Solo quienes publicaron las búsquedas a las que te postulaste en Workly: ven tus datos, tu experiencia, tu formación y tu CV."),
-        (Categoria: "perfil", Pregunta: "¿Para qué sirve completar \"Qué busco\"?", Respuesta: "Con el puesto que buscás armamos las ofertas de tu inicio. Lo cambiás cuando quieras desde Configuración › Qué busco."),
-        (Categoria: "perfil", Pregunta: "¿Qué formatos de CV y de foto aceptan?", Respuesta: "El CV puede ser PDF, DOC o DOCX, y la foto JPG, PNG o WEBP. En los dos casos, de hasta 5 MB."),
-        (Categoria: "cuenta", Pregunta: "¿Cómo cambio mi contraseña?", Respuesta: "En Configuración › Seguridad escribí tu contraseña actual y la nueva dos veces. Si entrás con Google o LinkedIn, desde ahí también podés crear una contraseña."),
-        (Categoria: "cuenta", Pregunta: "¿Cómo elimino mi cuenta?", Respuesta: "En Configuración › Seguridad, al final, escribí ELIMINAR y confirmá. Se borran tu perfil, tu CV, tus postulaciones y tus publicaciones, y no se puede deshacer."),
-        (Categoria: "publicar", Pregunta: "¿Cómo registro mi empresa?", Respuesta: "En Crear cuenta elegí \"Empresa\". Te pedimos el CUIT, la razón social, el rubro y el sitio web, y el email tiene que ser del dominio de ese sitio. Con la cuenta de empresa publicás búsquedas al instante y ves a todas las personas que se postulan."),
-        (Categoria: "publicar", Pregunta: "¿Puedo publicar una búsqueda sin ser empresa?", Respuesta: "Sí, desde \"Publicar búsqueda\". Antes de salir la revisa el equipo de Workly; si la aceptamos se publica junto con las demás, y si no, en Mis publicaciones vas a ver el motivo.")
-    };
 }
 
 <section class="ayuda-hero">
-    <div class="contenedor ayuda-hero__interior">
-        <span class="etiqueta etiqueta--acento">Centro de ayuda</span>
-        <h1 class="ayuda-hero__titulo">¿En qué te podemos ayudar?</h1>
-        <form class="ayuda-hero__buscador" role="search">
+    <div class="contenedor ayuda-hero-interior">
+        <span class="etiqueta etiqueta-acento">Centro de ayuda</span>
+        <h1 class="ayuda-hero-titulo">¿En qué te podemos ayudar?</h1>
+        <form class="ayuda-hero-buscador" role="search">
             <div class="control-con-icono">
                 <icono nombre="search" />
                 <label class="solo-lectores" for="buscar-ayuda">Buscar en la ayuda</label>
-                <input class="campo__control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
+                <input class="campo-control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
             </div>
         </form>
     </div>
@@ -39,7 +18,7 @@
 
 <div class="contenedor seccion-app">
     <ul class="ayuda-categorias" role="list">
-        @foreach (var categoria in categorias)
+        @foreach (var categoria in Ayuda.Categorias)
         {
             <li>
                 <a class="ayuda-categoria" href="#@categoria.Id">
@@ -51,20 +30,20 @@
         }
     </ul>
 
-    <section class="ayuda-preguntas ayuda-preguntas--sola" id="preguntas" aria-labelledby="preguntas-titulo">
+    <section class="ayuda-preguntas ayuda-preguntas-sola" id="preguntas" aria-labelledby="preguntas-titulo">
         <h2 class="texto-titulo-4" id="preguntas-titulo">Preguntas frecuentes</h2>
         <div class="acordeon" data-acordeon>
-            @foreach (var categoria in categorias)
+            @foreach (var categoria in Ayuda.Categorias)
             {
-                <h3 class="acordeon__grupo" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
-                @foreach (var item in preguntas.Where(p => p.Categoria == categoria.Id))
+                <h3 class="acordeon-grupo" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
+                @foreach (var item in Ayuda.PreguntasDe(categoria.Id))
                 {
-                    <details class="acordeon__item" data-grupo="@categoria.Id">
-                        <summary class="acordeon__pregunta">
+                    <details class="acordeon-item" data-grupo="@categoria.Id">
+                        <summary class="acordeon-pregunta">
                             <span>@item.Pregunta</span>
                             <icono nombre="chevron-down" />
                         </summary>
-                        <p class="acordeon__respuesta">@item.Respuesta</p>
+                        <p class="acordeon-respuesta">@item.Respuesta</p>
                     </details>
                 }
             }

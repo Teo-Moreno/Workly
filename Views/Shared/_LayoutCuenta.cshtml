@@ -8,26 +8,26 @@
     <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 
     <div class="cuenta">
-        <aside class="cuenta__marca">
-            <a class="logo logo--claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
-                <span class="logo__isotipo" aria-hidden="true">W<span class="logo__acento"></span></span>
-                <span class="logo__texto">Workly</span>
+        <aside class="cuenta-marca">
+            <a class="logo logo-claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
+                <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
+                <span class="logo-texto">Workly</span>
             </a>
 
-            <div class="cuenta__mensaje">
-                <span class="etiqueta etiqueta--acento">Por qué Workly</span>
-                <p class="cuenta__titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></p>
-                <ul class="cuenta__lista" role="list">
+            <div class="cuenta-mensaje">
+                <span class="etiqueta etiqueta-acento">Por qué Workly</span>
+                <p class="cuenta-titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></p>
+                <ul class="cuenta-lista" role="list">
                     <li>
-                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="circle-check-outline" /></span>
+                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="circle-check-outline" /></span>
                         <span><strong>Todo en un lugar.</strong> Ofertas de Workly y de otros sitios en una sola búsqueda.</span>
                     </li>
                     <li>
-                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="settings" /></span>
+                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="settings" /></span>
                         <span><strong>Tu perfil, tus reglas.</strong> Contá qué buscás y te mostramos ofertas acordes.</span>
                     </li>
                     <li>
-                        <span class="caja-icono caja-icono--secundario caja-icono--sm"><icono nombre="checkbox-checked" /></span>
+                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="checkbox-checked" /></span>
                         <span><strong>Más organizado.</strong> Seguí todas tus postulaciones desde un solo tablero.</span>
                     </li>
                 </ul>
@@ -35,12 +35,12 @@
 
         </aside>
 
-        <main class="cuenta__contenido" id="contenido">
-            <div class="cuenta__barra">
-                <a class="enlace enlace--principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
+        <main class="cuenta-contenido" id="contenido">
+            <div class="cuenta-barra">
+                <a class="enlace enlace-principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
                 @await RenderSectionAsync("Barra", required: false)
             </div>
-            <div class="cuenta__formulario">
+            <div class="cuenta-formulario">
                 @RenderBody()
             </div>
         </main>

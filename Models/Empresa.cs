@@ -30,4 +30,6 @@ public class Empresa
 
     public string? UbicacionCompleta =>
         string.Join(" · ", new[] { Ubicacion, Provincia }.Where(t => !string.IsNullOrWhiteSpace(t))) is { Length: > 0 } texto ? texto : null;
+
+    public string Resumen => string.Join(" · ", new[] { Rubro, Provincia }.Where(t => !string.IsNullOrEmpty(t)));
 }

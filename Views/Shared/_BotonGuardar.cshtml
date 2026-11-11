@@ -1,19 +1,14 @@
-@model Oferta
-@{
-    var volver = ViewData["Volver"] as string ?? (Context.Request.Path + Context.Request.QueryString);
-    var esPropia = User.EstaLogueado() && Model.IDUsuario_Publicador == User.IdUsuario();
-}
 @if (!User.EstaLogueado())
 {
-    <a class="boton boton--contorno boton--lg" href="@Url.Action("IniciarSesion", "Cuenta", new { returnUrl = volver })"><icono nombre="bookmark" />Guardar</a>
+    <a class="boton boton-contorno boton-lg" href="@Url.Action("IniciarSesion", "Cuenta", new { returnUrl = ViewContext.Volver() })"><icono nombre="bookmark" />Guardar</a>
 }
-else if (User.EsPersona() && !esPropia)
+else if (User.EsPersona() && !User.EsPropia((int?)Model.IDUsuario_Publicador))
 {
     <form asp-controller="Guardadas" asp-action="@(Model.Guardada ? "Quitar" : "Guardar")" method="post">
         <input type="hidden" name="id" value="@Model.ID" />
         <input type="hidden" name="externa" value="@(Model.EsExterna ? "true" : "false")" />
-        <input type="hidden" name="volver" value="@volver" />
-        <button class="boton boton--contorno boton--lg @(Model.Guardada ? "esta-activo" : "")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
+        <input type="hidden" name="volver" value="@ViewContext.Volver()" />
+        <button class="boton boton-contorno boton-lg @(Model.Guardada ? "esta-activo" : "")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
                 title="@(Model.Guardada ? "Sacar de Guardadas" : "Guardar para verla después")">
             <icono nombre="@(Model.Guardada ? "bookmark-fill" : "bookmark")" />@(Model.Guardada ? "Guardada" : "Guardar")
         </button>
