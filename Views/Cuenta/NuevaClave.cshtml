@@ -11,24 +11,24 @@
     <form class="formulario" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
         <div class="campo @Html.ClaseError("Nueva")">
-            <label class="campo-etiqueta" for="clave-nueva">Contraseña nueva</label>
+            <label class="form-label" for="clave-nueva">Contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
-                <input class="campo-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
+                <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
                        pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required autofocus />
                 <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
-            <span class="campo-ayuda">Al menos 8 caracteres, con letras y números.</span>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+            <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
         </div>
         <div class="campo @Html.ClaseError("Repetir")">
-            <label class="campo-etiqueta" for="clave-repetir">Repetí la contraseña nueva</label>
+            <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
-                <input class="campo-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
+                <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
             </div>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
         </div>
-        <button class="boton boton-lg boton-bloque" type="submit">Guardar contraseña</button>
+        <button class="btn btn-block-lg" type="submit">Guardar contraseña</button>
     </form>
 </div>

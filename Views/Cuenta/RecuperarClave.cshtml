@@ -3,7 +3,7 @@
     ViewData["Title"] = "Recuperar contraseña";
 }
 @section Barra {
-    <p class="texto-suave">¿Te acordaste? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Te acordaste? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
 <div class="cuenta-tarjeta">
@@ -14,16 +14,16 @@
 
     <form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
         <div class="campo @Html.ClaseError("Email")">
-            <label class="campo-etiqueta" for="Email">Email</label>
+            <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
-                <input class="campo-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
+                <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="campo-mensaje campo-mensaje-error"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
         </div>
 
         <partial name="_Captcha" model="Generador.Nuevo()" />
 
-        <button class="boton boton-lg boton-bloque" type="submit"><icono nombre="send" />Mandarme el link</button>
+        <button class="btn btn-block-lg" type="submit"><icono nombre="send" />Mandarme el link</button>
     </form>
 </div>

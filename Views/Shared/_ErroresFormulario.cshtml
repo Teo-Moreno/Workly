@@ -1,7 +1,7 @@
 @if (Html.ErroresGenerales().Any())
 {
-    <div class="snackbar snackbar-error aviso" role="alert" data-error-formulario>
+    <div class="toast toast-error" role="alert" data-error-formulario>
         <icono nombre="error" />
-        <span class="snackbar-texto">@string.Join(" ", Html.ErroresGenerales())</span>
+        <span class="toast-body">@string.Join(" ", Html.ErroresGenerales())</span>
     </div>
 }

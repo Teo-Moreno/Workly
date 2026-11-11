@@ -2,12 +2,13 @@
     ViewData["Title"] = ViewBag.Oferta.Titulo;
 }
 
-<div class="contenedor seccion-app">
+<div class="container seccion-app">
     <header class="encabezado-pagina">
-        <nav class="migas migas-chica" aria-label="Estás en">
-            <a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
-            <icono nombre="chevron-right" />
-            <span aria-current="page">@ViewBag.Oferta.Titulo</span>
+        <nav aria-label="Estás en">
+            <ol class="breadcrumb breadcrumb-chica">
+                <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewBag.Oferta.Titulo</li>
+            </ol>
         </nav>
         <div class="encabezado-pagina-fila">
             <div>
@@ -15,15 +16,15 @@
                 <p class="encabezado-pagina-bajada">@ViewBag.Oferta.Empresa@(ViewBag.Oferta.UbicacionVisible != null ? " · " + ViewBag.Oferta.UbicacionVisible : "") · @ViewBag.Oferta.PublicadaTexto</p>
             </div>
             <div class="encabezado-pagina-acciones">
-                <a class="boton boton-contorno" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
+                <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
                 @if (ViewBag.Oferta.Estado_Publicacion == "Aprobada" && !ViewBag.Oferta.EstaCerrada)
                 {
                     <form asp-controller="Publicaciones" asp-action="Cerrar" asp-route-id="@ViewBag.Oferta.ID" method="post" data-confirmar="¿Cerramos la búsqueda? Deja de aparecer y de recibir postulaciones.">
-                        <button class="boton boton-contorno" type="submit">Cerrar búsqueda</button>
+                        <button class="btn btn-outline-primary" type="submit">Cerrar búsqueda</button>
                     </form>
                 }
                 <form asp-controller="Publicaciones" asp-action="Eliminar" asp-route-id="@ViewBag.Oferta.ID" method="post" data-confirmar="¿Eliminamos la búsqueda y sus postulaciones? No se puede deshacer.">
-                    <button class="boton boton-peligro-contorno" type="submit"><icono nombre="trash-full" />Eliminar</button>
+                    <button class="btn btn-outline-danger" type="submit"><icono nombre="trash-full" />Eliminar</button>
                 </form>
             </div>
         </div>
@@ -31,19 +32,19 @@
 
     @if (ViewBag.Oferta.Estado_Publicacion == "Pendiente")
     {
-        <p class="aviso aviso-advertencia"><icono nombre="warning-outline" />Está en revisión: todavía no la ve nadie más que vos. Cuando la revisemos, acá vas a ver si se publicó.</p>
+        <p class="alert alert-warning"><icono nombre="warning-outline" />Está en revisión: todavía no la ve nadie más que vos. Cuando la revisemos, acá vas a ver si se publicó.</p>
     }
     else if (ViewBag.Oferta.Estado_Publicacion == "Rechazada")
     {
-        <p class="aviso aviso-error"><icono nombre="error-outline" />No la pudimos publicar. Motivo: @ViewBag.Oferta.Motivo_Rechazo</p>
+        <p class="alert alert-danger"><icono nombre="error-outline" />No la pudimos publicar. Motivo: @ViewBag.Oferta.Motivo_Rechazo</p>
     }
     else if (ViewBag.Oferta.EstaCerrada)
     {
-        <p class="aviso"><icono nombre="info" />Esta búsqueda está cerrada: ya no recibe postulaciones.</p>
+        <p class="alert alert-info"><icono nombre="info" />Esta búsqueda está cerrada: ya no recibe postulaciones.</p>
     }
 
     <section aria-labelledby="postulantes-titulo">
-        <h2 class="texto-titulo-4" id="postulantes-titulo">Postulantes (@ViewBag.Postulantes.Count)</h2>
+        <h2 class="h4" id="postulantes-titulo">Postulantes (@ViewBag.Postulantes.Count)</h2>
         @if (ViewBag.Postulantes.Count == 0)
         {
             <div class="estado-vacio estado-vacio-chico">
@@ -56,7 +57,7 @@
                 @foreach (Postulante p in ViewBag.Postulantes)
                 {
                     <li class="postulante">
-                        <span class="avatar avatar-md" aria-hidden="true">
+                        <span class="avatar-md" aria-hidden="true">
                             @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt="" /> } else { @p.Iniciales }
                         </span>
                         <div class="postulante-datos">
@@ -67,13 +68,13 @@
                                 @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a class="enlace" href="tel:@p.TelefonoLink">@p.Telefono</a></span> }
                             </p>
                         </div>
-                        <span class="texto-chico texto-suave">Se postuló el @Vistas.Fecha(p.Fecha)</span>
+                        <span class="small text-body-secondary">Se postuló el @Vistas.Fecha(p.Fecha)</span>
                         <div class="fila">
                             @if (p.TieneCV)
                             {
-                                <a class="boton boton-contorno boton-sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion"><icono nombre="download" />CV</a>
+                                <a class="btn btn-outline-sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion"><icono nombre="download" />CV</a>
                             }
-                            <a class="boton boton-sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
+                            <a class="btn btn-sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
                         </div>
                     </li>
                 }

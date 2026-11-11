@@ -15,19 +15,19 @@
             </a>
 
             <div class="cuenta-mensaje">
-                <span class="etiqueta etiqueta-acento">Por qué Workly</span>
-                <p class="cuenta-titulo">Tu próximo trabajo no debería ser una <span class="texto-acento">aguja en un pajar.</span></p>
+                <span class="badge badge-acento">Por qué Workly</span>
+                <p class="cuenta-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></p>
                 <ul class="cuenta-lista" role="list">
                     <li>
-                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="circle-check-outline" /></span>
+                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="circle-check-outline" /></span>
                         <span><strong>Todo en un lugar.</strong> Ofertas de Workly y de otros sitios en una sola búsqueda.</span>
                     </li>
                     <li>
-                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="settings" /></span>
+                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="settings" /></span>
                         <span><strong>Tu perfil, tus reglas.</strong> Contá qué buscás y te mostramos ofertas acordes.</span>
                     </li>
                     <li>
-                        <span class="caja-icono caja-icono-secundario caja-icono-sm"><icono nombre="checkbox-checked" /></span>
+                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="checkbox-checked" /></span>
                         <span><strong>Más organizado.</strong> Seguí todas tus postulaciones desde un solo tablero.</span>
                     </li>
                 </ul>
@@ -47,8 +47,9 @@
     </div>
 
     <partial name="_AvisoCookies" />
-    <div class="snackbars" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
+    <div class="toast-container" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
