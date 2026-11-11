@@ -15,6 +15,8 @@ public class PostulacionItem
 
     public bool EsExterna => IDOfertaExterna.HasValue;
     public string Iniciales => Textos.Iniciales(Empresa);
+    public string Enlace => EsExterna ? "/Empleos/Externa/" + IDOfertaExterna : "/Empleos/Detalle/" + IDOfertaLaboral;
+    public string Fuente => EsExterna ? "Vía " + (string.IsNullOrWhiteSpace(Publicador) ? "otro sitio" : Publicador) : "En Workly";
     public string FechaTexto => "Te postulaste el " + Fecha.ToString("d 'de' MMMM", new System.Globalization.CultureInfo("es-AR"));
 }
 
@@ -36,4 +38,6 @@ public class Postulante
     public string NombreCompleto => $"{Nombre} {Apellido}".Trim();
     public string Iniciales => UsuarioActual.Iniciales(Nombre, Apellido);
     public bool TieneCV => !string.IsNullOrEmpty(Nombre_Archivo);
+    public string Resumen => string.Join(" · ", new[] { Puesto_Buscado, Provincia }.Where(t => !string.IsNullOrEmpty(t)));
+    public string TelefonoLink => (Telefono ?? "").Replace(" ", "").Replace("-", "");
 }

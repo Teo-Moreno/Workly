@@ -76,6 +76,8 @@ public abstract class RegistroBase
     public bool AceptaTerminos { get; set; }
 
     public string? ProveedorExterno { get; set; }
+
+    public bool EsExterno => ProveedorExterno != null;
 }
 
 public class RegistroPersonaViewModel : RegistroBase
@@ -122,6 +124,10 @@ public class RegistroEmpresaViewModel : RegistroBase
     public string? Descripcion { get; set; }
 
     public IFormFile? Logo { get; set; }
+
+    public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
+
+    public static readonly string[] Pasos = { "Quién la maneja", "La empresa" };
 }
 
 public class CompletarPerfilViewModel
@@ -184,6 +190,18 @@ public class CompletarPerfilViewModel
     public string? CVActual { get; set; }
     public List<ExperienciaItem> ExperienciasCargadas { get; set; } = new();
     public List<FormacionItem> FormacionesCargadas { get; set; } = new();
+
+    public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
+
+    public static readonly string[] Pasos = { "Tus datos", "Qué buscás", "Experiencia", "Tu CV" };
+
+    public List<ExperienciaEnviada> ExperienciasEnviadas => ExpPuesto.Select((p, i) =>
+        new ExperienciaEnviada(Valor(ExpPuesto, i), Valor(ExpEmpresa, i), Valor(ExpInicio, i), Valor(ExpFin, i), Valor(ExpDescripcion, i))).ToList();
+
+    public List<FormacionEnviada> FormacionesEnviadas => ForTitulo.Select((t, i) =>
+        new FormacionEnviada(Valor(ForTitulo, i), Valor(ForInstitucion, i), Valor(ForInicio, i), Valor(ForFin, i))).ToList();
+
+    private static string Valor(List<string> lista, int i) => i < lista.Count ? lista[i] ?? "" : "";
 }
 
 public class CuentaFormulario
@@ -331,7 +349,20 @@ public class FormacionFormulario
     public string? Fin { get; set; }
 }
 
-public record ItemPerfil(string Clave, string Texto, bool Listo, string Accion);
+public record ItemPerfil(string Clave, string Texto, bool Listo, string Accion)
+{
+    public string? Modal => Clave switch
+    {
+        "foto" => "modal-foto",
+        "sobre-mi" => "modal-sobre-mi",
+        "experiencia" => "modal-experiencia",
+        "formacion" => "modal-formacion",
+        "cv" => "modal-cv",
+        _ => null
+    };
+
+    public string? Enlace => Modal != null ? null : Clave == "telefono" ? "/Perfil/Configuracion?pestana=cuenta" : "/Perfil/Configuracion?pestana=busqueda";
+}
 
 public class MiPerfilViewModel
 {
@@ -355,7 +386,10 @@ public class MiPerfilViewModel
     public Empresa? Empresa { get; set; }
 
     public int TotalPostulaciones => PostulacionesPorEstado.Values.Sum();
+    public int CantidadEnEstado(string estado) => PostulacionesPorEstado.GetValueOrDefault(estado);
     public bool TieneCV => !string.IsNullOrEmpty(CV?.Nombre_Archivo);
+    public string? EnlaceSitio => Textos.Enlace(CV?.Sitio_Web);
+    public string Iniciales => UsuarioActual.Iniciales(Usuario.Nombre, Usuario.Apellido);
 
     public List<ItemPerfil> Checklist => new()
     {
@@ -380,6 +414,10 @@ public class MiPerfilViewModel
     }
 
     public ItemPerfil? SiguientePaso => Checklist.FirstOrDefault(i => !i.Listo);
+
+    public List<ItemPerfil> OtrosPendientes => Checklist.Where(i => !i.Listo).Skip(1).ToList();
+
+    public string FechaCV => CV == null ? "" : Vistas.Fecha(CV.Fecha_Actualizacion, "d 'de' MMMM 'de' yyyy");
 }
 
 public class ExperienciaItem
@@ -438,4 +476,14 @@ public static class Fechas
         var fechaFin = fin.HasValue ? MesAnio(fin.Value) : "Actualidad";
         return $"{MesAnio(inicio)} – {fechaFin} · {string.Join(" ", partes)}";
     }
+}
+
+public record ExperienciaEnviada(string Puesto, string Empresa, string Inicio, string Fin, string Descripcion)
+{
+    public string FinTexto => Fin.Length > 0 ? Fin : "Actualidad";
+}
+
+public record FormacionEnviada(string Titulo, string Institucion, string Inicio, string Fin)
+{
+    public string FinTexto => Fin.Length > 0 ? Fin : "En curso";
 }

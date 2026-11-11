@@ -69,7 +69,10 @@ public class EmpleosController : Controller
             _ => ofertas.OrderByDescending(o => o.Fecha_Publicacion ?? DateTime.MinValue).ToList()
         };
         modelo.Seleccionada = modelo.Ofertas.FirstOrDefault(o => o.Clave == id) ?? modelo.Ofertas.FirstOrDefault();
-        return View(modelo);
+        modelo.Consulta = Request.Query.Where(q => q.Key != "id")
+            .SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
+        ViewBag.Busqueda = modelo;
+        return View();
     }
 
     public IActionResult Detalle(int id)
@@ -84,7 +87,8 @@ public class EmpleosController : Controller
         {
             return NotFound();
         }
-        return View(ArmarDetalle(oferta, esPropia));
+        ArmarDetalle(oferta, esPropia);
+        return View();
     }
 
     public IActionResult Externa(int id)
@@ -94,7 +98,8 @@ public class EmpleosController : Controller
         {
             return NotFound();
         }
-        return View("Detalle", ArmarDetalle(oferta, false));
+        ArmarDetalle(oferta, false);
+        return View("Detalle");
     }
 
     [HttpPost]
@@ -138,15 +143,16 @@ public class EmpleosController : Controller
             : Volver("Esa postulación ya estaba en tu tablero.", "advertencia", volver, null, id);
     }
 
-    private OfertaDetalleViewModel ArmarDetalle(Oferta oferta, bool esPropia) => new()
+    private void ArmarDetalle(Oferta oferta, bool esPropia)
     {
-        Oferta = oferta,
-        Empresa = oferta.IDEmpresa.HasValue ? BD.ObtenerEmpresa(oferta.IDEmpresa.Value) : null,
-        EsPropia = esPropia,
-        PuedePostular = !oferta.EsExterna && !esPropia && !oferta.YaPostulado && !User.EsEmpresa() &&
-                        oferta.Estado_Publicacion == "Aprobada" && !oferta.EstaCerrada,
-        TieneCV = User.EsPersona() && !string.IsNullOrEmpty(BD.ObtenerCV(User.IdUsuario())?.Nombre_Archivo)
-    };
+        ViewBag.Oferta = oferta;
+        ViewBag.Empresa = oferta.IDEmpresa.HasValue ? BD.ObtenerEmpresa(oferta.IDEmpresa.Value) : null;
+        ViewBag.EsPropia = esPropia;
+        ViewBag.EsRevision = false;
+        ViewBag.PuedePostular = !oferta.EsExterna && !esPropia && !oferta.YaPostulado && !User.EsEmpresa() &&
+                                oferta.Estado_Publicacion == "Aprobada" && !oferta.EstaCerrada;
+        ViewBag.TieneCV = User.EsPersona() && !string.IsNullOrEmpty(BD.ObtenerCV(User.IdUsuario())?.Nombre_Archivo);
+    }
 
     private IActionResult Volver(string mensaje, string tipo, string? volver, int? idOferta, int? idExterna = null)
     {

@@ -1,7 +1,6 @@
-@model Oferta
 @if (Model.EsOficial)
 {
-    <span class="sello sello--oficial" title="@(Model.EsExterna ? "Publicada por la empresa en otro sitio" : "Publicada por una empresa registrada con su CUIT")"><icono nombre="circle-check" tamano="14" />Oficial</span>
+    <span class="sello sello-oficial" title="@(Model.EsExterna ? "Publicada por la empresa en otro sitio" : "Publicada por una empresa registrada con su CUIT")"><icono nombre="circle-check" tamano="14" />Oficial</span>
 }
 else
 {
