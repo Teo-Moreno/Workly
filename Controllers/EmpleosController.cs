@@ -13,23 +13,19 @@ public class EmpleosController : Controller
         _jsearch = jsearch;
     }
 
-    public async Task<IActionResult> Index(BuscarTrabajoViewModel filtros, string? id)
+    public IActionResult Index(BuscarTrabajoViewModel filtros)
     {
-        var modelo = filtros;
-        modelo.Q = Validaciones.Limpiar(modelo.Q);
-        modelo.Paises = BD.ObtenerPaises();
-        modelo.Provincias = BD.ObtenerProvincias();
+        ViewBag.Busqueda = Preparar(filtros);
+        ViewBag.UrlResultados = Url.Action(nameof(Resultados)) + Request.QueryString;
+        return View();
+    }
 
-        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais) ?? modelo.Paises.FirstOrDefault();
-        modelo.IDPais = pais?.ID;
-        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia && p.IDPais == modelo.IDPais);
-        modelo.IDProvincia = provincia?.ID;
-
-        modelo.Modalidad = modelo.Modalidad.Where(Catalogos.Modalidades.Contains).Distinct().ToList();
-        modelo.Tipo = modelo.Tipo.Where(t => Catalogos.TiposEmpleo.Any(c => c.Nombre == t)).Distinct().ToList();
+    public async Task<IActionResult> Resultados(BuscarTrabajoViewModel filtros, string? id)
+    {
+        var modelo = Preparar(filtros);
+        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais);
+        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia);
         var fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha);
-        modelo.Fecha = fecha.Valor;
-        if (!Catalogos.Ordenes.Any(o => o.Valor == modelo.Orden)) modelo.Orden = "recientes";
 
         var ofertas = new List<Oferta>();
         if (string.IsNullOrEmpty(modelo.Cursor))
@@ -72,7 +68,22 @@ public class EmpleosController : Controller
         modelo.Consulta = Request.Query.Where(q => q.Key != "id")
             .SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
         ViewBag.Busqueda = modelo;
-        return View();
+        return PartialView("_Resultados");
+    }
+
+    private static BuscarTrabajoViewModel Preparar(BuscarTrabajoViewModel modelo)
+    {
+        modelo.Q = Validaciones.Limpiar(modelo.Q);
+        modelo.Paises = BD.ObtenerPaises();
+        modelo.Provincias = BD.ObtenerProvincias();
+        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais) ?? modelo.Paises.FirstOrDefault();
+        modelo.IDPais = pais?.ID;
+        modelo.IDProvincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia && p.IDPais == modelo.IDPais)?.ID;
+        modelo.Modalidad = modelo.Modalidad.Where(Catalogos.Modalidades.Contains).Distinct().ToList();
+        modelo.Tipo = modelo.Tipo.Where(t => Catalogos.TiposEmpleo.Any(c => c.Nombre == t)).Distinct().ToList();
+        modelo.Fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha).Valor;
+        if (!Catalogos.Ordenes.Any(o => o.Valor == modelo.Orden)) modelo.Orden = "recientes";
+        return modelo;
     }
 
     public IActionResult Detalle(int id)
