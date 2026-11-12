@@ -1,0 +1,22 @@
+<template data-parte="contenido">
+    @if (ViewBag.ErrorExternas)
+    {
+        <partial name="_AvisoExternas" />
+    }
+    @if (ViewBag.ParaVos.Count == 0)
+    {
+        <div class="estado-vacio estado-vacio-chico">
+            <p>No encontramos ningún puesto de "@ViewBag.Puesto" nuevo para vos. Probá buscar con otras palabras.</p>
+            <a class="btn btn-outline-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+        </div>
+    }
+    else
+    {
+        <div class="resultados-lista">
+            @foreach (Oferta oferta in ViewBag.ParaVos)
+            {
+                <partial name="_OfertaTarjeta" model="oferta" />
+            }
+        </div>
+    }
+</template>

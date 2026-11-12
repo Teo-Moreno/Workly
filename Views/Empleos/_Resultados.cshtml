@@ -1,0 +1,55 @@
+<template data-parte="titulo">@ViewBag.Busqueda.Titulo</template>
+
+<template data-parte="contenido">
+    @if (ViewBag.Busqueda.ErrorExternas)
+    {
+        <partial name="_AvisoExternas" />
+    }
+    @if (!ViewBag.Busqueda.BuscoAlgo && ViewBag.Busqueda.Ofertas.Count > 0)
+    {
+        <p class="small text-body-secondary">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @ViewBag.Busqueda.Lugar. Escribí un puesto para buscar uno en particular.</p>
+    }
+
+    @if (ViewBag.Busqueda.Ofertas.Count == 0)
+    {
+        <div class="estado-vacio">
+            <span class="caja-icono-lg"><icono nombre="search" /></span>
+            @if (ViewBag.Busqueda.BuscoAlgo)
+            {
+                <h3 class="estado-vacio-titulo">No encontramos ningún puesto con ese nombre</h3>
+                <p>Revisá cómo lo escribiste, probá con otra palabra@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
+                @if (ViewBag.Busqueda.HayFiltros)
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" data-cargando="#resultados-busqueda">Buscar sin filtros</a>
+                }
+            }
+            else
+            {
+                <h3 class="estado-vacio-titulo">No encontramos ofertas@(ViewBag.Busqueda.HayFiltros ? " con esos filtros" : "")</h3>
+                <p>Escribí arriba el puesto que buscás@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : "").</p>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="resultados-lista" data-resultados>
+            @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
+            {
+                <partial name="_OfertaTarjeta" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Seleccionada", (object)ViewBag.Busqueda.EsSeleccionada(oferta) } }' />
+            }
+        </div>
+        @if (ViewBag.Busqueda.CursorSiguiente != null)
+        {
+            <div class="resultados-mas">
+                <a class="btn btn-outline-primary" href="@ViewBag.Busqueda.UrlMas" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
+            </div>
+        }
+    }
+</template>
+
+<template data-parte="detalles">
+    @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
+    {
+        <partial name="_OfertaDetallePanel" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Visible", (object)ViewBag.Busqueda.EsSeleccionada(oferta) }, { "Volver", (object)ViewBag.Busqueda.ConOferta(oferta.Clave) } }' />
+    }
+</template>
