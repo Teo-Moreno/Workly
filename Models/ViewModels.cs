@@ -28,6 +28,8 @@ public class BuscarTrabajoViewModel
     public int CantidadFiltros => Modalidad.Count + Tipo.Count + (Fecha != null ? 1 : 0);
     public bool HayFiltros => CantidadFiltros > 0 || IDProvincia != null;
 
+    public string TituloCargando => BuscoAlgo ? $"Ofertas para “{Q}”" : "Ofertas";
+
     public string Titulo => Ofertas.Count == 0 ? "Sin resultados"
         : $"{Ofertas.Count} {(Ofertas.Count == 1 ? "oferta" : "ofertas")}" + (BuscoAlgo ? $" para “{Q}”" : "");
 

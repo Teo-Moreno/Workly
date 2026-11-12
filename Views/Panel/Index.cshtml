@@ -51,26 +51,10 @@
                 }
                 else
                 {
-                    @if (ViewBag.ErrorExternas)
-                    {
-                        <partial name="_AvisoExternas" />
-                    }
-                    @if (ViewBag.ParaVos.Count == 0)
-                    {
-                        <div class="estado-vacio estado-vacio-chico">
-                            <p>No encontramos ningún puesto de "@ViewBag.Puesto" nuevo para vos. Probá buscar con otras palabras.</p>
-                            <a class="btn btn-outline-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="resultados-lista">
-                            @foreach (Oferta oferta in ViewBag.ParaVos)
-                            {
-                                <partial name="_OfertaTarjeta" model="oferta" />
-                            }
-                        </div>
-                    }
+                    <div class="esta-buscando" aria-busy="true" data-resultados-url="@ViewBag.UrlParaVos">
+                        <partial name="_CargandoResultados" model='"Buscando ofertas para vos…"' />
+                        <div data-resultados-contenido></div>
+                    </div>
                 }
             </section>
         </div>
