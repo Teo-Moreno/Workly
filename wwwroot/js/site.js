@@ -49,26 +49,23 @@
     window.addEventListener("hashchange", mostrar);
   });
 
-  const panelDetalles = $("[data-detalles]");
-
-  if (panelDetalles) {
-    $("[data-resultados]")?.addEventListener("click", (evento) => {
-      const tarjeta = evento.target.closest("[data-oferta]");
-      if (!tarjeta) return;
-      if (getComputedStyle(panelDetalles).display === "none") return;
-      evento.preventDefault();
-      const id = tarjeta.dataset.oferta;
-      $$("[data-oferta]").forEach((t) => t.classList.toggle("es-seleccionada", t === tarjeta));
-      $$("[data-detalle-oferta]", panelDetalles).forEach((detalle) => {
-        detalle.hidden = detalle.dataset.detalleOferta !== id;
-        detalle.classList.toggle("es-nueva", !detalle.hidden);
-        if (!detalle.hidden) detalle.scrollTop = 0;
-      });
-      const url = new URL(location.href);
-      url.searchParams.set("id", id);
-      history.replaceState(null, "", url);
+  document.addEventListener("click", (evento) => {
+    const tarjeta = evento.target.closest("[data-resultados] [data-oferta]");
+    const panelDetalles = $("[data-detalles]");
+    if (!tarjeta || !panelDetalles) return;
+    if (getComputedStyle(panelDetalles).display === "none") return;
+    evento.preventDefault();
+    const id = tarjeta.dataset.oferta;
+    $$("[data-oferta]").forEach((t) => t.classList.toggle("es-seleccionada", t === tarjeta));
+    $$("[data-detalle-oferta]", panelDetalles).forEach((detalle) => {
+      detalle.hidden = detalle.dataset.detalleOferta !== id;
+      detalle.classList.toggle("es-nueva", !detalle.hidden);
+      if (!detalle.hidden) detalle.scrollTop = 0;
     });
-  }
+    const url = new URL(location.href);
+    url.searchParams.set("id", id);
+    history.replaceState(null, "", url);
+  });
 
   function validar(formulario) {
     let valido = true;
@@ -422,7 +419,7 @@
   });
 
   const mostrarCargando = (destino) => {
-    const contenedor = destino && $(destino);
+    const contenedor = typeof destino === "string" ? $(destino) : destino;
     if (!contenedor) return;
     contenedor.classList.add("esta-buscando");
     contenedor.setAttribute("aria-busy", "true");
@@ -441,6 +438,40 @@
     const enlace = evento.target.closest("a[data-cargando]");
     if (!enlace || evento.defaultPrevented || evento.button !== 0 || evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey) return;
     mostrarCargando(enlace.dataset.cargando);
+  });
+
+  const cargarResultados = async (zona) => {
+    const contenido = $("[data-resultados-contenido]", zona);
+    const detalles = zona.dataset.resultadosDetalles ? $(zona.dataset.resultadosDetalles) : null;
+    mostrarCargando(zona);
+    try {
+      const respuesta = await fetch(zona.dataset.resultadosUrl, { headers: { Accept: "text/html" }, credentials: "same-origin" });
+      if (!respuesta.ok) throw new Error(respuesta.statusText);
+      const plantilla = document.createElement("template");
+      plantilla.innerHTML = await respuesta.text();
+      const parte = (nombre) => plantilla.content.querySelector(`template[data-parte="${nombre}"]`)?.content;
+      const titulo = parte("titulo");
+      const lugarTitulo = $("[data-resultados-titulo]", zona);
+      if (titulo && lugarTitulo) lugarTitulo.textContent = titulo.textContent.trim();
+      contenido.replaceChildren(parte("contenido") ?? "");
+      if (detalles) {
+        detalles.replaceChildren(parte("detalles") ?? "");
+        detalles.hidden = detalles.children.length === 0;
+      }
+    } catch {
+      const error = $("template[data-cargando-error]", zona);
+      contenido.replaceChildren(error ? error.content.cloneNode(true) : "");
+    }
+    zona.classList.remove("esta-buscando");
+    zona.removeAttribute("aria-busy");
+  };
+
+  $$("[data-resultados-url]").forEach(cargarResultados);
+
+  document.addEventListener("click", (evento) => {
+    const boton = evento.target.closest("[data-recargar-resultados]");
+    const zona = boton?.closest("[data-resultados-url]");
+    if (zona) cargarResultados(zona);
   });
 
   window.addEventListener("pageshow", (evento) => {

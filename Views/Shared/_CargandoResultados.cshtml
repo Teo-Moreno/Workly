@@ -3,3 +3,11 @@
     <p class="cargando-resultados-titulo" data-cargando-titulo></p>
     <p class="cargando-resultados-texto">Puede tardar unos segundos.</p>
 </div>
+<template data-cargando-error>
+    <div class="estado-vacio" role="alert">
+        <span class="caja-icono-lg"><icono nombre="warning-outline" /></span>
+        <h3 class="estado-vacio-titulo">No pudimos cargar los resultados</h3>
+        <p>Revisá tu conexión y probá de nuevo.</p>
+        <button class="btn btn-outline-primary" type="button" data-recargar-resultados><icono nombre="refresh" />Probar de nuevo</button>
+    </div>
+</template>

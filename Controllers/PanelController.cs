@@ -14,7 +14,7 @@ public class PanelController : Controller
         _jsearch = jsearch;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         if (User.EsEmpresa())
         {
@@ -29,10 +29,18 @@ public class PanelController : Controller
 
         ViewBag.Perfil = perfil;
         ViewBag.Puesto = perfil.Preferencia.Puesto_Buscado;
+        ViewBag.UrlParaVos = Url.Action(nameof(ParaVos));
+        return View();
+    }
+
+    public async Task<IActionResult> ParaVos()
+    {
+        var perfil = User.EsPersona() ? BD.ObtenerMiPerfil(User.IdUsuario()) : null;
+        var puesto = perfil?.Preferencia.Puesto_Buscado;
+        ViewBag.Puesto = puesto;
         ViewBag.ErrorExternas = false;
         ViewBag.ParaVos = new List<Oferta>();
-        var puesto = perfil.Preferencia.Puesto_Buscado;
-        if (!string.IsNullOrWhiteSpace(puesto))
+        if (perfil != null && !string.IsNullOrWhiteSpace(puesto))
         {
             var idProvincia = perfil.Preferencia.IDProvincia ?? perfil.Perfil.IDProvincia;
             var provincias = BD.ObtenerProvincias();
@@ -52,6 +60,6 @@ public class PanelController : Controller
             }
             ViewBag.ParaVos = ofertas.Where(o => !o.YaPostulado).Take(6).ToList();
         }
-        return View();
+        return PartialView("_ParaVos");
     }
 }

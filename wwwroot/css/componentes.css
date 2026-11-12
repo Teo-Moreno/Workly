@@ -3168,6 +3168,10 @@ p.alert .icono {
   font-size: var(--texto-15);
 }
 
+[data-resultados-contenido] {
+  display: contents;
+}
+
 .esta-buscando > .cargando-resultados {
   display: flex;
 }
