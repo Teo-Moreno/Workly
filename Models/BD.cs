@@ -8,6 +8,8 @@ public static class BD
 {
     private static string _connectionString = "";
 
+    private const CommandType SP = CommandType.StoredProcedure;
+
     public static void Configurar(string connectionString)
     {
         _connectionString = connectionString;
@@ -15,144 +17,118 @@ public static class BD
 
     private static SqlConnection Conectar() => new(_connectionString);
 
-    private static string? Like(string? texto) =>
-        string.IsNullOrWhiteSpace(texto)
-            ? null
-            : "%" + texto.Trim().Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]") + "%";
-
-    private const string ColumnasUsuario = "ID, Nombre, Apellido, Email, [Contraseña], Fecha_Registro, Tipo, Es_Moderador";
-
-    public static Usuario? ObtenerUsuarioPorEmail(string email)
+    private static List<T> Lista<T>(string procedimiento, object? parametros = null)
     {
         using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Usuario>($"SELECT {ColumnasUsuario} FROM Usuario WHERE Email = @Email", new { Email = email });
+        return conexion.Query<T>(procedimiento, parametros, commandType: SP).ToList();
     }
 
-    public static Usuario? ObtenerUsuarioPorId(int id)
+    private static T? Uno<T>(string procedimiento, object? parametros = null)
     {
         using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Usuario>($"SELECT {ColumnasUsuario} FROM Usuario WHERE ID = @ID", new { ID = id });
+        return conexion.QueryFirstOrDefault<T>(procedimiento, parametros, commandType: SP);
     }
 
-    public static bool ExisteEmail(string email, int? exceptoIdUsuario = null)
+    private static T Valor<T>(string procedimiento, object? parametros = null)
     {
-        const string sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM Usuario WHERE Email = @Email AND ID <> ISNULL(@Excepto, 0)) THEN 1 ELSE 0 END";
         using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>(sql, new { Email = email, Excepto = exceptoIdUsuario }) == 1;
+        return conexion.ExecuteScalar<T>(procedimiento, parametros, commandType: SP);
     }
+
+    private static void Ejecutar(string procedimiento, object? parametros = null)
+    {
+        using var conexion = Conectar();
+        conexion.Execute(procedimiento, parametros, commandType: SP);
+    }
+
+    private static bool Cambio(string procedimiento, object parametros) => Valor<int>(procedimiento, parametros) > 0;
+
+    public static Usuario? ObtenerUsuarioPorEmail(string email) =>
+        Uno<Usuario>("ObtenerUsuarioPorEmail", new { Email = email });
+
+    public static Usuario? ObtenerUsuarioPorId(int id) =>
+        Uno<Usuario>("ObtenerUsuarioPorId", new { ID = id });
+
+    public static bool ExisteEmail(string email, int? exceptoIdUsuario = null) =>
+        Valor<bool>("ExisteEmail", new { Email = email, Excepto = exceptoIdUsuario });
 
     public static int RegistrarPersona(PersonaNueva datos)
     {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-
-        var id = InsertarUsuario(conexion, tx, datos.Usuario, Usuario.TipoPersona);
-        AsegurarPerfil(conexion, tx, id);
-        if (datos.LoginExterno != null)
+        var u = datos.Usuario;
+        return Valor<int>("RegistrarPersona", new
         {
-            VincularLoginExterno(conexion, tx, id, datos.LoginExterno);
-        }
-
-        tx.Commit();
-        return id;
+            u.Nombre,
+            u.Apellido,
+            u.Email,
+            Contrasena = u.Contraseña,
+            datos.LoginExterno?.Proveedor,
+            IDExterno = datos.LoginExterno?.ID_Externo
+        });
     }
 
     public static int RegistrarEmpresa(EmpresaNueva datos)
     {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-
-        var id = InsertarUsuario(conexion, tx, datos.Usuario, Usuario.TipoEmpresa);
+        var u = datos.Usuario;
         var e = datos.Empresa;
-        var existente = conexion.QueryFirstOrDefault<int?>("SELECT ID FROM Empresa WHERE Nombre = @Nombre AND IDUsuario IS NULL", new { e.Nombre }, tx);
-        var parametros = new { IDEmpresa = existente, IDUsuario = id, e.Nombre, e.Descripcion, e.Logo, e.Ubicacion, e.Sitio_Web, e.Razon_Social, e.CUIT, e.Rubro, e.IDProvincia, e.Telefono };
-        if (existente.HasValue)
+        return Valor<int>("RegistrarEmpresa", new
         {
-            conexion.Execute(@"UPDATE Empresa SET IDUsuario = @IDUsuario, Descripcion = @Descripcion, Logo = @Logo, Ubicacion = @Ubicacion,
-                                   Sitio_Web = @Sitio_Web, Razon_Social = @Razon_Social, CUIT = @CUIT, Rubro = @Rubro,
-                                   IDProvincia = @IDProvincia, Telefono = @Telefono
-                               WHERE ID = @IDEmpresa", parametros, tx);
-        }
-        else
+            u.Nombre,
+            u.Apellido,
+            u.Email,
+            Contrasena = u.Contraseña,
+            NombreEmpresa = e.Nombre,
+            e.Descripcion,
+            e.Logo,
+            e.Ubicacion,
+            e.Sitio_Web,
+            e.Razon_Social,
+            e.CUIT,
+            e.Rubro,
+            e.IDProvincia,
+            e.Telefono,
+            datos.LoginExterno?.Proveedor,
+            IDExterno = datos.LoginExterno?.ID_Externo
+        });
+    }
+
+    public static int? ObtenerUsuarioDeLoginExterno(string proveedor, string idExterno) =>
+        Valor<int?>("ObtenerUsuarioDeLoginExterno", new { Proveedor = proveedor, IDExterno = idExterno });
+
+    public static void VincularLoginExterno(int idUsuario, LoginExternoNuevo login) =>
+        Ejecutar("VincularLoginExterno", new { IDUsuario = idUsuario, login.Proveedor, IDExterno = login.ID_Externo });
+
+    public static List<string> ObtenerProveedoresVinculados(int idUsuario) =>
+        Lista<string>("ObtenerProveedoresVinculados", new { IDUsuario = idUsuario });
+
+    public static void ActualizarDatosPersonales(int idUsuario, string nombre, string apellido, string email, int? idProvincia, string? telefono, string? sitioWeb) =>
+        Ejecutar("ActualizarDatosPersonales", new
         {
-            conexion.Execute(@"INSERT INTO Empresa (Nombre, Descripcion, Logo, Ubicacion, Sitio_Web, IDUsuario, Razon_Social, CUIT, Rubro, IDProvincia, Telefono)
-                               VALUES (@Nombre, @Descripcion, @Logo, @Ubicacion, @Sitio_Web, @IDUsuario, @Razon_Social, @CUIT, @Rubro, @IDProvincia, @Telefono)",
-                parametros, tx);
-        }
-
-        if (datos.LoginExterno != null)
-        {
-            VincularLoginExterno(conexion, tx, id, datos.LoginExterno);
-        }
-
-        tx.Commit();
-        return id;
-    }
-
-    private static int InsertarUsuario(IDbConnection conexion, IDbTransaction tx, Usuario u, string tipo) =>
-        conexion.ExecuteScalar<int>(@"INSERT INTO Usuario (Nombre, Apellido, Email, [Contraseña], Fecha_Registro, Tipo)
-                                      OUTPUT INSERTED.ID
-                                      VALUES (@Nombre, @Apellido, @Email, @Contrasena, CAST(GETDATE() AS DATE), @Tipo)",
-            new { u.Nombre, u.Apellido, u.Email, Contrasena = u.Contraseña, Tipo = tipo }, tx);
-
-    public static int? ObtenerUsuarioDeLoginExterno(string proveedor, string idExterno)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<int?>("SELECT IDUsuario FROM LoginExterno WHERE Proveedor = @Proveedor AND ID_Externo = @ID",
-            new { Proveedor = proveedor, ID = idExterno });
-    }
-
-    public static void VincularLoginExterno(int idUsuario, LoginExternoNuevo login)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        VincularLoginExterno(conexion, tx, idUsuario, login);
-        tx.Commit();
-    }
-
-    private static void VincularLoginExterno(IDbConnection conexion, IDbTransaction tx, int idUsuario, LoginExternoNuevo login) =>
-        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM LoginExterno WHERE Proveedor = @Proveedor AND ID_Externo = @ID_Externo)
-                           INSERT INTO LoginExterno (IDUsuario, Proveedor, ID_Externo) VALUES (@IDUsuario, @Proveedor, @ID_Externo)",
-            new { IDUsuario = idUsuario, login.Proveedor, login.ID_Externo }, tx);
-
-    public static List<string> ObtenerProveedoresVinculados(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<string>("SELECT Proveedor FROM LoginExterno WHERE IDUsuario = @ID", new { ID = idUsuario }).ToList();
-    }
-
-    public static void ActualizarDatosPersonales(int idUsuario, string nombre, string apellido, string email, int? idProvincia, string? telefono, string? sitioWeb)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        conexion.Execute("UPDATE Usuario SET Nombre = @Nombre, Apellido = @Apellido, Email = @Email WHERE ID = @ID",
-            new { ID = idUsuario, Nombre = nombre, Apellido = apellido, Email = email }, tx);
-        AsegurarPerfil(conexion, tx, idUsuario);
-        conexion.Execute("UPDATE Perfil SET IDProvincia = @IDProvincia, Telefono = @Telefono WHERE IDUsuario = @ID",
-            new { ID = idUsuario, IDProvincia = idProvincia, Telefono = telefono }, tx);
-        GuardarCV(conexion, tx, idUsuario, sitioWeb: sitioWeb, cambiarSitio: true);
-        tx.Commit();
-    }
+            IDUsuario = idUsuario,
+            Nombre = nombre,
+            Apellido = apellido,
+            Email = email,
+            IDProvincia = idProvincia,
+            Telefono = telefono,
+            SitioWeb = sitioWeb
+        });
 
     public static (string? FotoAnterior, string? CVAnterior) CompletarPerfil(int idUsuario, PerfilCompletado d)
     {
         using var conexion = Conectar();
         conexion.Open();
         using var tx = conexion.BeginTransaction();
-        AsegurarPerfil(conexion, tx, idUsuario);
-        var fotoAnterior = d.Foto == null ? null : conexion.ExecuteScalar<string?>("SELECT Foto FROM Perfil WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        var cvAnterior = d.ArchivoCV == null ? null : conexion.ExecuteScalar<string?>("SELECT Nombre_Archivo FROM CV WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        conexion.Execute(@"UPDATE Perfil SET IDProvincia = @IDProvincia, Telefono = @Telefono, Descripcion = @Descripcion, Estado_Busqueda = @Estado,
-                               Foto = COALESCE(@Foto, Foto)
-                           WHERE IDUsuario = @ID",
-            new { ID = idUsuario, d.IDProvincia, d.Telefono, d.Descripcion, Estado = d.EstadoBusqueda, d.Foto }, tx);
-        GuardarCV(conexion, tx, idUsuario, nombreArchivo: d.ArchivoCV, cambiarArchivo: d.ArchivoCV != null, sitioWeb: d.SitioWeb, cambiarSitio: true);
-        d.Preferencia.IDUsuario = idUsuario;
-        GuardarPreferencia(conexion, tx, d.Preferencia);
+        var anteriores = conexion.QueryFirst<(string? FotoAnterior, string? CVAnterior)>("CompletarPerfil", new
+        {
+            IDUsuario = idUsuario,
+            d.IDProvincia,
+            d.Telefono,
+            d.Descripcion,
+            d.EstadoBusqueda,
+            d.Foto,
+            d.ArchivoCV,
+            d.SitioWeb
+        }, tx, commandType: SP);
+        GuardarPreferencia(conexion, tx, idUsuario, d.Preferencia);
         GuardarHabilidades(conexion, tx, idUsuario, d.Habilidades);
         GuardarIdiomas(conexion, tx, idUsuario, d.Idiomas);
         foreach (var experiencia in d.Experiencias)
@@ -164,283 +140,118 @@ public static class BD
             AgregarFormacion(conexion, tx, idUsuario, formacion);
         }
         tx.Commit();
-        return (fotoAnterior, cvAnterior);
+        return anteriores;
     }
 
-    public static void ActualizarResponsable(int idUsuario, string nombre, string apellido)
-    {
-        using var conexion = Conectar();
-        conexion.Execute("UPDATE Usuario SET Nombre = @Nombre, Apellido = @Apellido WHERE ID = @ID",
-            new { ID = idUsuario, Nombre = nombre, Apellido = apellido });
-    }
+    public static void ActualizarResponsable(int idUsuario, string nombre, string apellido) =>
+        Ejecutar("ActualizarResponsable", new { IDUsuario = idUsuario, Nombre = nombre, Apellido = apellido });
 
-    public static void CambiarContrasena(int idUsuario, string hash)
-    {
-        using var conexion = Conectar();
-        conexion.Execute("UPDATE Usuario SET [Contraseña] = @Hash WHERE ID = @ID", new { ID = idUsuario, Hash = hash });
-    }
+    public static void CambiarContrasena(int idUsuario, string hash) =>
+        Ejecutar("CambiarContrasena", new { IDUsuario = idUsuario, Hash = hash });
 
-    private static void AsegurarPerfil(IDbConnection conexion, IDbTransaction? tx, int idUsuario) =>
-        conexion.Execute("IF NOT EXISTS (SELECT 1 FROM Perfil WHERE IDUsuario = @ID) INSERT INTO Perfil (IDUsuario) VALUES (@ID)",
-            new { ID = idUsuario }, tx);
+    public static string? ActualizarFoto(int idUsuario, string? ruta) =>
+        Valor<string?>("ActualizarFoto", new { IDUsuario = idUsuario, Foto = ruta });
 
-    public static string? ActualizarFoto(int idUsuario, string? ruta)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        AsegurarPerfil(conexion, tx, idUsuario);
-        var anterior = conexion.ExecuteScalar<string?>("SELECT Foto FROM Perfil WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        conexion.Execute("UPDATE Perfil SET Foto = @Foto WHERE IDUsuario = @ID", new { ID = idUsuario, Foto = ruta }, tx);
-        tx.Commit();
-        return anterior;
-    }
+    public static void ActualizarDescripcion(int idUsuario, string? descripcion) =>
+        Ejecutar("ActualizarDescripcion", new { IDUsuario = idUsuario, Descripcion = descripcion });
 
-    public static void ActualizarDescripcion(int idUsuario, string? descripcion)
-    {
-        using var conexion = Conectar();
-        AsegurarPerfil(conexion, null, idUsuario);
-        conexion.Execute("UPDATE Perfil SET Descripcion = @Descripcion WHERE IDUsuario = @ID", new { ID = idUsuario, Descripcion = descripcion });
-    }
+    public static void ActualizarEstadoBusqueda(int idUsuario, string? estado) =>
+        Ejecutar("ActualizarEstadoBusqueda", new { IDUsuario = idUsuario, EstadoBusqueda = estado });
 
-    public static void ActualizarEstadoBusqueda(int idUsuario, string? estado)
-    {
-        using var conexion = Conectar();
-        AsegurarPerfil(conexion, null, idUsuario);
-        conexion.Execute("UPDATE Perfil SET Estado_Busqueda = @Estado WHERE IDUsuario = @ID", new { ID = idUsuario, Estado = estado });
-    }
+    public static string? ActualizarArchivoCV(int idUsuario, string? nombreArchivo) =>
+        Valor<string?>("ActualizarArchivoCV", new { IDUsuario = idUsuario, Archivo = nombreArchivo });
 
-    public static string? ActualizarArchivoCV(int idUsuario, string? nombreArchivo)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var anterior = conexion.ExecuteScalar<string?>("SELECT Nombre_Archivo FROM CV WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        GuardarCV(conexion, tx, idUsuario, nombreArchivo: nombreArchivo, cambiarArchivo: true);
-        tx.Commit();
-        return anterior;
-    }
+    public static (string? Foto, string? CV, string? Logo) EliminarCuenta(int idUsuario) =>
+        Uno<(string? Foto, string? CV, string? Logo)>("EliminarCuenta", new { IDUsuario = idUsuario });
 
-    private static void GuardarCV(IDbConnection conexion, IDbTransaction tx, int idUsuario,
-                                  string? nombreArchivo = null, bool cambiarArchivo = false, string? sitioWeb = null, bool cambiarSitio = false)
-    {
-        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM CV WHERE IDUsuario = @ID)
-                               INSERT INTO CV (IDUsuario, Fecha_Actualizacion) VALUES (@ID, CAST(GETDATE() AS DATE));
-                           UPDATE CV SET
-                               Nombre_Archivo = CASE WHEN @CambiarArchivo = 1 THEN @Archivo ELSE Nombre_Archivo END,
-                               Sitio_Web = CASE WHEN @CambiarSitio = 1 THEN @Sitio ELSE Sitio_Web END,
-                               Fecha_Actualizacion = CAST(GETDATE() AS DATE)
-                           WHERE IDUsuario = @ID",
-            new { ID = idUsuario, Archivo = nombreArchivo, CambiarArchivo = cambiarArchivo, Sitio = sitioWeb, CambiarSitio = cambiarSitio }, tx);
-    }
+    public static int ContarRecuperacionesRecientes(int idUsuario) =>
+        Valor<int>("ContarRecuperacionesRecientes", new { IDUsuario = idUsuario });
 
-    public static (string? Foto, string? CV, string? Logo) EliminarCuenta(int idUsuario)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
+    public static void GuardarRecuperacion(int idUsuario, string tokenHash, DateTime venceUtc) =>
+        Ejecutar("GuardarRecuperacion", new { IDUsuario = idUsuario, TokenHash = tokenHash, Vence = venceUtc });
 
-        var foto = conexion.ExecuteScalar<string?>("SELECT Foto FROM Perfil WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        var cv = conexion.ExecuteScalar<string?>("SELECT Nombre_Archivo FROM CV WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        var logo = conexion.ExecuteScalar<string?>("SELECT Logo FROM Empresa WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
+    public static int? ObtenerUsuarioDeRecuperacion(string tokenHash) =>
+        Valor<int?>("ObtenerUsuarioDeRecuperacion", new { TokenHash = tokenHash });
 
-        conexion.Execute(@"
-            DECLARE @Ofertas TABLE (ID INT);
-            INSERT INTO @Ofertas
-            SELECT o.ID FROM OfertaLaboral o
-            WHERE o.IDUsuario_Publicador = @ID OR o.IDEmpresa IN (SELECT ID FROM Empresa WHERE IDUsuario = @ID);
+    public static bool UsarRecuperacion(string tokenHash, string hashContrasena) =>
+        Valor<bool>("UsarRecuperacion", new { TokenHash = tokenHash, Contrasena = hashContrasena });
 
-            DELETE FROM Postulacion WHERE IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
-            DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
-            WHERE fo.IDOfertaLaboral IN (SELECT ID FROM @Ofertas);
-            DELETE FROM OfertaLaboral WHERE ID IN (SELECT ID FROM @Ofertas);
+    public static List<Pais> ObtenerPaises() => Lista<Pais>("ObtenerPaises");
 
-            UPDATE Empresa SET IDUsuario = NULL, CUIT = NULL, Razon_Social = NULL, Logo = NULL WHERE IDUsuario = @ID;
+    public static List<Provincia> ObtenerProvincias() => Lista<Provincia>("ObtenerProvincias");
 
-            DELETE FROM Usuario WHERE ID = @ID;", new { ID = idUsuario }, tx);
-        BorrarHabilidadesSinUso(conexion, tx);
+    public static Perfil? ObtenerPerfil(int idUsuario) =>
+        Uno<Perfil>("ObtenerPerfil", new { IDUsuario = idUsuario });
 
-        tx.Commit();
-        return (foto, cv, logo);
-    }
+    public static CV? ObtenerCV(int idUsuario) =>
+        Uno<CV>("ObtenerCV", new { IDUsuario = idUsuario });
 
-    public static int ContarRecuperacionesRecientes(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>(
-            "SELECT COUNT(*) FROM RecuperacionClave WHERE IDUsuario = @ID AND Fecha >= DATEADD(HOUR, -1, SYSUTCDATETIME())", new { ID = idUsuario });
-    }
-
-    public static void GuardarRecuperacion(int idUsuario, string tokenHash, DateTime venceUtc)
-    {
-        using var conexion = Conectar();
-        conexion.Execute("INSERT INTO RecuperacionClave (IDUsuario, Token_Hash, Vence) VALUES (@IDUsuario, @Hash, @Vence)",
-            new { IDUsuario = idUsuario, Hash = tokenHash, Vence = venceUtc });
-    }
-
-    public static int? ObtenerUsuarioDeRecuperacion(string tokenHash)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int?>(
-            "SELECT IDUsuario FROM RecuperacionClave WHERE Token_Hash = @Hash AND Usada = 0 AND Vence > SYSUTCDATETIME()", new { Hash = tokenHash });
-    }
-
-    public static bool UsarRecuperacion(string tokenHash, string hashContrasena)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var idUsuario = conexion.ExecuteScalar<int?>(
-            "SELECT IDUsuario FROM RecuperacionClave WITH (UPDLOCK) WHERE Token_Hash = @Hash AND Usada = 0 AND Vence > SYSUTCDATETIME()",
-            new { Hash = tokenHash }, tx);
-        if (idUsuario == null)
-        {
-            tx.Rollback();
-            return false;
-        }
-        conexion.Execute(@"UPDATE Usuario SET [Contraseña] = @Contrasena WHERE ID = @ID;
-                           UPDATE RecuperacionClave SET Usada = 1 WHERE IDUsuario = @ID AND Usada = 0;",
-            new { ID = idUsuario, Contrasena = hashContrasena }, tx);
-        tx.Commit();
-        return true;
-    }
-
-    public static List<Pais> ObtenerPaises()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Pais>("SELECT ID, Nombre, Codigo_ISO, Codigo_Telefono FROM Pais ORDER BY Nombre").ToList();
-    }
-
-    public static List<Provincia> ObtenerProvincias()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Provincia>("SELECT ID, IDPais, Nombre FROM Provincia ORDER BY Nombre").ToList();
-    }
-
-    public static Perfil? ObtenerPerfil(int idUsuario)
-    {
-        const string sql = @"SELECT pe.ID, pe.IDUsuario, pe.IDProvincia, pe.Foto, pe.Descripcion, pe.Telefono, pe.Estado_Busqueda,
-                                    pr.Nombre AS Provincia, pa.ID AS IDPais, pa.Nombre AS Pais, pa.Codigo_Telefono
-                             FROM Perfil pe
-                             LEFT JOIN Provincia pr ON pr.ID = pe.IDProvincia
-                             LEFT JOIN Pais pa ON pa.ID = pr.IDPais
-                             WHERE pe.IDUsuario = @IDUsuario";
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Perfil>(sql, new { IDUsuario = idUsuario });
-    }
-
-    public static CV? ObtenerCV(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<CV>("SELECT ID, IDUsuario, Nombre_Archivo, Sitio_Web, Fecha_Actualizacion FROM CV WHERE IDUsuario = @ID",
-            new { ID = idUsuario });
-    }
-
-    public static Preferencia? ObtenerPreferencia(int idUsuario)
-    {
-        const string sql = @"SELECT p.*, pr.Nombre AS Provincia FROM Preferencia p
-                             LEFT JOIN Provincia pr ON pr.ID = p.IDProvincia
-                             WHERE p.IDUsuario = @ID";
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Preferencia>(sql, new { ID = idUsuario });
-    }
+    public static Preferencia? ObtenerPreferencia(int idUsuario) =>
+        Uno<Preferencia>("ObtenerPreferencia", new { IDUsuario = idUsuario });
 
     public static void GuardarBusqueda(int idUsuario, Preferencia preferencia, string? estadoBusqueda, List<string> habilidades, List<(int, string)> idiomas)
     {
         using var conexion = Conectar();
         conexion.Open();
         using var tx = conexion.BeginTransaction();
-        preferencia.IDUsuario = idUsuario;
-        GuardarPreferencia(conexion, tx, preferencia);
-        AsegurarPerfil(conexion, tx, idUsuario);
-        conexion.Execute("UPDATE Perfil SET Estado_Busqueda = @Estado WHERE IDUsuario = @ID", new { ID = idUsuario, Estado = estadoBusqueda }, tx);
+        GuardarPreferencia(conexion, tx, idUsuario, preferencia);
+        conexion.Execute("ActualizarEstadoBusqueda", new { IDUsuario = idUsuario, EstadoBusqueda = estadoBusqueda }, tx, commandType: SP);
         GuardarHabilidades(conexion, tx, idUsuario, habilidades);
         GuardarIdiomas(conexion, tx, idUsuario, idiomas);
         tx.Commit();
     }
 
-    private static void GuardarPreferencia(IDbConnection conexion, IDbTransaction tx, Preferencia p) =>
-        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM Preferencia WHERE IDUsuario = @IDUsuario)
-                               INSERT INTO Preferencia (IDUsuario) VALUES (@IDUsuario);
-                           UPDATE Preferencia SET Puesto_Buscado = @Puesto_Buscado, Niveles = @Niveles, Modalidades = @Modalidades,
-                               Jornada = @Jornada, Contratacion = @Contratacion, IDProvincia = @IDProvincia,
-                               Salario_Minimo = @Salario_Minimo, Salario_Maximo = @Salario_Maximo, Disponibilidad = @Disponibilidad
-                           WHERE IDUsuario = @IDUsuario",
-            new { p.IDUsuario, p.Puesto_Buscado, p.Niveles, p.Modalidades, p.Jornada, p.Contratacion, p.IDProvincia, p.Salario_Minimo, p.Salario_Maximo, p.Disponibilidad }, tx);
-
-    public static List<Sector> ObtenerSectores()
+    private static void GuardarPreferencia(IDbConnection conexion, IDbTransaction tx, int idUsuario, Preferencia p)
     {
-        using var conexion = Conectar();
-        return conexion.Query<Sector>("SELECT ID, Nombre FROM Sector ORDER BY Orden, Nombre").ToList();
+        p.IDUsuario = idUsuario;
+        conexion.Execute("GuardarPreferencia", new
+        {
+            p.IDUsuario,
+            p.Puesto_Buscado,
+            p.Niveles,
+            p.Modalidades,
+            p.Jornada,
+            p.Contratacion,
+            p.IDProvincia,
+            p.Salario_Minimo,
+            p.Salario_Maximo,
+            p.Disponibilidad
+        }, tx, commandType: SP);
     }
 
-    public static List<Habilidad> ObtenerCatalogoHabilidades()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Habilidad>(@"SELECT h.ID, h.Nombre, h.IDSector, s.Nombre AS Sector
-                                           FROM Habilidad h JOIN Sector s ON s.ID = h.IDSector
-                                           ORDER BY s.Orden, s.Nombre, h.Nombre").ToList();
-    }
+    public static List<Sector> ObtenerSectores() => Lista<Sector>("ObtenerSectores");
 
-    public static List<string> ObtenerHabilidadesUsuario(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<string>(@"SELECT h.Nombre FROM UsuarioHabilidad uh JOIN Habilidad h ON h.ID = uh.IDHabilidad
-                                         WHERE uh.IDUsuario = @ID ORDER BY h.Nombre", new { ID = idUsuario }).ToList();
-    }
+    public static List<Habilidad> ObtenerCatalogoHabilidades() => Lista<Habilidad>("ObtenerCatalogoHabilidades");
+
+    public static List<string> ObtenerHabilidadesUsuario(int idUsuario) =>
+        Lista<string>("ObtenerHabilidadesUsuario", new { IDUsuario = idUsuario });
 
     private static void GuardarHabilidades(IDbConnection conexion, IDbTransaction tx, int idUsuario, List<string> nombres)
     {
-        conexion.Execute("DELETE FROM UsuarioHabilidad WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
+        conexion.Execute("QuitarHabilidadesUsuario", new { IDUsuario = idUsuario }, tx, commandType: SP);
         foreach (var nombre in nombres.Select(n => n.Trim()).Where(n => n.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM Habilidad WHERE Nombre = @Nombre) INSERT INTO Habilidad (Nombre) VALUES (@Nombre);
-                               INSERT INTO UsuarioHabilidad (IDUsuario, IDHabilidad)
-                               SELECT @ID, h.ID FROM Habilidad h WHERE h.Nombre = @Nombre
-                                 AND NOT EXISTS (SELECT 1 FROM UsuarioHabilidad WHERE IDUsuario = @ID AND IDHabilidad = h.ID)",
-                new { ID = idUsuario, Nombre = nombre }, tx);
+            conexion.Execute("AgregarHabilidadUsuario", new { IDUsuario = idUsuario, Nombre = nombre }, tx, commandType: SP);
         }
-        BorrarHabilidadesSinUso(conexion, tx);
+        conexion.Execute("BorrarHabilidadesSinUso", transaction: tx, commandType: SP);
     }
 
-    private static void BorrarHabilidadesSinUso(IDbConnection conexion, IDbTransaction tx) =>
-        conexion.Execute(@"DELETE h FROM Habilidad h
-                           WHERE h.IDSector IS NULL AND NOT EXISTS (SELECT 1 FROM UsuarioHabilidad uh WHERE uh.IDHabilidad = h.ID)", transaction: tx);
+    public static List<Idioma> ObtenerCatalogoIdiomas() => Lista<Idioma>("ObtenerCatalogoIdiomas");
 
-    public static List<Idioma> ObtenerCatalogoIdiomas()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Idioma>("SELECT ID, Nombre FROM Idioma ORDER BY Nombre").ToList();
-    }
-
-    public static List<IdiomaElegido> ObtenerIdiomasUsuario(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<IdiomaElegido>(@"SELECT ui.IDIdioma, i.Nombre AS Idioma, ui.Nivel FROM UsuarioIdioma ui
-                                                JOIN Idioma i ON i.ID = ui.IDIdioma WHERE ui.IDUsuario = @ID ORDER BY i.Nombre",
-            new { ID = idUsuario }).ToList();
-    }
+    public static List<IdiomaElegido> ObtenerIdiomasUsuario(int idUsuario) =>
+        Lista<IdiomaElegido>("ObtenerIdiomasUsuario", new { IDUsuario = idUsuario });
 
     private static void GuardarIdiomas(IDbConnection conexion, IDbTransaction tx, int idUsuario, List<(int IDIdioma, string Nivel)> idiomas)
     {
-        conexion.Execute("DELETE FROM UsuarioIdioma WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
+        conexion.Execute("QuitarIdiomasUsuario", new { IDUsuario = idUsuario }, tx, commandType: SP);
         foreach (var (idIdioma, nivel) in idiomas.GroupBy(i => i.IDIdioma).Select(g => g.Last()))
         {
-            conexion.Execute("INSERT INTO UsuarioIdioma (IDUsuario, IDIdioma, Nivel) VALUES (@ID, @IDIdioma, @Nivel)",
-                new { ID = idUsuario, IDIdioma = idIdioma, Nivel = nivel }, tx);
+            conexion.Execute("AgregarIdiomaUsuario", new { IDUsuario = idUsuario, IDIdioma = idIdioma, Nivel = nivel }, tx, commandType: SP);
         }
     }
 
-    public static List<ExperienciaItem> ObtenerExperiencias(int idUsuario)
-    {
-        const string sql = @"SELECT x.ID, x.Puesto, e.Nombre AS Empresa, x.Descripcion, x.Fecha_Inicio, x.Fecha_Finalizacion
-                             FROM ExperienciaLaboral x
-                             JOIN Empresa e ON e.ID = x.IDEmpresa
-                             WHERE x.IDUsuario = @IDUsuario
-                             ORDER BY CASE WHEN x.Fecha_Finalizacion IS NULL THEN 0 ELSE 1 END, x.Fecha_Inicio DESC";
-        using var conexion = Conectar();
-        return conexion.Query<ExperienciaItem>(sql, new { IDUsuario = idUsuario }).ToList();
-    }
+    public static List<ExperienciaItem> ObtenerExperiencias(int idUsuario) =>
+        Lista<ExperienciaItem>("ObtenerExperiencias", new { IDUsuario = idUsuario });
 
     public static void AgregarExperiencia(int idUsuario, ExperienciaNueva experiencia)
     {
@@ -451,31 +262,14 @@ public static class BD
         tx.Commit();
     }
 
-    private static void AgregarExperiencia(IDbConnection conexion, IDbTransaction tx, int idUsuario, ExperienciaNueva x)
-    {
-        var idEmpresa = ObtenerOCrearEmpresa(conexion, tx, x.Empresa);
-        conexion.Execute(@"INSERT INTO ExperienciaLaboral (IDUsuario, IDEmpresa, Puesto, Descripcion, Fecha_Inicio, Fecha_Finalizacion)
-                           VALUES (@IDUsuario, @IDEmpresa, @Puesto, @Descripcion, @Inicio, @Fin)",
-            new { IDUsuario = idUsuario, IDEmpresa = idEmpresa, x.Puesto, x.Descripcion, x.Inicio, x.Fin }, tx);
-    }
+    private static void AgregarExperiencia(IDbConnection conexion, IDbTransaction tx, int idUsuario, ExperienciaNueva x) =>
+        conexion.Execute("AgregarExperiencia", new { IDUsuario = idUsuario, x.Empresa, x.Puesto, x.Descripcion, x.Inicio, x.Fin }, tx, commandType: SP);
 
-    public static bool EliminarExperiencia(int idUsuario, int idExperiencia)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute("DELETE FROM ExperienciaLaboral WHERE ID = @ID AND IDUsuario = @IDUsuario",
-            new { ID = idExperiencia, IDUsuario = idUsuario }) > 0;
-    }
+    public static bool EliminarExperiencia(int idUsuario, int idExperiencia) =>
+        Cambio("EliminarExperiencia", new { IDUsuario = idUsuario, ID = idExperiencia });
 
-    public static List<FormacionItem> ObtenerFormaciones(int idUsuario)
-    {
-        const string sql = @"SELECT ue.ID, ue.Titulo, ed.Institucion, ue.Fecha_Inicio, ue.Fecha_Fin
-                             FROM UsuarioEducacion ue
-                             JOIN Educacion ed ON ed.ID = ue.IDEducacion
-                             WHERE ue.IDUsuario = @IDUsuario
-                             ORDER BY CASE WHEN ue.Fecha_Fin IS NULL THEN 0 ELSE 1 END, ue.Fecha_Inicio DESC";
-        using var conexion = Conectar();
-        return conexion.Query<FormacionItem>(sql, new { IDUsuario = idUsuario }).ToList();
-    }
+    public static List<FormacionItem> ObtenerFormaciones(int idUsuario) =>
+        Lista<FormacionItem>("ObtenerFormaciones", new { IDUsuario = idUsuario });
 
     public static void AgregarFormacion(int idUsuario, FormacionNueva formacion)
     {
@@ -486,35 +280,13 @@ public static class BD
         tx.Commit();
     }
 
-    private static void AgregarFormacion(IDbConnection conexion, IDbTransaction tx, int idUsuario, FormacionNueva f)
-    {
-        var idEducacion = conexion.ExecuteScalar<int>(@"
-            IF NOT EXISTS (SELECT 1 FROM Educacion WHERE Institucion = @Institucion)
-                INSERT INTO Educacion (Institucion) VALUES (@Institucion);
-            SELECT ID FROM Educacion WHERE Institucion = @Institucion;", new { f.Institucion }, tx);
-        conexion.Execute(@"INSERT INTO UsuarioEducacion (IDUsuario, IDEducacion, Titulo, Fecha_Inicio, Fecha_Fin)
-                           VALUES (@IDUsuario, @IDEducacion, @Titulo, @Inicio, @Fin)",
-            new { IDUsuario = idUsuario, IDEducacion = idEducacion, f.Titulo, f.Inicio, f.Fin }, tx);
-    }
+    private static void AgregarFormacion(IDbConnection conexion, IDbTransaction tx, int idUsuario, FormacionNueva f) =>
+        conexion.Execute("AgregarFormacion", new { IDUsuario = idUsuario, f.Institucion, f.Titulo, f.Inicio, f.Fin }, tx, commandType: SP);
 
-    public static bool EliminarFormacion(int idUsuario, int idFormacion)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute("DELETE FROM UsuarioEducacion WHERE ID = @ID AND IDUsuario = @IDUsuario",
-            new { ID = idFormacion, IDUsuario = idUsuario }) > 0;
-    }
+    public static bool EliminarFormacion(int idUsuario, int idFormacion) =>
+        Cambio("EliminarFormacion", new { IDUsuario = idUsuario, ID = idFormacion });
 
-    public static List<string> ObtenerInstituciones()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<string>("SELECT Institucion FROM Educacion ORDER BY Institucion").ToList();
-    }
-
-    private static int ObtenerOCrearEmpresa(IDbConnection conexion, IDbTransaction tx, string nombre) =>
-        conexion.ExecuteScalar<int>(@"
-            IF NOT EXISTS (SELECT 1 FROM Empresa WHERE Nombre = @Nombre)
-                INSERT INTO Empresa (Nombre) VALUES (@Nombre);
-            SELECT ID FROM Empresa WHERE Nombre = @Nombre;", new { Nombre = nombre }, tx);
+    public static List<string> ObtenerInstituciones() => Lista<string>("ObtenerInstituciones");
 
     public static MiPerfilViewModel? ObtenerMiPerfil(int idUsuario)
     {
@@ -538,257 +310,94 @@ public static class BD
         };
     }
 
-    private const string SelectEmpresa = @"
-        SELECT e.ID, e.Nombre, e.Descripcion, e.Logo, e.Ubicacion, e.Sitio_Web, e.IDUsuario, e.Razon_Social, e.CUIT,
-               e.Rubro, e.IDProvincia, e.Telefono, e.Fecha_Registro, pr.Nombre AS Provincia, pa.ID AS IDPais, pa.Nombre AS Pais,
-               (SELECT COUNT(*) FROM OfertaLaboral o
-                WHERE o.IDEmpresa = e.ID AND o.Estado_Publicacion = N'Aprobada'
-                  AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))) AS BusquedasActivas
-        FROM Empresa e
-        LEFT JOIN Provincia pr ON pr.ID = e.IDProvincia
-        LEFT JOIN Pais pa ON pa.ID = pr.IDPais";
+    public static List<Empresa> BuscarEmpresas(string? texto, string? rubro, int? idPais, int? idProvincia, string? orden) =>
+        Lista<Empresa>("BuscarEmpresas", new { Texto = texto, Rubro = rubro, IDPais = idPais, IDProvincia = idProvincia, Orden = orden });
 
-    private const string EmpresaVisible = @"(e.IDUsuario IS NOT NULL OR EXISTS (SELECT 1 FROM OfertaLaboral o
-                                              WHERE o.IDEmpresa = e.ID AND o.Estado_Publicacion = N'Aprobada'))";
+    public static List<Empresa> ObtenerEmpresasConBusquedas(int cantidad) =>
+        Lista<Empresa>("ObtenerEmpresasConBusquedas", new { Cantidad = cantidad });
 
-    public static List<Empresa> BuscarEmpresas(string? texto, string? rubro, int? idPais, int? idProvincia, string? orden)
-    {
-        var ordenSql = orden switch
-        {
-            "az" => "e.Nombre",
-            "antiguas" => "e.Fecha_Registro, e.ID",
-            _ => "e.Fecha_Registro DESC, e.ID DESC"
-        };
-        var sql = $@"{SelectEmpresa}
-                     WHERE {EmpresaVisible}
-                       AND (@Texto IS NULL OR e.Nombre LIKE @Texto OR e.Descripcion LIKE @Texto)
-                       AND (@Rubro IS NULL OR e.Rubro = @Rubro)
-                       AND (@IDProvincia IS NULL OR e.IDProvincia = @IDProvincia)
-                       AND (@IDPais IS NULL OR pa.ID = @IDPais)
-                     ORDER BY {ordenSql}";
-        using var conexion = Conectar();
-        return conexion.Query<Empresa>(sql, new { Texto = Like(texto), Rubro = rubro, IDPais = idPais, IDProvincia = idProvincia }).ToList();
-    }
+    public static Empresa? ObtenerEmpresa(int idEmpresa) =>
+        Uno<Empresa>("ObtenerEmpresa", new { ID = idEmpresa });
 
-    public static List<Empresa> ObtenerEmpresasConBusquedas(int cantidad)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Empresa>($@"SELECT TOP (@Cantidad) * FROM ({SelectEmpresa}) x WHERE x.BusquedasActivas > 0 ORDER BY x.BusquedasActivas DESC, x.Nombre",
-            new { Cantidad = cantidad }).ToList();
-    }
+    public static Empresa? ObtenerEmpresaDeUsuario(int idUsuario) =>
+        Uno<Empresa>("ObtenerEmpresaDeUsuario", new { IDUsuario = idUsuario });
 
-    public static Empresa? ObtenerEmpresa(int idEmpresa)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Empresa>($"{SelectEmpresa} WHERE e.ID = @ID", new { ID = idEmpresa });
-    }
+    public static bool ExisteCuit(string cuit) =>
+        Valor<bool>("ExisteCuit", new { CUIT = cuit });
 
-    public static Empresa? ObtenerEmpresaDeUsuario(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Empresa>($"{SelectEmpresa} WHERE e.IDUsuario = @ID", new { ID = idUsuario });
-    }
+    public static bool NombreEmpresaConCuenta(string nombre, int? exceptoIdEmpresa = null) =>
+        Valor<bool>("NombreEmpresaConCuenta", new { Nombre = nombre, Excepto = exceptoIdEmpresa });
 
-    public static bool ExisteCuit(string cuit)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Empresa WHERE CUIT = @CUIT", new { CUIT = cuit }) > 0;
-    }
+    public static bool ExisteNombreEmpresa(string nombre, int exceptoIdEmpresa) =>
+        Valor<bool>("ExisteNombreEmpresa", new { Nombre = nombre, Excepto = exceptoIdEmpresa });
 
-    public static bool NombreEmpresaConCuenta(string nombre, int? exceptoIdEmpresa = null)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Empresa WHERE Nombre = @Nombre AND IDUsuario IS NOT NULL AND ID <> ISNULL(@Excepto, 0)",
-            new { Nombre = nombre, Excepto = exceptoIdEmpresa }) > 0;
-    }
+    public static void ActualizarEmpresa(Empresa e) =>
+        Ejecutar("ActualizarEmpresa", new { e.ID, e.IDUsuario, e.Nombre, e.Descripcion, e.Ubicacion, e.Sitio_Web, e.Rubro, e.IDProvincia, e.Telefono });
 
-    public static bool ExisteNombreEmpresa(string nombre, int exceptoIdEmpresa)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Empresa WHERE Nombre = @Nombre AND ID <> @Excepto",
-            new { Nombre = nombre, Excepto = exceptoIdEmpresa }) > 0;
-    }
+    public static string? ActualizarLogo(int idUsuario, string? ruta) =>
+        Valor<string?>("ActualizarLogo", new { IDUsuario = idUsuario, Logo = ruta });
 
-    public static void ActualizarEmpresa(Empresa e)
-    {
-        using var conexion = Conectar();
-        conexion.Execute(@"UPDATE Empresa SET Nombre = @Nombre, Descripcion = @Descripcion, Ubicacion = @Ubicacion, Sitio_Web = @Sitio_Web,
-                               Rubro = @Rubro, IDProvincia = @IDProvincia, Telefono = @Telefono
-                           WHERE ID = @ID AND IDUsuario = @IDUsuario", e);
-    }
-
-    public static string? ActualizarLogo(int idUsuario, string? ruta)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var anterior = conexion.ExecuteScalar<string?>("SELECT Logo FROM Empresa WHERE IDUsuario = @ID", new { ID = idUsuario }, tx);
-        conexion.Execute("UPDATE Empresa SET Logo = @Logo WHERE IDUsuario = @ID", new { ID = idUsuario, Logo = ruta }, tx);
-        tx.Commit();
-        return anterior;
-    }
-
-    private const string SelectOferta = @"
-        SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
-               pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
-               CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
-               o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
-               (SELECT STRING_AGG(p.Nombre, ', ') FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
-               (SELECT COUNT(*) FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
-               CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
-               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                                 WHERE fo.IDOfertaLaboral = o.ID AND f.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
-        FROM OfertaLaboral o
-        JOIN Empresa e ON e.ID = o.IDEmpresa
-        LEFT JOIN Usuario pu ON pu.ID = o.IDUsuario_Publicador
-        LEFT JOIN Provincia pr ON pr.ID = o.IDProvincia";
-
-    private const string OfertaPublica = @"o.Estado_Publicacion = N'Aprobada' AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))";
-
-    public static List<Oferta> BuscarOfertas(FiltrosOfertas f, int idUsuarioActual)
-    {
-        var sql = $@"{SelectOferta}
-                     WHERE {OfertaPublica}
-                       AND (@Texto IS NULL OR o.Titulo LIKE @Texto OR o.Descripcion LIKE @Texto OR e.Nombre LIKE @Texto
-                            OR EXISTS (SELECT 1 FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto
-                                       WHERE op.IDOfertaLaboral = o.ID AND p.Nombre LIKE @Texto))
-                       AND (@IDProvincia IS NULL OR o.IDProvincia = @IDProvincia OR o.Modalidad = N'Remoto')
-                       AND (@SinModalidades = 1 OR o.Modalidad IN @Modalidades)
-                       AND (@SinTipos = 1 OR o.Tipo_Contrato IN @Tipos)
-                       AND (@Dias IS NULL OR o.Fecha_Publicacion >= DATEADD(DAY, -@Dias, CAST(GETDATE() AS DATE)))
-                     ORDER BY o.Fecha_Publicacion DESC, o.ID DESC";
-        using var conexion = Conectar();
-        return conexion.Query<Oferta>(sql, new
+    public static List<Oferta> BuscarOfertas(FiltrosOfertas f, int idUsuarioActual) =>
+        Lista<Oferta>("BuscarOfertas", new
         {
             IDUsuarioActual = idUsuarioActual,
-            Texto = Like(f.Texto),
+            f.Texto,
             f.IDProvincia,
-            SinModalidades = f.Modalidades.Count == 0,
-            Modalidades = f.Modalidades.DefaultIfEmpty("").ToList(),
-            SinTipos = f.TiposEmpleo.Count == 0,
-            Tipos = f.TiposEmpleo.DefaultIfEmpty("").ToList(),
+            Modalidades = f.Modalidades.Count == 0 ? null : string.Join(",", f.Modalidades),
+            Tipos = f.TiposEmpleo.Count == 0 ? null : string.Join(",", f.TiposEmpleo),
             f.Dias
-        }).ToList();
-    }
+        });
 
-    public static Oferta? ObtenerOferta(int idOferta, int idUsuarioActual)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Oferta>($"{SelectOferta} WHERE o.ID = @ID", new { ID = idOferta, IDUsuarioActual = idUsuarioActual });
-    }
+    public static Oferta? ObtenerOferta(int idOferta, int idUsuarioActual) =>
+        Uno<Oferta>("ObtenerOferta", new { ID = idOferta, IDUsuarioActual = idUsuarioActual });
 
-    public static List<Oferta> ObtenerOfertasDeEmpresa(int idEmpresa, int idUsuarioActual)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Oferta>($"{SelectOferta} WHERE o.IDEmpresa = @ID AND {OfertaPublica} ORDER BY o.Fecha_Publicacion DESC, o.ID DESC",
-            new { ID = idEmpresa, IDUsuarioActual = idUsuarioActual }).ToList();
-    }
+    public static List<Oferta> ObtenerOfertasDeEmpresa(int idEmpresa, int idUsuarioActual) =>
+        Lista<Oferta>("ObtenerOfertasDeEmpresa", new { IDEmpresa = idEmpresa, IDUsuarioActual = idUsuarioActual });
 
-    public static List<Oferta> ObtenerOfertasPublicadas(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Oferta>($"{SelectOferta} WHERE o.IDUsuario_Publicador = @ID ORDER BY o.Fecha_Publicacion DESC, o.ID DESC",
-            new { ID = idUsuario, IDUsuarioActual = 0 }).ToList();
-    }
+    public static List<Oferta> ObtenerOfertasPublicadas(int idUsuario) =>
+        Lista<Oferta>("ObtenerOfertasPublicadas", new { IDUsuario = idUsuario });
 
-    public static bool TieneOfertasPublicadas(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM OfertaLaboral WHERE IDUsuario_Publicador = @ID", new { ID = idUsuario }) > 0;
-    }
+    public static bool TieneOfertasPublicadas(int idUsuario) =>
+        Valor<bool>("TieneOfertasPublicadas", new { IDUsuario = idUsuario });
 
-    public static List<string> ObtenerTitulosRecientes(int cantidad)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<string>(@"SELECT TOP (@Cantidad) Titulo FROM (
-                                            SELECT o.Titulo, CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha FROM OfertaLaboral o
-                                            WHERE o.Estado_Publicacion = N'Aprobada'
-                                            UNION ALL
-                                            SELECT x.Titulo, x.Fecha_Consulta FROM OfertaExterna x) t
-                                        ORDER BY Fecha DESC", new { Cantidad = cantidad }).ToList();
-    }
+    public static List<string> ObtenerTitulosRecientes(int cantidad) =>
+        Lista<string>("ObtenerTitulosRecientes", new { Cantidad = cantidad });
 
-    public static int CrearOferta(OfertaNueva o)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var idEmpresa = o.IDEmpresa ?? ObtenerOCrearEmpresa(conexion, tx, o.EmpresaNombre!);
-        var id = conexion.ExecuteScalar<int>(@"
-            INSERT INTO OfertaLaboral (IDEmpresa, Titulo, Descripcion, Ubicacion, Modalidad, Tipo_Contrato, Salario, Cantidad_Puestos,
-                                       Fecha_Publicacion, Fecha_Cierre, IDUsuario_Publicador, IDProvincia, Estado_Publicacion)
-            OUTPUT INSERTED.ID
-            VALUES (@IDEmpresa, @Titulo, @Descripcion, @Ubicacion, @Modalidad, @Tipo_Contrato, @Salario, @Cantidad_Puestos,
-                    CAST(GETDATE() AS DATE), @Fecha_Cierre, @IDUsuario_Publicador, @IDProvincia, @Estado_Publicacion)",
-            new { IDEmpresa = idEmpresa, o.Titulo, o.Descripcion, o.Ubicacion, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos,
-                  o.Fecha_Cierre, o.IDUsuario_Publicador, o.IDProvincia, o.Estado_Publicacion }, tx);
-        conexion.Execute(@"IF NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = @Puesto) INSERT INTO Puesto (Nombre, IDSector) VALUES (@Puesto, @IDSector);
-                           UPDATE Puesto SET IDSector = @IDSector WHERE Nombre = @Puesto AND IDSector IS NULL;
-                           INSERT INTO OfertaPuesto (IDOfertaLaboral, IDPuesto) SELECT @ID, ID FROM Puesto WHERE Nombre = @Puesto;",
-            new { ID = id, o.Puesto, o.IDSector }, tx);
-        tx.Commit();
-        return id;
-    }
-
-    public static bool CerrarOferta(int idOferta, int idPublicador)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute(@"UPDATE OfertaLaboral SET Fecha_Cierre = CAST(GETDATE() AS DATE)
-                                  WHERE ID = @ID AND IDUsuario_Publicador = @Publicador
-                                    AND (Fecha_Cierre IS NULL OR Fecha_Cierre >= CAST(GETDATE() AS DATE))",
-            new { ID = idOferta, Publicador = idPublicador }) > 0;
-    }
-
-    public static bool EliminarOferta(int idOferta, int idPublicador)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var esSuya = conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM OfertaLaboral WHERE ID = @ID AND IDUsuario_Publicador = @Publicador",
-            new { ID = idOferta, Publicador = idPublicador }, tx) > 0;
-        if (esSuya)
+    public static int CrearOferta(OfertaNueva o) =>
+        Valor<int>("CrearOferta", new
         {
-            conexion.Execute(@"DELETE FROM Postulacion WHERE IDOfertaLaboral = @ID;
-                               DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito WHERE fo.IDOfertaLaboral = @ID;
-                               DELETE FROM OfertaLaboral WHERE ID = @ID;", new { ID = idOferta }, tx);
-        }
-        tx.Commit();
-        return esSuya;
-    }
+            o.IDUsuario_Publicador,
+            o.IDEmpresa,
+            o.EmpresaNombre,
+            o.Titulo,
+            o.Puesto,
+            o.IDSector,
+            o.Descripcion,
+            o.Ubicacion,
+            o.IDProvincia,
+            o.Modalidad,
+            o.Tipo_Contrato,
+            o.Salario,
+            o.Cantidad_Puestos,
+            o.Fecha_Cierre,
+            o.Estado_Publicacion
+        });
 
-    public static List<Oferta> ObtenerOfertasPendientes()
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Oferta>($"{SelectOferta} WHERE o.Estado_Publicacion = N'Pendiente' ORDER BY o.Fecha_Publicacion, o.ID",
-            new { IDUsuarioActual = 0 }).ToList();
-    }
+    public static bool CerrarOferta(int idOferta, int idPublicador) =>
+        Cambio("CerrarOferta", new { ID = idOferta, IDPublicador = idPublicador });
 
-    public static List<Oferta> ObtenerOfertasRevisadas(int cantidad)
-    {
-        using var conexion = Conectar();
-        return conexion.Query<Oferta>($@"SELECT TOP (@Cantidad) * FROM ({SelectOferta}
-                                          WHERE o.Estado_Publicacion <> N'Pendiente' AND o.Fecha_Revision IS NOT NULL) x
-                                          ORDER BY x.ID DESC",
-            new { IDUsuarioActual = 0, Cantidad = cantidad }).ToList();
-    }
+    public static bool EliminarOferta(int idOferta, int idPublicador) =>
+        Valor<bool>("EliminarOferta", new { ID = idOferta, IDPublicador = idPublicador });
 
-    public static int ContarOfertasPendientes()
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM OfertaLaboral WHERE Estado_Publicacion = N'Pendiente'");
-    }
+    public static List<Oferta> ObtenerOfertasPendientes() => Lista<Oferta>("ObtenerOfertasPendientes");
 
-    public static bool RevisarOferta(int idOferta, bool aprobada, string? motivo)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute(@"UPDATE OfertaLaboral SET Estado_Publicacion = @Estado, Motivo_Rechazo = @Motivo,
-                                      Fecha_Revision = CAST(GETDATE() AS DATE),
-                                      Fecha_Publicacion = CASE WHEN @Estado = N'Aprobada' THEN CAST(GETDATE() AS DATE) ELSE Fecha_Publicacion END
-                                  WHERE ID = @ID AND Estado_Publicacion = N'Pendiente'",
-            new { ID = idOferta, Estado = aprobada ? "Aprobada" : "Rechazada", Motivo = aprobada ? null : motivo }) > 0;
-    }
+    public static List<Oferta> ObtenerOfertasRevisadas(int cantidad) =>
+        Lista<Oferta>("ObtenerOfertasRevisadas", new { Cantidad = cantidad });
+
+    public static int ContarOfertasPendientes() => Valor<int>("ContarOfertasPendientes");
+
+    public static bool RevisarOferta(int idOferta, bool aprobada, string? motivo) =>
+        Cambio("RevisarOferta", new { ID = idOferta, Aprobada = aprobada, Motivo = motivo });
 
     public static List<Oferta> GuardarOfertasExternas(List<OfertaExternaDatos> ofertas)
     {
@@ -797,48 +406,39 @@ public static class BD
             return new List<Oferta>();
         }
 
+        var guardadas = new Dictionary<string, Oferta>();
         using var conexion = Conectar();
         conexion.Open();
         using var tx = conexion.BeginTransaction();
         foreach (var o in ofertas)
         {
-            conexion.Execute(@"
-                IF EXISTS (SELECT 1 FROM OfertaExterna WHERE ID_Externo = @ID_Externo)
-                    UPDATE OfertaExterna SET Titulo = @Titulo, Empresa = @Empresa, Logo = @Logo, Ubicacion = @Ubicacion,
-                        Descripcion = @Descripcion, Es_Remoto = @Es_Remoto, Tipo_Contrato = @Tipo_Contrato, Salario = @Salario,
-                        Link_Postulacion = @Link_Postulacion, Publicador = @Publicador, Fecha_Publicacion = @Fecha_Publicacion,
-                        Fecha_Consulta = SYSUTCDATETIME()
-                    WHERE ID_Externo = @ID_Externo;
-                ELSE
-                    INSERT INTO OfertaExterna (ID_Externo, Titulo, Empresa, Logo, Ubicacion, Descripcion, Es_Remoto, Tipo_Contrato,
-                                               Salario, Link_Postulacion, Publicador, Fecha_Publicacion)
-                    VALUES (@ID_Externo, @Titulo, @Empresa, @Logo, @Ubicacion, @Descripcion, @Es_Remoto, @Tipo_Contrato,
-                            @Salario, @Link_Postulacion, @Publicador, @Fecha_Publicacion);", o, tx);
+            var guardada = conexion.QueryFirstOrDefault<Oferta>("GuardarOfertaExterna", new
+            {
+                o.ID_Externo,
+                o.Titulo,
+                o.Empresa,
+                o.Logo,
+                o.Ubicacion,
+                o.Descripcion,
+                o.Es_Remoto,
+                o.Tipo_Contrato,
+                o.Salario,
+                o.Link_Postulacion,
+                o.Publicador,
+                o.Fecha_Publicacion
+            }, tx, commandType: SP);
+            if (guardada != null)
+            {
+                guardadas[o.ID_Externo] = guardada;
+            }
         }
         tx.Commit();
 
-        var guardadas = conexion.Query<Oferta>($"{SelectExterna} WHERE x.ID_Externo IN @IDs",
-            new { IDs = ofertas.Select(o => o.ID_Externo).ToList(), IDUsuarioActual = 0 })
-            .ToDictionary(g => g.ID_Externo!);
         return ofertas.Select(o => o.ID_Externo).Distinct().Where(guardadas.ContainsKey).Select(id => guardadas[id]).ToList();
     }
 
-    private const string SelectExterna = @"
-        SELECT CAST(1 AS BIT) AS EsExterna, x.ID, x.ID_Externo, x.Titulo, ISNULL(x.Empresa, N'Empresa sin nombre') AS Empresa, x.Logo, x.Ubicacion,
-               CASE WHEN x.Es_Remoto = 1 THEN N'Remoto' ELSE NULL END AS Modalidad, x.Tipo_Contrato, x.Salario AS SalarioTexto,
-               x.Descripcion, x.Fecha_Publicacion, x.Link_Postulacion, x.Publicador,
-               CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
-               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                                 WHERE fo.IDOfertaExterna = x.ID AND f.IDUsuario = @IDUsuarioActual)
-                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
-        FROM OfertaExterna x";
-
-    public static Oferta? ObtenerOfertaExterna(int id, int idUsuarioActual)
-    {
-        using var conexion = Conectar();
-        return conexion.QueryFirstOrDefault<Oferta>($"{SelectExterna} WHERE x.ID = @ID", new { ID = id, IDUsuarioActual = idUsuarioActual });
-    }
+    public static Oferta? ObtenerOfertaExterna(int id, int idUsuarioActual) =>
+        Uno<Oferta>("ObtenerOfertaExterna", new { ID = id, IDUsuarioActual = idUsuarioActual });
 
     public static void MarcarPostuladas(List<Oferta> ofertas, int idUsuario)
     {
@@ -847,167 +447,62 @@ public static class BD
         {
             return;
         }
-        using var conexion = Conectar();
-        var postuladas = conexion.Query<int>("SELECT IDOfertaExterna FROM Postulacion WHERE IDUsuario = @ID AND IDOfertaExterna IN @IDs",
-            new { ID = idUsuario, IDs = externas }).ToHashSet();
-        var guardadas = conexion.Query<int>(@"SELECT fo.IDOfertaExterna FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                                              WHERE f.IDUsuario = @ID AND fo.IDOfertaExterna IN @IDs",
-            new { ID = idUsuario, IDs = externas }).ToHashSet();
+        var marcas = Lista<(int ID, bool YaPostulado, bool Guardada)>("ObtenerMarcasExternas",
+            new { IDUsuario = idUsuario, IDs = string.Join(",", externas) }).ToDictionary(m => m.ID);
         foreach (var oferta in ofertas.Where(o => o.EsExterna))
         {
-            oferta.YaPostulado = postuladas.Contains(oferta.ID);
-            oferta.Guardada = guardadas.Contains(oferta.ID);
+            var marca = marcas.GetValueOrDefault(oferta.ID);
+            oferta.YaPostulado = marca.YaPostulado;
+            oferta.Guardada = marca.Guardada;
         }
     }
 
-    public static bool GuardarOferta(int idUsuario, int idOferta, bool esExterna)
-    {
-        using var conexion = Conectar();
-        conexion.Open();
-        using var tx = conexion.BeginTransaction();
-        var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
-        var existe = esExterna
-            ? "EXISTS (SELECT 1 FROM OfertaExterna WHERE ID = @IDOferta)"
-            : "EXISTS (SELECT 1 FROM OfertaLaboral WHERE ID = @IDOferta AND Estado_Publicacion = N'Aprobada')";
-        var puede = conexion.ExecuteScalar<int>($@"
-            SELECT CASE WHEN {existe}
-                         AND NOT EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                                         WHERE f.IDUsuario = @IDUsuario AND fo.{columna} = @IDOferta)
-                        THEN 1 ELSE 0 END", new { IDUsuario = idUsuario, IDOferta = idOferta }, tx) == 1;
-        if (puede)
-        {
-            conexion.Execute($@"
-                INSERT INTO Favorito (IDUsuario, fecha_guardado) VALUES (@IDUsuario, CAST(GETDATE() AS DATE));
-                INSERT INTO FavoritoOferta (IDFavorito, {columna}) VALUES (SCOPE_IDENTITY(), @IDOferta);",
-                new { IDUsuario = idUsuario, IDOferta = idOferta }, tx);
-        }
-        tx.Commit();
-        return puede;
-    }
+    public static bool GuardarOferta(int idUsuario, int idOferta, bool esExterna) =>
+        Valor<bool>("GuardarOferta", new { IDUsuario = idUsuario, IDOferta = idOferta, EsExterna = esExterna });
 
-    public static bool QuitarGuardada(int idUsuario, int idOferta, bool esExterna)
-    {
-        var columna = esExterna ? "IDOfertaExterna" : "IDOfertaLaboral";
-        using var conexion = Conectar();
-        return conexion.Execute($@"DELETE f FROM Favorito f JOIN FavoritoOferta fo ON fo.IDFavorito = f.ID_favorito
-                                   WHERE f.IDUsuario = @IDUsuario AND fo.{columna} = @IDOferta",
-            new { IDUsuario = idUsuario, IDOferta = idOferta }) > 0;
-    }
+    public static bool QuitarGuardada(int idUsuario, int idOferta, bool esExterna) =>
+        Cambio("QuitarGuardada", new { IDUsuario = idUsuario, IDOferta = idOferta, EsExterna = esExterna });
 
     public static List<Oferta> ObtenerGuardadas(int idUsuario)
     {
-        var sql = $@"
-            SELECT * FROM (
-                SELECT w.*, CAST(f.fecha_guardado AS DATETIME2) AS Fecha_Guardado, f.ID_favorito AS IDFavorito
-                FROM ({SelectOferta}) w
-                JOIN FavoritoOferta fo ON fo.IDOfertaLaboral = w.ID
-                JOIN Favorito f ON f.ID_favorito = fo.IDFavorito AND f.IDUsuario = @IDUsuarioActual
-            ) x
-            ORDER BY x.IDFavorito DESC;
-            SELECT e.*, CAST(f.fecha_guardado AS DATETIME2) AS Fecha_Guardado, f.ID_favorito AS IDFavorito
-            FROM ({SelectExterna}) e
-            JOIN FavoritoOferta fo ON fo.IDOfertaExterna = e.ID
-            JOIN Favorito f ON f.ID_favorito = fo.IDFavorito AND f.IDUsuario = @IDUsuarioActual
-            ORDER BY f.ID_favorito DESC;";
         using var conexion = Conectar();
-        using var lectura = conexion.QueryMultiple(sql, new { IDUsuarioActual = idUsuario });
+        using var lectura = conexion.QueryMultiple("ObtenerGuardadas", new { IDUsuario = idUsuario }, commandType: SP);
         var workly = lectura.Read<Oferta>().ToList();
         var externas = lectura.Read<Oferta>().ToList();
         return workly.Concat(externas).OrderByDescending(o => o.IDFavorito).ToList();
     }
 
-    public static int ContarGuardadas(int idUsuario)
-    {
-        using var conexion = Conectar();
-        return conexion.ExecuteScalar<int>("SELECT COUNT(*) FROM Favorito WHERE IDUsuario = @ID", new { ID = idUsuario });
-    }
+    public static int ContarGuardadas(int idUsuario) =>
+        Valor<int>("ContarGuardadas", new { IDUsuario = idUsuario });
 
-    public static bool Postular(int idUsuario, int idOferta)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute(@"INSERT INTO Postulacion (IDUsuario, IDOfertaLaboral, Fecha, Estado)
-                                  SELECT @IDUsuario, @IDOferta, CAST(GETDATE() AS DATE), N'Enviada'
-                                  WHERE NOT EXISTS (SELECT 1 FROM Postulacion WHERE IDUsuario = @IDUsuario AND IDOfertaLaboral = @IDOferta)",
-            new { IDUsuario = idUsuario, IDOferta = idOferta }) > 0;
-    }
+    public static bool Postular(int idUsuario, int idOferta) =>
+        Cambio("Postular", new { IDUsuario = idUsuario, IDOferta = idOferta });
 
-    public static bool RegistrarPostulacionExterna(int idUsuario, int idOfertaExterna)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute(@"INSERT INTO Postulacion (IDUsuario, IDOfertaExterna, Fecha, Estado)
-                                  SELECT @IDUsuario, @IDOferta, CAST(GETDATE() AS DATE), N'Enviada'
-                                  WHERE EXISTS (SELECT 1 FROM OfertaExterna WHERE ID = @IDOferta)
-                                    AND NOT EXISTS (SELECT 1 FROM Postulacion WHERE IDUsuario = @IDUsuario AND IDOfertaExterna = @IDOferta)",
-            new { IDUsuario = idUsuario, IDOferta = idOfertaExterna }) > 0;
-    }
+    public static bool RegistrarPostulacionExterna(int idUsuario, int idOfertaExterna) =>
+        Cambio("RegistrarPostulacionExterna", new { IDUsuario = idUsuario, IDOferta = idOfertaExterna });
 
-    public static List<PostulacionItem> ObtenerPostulaciones(int idUsuario)
-    {
-        const string sql = @"
-            SELECT po.ID, po.Estado, CAST(po.Fecha AS DATETIME2) AS Fecha, po.IDOfertaLaboral, po.IDOfertaExterna,
-                   COALESCE(o.Titulo, x.Titulo) AS Titulo,
-                   COALESCE(e.Nombre, x.Empresa, N'Empresa sin nombre') AS Empresa,
-                   COALESCE(o.Ubicacion, pr.Nombre, x.Ubicacion) AS Ubicacion,
-                   CASE WHEN x.ID IS NULL THEN N'Workly' ELSE x.Publicador END AS Publicador,
-                   x.Link_Postulacion
-            FROM Postulacion po
-            LEFT JOIN OfertaLaboral o ON o.ID = po.IDOfertaLaboral
-            LEFT JOIN Empresa e ON e.ID = o.IDEmpresa
-            LEFT JOIN Provincia pr ON pr.ID = o.IDProvincia
-            LEFT JOIN OfertaExterna x ON x.ID = po.IDOfertaExterna
-            WHERE po.IDUsuario = @ID
-            ORDER BY po.Fecha DESC, po.ID DESC";
-        using var conexion = Conectar();
-        return conexion.Query<PostulacionItem>(sql, new { ID = idUsuario }).ToList();
-    }
+    public static List<PostulacionItem> ObtenerPostulaciones(int idUsuario) =>
+        Lista<PostulacionItem>("ObtenerPostulaciones", new { IDUsuario = idUsuario });
 
-    public static bool CambiarEstadoPostulacion(int idUsuario, int idPostulacion, string estado)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute("UPDATE Postulacion SET Estado = @Estado WHERE ID = @ID AND IDUsuario = @IDUsuario",
-            new { ID = idPostulacion, IDUsuario = idUsuario, Estado = estado }) > 0;
-    }
+    public static bool CambiarEstadoPostulacion(int idUsuario, int idPostulacion, string estado) =>
+        Cambio("CambiarEstadoPostulacion", new { IDUsuario = idUsuario, ID = idPostulacion, Estado = estado });
 
-    public static bool EliminarPostulacion(int idUsuario, int idPostulacion)
-    {
-        using var conexion = Conectar();
-        return conexion.Execute("DELETE FROM Postulacion WHERE ID = @ID AND IDUsuario = @IDUsuario",
-            new { ID = idPostulacion, IDUsuario = idUsuario }) > 0;
-    }
+    public static bool EliminarPostulacion(int idUsuario, int idPostulacion) =>
+        Cambio("EliminarPostulacion", new { IDUsuario = idUsuario, ID = idPostulacion });
 
     public static Dictionary<string, int> ContarPostulacionesPorEstado(int idUsuario)
     {
-        using var conexion = Conectar();
-        var cuentas = conexion.Query<(string Estado, int Cantidad)>("SELECT Estado, COUNT(*) FROM Postulacion WHERE IDUsuario = @ID GROUP BY Estado",
-            new { ID = idUsuario }).ToDictionary(c => c.Estado, c => c.Cantidad);
+        var cuentas = Lista<(string Estado, int Cantidad)>("ContarPostulacionesPorEstado", new { IDUsuario = idUsuario })
+            .ToDictionary(c => c.Estado, c => c.Cantidad);
         return Catalogos.EstadosPostulacion.ToDictionary(e => e.Estado, e => cuentas.GetValueOrDefault(e.Estado));
     }
 
-    public static List<Postulante> ObtenerPostulantes(int idOferta)
-    {
-        const string sql = @"
-            SELECT po.ID AS IDPostulacion, u.ID AS IDUsuario, CAST(po.Fecha AS DATETIME2) AS Fecha, u.Nombre, u.Apellido, u.Email,
-                   pe.Telefono, pe.Foto, pr.Nombre AS Provincia, pe.Estado_Busqueda, pf.Puesto_Buscado, cv.Nombre_Archivo
-            FROM Postulacion po
-            JOIN Usuario u ON u.ID = po.IDUsuario
-            LEFT JOIN Perfil pe ON pe.IDUsuario = u.ID
-            LEFT JOIN Provincia pr ON pr.ID = pe.IDProvincia
-            LEFT JOIN Preferencia pf ON pf.IDUsuario = u.ID
-            LEFT JOIN CV cv ON cv.IDUsuario = u.ID
-            WHERE po.IDOfertaLaboral = @ID
-            ORDER BY po.Fecha DESC, po.ID DESC";
-        using var conexion = Conectar();
-        return conexion.Query<Postulante>(sql, new { ID = idOferta }).ToList();
-    }
+    public static List<Postulante> ObtenerPostulantes(int idOferta) =>
+        Lista<Postulante>("ObtenerPostulantes", new { IDOferta = idOferta });
 
     public static (int IDUsuario, int IDOferta)? ObtenerPostulacionDePublicador(int idPostulacion, int idPublicador)
     {
-        using var conexion = Conectar();
-        var filas = conexion.Query<(int IDUsuario, int IDOferta)>(@"
-            SELECT po.IDUsuario, o.ID FROM Postulacion po
-            JOIN OfertaLaboral o ON o.ID = po.IDOfertaLaboral
-            WHERE po.ID = @ID AND o.IDUsuario_Publicador = @Publicador",
-            new { ID = idPostulacion, Publicador = idPublicador }).ToList();
+        var filas = Lista<(int IDUsuario, int IDOferta)>("ObtenerPostulacionDePublicador", new { ID = idPostulacion, IDPublicador = idPublicador });
         return filas.Count == 0 ? null : filas[0];
     }
 }
