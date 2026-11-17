@@ -91,6 +91,42 @@ public static class Archivos
 
     public static string CarpetaCV(string carpetaRaiz) => Path.Combine(carpetaRaiz, "ArchivosPrivados", "cv");
 
+    public static Descarga? DescargaCV(CV? cv, string carpetaRaiz)
+    {
+        if (string.IsNullOrEmpty(cv?.Nombre_Archivo) || cv.Nombre_Archivo != Path.GetFileName(cv.Nombre_Archivo))
+        {
+            return null;
+        }
+        var ruta = Path.Combine(CarpetaCV(carpetaRaiz), cv.Nombre_Archivo);
+        if (!File.Exists(ruta))
+        {
+            return null;
+        }
+        var extension = Path.GetExtension(ruta).ToLowerInvariant();
+        return new Descarga
+        {
+            Ruta = ruta,
+            Tipo = extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                _ => "application/octet-stream"
+            },
+            Nombre = cv.NombreOriginal ?? "CV" + extension
+        };
+    }
+
+    public static void BorrarCV(string? nombre, string carpetaRaiz)
+    {
+        if (!string.IsNullOrEmpty(nombre) && nombre == Path.GetFileName(nombre))
+        {
+            Borrar(Path.Combine(CarpetaCV(carpetaRaiz), nombre));
+        }
+    }
+
+    public static void BorrarImagen(string? rutaPublica, string carpetaWwwroot) => Borrar(RutaImagen(rutaPublica, carpetaWwwroot));
+
     public static void Borrar(string? rutaCompleta)
     {
         if (!string.IsNullOrEmpty(rutaCompleta) && File.Exists(rutaCompleta))

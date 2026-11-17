@@ -279,5 +279,6 @@ __pycache__/
 wwwroot/uploads/
 ArchivosPrivados/
 
-# No se suben archivos Markdown al repositorio
+# No se suben archivos Markdown al repositorio, salvo el README
 *.md
+!README.md
