@@ -37,6 +37,42 @@ public class Correo
         return UsaResend ? await EnviarPorResend(destino, asunto, texto) : await EnviarPorSmtp(destino, asunto, texto);
     }
 
+    public Task<bool> EnviarRecuperacion(Usuario usuario, string enlace) =>
+        Enviar(usuario.Email, "Workly: creá una contraseña nueva",
+            $"Hola, {usuario.Nombre}.\n\n" +
+            "Pediste crear una contraseña nueva para tu cuenta de Workly. Entrá a este link para elegirla:\n\n" +
+            $"{enlace}\n\n" +
+            "El link sirve una sola vez y vence en 1 hora. Si no lo pediste vos, ignorá este mail: tu contraseña no cambia.\n\n" +
+            "Workly");
+
+    public async Task<bool> EnviarCodigo(string email, string nombre, string codigo, bool esDesarrollo)
+    {
+        if (!Configurado && esDesarrollo)
+        {
+            _logger.LogWarning("El mail no está configurado. Código de verificación para {Email}: {Codigo}", email, codigo);
+            return true;
+        }
+        return await Enviar(email, $"{codigo} es tu código de Workly",
+            $"Hola, {nombre}.\n\n" +
+            $"Tu código para terminar de crear tu cuenta en Workly es:\n\n{codigo}\n\n" +
+            $"Vence en {VerificacionEmail.Vigencia.TotalMinutes:0} minutos. Si no estás creando una cuenta en Workly, ignorá este mail.\n\n" +
+            "Workly");
+    }
+
+    public async Task<bool> EnviarRechazo(Usuario publicador, Oferta oferta, string motivo, string? enlace)
+    {
+        if (!Configurado)
+        {
+            return false;
+        }
+        return await Enviar(publicador.Email, $"Workly: tu búsqueda \"{oferta.Titulo}\" no se publicó",
+            $"Hola, {publicador.Nombre}.\n\n" +
+            $"Revisamos tu búsqueda \"{oferta.Titulo}\" y no la pudimos publicar. Este es el motivo:\n\n" +
+            $"{motivo}\n\n" +
+            $"Podés verla en Mis publicaciones y publicar una nueva con los cambios: {enlace}\n\n" +
+            "Workly");
+    }
+
     private async Task<bool> EnviarPorResend(string destino, string asunto, string texto)
     {
         try

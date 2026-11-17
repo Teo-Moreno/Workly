@@ -32,17 +32,17 @@ public class ModeracionController : Controller
 
     public IActionResult Revisar(int id)
     {
-        var oferta = BD.ObtenerOferta(id, 0);
-        if (oferta == null)
+        var detalle = Empleos.ParaRevisar(id);
+        if (detalle == null)
         {
             return NotFound();
         }
-        ViewBag.Oferta = oferta;
-        ViewBag.Empresa = oferta.IDEmpresa.HasValue ? BD.ObtenerEmpresa(oferta.IDEmpresa.Value) : null;
-        ViewBag.EsPropia = false;
-        ViewBag.EsRevision = true;
-        ViewBag.PuedePostular = false;
-        ViewBag.TieneCV = false;
+        ViewBag.Oferta = detalle.Oferta;
+        ViewBag.Empresa = detalle.Empresa;
+        ViewBag.EsPropia = detalle.EsPropia;
+        ViewBag.EsRevision = detalle.EsRevision;
+        ViewBag.PuedePostular = detalle.PuedePostular;
+        ViewBag.TieneCV = detalle.TieneCV;
         return View("~/Views/Empleos/Detalle.cshtml");
     }
 
@@ -50,9 +50,7 @@ public class ModeracionController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Aceptar(int id)
     {
-        TempData["Mensaje"] = BD.RevisarOferta(id, true, null)
-            ? "Aceptaste la búsqueda: ya está publicada."
-            : "Esa búsqueda ya estaba revisada.";
+        TempData["Mensaje"] = Moderacion.Aceptar(id);
         return RedirectToAction(nameof(Index));
     }
 
@@ -60,35 +58,13 @@ public class ModeracionController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Rechazar(int id, string? motivo)
     {
-        var texto = (motivo ?? "").Replace("\r\n", "\n").Trim();
-        if (texto.Length is < 10 or > 500)
+        var resultado = await Moderacion.Rechazar(id, motivo, Url.Action("Index", "Publicaciones", null, Request.Scheme), _correo);
+        TempData["Mensaje"] = resultado.Mensaje;
+        if (!resultado.Exito)
         {
-            TempData["Mensaje"] = "Escribí el motivo del rechazo (entre 10 y 500 caracteres): se lo vamos a mostrar a quien la publicó.";
-            TempData["MensajeTipo"] = "error";
+            TempData["MensajeTipo"] = resultado.Tipo;
             return RedirectToAction(nameof(Revisar), new { id });
         }
-        if (!BD.RevisarOferta(id, false, texto))
-        {
-            TempData["Mensaje"] = "Esa búsqueda ya estaba revisada.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var oferta = BD.ObtenerOferta(id, 0);
-        var publicador = oferta?.IDUsuario_Publicador is int idPublicador ? BD.ObtenerUsuarioPorId(idPublicador) : null;
-        var mandado = false;
-        if (oferta != null && publicador != null && _correo.Configurado)
-        {
-            var enlace = Url.Action("Index", "Publicaciones", null, Request.Scheme);
-            mandado = await _correo.Enviar(publicador.Email, $"Workly: tu búsqueda \"{oferta.Titulo}\" no se publicó",
-                $"Hola, {publicador.Nombre}.\n\n" +
-                $"Revisamos tu búsqueda \"{oferta.Titulo}\" y no la pudimos publicar. Este es el motivo:\n\n" +
-                $"{texto}\n\n" +
-                $"Podés verla en Mis publicaciones y publicar una nueva con los cambios: {enlace}\n\n" +
-                "Workly");
-        }
-        TempData["Mensaje"] = mandado
-            ? "Rechazaste la búsqueda. Le mandamos un mail con el motivo a quien la publicó, y también lo ve en Mis publicaciones."
-            : "Rechazaste la búsqueda. Quien la publicó va a ver el motivo en Mis publicaciones.";
         return RedirectToAction(nameof(Index));
     }
 }

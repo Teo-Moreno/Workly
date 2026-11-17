@@ -128,6 +128,16 @@ public class RegistroEmpresaViewModel : RegistroBase
     public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
 
     public static readonly string[] Pasos = { "Quién la maneja", "La empresa" };
+
+    public void CargarListas()
+    {
+        Paises = BD.ObtenerPaises();
+        Provincias = BD.ObtenerProvincias();
+        if (IDPais == null && Paises.Count == 1)
+        {
+            IDPais = Paises[0].ID;
+        }
+    }
 }
 
 public class CompletarPerfilViewModel
