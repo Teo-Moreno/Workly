@@ -9,11 +9,11 @@ namespace Workly.Controllers;
 [Authorize]
 public class PerfilController : Controller
 {
-    private readonly IWebHostEnvironment _entorno;
+    private readonly Carpetas _carpetas;
 
     public PerfilController(IWebHostEnvironment entorno)
     {
-        _entorno = entorno;
+        _carpetas = Carpetas.Desde(entorno);
     }
 
     public async Task<IActionResult> Index()
@@ -23,186 +23,98 @@ public class PerfilController : Controller
             var empresa = BD.ObtenerEmpresaDeUsuario(User.IdUsuario());
             return empresa == null ? await SesionInvalida() : RedirectToAction("Detalle", "Empresas", new { id = empresa.ID });
         }
-        var modelo = ObtenerMiPerfil();
+        var modelo = Perfiles.PerfilParaMostrar(User.IdUsuario(), User.Email());
         if (modelo == null)
         {
             return await SesionInvalida();
         }
-        modelo.Instituciones = BD.ObtenerInstituciones();
         ViewBag.Perfil = modelo;
         return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult GuardarSobreMi(string? descripcion)
-    {
-        var texto = (descripcion ?? "").Replace("\r\n", "\n").Trim();
-        if (texto.Length > 500)
-        {
-            return Volver("Usá hasta 500 caracteres en \"Sobre mí\".", "error");
-        }
-        BD.ActualizarDescripcion(User.IdUsuario(), texto.Length == 0 ? null : texto);
-        return Volver(texto.Length == 0 ? "Borramos el texto de \"Sobre mí\"." : "Guardamos tu \"Sobre mí\".");
-    }
+    public IActionResult GuardarSobreMi(string? descripcion) =>
+        Volver(Perfiles.GuardarSobreMi(User.IdUsuario(), descripcion));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult GuardarEstado(string? estado)
-    {
-        if (estado != null && !Catalogos.EstadosBusqueda.Contains(estado))
-        {
-            return Volver("Elegí una opción de la lista.", "error");
-        }
-        BD.ActualizarEstadoBusqueda(User.IdUsuario(), estado);
-        return Volver("Actualizamos tu estado de búsqueda.");
-    }
+    public IActionResult GuardarEstado(string? estado) =>
+        Volver(Perfiles.GuardarEstado(User.IdUsuario(), estado));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(6 * 1024 * 1024)]
     public async Task<IActionResult> SubirFoto(IFormFile? foto, string? volver)
     {
-        if (foto == null || foto.Length == 0)
+        var resultado = await Perfiles.CambiarImagen(User.IdUsuario(), User.EsEmpresa(), foto, _carpetas);
+        if (resultado.Exito)
         {
-            return Volver("Elegí una foto para subir.", "error", volver);
+            await Sesion.Iniciar(HttpContext, User.IdUsuario());
         }
-        var error = Archivos.Validar(foto, Archivos.ExtensionesFoto);
-        if (error != null)
-        {
-            return Volver(error + ".", "error", volver);
-        }
-
-        var ruta = await Archivos.GuardarFoto(foto, _entorno.WebRootPath);
-        if (User.EsEmpresa())
-        {
-            Archivos.Borrar(Archivos.RutaImagen(BD.ActualizarLogo(User.IdUsuario(), ruta), _entorno.WebRootPath));
-        }
-        else
-        {
-            Archivos.Borrar(Archivos.RutaImagen(BD.ActualizarFoto(User.IdUsuario(), ruta), _entorno.WebRootPath));
-        }
-        await Sesion.Iniciar(HttpContext, User.IdUsuario());
-        return Volver(User.EsEmpresa() ? "Actualizamos el logo." : "Actualizamos tu foto de perfil.", "exito", volver);
+        return Volver(resultado, volver);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> QuitarFoto(string? volver)
     {
-        var anterior = User.EsEmpresa() ? BD.ActualizarLogo(User.IdUsuario(), null) : BD.ActualizarFoto(User.IdUsuario(), null);
-        Archivos.Borrar(Archivos.RutaImagen(anterior, _entorno.WebRootPath));
+        var resultado = Perfiles.QuitarImagen(User.IdUsuario(), User.EsEmpresa(), _carpetas);
         await Sesion.Iniciar(HttpContext, User.IdUsuario());
-        return Volver(User.EsEmpresa() ? "Quitamos el logo." : "Quitamos tu foto de perfil.", "exito", volver);
+        return Volver(resultado, volver);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(6 * 1024 * 1024)]
-    public async Task<IActionResult> SubirCV(IFormFile? archivo, string? volver)
-    {
-        if (archivo == null || archivo.Length == 0)
-        {
-            return Volver("Elegí tu CV para subirlo.", "error", volver);
-        }
-        var error = Archivos.Validar(archivo, Archivos.ExtensionesCV);
-        if (error != null)
-        {
-            return Volver(error + ".", "error", volver);
-        }
-        var nombre = await Archivos.GuardarCV(archivo, _entorno.ContentRootPath);
-        BorrarCVViejo(BD.ActualizarArchivoCV(User.IdUsuario(), nombre));
-        return Volver("Subimos tu CV.", "exito", volver);
-    }
+    public async Task<IActionResult> SubirCV(IFormFile? archivo, string? volver) =>
+        Volver(await Perfiles.CambiarCV(User.IdUsuario(), archivo, _carpetas), volver);
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult QuitarCV(string? volver)
-    {
-        BorrarCVViejo(BD.ActualizarArchivoCV(User.IdUsuario(), null));
-        return Volver("Quitamos tu CV.", "exito", volver);
-    }
+    public IActionResult QuitarCV(string? volver) =>
+        Volver(Perfiles.QuitarCV(User.IdUsuario(), _carpetas), volver);
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult AgregarExperiencia(ExperienciaFormulario formulario)
     {
-        formulario.Descripcion = formulario.Descripcion?.Replace("\r\n", "\n");
-        ModelState.Remove(nameof(formulario.Descripcion));
-        if (formulario.Descripcion?.Length > 500)
-        {
-            ModelState.AddModelError(nameof(formulario.Descripcion), "Usá hasta 500 caracteres");
-        }
-        if (!Validaciones.Periodo(formulario.Inicio, formulario.Actual ? null : formulario.Fin, false, out var inicio, out var fin, out var error))
-        {
-            ModelState.AddModelError(error!.Contains("de inicio") ? nameof(formulario.Inicio) : nameof(formulario.Fin), error);
-        }
-        else if (!formulario.Actual && fin == null)
-        {
-            ModelState.AddModelError(nameof(formulario.Fin), "Elegí el mes y el año de finalización, o marcá que trabajás actualmente acá");
-        }
-
-        if (!ModelState.IsValid)
+        if (!Perfiles.AgregarExperiencia(User.IdUsuario(), formulario, ModelState))
         {
             return MostrarPerfilConModal("modal-experiencia", formulario);
         }
-
-        BD.AgregarExperiencia(User.IdUsuario(), new ExperienciaNueva
-        {
-            Puesto = formulario.Puesto.Trim(),
-            Empresa = formulario.Empresa.Trim(),
-            Descripcion = Validaciones.Limpiar(formulario.Descripcion),
-            Inicio = inicio,
-            Fin = formulario.Actual ? null : fin
-        });
-        return Volver("Agregamos la experiencia a tu perfil.");
+        return Volver(Resultado.Bien("Agregamos la experiencia a tu perfil."));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult EliminarExperiencia(int id) =>
-        Volver(BD.EliminarExperiencia(User.IdUsuario(), id) ? "Borramos la experiencia." : "No encontramos esa experiencia.");
+        Volver(Perfiles.EliminarExperiencia(User.IdUsuario(), id));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult AgregarFormacion(FormacionFormulario formulario)
     {
-        if (!Validaciones.Periodo(formulario.Inicio, formulario.EnCurso ? null : formulario.Fin, true, out var inicio, out var fin, out var error))
-        {
-            ModelState.AddModelError(error!.Contains("de inicio") ? nameof(formulario.Inicio) : nameof(formulario.Fin), error);
-        }
-        else if (!formulario.EnCurso && fin == null)
-        {
-            ModelState.AddModelError(nameof(formulario.Fin), "Elegí el mes y el año de finalización, o marcá que la estás cursando");
-        }
-
-        if (!ModelState.IsValid)
+        if (!Perfiles.AgregarFormacion(User.IdUsuario(), formulario, ModelState))
         {
             return MostrarPerfilConModal("modal-formacion", formulario);
         }
-
-        BD.AgregarFormacion(User.IdUsuario(), new FormacionNueva
-        {
-            Titulo = formulario.Titulo.Trim(),
-            Institucion = formulario.Institucion.Trim(),
-            Inicio = inicio,
-            Fin = formulario.EnCurso ? null : fin
-        });
-        return Volver("Agregamos la formación a tu perfil.");
+        return Volver(Resultado.Bien("Agregamos la formación a tu perfil."));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult EliminarFormacion(int id) =>
-        Volver(BD.EliminarFormacion(User.IdUsuario(), id) ? "Borramos la formación." : "No encontramos esa formación.");
+        Volver(Perfiles.EliminarFormacion(User.IdUsuario(), id));
 
     public async Task<IActionResult> DescargarCV()
     {
-        if (!EsUsuarioDeLaSesion(BD.ObtenerUsuarioPorId(User.IdUsuario())))
+        if (!Perfiles.EsUsuarioDeLaSesion(BD.ObtenerUsuarioPorId(User.IdUsuario()), User.Email()))
         {
             return await SesionInvalida();
         }
-        return ArchivoCV(BD.ObtenerCV(User.IdUsuario()));
+        var descarga = Archivos.DescargaCV(BD.ObtenerCV(User.IdUsuario()), _carpetas.Raiz);
+        return descarga == null ? NotFound() : PhysicalFile(descarga.Ruta, descarga.Tipo, descarga.Nombre);
     }
 
     public async Task<IActionResult> Completar()
@@ -211,35 +123,12 @@ public class PerfilController : Controller
         {
             return RedirectToAction(nameof(Index));
         }
-        var perfil = ObtenerMiPerfil();
+        var perfil = Perfiles.MiPerfil(User.IdUsuario(), User.Email());
         if (perfil == null)
         {
             return await SesionInvalida();
         }
-        var p = perfil.Preferencia;
-        var modelo = new CompletarPerfilViewModel
-        {
-            IDPais = perfil.Perfil.IDPais,
-            IDProvincia = perfil.Perfil.IDProvincia,
-            Telefono = Telefonos.ParteLocal(perfil.Perfil.Telefono, perfil.Perfil.Codigo_Telefono),
-            Descripcion = perfil.Perfil.Descripcion,
-            EstadoBusqueda = perfil.Perfil.Estado_Busqueda,
-            PuestoBuscado = p.Puesto_Buscado,
-            Niveles = p.ListaNiveles,
-            Modalidades = p.ListaModalidades,
-            Jornada = p.Jornada,
-            Contratacion = p.Contratacion,
-            IDProvinciaPreferida = p.IDProvincia,
-            SalarioMinimo = p.Salario_Minimo,
-            SalarioMaximo = p.Salario_Maximo,
-            Disponibilidad = p.Disponibilidad,
-            Habilidades = perfil.Habilidades,
-            IdiomaIds = perfil.Idiomas.Select(i => i.IDIdioma).ToList(),
-            IdiomaNiveles = perfil.Idiomas.Select(i => i.Nivel).ToList(),
-            SitioWeb = perfil.CV?.Sitio_Web
-        };
-        CargarCompletar(modelo, perfil);
-        ViewBag.Completar = modelo;
+        ViewBag.Completar = Perfiles.FormularioCompletar(perfil);
         return View();
     }
 
@@ -252,82 +141,27 @@ public class PerfilController : Controller
         {
             return RedirectToAction(nameof(Index));
         }
-        var perfil = ObtenerMiPerfil();
+        var perfil = Perfiles.MiPerfil(User.IdUsuario(), User.Email());
         if (perfil == null)
         {
             return await SesionInvalida();
         }
-        CargarCompletar(modelo, perfil);
-
-        modelo.Descripcion = modelo.Descripcion?.Replace("\r\n", "\n");
-        ModelState.Remove(nameof(modelo.Descripcion));
-        if (modelo.Descripcion?.Length > 500)
-        {
-            ModelState.AddModelError(nameof(modelo.Descripcion), "Usá hasta 500 caracteres");
-        }
-        var provincia = modelo.Provincias.FirstOrDefault(pr => pr.ID == modelo.IDProvincia);
-        if (modelo.IDProvincia != null && (provincia == null || provincia.IDPais != modelo.IDPais))
-        {
-            ModelState.AddModelError(nameof(modelo.IDProvincia), "Elegí una provincia de la lista");
-            provincia = null;
-        }
-        var telefono = Validaciones.Telefono(modelo.Telefono, modelo.Paises.FirstOrDefault(pa => pa.ID == modelo.IDPais), nameof(modelo.Telefono), ModelState);
-        if (modelo.EstadoBusqueda != null && !Catalogos.EstadosBusqueda.Contains(modelo.EstadoBusqueda))
-        {
-            ModelState.AddModelError(nameof(modelo.EstadoBusqueda), "Elegí una opción de la lista");
-        }
-        var preferencia = Validaciones.Preferencia(modelo.PuestoBuscado, modelo.Niveles, modelo.Modalidades, modelo.Jornada, modelo.Contratacion,
-                                                   modelo.IDProvinciaPreferida, modelo.SalarioMinimo, modelo.SalarioMaximo, modelo.Disponibilidad,
-                                                   modelo.Provincias, nameof(modelo.SalarioMaximo), ModelState);
-        var habilidades = Validaciones.Habilidades(modelo.Habilidades, nameof(modelo.Habilidades), ModelState);
-        var idiomas = Validaciones.Idiomas(modelo.IdiomaIds, modelo.IdiomaNiveles, modelo.CatalogoIdiomas, "Idiomas", ModelState);
-        var experiencias = ArmarExperiencias(modelo);
-        var formaciones = ArmarFormaciones(modelo);
-        if (Archivos.Validar(modelo.Foto, Archivos.ExtensionesFoto) is { } errorFoto)
-        {
-            ModelState.AddModelError(nameof(modelo.Foto), errorFoto);
-        }
-        if (Archivos.Validar(modelo.ArchivoCV, Archivos.ExtensionesCV) is { } errorCV)
-        {
-            ModelState.AddModelError(nameof(modelo.ArchivoCV), errorCV);
-        }
-        if (!ModelState.IsValid)
+        if (!await Perfiles.Completar(User.IdUsuario(), modelo, perfil, ModelState, _carpetas))
         {
             ViewBag.Completar = modelo;
             return View();
         }
-
-        var rutaFoto = await Archivos.GuardarFoto(modelo.Foto, _entorno.WebRootPath);
-        var nombreCV = await Archivos.GuardarCV(modelo.ArchivoCV, _entorno.ContentRootPath);
-        var (fotoAnterior, cvAnterior) = BD.CompletarPerfil(User.IdUsuario(), new PerfilCompletado
-        {
-            IDProvincia = provincia?.ID,
-            Telefono = telefono,
-            Descripcion = Validaciones.Limpiar(modelo.Descripcion),
-            EstadoBusqueda = modelo.EstadoBusqueda,
-            Foto = rutaFoto,
-            ArchivoCV = nombreCV,
-            SitioWeb = Validaciones.Limpiar(modelo.SitioWeb),
-            Preferencia = preferencia,
-            Habilidades = habilidades,
-            Idiomas = idiomas,
-            Experiencias = experiencias,
-            Formaciones = formaciones
-        });
-        if (rutaFoto != null) Archivos.Borrar(Archivos.RutaImagen(fotoAnterior, _entorno.WebRootPath));
-        if (nombreCV != null) BorrarCVViejo(cvAnterior);
-        return Volver("Guardamos tu perfil.");
+        return Volver(Resultado.Bien("Guardamos tu perfil."));
     }
 
     public async Task<IActionResult> Configuracion()
     {
-        var modelo = ObtenerMiPerfil();
+        var modelo = Perfiles.MiPerfil(User.IdUsuario(), User.Email());
         if (modelo == null)
         {
             return await SesionInvalida();
         }
-        CargarConfiguracion(modelo);
-        PrepararConfiguracion(modelo, Request.Query["pestana"].ToString(), null);
+        MostrarConfiguracion(Perfiles.Configuracion(modelo, Request.Query["pestana"].ToString(), null));
         return View();
     }
 
@@ -336,49 +170,11 @@ public class PerfilController : Controller
     [RequestSizeLimit(12 * 1024 * 1024)]
     public async Task<IActionResult> GuardarCuenta(CuentaFormulario formulario)
     {
-        var id = User.IdUsuario();
-        var paises = BD.ObtenerPaises();
-        var provincias = BD.ObtenerProvincias();
-        formulario.Email = (formulario.Email ?? "").Trim().ToLowerInvariant();
-
-        var provincia = provincias.FirstOrDefault(p => p.ID == formulario.IDProvincia);
-        if (formulario.IDProvincia != null && (provincia == null || provincia.IDPais != formulario.IDPais))
-        {
-            ModelState.AddModelError(nameof(formulario.IDProvincia), "Elegí una provincia de la lista");
-        }
-        var telefono = Validaciones.Telefono(formulario.Telefono, paises.FirstOrDefault(p => p.ID == formulario.IDPais), nameof(formulario.Telefono), ModelState);
-        if (ModelState[nameof(formulario.Email)]?.Errors.Count is null or 0 && BD.ExisteEmail(formulario.Email, id))
-        {
-            ModelState.AddModelError(nameof(formulario.Email), "Ya hay otra cuenta con ese email");
-        }
-        if (Archivos.Validar(formulario.Foto, Archivos.ExtensionesFoto) is { } errorFoto)
-        {
-            ModelState.AddModelError(nameof(formulario.Foto), errorFoto);
-        }
-        if (Archivos.Validar(formulario.ArchivoCV, Archivos.ExtensionesCV) is { } errorCV)
-        {
-            ModelState.AddModelError(nameof(formulario.ArchivoCV), errorCV);
-        }
-
-        if (!ModelState.IsValid)
+        if (!await Perfiles.GuardarCuenta(User.IdUsuario(), formulario, ModelState, _carpetas))
         {
             return MostrarConfiguracionConErrores("cuenta", formulario);
         }
-
-        BD.ActualizarDatosPersonales(id, formulario.Nombre.Trim(), formulario.Apellido.Trim(), formulario.Email, provincia?.ID, telefono,
-                                     Validaciones.Limpiar(formulario.SitioWeb));
-        if (formulario.Foto is { Length: > 0 })
-        {
-            var ruta = await Archivos.GuardarFoto(formulario.Foto, _entorno.WebRootPath);
-            Archivos.Borrar(Archivos.RutaImagen(BD.ActualizarFoto(id, ruta), _entorno.WebRootPath));
-        }
-        if (formulario.ArchivoCV is { Length: > 0 })
-        {
-            var nombre = await Archivos.GuardarCV(formulario.ArchivoCV, _entorno.ContentRootPath);
-            BorrarCVViejo(BD.ActualizarArchivoCV(id, nombre));
-        }
-
-        await Sesion.Iniciar(HttpContext, id);
+        await Sesion.Iniciar(HttpContext, User.IdUsuario());
         TempData["Mensaje"] = "Guardamos los datos de tu cuenta.";
         return RedirectToAction(nameof(Configuracion));
     }
@@ -388,75 +184,16 @@ public class PerfilController : Controller
     [RequestSizeLimit(8 * 1024 * 1024)]
     public async Task<IActionResult> GuardarEmpresa(EmpresaFormulario formulario)
     {
-        var id = User.IdUsuario();
-        var empresa = BD.ObtenerEmpresaDeUsuario(id);
+        var empresa = BD.ObtenerEmpresaDeUsuario(User.IdUsuario());
         if (empresa == null)
         {
             return await SesionInvalida();
         }
-
-        var paises = BD.ObtenerPaises();
-        var provincias = BD.ObtenerProvincias();
-        formulario.NombreEmpresa = (formulario.NombreEmpresa ?? "").Trim();
-        formulario.Descripcion = formulario.Descripcion?.Replace("\r\n", "\n");
-        ModelState.Remove(nameof(formulario.Descripcion));
-        if (string.IsNullOrWhiteSpace(formulario.Descripcion))
-        {
-            ModelState.AddModelError(nameof(formulario.Descripcion), "Contá en pocas líneas qué hace la empresa");
-        }
-        else if (formulario.Descripcion.Length > 500)
-        {
-            ModelState.AddModelError(nameof(formulario.Descripcion), "Usá hasta 500 caracteres");
-        }
-
-        var provincia = provincias.FirstOrDefault(p => p.ID == formulario.IDProvincia);
-        if (formulario.IDProvincia != null && (provincia == null || provincia.IDPais != formulario.IDPais))
-        {
-            ModelState.AddModelError(nameof(formulario.IDProvincia), "Elegí una provincia de la lista");
-        }
-        var telefono = Validaciones.Telefono(formulario.Telefono, paises.FirstOrDefault(p => p.ID == formulario.IDPais), nameof(formulario.Telefono), ModelState);
-        if (formulario.Rubro != null && !Catalogos.Rubros.Contains(formulario.Rubro))
-        {
-            ModelState.AddModelError(nameof(formulario.Rubro), "Elegí un rubro de la lista");
-        }
-        if (!string.IsNullOrEmpty(formulario.SitioWeb) && !VerificacionEmpresa.EmailCoincideConSitio(User.Email(), formulario.SitioWeb))
-        {
-            ModelState.AddModelError(nameof(formulario.SitioWeb), $"El sitio tiene que ser del mismo dominio que tu email ({VerificacionEmpresa.DominioDelEmail(User.Email())})");
-        }
-        if (formulario.NombreEmpresa.Length > 0 && BD.ExisteNombreEmpresa(formulario.NombreEmpresa, empresa.ID))
-        {
-            ModelState.AddModelError(nameof(formulario.NombreEmpresa), "Ya hay otra empresa con ese nombre");
-        }
-        if (Archivos.Validar(formulario.Logo, Archivos.ExtensionesFoto) is { } errorLogo)
-        {
-            ModelState.AddModelError(nameof(formulario.Logo), errorLogo);
-        }
-
-        if (!ModelState.IsValid)
+        if (!await Perfiles.GuardarEmpresa(User.IdUsuario(), empresa, User.Email(), formulario, ModelState, _carpetas))
         {
             return MostrarConfiguracionConErrores("cuenta", formulario);
         }
-
-        BD.ActualizarResponsable(id, formulario.Nombre.Trim(), formulario.Apellido.Trim());
-        BD.ActualizarEmpresa(new Empresa
-        {
-            ID = empresa.ID,
-            IDUsuario = id,
-            Nombre = formulario.NombreEmpresa,
-            Descripcion = formulario.Descripcion!.Trim(),
-            Ubicacion = Validaciones.Limpiar(formulario.Ubicacion),
-            Sitio_Web = formulario.SitioWeb.Trim(),
-            Rubro = formulario.Rubro,
-            IDProvincia = provincia?.ID,
-            Telefono = telefono
-        });
-        if (formulario.Logo is { Length: > 0 })
-        {
-            var ruta = await Archivos.GuardarLogo(formulario.Logo, _entorno.WebRootPath);
-            Archivos.Borrar(Archivos.RutaImagen(BD.ActualizarLogo(id, ruta), _entorno.WebRootPath));
-        }
-
-        await Sesion.Iniciar(HttpContext, id);
+        await Sesion.Iniciar(HttpContext, User.IdUsuario());
         TempData["Mensaje"] = "Guardamos los datos de la empresa.";
         return RedirectToAction(nameof(Configuracion));
     }
@@ -469,23 +206,10 @@ public class PerfilController : Controller
         {
             return Forbid();
         }
-        if (formulario.EstadoBusqueda != null && !Catalogos.EstadosBusqueda.Contains(formulario.EstadoBusqueda))
-        {
-            ModelState.AddModelError(nameof(formulario.EstadoBusqueda), "Elegí una opción de la lista");
-        }
-        var preferencia = Validaciones.Preferencia(formulario.PuestoBuscado, formulario.Niveles, formulario.Modalidades, formulario.Jornada,
-                                                   formulario.Contratacion, formulario.IDProvinciaPreferida, formulario.SalarioMinimo,
-                                                   formulario.SalarioMaximo, formulario.Disponibilidad, BD.ObtenerProvincias(),
-                                                   nameof(formulario.SalarioMaximo), ModelState);
-        var habilidades = Validaciones.Habilidades(formulario.Habilidades, nameof(formulario.Habilidades), ModelState);
-        var idiomas = Validaciones.Idiomas(formulario.IdiomaIds, formulario.IdiomaNiveles, BD.ObtenerCatalogoIdiomas(), "Idiomas", ModelState);
-
-        if (!ModelState.IsValid)
+        if (!Perfiles.GuardarBusqueda(User.IdUsuario(), formulario, ModelState))
         {
             return MostrarConfiguracionConErrores("busqueda", formulario);
         }
-
-        BD.GuardarBusqueda(User.IdUsuario(), preferencia, formulario.EstadoBusqueda, habilidades, idiomas);
         TempData["Mensaje"] = "Guardamos lo que estás buscando.";
         return Redirect(Url.Action(nameof(Configuracion)) + "#busqueda");
     }
@@ -499,17 +223,12 @@ public class PerfilController : Controller
         {
             return await SesionInvalida();
         }
-        if (usuario.TieneContrasena && !Contrasenas.Verificar(formulario.Actual ?? "", usuario.Contraseña))
-        {
-            ModelState.AddModelError(nameof(formulario.Actual), "La contraseña actual no es correcta");
-        }
-        if (!ModelState.IsValid)
+        var resultado = Perfiles.CambiarClave(usuario, formulario, ModelState);
+        if (resultado == null)
         {
             return MostrarConfiguracionConErrores("seguridad", formulario);
         }
-
-        BD.CambiarContrasena(usuario.ID, Contrasenas.Hashear(formulario.Nueva));
-        TempData["Mensaje"] = usuario.TieneContrasena ? "Cambiamos tu contraseña." : "Creamos tu contraseña: ya podés entrar también con tu email.";
+        TempData["Mensaje"] = resultado.Mensaje;
         return Redirect(Url.Action(nameof(Configuracion)) + "#seguridad");
     }
 
@@ -517,19 +236,15 @@ public class PerfilController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EliminarCuenta(string? confirmacion)
     {
-        if (!string.Equals(confirmacion?.Trim(), "ELIMINAR", StringComparison.Ordinal))
+        var resultado = Perfiles.EliminarCuenta(User.IdUsuario(), confirmacion, _carpetas);
+        if (!resultado.Exito)
         {
-            TempData["Mensaje"] = "Para eliminar la cuenta escribí ELIMINAR en mayúsculas.";
-            TempData["MensajeTipo"] = "error";
+            TempData["Mensaje"] = resultado.Mensaje;
+            TempData["MensajeTipo"] = resultado.Tipo;
             return Redirect(Url.Action(nameof(Configuracion)) + "#seguridad");
         }
-
-        var (foto, cv, logo) = BD.EliminarCuenta(User.IdUsuario());
-        Archivos.Borrar(Archivos.RutaImagen(foto, _entorno.WebRootPath));
-        Archivos.Borrar(Archivos.RutaImagen(logo, _entorno.WebRootPath));
-        BorrarCVViejo(cv);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        TempData["Mensaje"] = "Eliminamos tu cuenta y todos sus datos.";
+        TempData["Mensaje"] = resultado.Mensaje;
         return RedirectToAction("Index", "Home");
     }
 
@@ -539,167 +254,49 @@ public class PerfilController : Controller
         return View();
     }
 
-    private MiPerfilViewModel? ObtenerMiPerfil()
-    {
-        var modelo = BD.ObtenerMiPerfil(User.IdUsuario());
-        return EsUsuarioDeLaSesion(modelo?.Usuario) ? modelo : null;
-    }
-
-    private void CargarCompletar(CompletarPerfilViewModel modelo, MiPerfilViewModel perfil)
-    {
-        modelo.Paises = BD.ObtenerPaises();
-        modelo.Provincias = BD.ObtenerProvincias();
-        modelo.IDPais ??= modelo.Paises.Count == 1 ? modelo.Paises[0].ID : null;
-        modelo.CatalogoHabilidades = BD.ObtenerCatalogoHabilidades();
-        modelo.CatalogoIdiomas = BD.ObtenerCatalogoIdiomas();
-        modelo.Instituciones = BD.ObtenerInstituciones();
-        modelo.FotoActual = perfil.Perfil.Foto;
-        modelo.CVActual = perfil.CV?.NombreOriginal ?? (perfil.TieneCV ? "CV" : null);
-        modelo.ExperienciasCargadas = perfil.Experiencias;
-        modelo.FormacionesCargadas = perfil.Formaciones;
-    }
-
-    private List<ExperienciaNueva> ArmarExperiencias(CompletarPerfilViewModel m)
-    {
-        var lista = new List<ExperienciaNueva>();
-        for (var i = 0; i < m.ExpPuesto.Count; i++)
-        {
-            var puesto = Valor(m.ExpPuesto, i);
-            var empresa = Valor(m.ExpEmpresa, i);
-            var inicio = Fechas.ParsearMesAnio(Valor(m.ExpInicio, i));
-            var finTexto = Valor(m.ExpFin, i);
-            var fin = Fechas.ParsearMesAnio(finTexto);
-            var descripcion = Valor(m.ExpDescripcion, i);
-            if (puesto.Length is 0 or > 100 || empresa.Length is 0 or > 100 || inicio == null || inicio > Fechas.MesActual ||
-                (finTexto.Length > 0 && (fin == null || fin < inicio || fin > Fechas.MesActual)) || descripcion.Length > 500)
-            {
-                ModelState.AddModelError("Experiencias", "Revisá las experiencias: cada una necesita puesto, empresa y fechas válidas.");
-                continue;
-            }
-            lista.Add(new ExperienciaNueva { Puesto = puesto, Empresa = empresa, Inicio = inicio.Value, Fin = fin, Descripcion = Validaciones.Limpiar(descripcion) });
-        }
-        return lista;
-    }
-
-    private List<FormacionNueva> ArmarFormaciones(CompletarPerfilViewModel m)
-    {
-        var lista = new List<FormacionNueva>();
-        for (var i = 0; i < m.ForTitulo.Count; i++)
-        {
-            var titulo = Valor(m.ForTitulo, i);
-            var institucion = Valor(m.ForInstitucion, i);
-            var inicio = Fechas.ParsearMesAnio(Valor(m.ForInicio, i));
-            var finTexto = Valor(m.ForFin, i);
-            var fin = Fechas.ParsearMesAnio(finTexto);
-            if (titulo.Length is 0 or > 150 || institucion.Length is 0 or > 150 || inicio == null || inicio > Fechas.MesActual ||
-                (finTexto.Length > 0 && (fin == null || fin < inicio)))
-            {
-                ModelState.AddModelError("Formaciones", "Revisá la formación: cada una necesita título, institución y fechas válidas.");
-                continue;
-            }
-            lista.Add(new FormacionNueva { Titulo = titulo, Institucion = institucion, Inicio = inicio.Value, Fin = fin });
-        }
-        return lista;
-    }
-
-    private static string Valor(List<string> lista, int i) => i < lista.Count ? (lista[i] ?? "").Trim() : "";
-
-    private void CargarConfiguracion(MiPerfilViewModel modelo)
-    {
-        modelo.Paises = BD.ObtenerPaises();
-        modelo.Provincias = BD.ObtenerProvincias();
-        modelo.CatalogoHabilidades = BD.ObtenerCatalogoHabilidades();
-        modelo.CatalogoIdiomas = BD.ObtenerCatalogoIdiomas();
-        modelo.ProveedoresVinculados = BD.ObtenerProveedoresVinculados(modelo.Usuario.ID);
-        if (modelo.Usuario.EsEmpresa)
-        {
-            modelo.Empresa = BD.ObtenerEmpresaDeUsuario(modelo.Usuario.ID);
-        }
-    }
-
     private IActionResult MostrarConfiguracionConErrores(string pestana, object formulario)
     {
-        var modelo = ObtenerMiPerfil();
+        var modelo = Perfiles.MiPerfil(User.IdUsuario(), User.Email());
         if (modelo == null)
         {
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
-        CargarConfiguracion(modelo);
-        PrepararConfiguracion(modelo, pestana, formulario);
+        MostrarConfiguracion(Perfiles.Configuracion(modelo, pestana, formulario));
         return View(nameof(Configuracion));
     }
 
-    private void PrepararConfiguracion(MiPerfilViewModel modelo, string? pestana, object? formulario)
+    private void MostrarConfiguracion(PantallaConfiguracion pantalla)
     {
-        var esEmpresa = modelo.Usuario.EsEmpresa;
-        var pestanas = esEmpresa ? new[] { "cuenta", "seguridad" } : new[] { "cuenta", "busqueda", "seguridad" };
-        var cuenta = formulario as CuentaFormulario;
-        var empresa = formulario as EmpresaFormulario;
-        var busqueda = formulario as BusquedaFormulario;
-        var idPais = cuenta?.IDPais ?? empresa?.IDPais ?? (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais) ?? modelo.Paises.FirstOrDefault()?.ID;
-        ViewBag.Perfil = modelo;
-        ViewBag.EsEmpresa = esEmpresa;
-        ViewBag.Activa = pestanas.Contains(pestana) ? pestana : "cuenta";
-        ViewBag.FormularioCuenta = cuenta;
-        ViewBag.FormularioEmpresa = empresa;
-        ViewBag.IDPais = idPais;
-        ViewBag.CodigoPais = modelo.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
-        ViewBag.CodigoGuardado = modelo.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais))?.Codigo_Telefono;
-        ViewBag.CamposBusqueda = esEmpresa ? null : CamposBusqueda.Desde(modelo, busqueda);
+        ViewBag.Perfil = pantalla.Perfil;
+        ViewBag.EsEmpresa = pantalla.EsEmpresa;
+        ViewBag.Activa = pantalla.Activa;
+        ViewBag.FormularioCuenta = pantalla.FormularioCuenta;
+        ViewBag.FormularioEmpresa = pantalla.FormularioEmpresa;
+        ViewBag.IDPais = pantalla.IDPais;
+        ViewBag.CodigoPais = pantalla.CodigoPais;
+        ViewBag.CodigoGuardado = pantalla.CodigoGuardado;
+        ViewBag.CamposBusqueda = pantalla.CamposBusqueda;
     }
 
     private IActionResult MostrarPerfilConModal(string modal, object formulario)
     {
-        var modelo = ObtenerMiPerfil();
+        var modelo = Perfiles.PerfilParaMostrar(User.IdUsuario(), User.Email());
         if (modelo == null)
         {
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
-        modelo.Instituciones = BD.ObtenerInstituciones();
         ViewBag.ModalAbierto = modal;
         ViewBag.Formulario = formulario;
         ViewBag.Perfil = modelo;
         return View(nameof(Index));
     }
 
-    private IActionResult Volver(string mensaje, string tipo = "exito", string? volver = null)
+    private IActionResult Volver(Resultado resultado, string? volver = null)
     {
-        TempData["Mensaje"] = mensaje;
-        TempData["MensajeTipo"] = tipo;
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["MensajeTipo"] = resultado.Tipo;
         return !string.IsNullOrEmpty(volver) && Url.IsLocalUrl(volver) ? LocalRedirect(volver) : RedirectToAction(nameof(Index));
     }
-
-    private IActionResult ArchivoCV(CV? cv)
-    {
-        if (string.IsNullOrEmpty(cv?.Nombre_Archivo) || cv.Nombre_Archivo != Path.GetFileName(cv.Nombre_Archivo))
-        {
-            return NotFound();
-        }
-        var ruta = Path.Combine(Archivos.CarpetaCV(_entorno.ContentRootPath), cv.Nombre_Archivo);
-        if (!System.IO.File.Exists(ruta))
-        {
-            return NotFound();
-        }
-        var tipo = Path.GetExtension(ruta).ToLowerInvariant() switch
-        {
-            ".pdf" => "application/pdf",
-            ".doc" => "application/msword",
-            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            _ => "application/octet-stream"
-        };
-        return PhysicalFile(ruta, tipo, cv.NombreOriginal ?? "CV" + Path.GetExtension(ruta));
-    }
-
-    private void BorrarCVViejo(string? nombre)
-    {
-        if (!string.IsNullOrEmpty(nombre) && nombre == Path.GetFileName(nombre))
-        {
-            Archivos.Borrar(Path.Combine(Archivos.CarpetaCV(_entorno.ContentRootPath), nombre));
-        }
-    }
-
-    private bool EsUsuarioDeLaSesion(Usuario? usuario) =>
-        usuario != null && string.Equals(usuario.Email, User.Email(), StringComparison.OrdinalIgnoreCase);
 
     private async Task<IActionResult> SesionInvalida()
     {

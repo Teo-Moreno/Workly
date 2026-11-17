@@ -23,8 +23,7 @@ public class PostulacionesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult CambiarEstado(int id, string estado)
     {
-        var valido = Catalogos.EstadosPostulacion.Any(e => e.Estado == estado);
-        var cambiado = valido && BD.CambiarEstadoPostulacion(User.IdUsuario(), id, estado);
+        var cambiado = Postulaciones.CambiarEstado(User.IdUsuario(), id, estado);
         if (Request.Headers.Accept.ToString().Contains("application/json"))
         {
             return cambiado ? Json(new { ok = true }) : BadRequest(new { ok = false });
@@ -38,9 +37,9 @@ public class PostulacionesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Eliminar(int id)
     {
-        var borrada = BD.EliminarPostulacion(User.IdUsuario(), id);
-        TempData["Mensaje"] = borrada ? "Sacamos la postulación de tu tablero." : "No encontramos esa postulación.";
-        TempData["MensajeTipo"] = borrada ? "exito" : "error";
+        var resultado = Postulaciones.Eliminar(User.IdUsuario(), id);
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["MensajeTipo"] = resultado.Tipo;
         return RedirectToAction(nameof(Index));
     }
 }

@@ -19,30 +19,18 @@ public class GuardadasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Guardar(int id, bool externa, string? volver)
-    {
-        if (!User.EsPersona())
-        {
-            return Volver("Las cuentas de empresa no guardan ofertas.", "error", volver);
-        }
-        return BD.GuardarOferta(User.IdUsuario(), id, externa)
-            ? Volver("Guardamos la oferta. La encontrás en Guardadas.", "exito", volver)
-            : Volver("Esa oferta ya estaba guardada o ya no está publicada.", "advertencia", volver);
-    }
+    public IActionResult Guardar(int id, bool externa, string? volver) =>
+        Volver(Postulaciones.Guardar(User.IdUsuario(), id, externa, User.EsPersona()), volver);
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Quitar(int id, bool externa, string? volver)
-    {
-        return BD.QuitarGuardada(User.IdUsuario(), id, externa)
-            ? Volver("Sacamos la oferta de tus guardadas.", "exito", volver)
-            : Volver("Esa oferta no estaba en tus guardadas.", "advertencia", volver);
-    }
+    public IActionResult Quitar(int id, bool externa, string? volver) =>
+        Volver(Postulaciones.QuitarGuardada(User.IdUsuario(), id, externa), volver);
 
-    private IActionResult Volver(string mensaje, string tipo, string? volver)
+    private IActionResult Volver(Resultado resultado, string? volver)
     {
-        TempData["Mensaje"] = mensaje;
-        TempData["MensajeTipo"] = tipo;
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["MensajeTipo"] = resultado.Tipo;
         return !string.IsNullOrEmpty(volver) && Url.IsLocalUrl(volver) ? LocalRedirect(volver) : RedirectToAction(nameof(Index));
     }
 }

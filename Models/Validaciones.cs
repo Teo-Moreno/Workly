@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Workly.Models;
@@ -5,6 +6,56 @@ namespace Workly.Models;
 public static class Validaciones
 {
     public static string? Limpiar(string? texto) => string.IsNullOrWhiteSpace(texto) ? null : texto.Trim();
+
+    public static string? TextoLargo(string? texto, string campo, int largo, ModelStateDictionary estado)
+    {
+        if (texto == null)
+        {
+            return null;
+        }
+        texto = texto.Replace("\r\n", "\n");
+        estado.Remove(campo);
+        if (texto.Length > largo)
+        {
+            estado.AddModelError(campo, $"Usá hasta {largo} caracteres");
+        }
+        return texto;
+    }
+
+    public static void Archivo(IFormFile? archivo, string[] extensiones, string campo, ModelStateDictionary estado)
+    {
+        if (Archivos.Validar(archivo, extensiones) is { } error)
+        {
+            estado.AddModelError(campo, error);
+        }
+    }
+
+    public static Provincia? Provincia(List<Provincia> provincias, int? idPais, int? idProvincia, string campo, ModelStateDictionary estado)
+    {
+        var provincia = provincias.FirstOrDefault(p => p.ID == idProvincia);
+        if (idProvincia != null && (provincia == null || provincia.IDPais != idPais))
+        {
+            estado.AddModelError(campo, "Elegí una provincia de la lista");
+            return null;
+        }
+        return provincia;
+    }
+
+    public static (Provincia? Provincia, string? Telefono) Ubicacion(List<Pais> paises, List<Provincia> provincias, int? idPais, int? idProvincia,
+                                                                     string? telefonoLocal, string campoProvincia, string campoTelefono,
+                                                                     ModelStateDictionary estado)
+    {
+        var provincia = Provincia(provincias, idPais, idProvincia, campoProvincia, estado);
+        return (provincia, Telefono(telefonoLocal, paises.FirstOrDefault(p => p.ID == idPais), campoTelefono, estado));
+    }
+
+    public static void OpcionDeLista(string? valor, IEnumerable<string> opciones, string campo, ModelStateDictionary estado, string mensaje = "Elegí una opción de la lista")
+    {
+        if (valor != null && !opciones.Contains(valor))
+        {
+            estado.AddModelError(campo, mensaje);
+        }
+    }
 
     public static string? Telefono(string? telefonoLocal, Pais? pais, string campo, ModelStateDictionary estado)
     {
