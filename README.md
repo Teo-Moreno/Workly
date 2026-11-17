@@ -92,7 +92,7 @@ dotnet watch run
 
 ## 👥 Integrantes
 
-- Dante
-- Gabi
 - Teo Moreno
-- Lucas
+- Gabi Papini
+- Dante Bruschetti
+- Lucas Ducatenzeiler
