@@ -41,3 +41,26 @@ public class Postulante
     public string Resumen => string.Join(" · ", new[] { Puesto_Buscado, Provincia }.Where(t => !string.IsNullOrEmpty(t)));
     public string TelefonoLink => (Telefono ?? "").Replace(" ", "").Replace("-", "");
 }
+
+public static class Postulaciones
+{
+    public static bool CambiarEstado(int idUsuario, int idPostulacion, string? estado) =>
+        Catalogos.EstadosPostulacion.Any(e => e.Estado == estado) && BD.CambiarEstadoPostulacion(idUsuario, idPostulacion, estado!);
+
+    public static Resultado Eliminar(int idUsuario, int idPostulacion) =>
+        Resultado.Segun(BD.EliminarPostulacion(idUsuario, idPostulacion), "Sacamos la postulación de tu tablero.", "No encontramos esa postulación.");
+
+    public static Resultado Guardar(int idUsuario, int idOferta, bool externa, bool esPersona)
+    {
+        if (!esPersona)
+        {
+            return Resultado.Mal("Las cuentas de empresa no guardan ofertas.");
+        }
+        return Resultado.Segun(BD.GuardarOferta(idUsuario, idOferta, externa),
+            "Guardamos la oferta. La encontrás en Guardadas.", "Esa oferta ya estaba guardada o ya no está publicada.", "advertencia");
+    }
+
+    public static Resultado QuitarGuardada(int idUsuario, int idOferta, bool externa) =>
+        Resultado.Segun(BD.QuitarGuardada(idUsuario, idOferta, externa),
+            "Sacamos la oferta de tus guardadas.", "Esa oferta no estaba en tus guardadas.", "advertencia");
+}
