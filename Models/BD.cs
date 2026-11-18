@@ -342,10 +342,14 @@ public static class BD
         {
             IDUsuarioActual = idUsuarioActual,
             f.Texto,
+            f.IDPais,
             f.IDProvincia,
             Modalidades = f.Modalidades.Count == 0 ? null : string.Join(",", f.Modalidades),
             Tipos = f.TiposEmpleo.Count == 0 ? null : string.Join(",", f.TiposEmpleo),
-            f.Dias
+            f.Dias,
+            f.Orden,
+            f.Desde,
+            f.Cantidad
         });
 
     public static Oferta? ObtenerOferta(int idOferta, int idUsuarioActual) =>
@@ -399,20 +403,19 @@ public static class BD
     public static bool RevisarOferta(int idOferta, bool aprobada, string? motivo) =>
         Cambio("RevisarOferta", new { ID = idOferta, Aprobada = aprobada, Motivo = motivo });
 
-    public static List<Oferta> GuardarOfertasExternas(List<OfertaExternaDatos> ofertas)
+    public static void GuardarOfertasExternas(List<OfertaExternaDatos> ofertas)
     {
         if (ofertas.Count == 0)
         {
-            return new List<Oferta>();
+            return;
         }
 
-        var guardadas = new Dictionary<string, Oferta>();
         using var conexion = Conectar();
         conexion.Open();
         using var tx = conexion.BeginTransaction();
-        foreach (var o in ofertas)
+        foreach (var o in ofertas.DistinctBy(o => o.ID_Externo))
         {
-            var guardada = conexion.QueryFirstOrDefault<Oferta>("GuardarOfertaExterna", new
+            conexion.Execute("GuardarOfertaExterna", new
             {
                 o.ID_Externo,
                 o.Titulo,
@@ -425,37 +428,20 @@ public static class BD
                 o.Salario,
                 o.Link_Postulacion,
                 o.Publicador,
-                o.Fecha_Publicacion
+                o.Fecha_Publicacion,
+                o.IDPais,
+                o.IDProvincia
             }, tx, commandType: SP);
-            if (guardada != null)
-            {
-                guardadas[o.ID_Externo] = guardada;
-            }
         }
         tx.Commit();
-
-        return ofertas.Select(o => o.ID_Externo).Distinct().Where(guardadas.ContainsKey).Select(id => guardadas[id]).ToList();
     }
+
+    public static DateTime? ObtenerUltimaImportacion() => Valor<DateTime?>("ObtenerUltimaImportacion");
+
+    public static int BorrarOfertasExternasViejas(int dias) => Valor<int>("BorrarOfertasExternasViejas", new { Dias = dias });
 
     public static Oferta? ObtenerOfertaExterna(int id, int idUsuarioActual) =>
         Uno<Oferta>("ObtenerOfertaExterna", new { ID = id, IDUsuarioActual = idUsuarioActual });
-
-    public static void MarcarPostuladas(List<Oferta> ofertas, int idUsuario)
-    {
-        var externas = ofertas.Where(o => o.EsExterna).Select(o => o.ID).ToList();
-        if (externas.Count == 0 || idUsuario == 0)
-        {
-            return;
-        }
-        var marcas = Lista<(int ID, bool YaPostulado, bool Guardada)>("ObtenerMarcasExternas",
-            new { IDUsuario = idUsuario, IDs = string.Join(",", externas) }).ToDictionary(m => m.ID);
-        foreach (var oferta in ofertas.Where(o => o.EsExterna))
-        {
-            var marca = marcas.GetValueOrDefault(oferta.ID);
-            oferta.YaPostulado = marca.YaPostulado;
-            oferta.Guardada = marca.Guardada;
-        }
-    }
 
     public static bool GuardarOferta(int idUsuario, int idOferta, bool esExterna) =>
         Valor<bool>("GuardarOferta", new { IDUsuario = idUsuario, IDOferta = idOferta, EsExterna = esExterna });

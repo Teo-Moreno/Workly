@@ -11,16 +11,14 @@ public class BuscarTrabajoViewModel
     public List<string> Tipo { get; set; } = new();
     public string? Fecha { get; set; }
     public string Orden { get; set; } = "recientes";
-    public string? Cursor { get; set; }
+    public int Pagina { get; set; } = 1;
 
     public List<Oferta> Ofertas { get; set; } = new();
-    public Oferta? Seleccionada { get; set; }
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
 
-    public string? CursorSiguiente { get; set; }
-
-    public bool ErrorExternas { get; set; }
+    public int Total { get; set; }
+    public int PorPagina { get; set; }
 
     public List<string> Consulta { get; set; } = new();
 
@@ -30,16 +28,14 @@ public class BuscarTrabajoViewModel
 
     public string TituloCargando => BuscoAlgo ? $"Ofertas para “{Q}”" : "Ofertas";
 
-    public string Titulo => Ofertas.Count == 0 ? "Sin resultados"
-        : $"{Ofertas.Count} {(Ofertas.Count == 1 ? "oferta" : "ofertas")}" + (BuscoAlgo ? $" para “{Q}”" : "");
+    public string Titulo => Total == 0 ? "Sin resultados"
+        : $"{Total.ToString("N0", new System.Globalization.CultureInfo("es-AR"))} {(Total == 1 ? "oferta" : "ofertas")}" + (BuscoAlgo ? $" para “{Q}”" : "");
+
+    public bool HayMas => Pagina * PorPagina < Total;
 
     public string? Lugar => Provincias.FirstOrDefault(p => p.ID == IDProvincia)?.Nombre ?? Paises.FirstOrDefault(p => p.ID == IDPais)?.Nombre;
 
-    public string ConOferta(string clave) => "/Empleos?" + string.Join("&", Consulta.Where(c => !c.StartsWith("id=")).Append("id=" + clave));
-
-    public string UrlMas => "/Empleos?" + string.Join("&", Consulta.Where(c => !c.StartsWith("Cursor=") && !c.StartsWith("id=")).Append("Cursor=" + Uri.EscapeDataString(CursorSiguiente ?? "")));
-
-    public bool EsSeleccionada(Oferta oferta) => oferta == Seleccionada;
+    public string UrlMas => "/Empleos/Resultados?" + string.Join("&", Consulta.Append("Pagina=" + (Pagina + 1)));
 }
 
 public class EmpresasViewModel

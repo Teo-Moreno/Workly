@@ -242,6 +242,9 @@ CREATE TABLE [dbo].[OfertaExterna](
 	[Publicador] [nvarchar](100) NULL,
 	[Fecha_Publicacion] [datetime2](7) NULL,
 	[Fecha_Consulta] [datetime2](7) NOT NULL,
+	[IDPais] [int] NULL,
+	[IDProvincia] [int] NULL,
+	[Fecha_Alta] [datetime2](7) NOT NULL,
  CONSTRAINT [PK_OfertaExterna] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -541,6 +544,11 @@ CREATE NONCLUSTERED INDEX [IX_FavoritoOferta_IDOfertaExterna] ON [dbo].[Favorito
 	[IDOfertaExterna] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_OfertaExterna_IDProvincia] ON [dbo].[OfertaExterna]
+(
+	[IDProvincia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FavoritoOferta_IDOfertaLaboral] ON [dbo].[FavoritoOferta]
 (
 	[IDOfertaLaboral] ASC
@@ -736,6 +744,8 @@ ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Es_Remoto]  
 GO
 ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Fecha_Consulta]  DEFAULT (sysutcdatetime()) FOR [Fecha_Consulta]
 GO
+ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Fecha_Alta]  DEFAULT (sysutcdatetime()) FOR [Fecha_Alta]
+GO
 ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Cantidad_Puestos]  DEFAULT ((1)) FOR [Cantidad_Puestos]
 GO
 ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Fecha_Publicacion]  DEFAULT (CONVERT([date],getdate())) FOR [Fecha_Publicacion]
@@ -823,6 +833,16 @@ ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_OfertaLaboral_
 REFERENCES [dbo].[Empresa] ([ID])
 GO
 ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [FK_OfertaLaboral_Empresa]
+GO
+ALTER TABLE [dbo].[OfertaExterna]  WITH CHECK ADD  CONSTRAINT [FK_OfertaExterna_Pais] FOREIGN KEY([IDPais])
+REFERENCES [dbo].[Pais] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaExterna] CHECK CONSTRAINT [FK_OfertaExterna_Pais]
+GO
+ALTER TABLE [dbo].[OfertaExterna]  WITH CHECK ADD  CONSTRAINT [FK_OfertaExterna_Provincia] FOREIGN KEY([IDProvincia])
+REFERENCES [dbo].[Provincia] ([ID])
+GO
+ALTER TABLE [dbo].[OfertaExterna] CHECK CONSTRAINT [FK_OfertaExterna_Provincia]
 GO
 ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [FK_OfertaLaboral_Provincia] FOREIGN KEY([IDProvincia])
 REFERENCES [dbo].[Provincia] ([ID])

@@ -5,7 +5,7 @@
 <div class="container seccion-app">
     <header class="encabezado-pagina">
         <h1 class="encabezado-pagina-titulo">Buscar trabajo</h1>
-        <p class="encabezado-pagina-bajada">Buscamos en las búsquedas publicadas en Workly y en otros sitios de empleo a la vez.</p>
+        <p class="encabezado-pagina-bajada">Te mostramos las búsquedas publicadas en Workly y las ofertas de otros sitios de empleo.</p>
     </header>
 
     <form class="buscador buscador-app" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search" data-cargando="#resultados-busqueda">
@@ -108,7 +108,7 @@
             <noscript><button class="btn btn-block" type="submit" form="form-buscar">Aplicar filtros</button></noscript>
         </aside>
 
-        <section class="resultados esta-buscando" id="resultados-busqueda" aria-labelledby="resultados-titulo" aria-busy="true" data-resultados-url="@ViewBag.UrlResultados" data-resultados-detalles="#detalles-busqueda">
+        <section class="resultados esta-buscando" id="resultados-busqueda" aria-labelledby="resultados-titulo" aria-busy="true" data-resultados-url="@ViewBag.UrlResultados">
             <div class="resultados-cabecera">
                 <h2 class="resultados-titulo" id="resultados-titulo" data-resultados-titulo>@ViewBag.Busqueda.TituloCargando</h2>
                 <div class="ordenar">
@@ -125,7 +125,5 @@
             <partial name="_CargandoResultados" model='"Buscando ofertas…"' />
             <div data-resultados-contenido></div>
         </section>
-
-        <div class="buscar-detalle" id="detalles-busqueda" data-detalles hidden></div>
     </div>
 </div>
