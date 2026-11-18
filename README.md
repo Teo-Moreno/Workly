@@ -19,8 +19,8 @@
 - **Cuentas de persona y de empresa**, con verificación del email por código, recuperación de contraseña e inicio de sesión con Google o LinkedIn.
 - **Validaciones de empresa**: CUIT válido, email del dominio de la empresa y sin repetir nombre ni CUIT.
 - **Perfil y CV**: foto, "Sobre mí", experiencia laboral, formación, habilidades, idiomas, preferencias de búsqueda y CV en PDF o Word.
-- **Buscar trabajo** con filtros por texto, provincia, modalidad, tipo de empleo y fecha, ordenando por fecha o de la A a la Z.
-- **Ofertas externas** traídas de la API JSearch, junto con las ofertas publicadas en Workly.
+- **Buscar trabajo** con filtros por texto, provincia, modalidad, tipo de empleo y fecha, ordenando por fecha o de la A a la Z. Los resultados se muestran en una grilla de 42 ofertas con un botón "Ver más".
+- **Ofertas externas** de otros sitios guardadas en la base, junto con las ofertas publicadas en Workly. La app las actualiza sola desde la API JSearch una vez por semana.
 - **Postulaciones** a ofertas de Workly y registro de postulaciones externas, en un tablero que cambia de estado sin recargar la página (`fetch`).
 - **Ofertas guardadas** y recomendaciones **"Para vos"** según lo que busca cada persona.
 - **Publicaciones**: las empresas publican directo y las personas mandan su búsqueda a moderación.
@@ -81,7 +81,7 @@ dotnet user-secrets set "Correo:Contrasena" "TU_CONTRASEÑA"
 dotnet user-secrets set "Authentication:Google:ClientId" "TU_CLIENT_ID"
 dotnet user-secrets set "Authentication:Google:ClientSecret" "TU_CLIENT_SECRET"
 ```
-Sin estas claves la app funciona igual: no muestra ofertas externas ni manda mails, y en desarrollo el código de verificación aparece en la consola.
+Sin estas claves la app funciona igual: muestra las ofertas que ya están en la base pero no las actualiza, no manda mails y en desarrollo el código de verificación aparece en la consola.
 
 6. Ejecutar el programa:
 ```bash

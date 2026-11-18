@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Http;
 
 namespace Workly.Models;
@@ -20,56 +19,39 @@ public static class Empleos
         return modelo;
     }
 
-    public static async Task<BuscarTrabajoViewModel> Buscar(BuscarTrabajoViewModel filtros, string? idSeleccionada, IQueryCollection consulta,
-                                                            int idUsuario, JSearch jsearch)
+    public const int OfertasPorPagina = 42;
+
+    public static BuscarTrabajoViewModel Buscar(BuscarTrabajoViewModel filtros, IQueryCollection consulta, int idUsuario)
     {
         var modelo = Preparar(filtros);
-        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais);
-        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia);
         var fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha);
-
-        var ofertas = new List<Oferta>();
-        if (string.IsNullOrEmpty(modelo.Cursor))
+        modelo.Pagina = Math.Clamp(modelo.Pagina, 1, 1000);
+        modelo.Ofertas = BD.BuscarOfertas(new FiltrosOfertas
         {
-            ofertas.AddRange(BD.BuscarOfertas(new FiltrosOfertas
-            {
-                Texto = modelo.Q,
-                IDProvincia = modelo.IDProvincia,
-                Modalidades = modelo.Modalidad,
-                TiposEmpleo = modelo.Tipo,
-                Dias = fecha.Valor == null ? null : fecha.Dias
-            }, idUsuario));
-        }
-
-        if (pais != null)
-        {
-            var lugar = provincia?.Nombre ?? pais.Nombre;
-            var soloRemoto = modelo.Modalidad.Count == 1 && modelo.Modalidad[0] == "Remoto";
-            var tipos = Catalogos.TiposEmpleo.Where(t => modelo.Tipo.Contains(t.Nombre)).Select(t => t.JSearch);
-            var puesto = modelo.BuscoAlgo ? modelo.Q : "empleos";
-            var resultado = await jsearch.Buscar($"{puesto} en {lugar}", pais.Codigo_ISO, soloRemoto, tipos, modelo.Fecha, modelo.Cursor);
-            modelo.ErrorExternas = resultado.Error;
-            modelo.CursorSiguiente = resultado.Cursor;
-            var externas = resultado.Ofertas;
-            if (modelo.Modalidad.Count > 0 && !modelo.Modalidad.Contains("Remoto"))
-            {
-                externas = externas.Where(o => o.Modalidad != "Remoto").ToList();
-            }
-            BD.MarcarPostuladas(externas, idUsuario);
-            ofertas.AddRange(externas);
-        }
-
-        modelo.Ofertas = modelo.Orden switch
-        {
-            "az" => ofertas.OrderBy(o => o.Titulo, StringComparer.Create(new CultureInfo("es-AR"), true)).ToList(),
-            "antiguas" => ofertas.OrderBy(o => o.Fecha_Publicacion ?? DateTime.MaxValue).ToList(),
-            _ => ofertas.OrderByDescending(o => o.Fecha_Publicacion ?? DateTime.MinValue).ToList()
-        };
-        modelo.Seleccionada = modelo.Ofertas.FirstOrDefault(o => o.Clave == idSeleccionada) ?? modelo.Ofertas.FirstOrDefault();
-        modelo.Consulta = consulta.Where(q => q.Key != "id")
+            Texto = modelo.Q,
+            IDPais = modelo.IDPais,
+            IDProvincia = modelo.IDProvincia,
+            Modalidades = modelo.Modalidad,
+            TiposEmpleo = modelo.Tipo,
+            Dias = fecha.Valor == null ? null : fecha.Dias,
+            Orden = modelo.Orden,
+            Desde = (modelo.Pagina - 1) * OfertasPorPagina,
+            Cantidad = OfertasPorPagina
+        }, idUsuario);
+        modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
+        modelo.PorPagina = OfertasPorPagina;
+        modelo.Consulta = consulta.Where(q => q.Key != "Pagina")
             .SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
         return modelo;
     }
+
+    public static List<string> PuestosParaAnimacion() =>
+        BD.ObtenerTitulosRecientes(30)
+            .Select(t => Textos.Recortar(t, 48))
+            .Where(t => t.Length > 2)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(8)
+            .ToList();
 
     public static bool TieneCV(int idUsuario) => !string.IsNullOrEmpty(BD.ObtenerCV(idUsuario)?.Nombre_Archivo);
 
@@ -152,31 +134,24 @@ public static class Empleos
             "Agregamos la postulación a tu tablero.", "Esa postulación ya estaba en tu tablero.", "advertencia");
     }
 
-    public static async Task<(List<Oferta> Ofertas, bool Error)> ParaVos(MiPerfilViewModel perfil, int idUsuario, JSearch jsearch)
+    public static List<Oferta> ParaVos(MiPerfilViewModel perfil, int idUsuario)
     {
         var puesto = perfil.Preferencia.Puesto_Buscado;
         if (string.IsNullOrWhiteSpace(puesto))
         {
-            return (new List<Oferta>(), false);
+            return new List<Oferta>();
         }
         var idProvincia = perfil.Preferencia.IDProvincia ?? perfil.Perfil.IDProvincia;
         var provincia = BD.ObtenerProvincias().FirstOrDefault(p => p.ID == idProvincia);
-        var paises = BD.ObtenerPaises();
-        var pais = paises.FirstOrDefault(p => p.ID == (provincia?.IDPais ?? perfil.Perfil.IDPais)) ?? paises.FirstOrDefault();
-        var modalidades = perfil.Preferencia.ListaModalidades;
-
-        var error = false;
-        var ofertas = BD.BuscarOfertas(new FiltrosOfertas { Texto = puesto, IDProvincia = provincia?.ID, Modalidades = modalidades }, idUsuario);
-        if (pais != null)
+        var ofertas = BD.BuscarOfertas(new FiltrosOfertas
         {
-            var soloRemoto = modalidades.Count == 1 && modalidades[0] == "Remoto";
-            var resultado = await jsearch.Buscar($"{puesto} en {provincia?.Nombre ?? pais.Nombre}", pais.Codigo_ISO, soloRemoto,
-                                                 Array.Empty<string>(), "month", null);
-            error = resultado.Error;
-            BD.MarcarPostuladas(resultado.Ofertas, idUsuario);
-            ofertas.AddRange(resultado.Ofertas);
-        }
-        return (ofertas.Where(o => !o.YaPostulado).Take(6).ToList(), error);
+            Texto = puesto,
+            IDPais = provincia?.IDPais ?? perfil.Perfil.IDPais,
+            IDProvincia = provincia?.ID,
+            Modalidades = perfil.Preferencia.ListaModalidades,
+            Cantidad = 30
+        }, idUsuario);
+        return ofertas.Where(o => !o.YaPostulado).Take(6).ToList();
     }
 }
 

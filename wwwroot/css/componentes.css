@@ -3180,11 +3180,6 @@ p.alert .icono {
   display: none;
 }
 
-.buscar:has(.resultados.esta-buscando) .buscar-detalle {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
 @media (max-width: 640px) {
   .seleccion-lista {
     width: 100%;

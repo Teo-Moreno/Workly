@@ -1,4 +1,4 @@
-USE Workly
+﻿USE Workly
 GO
 SET ANSI_NULLS ON
 GO
@@ -932,41 +932,79 @@ GO
 CREATE OR ALTER PROCEDURE BuscarOfertas
     @IDUsuarioActual INT,
     @Texto NVARCHAR(200) = NULL,
+    @IDPais INT = NULL,
     @IDProvincia INT = NULL,
     @Modalidades NVARCHAR(200) = NULL,
     @Tipos NVARCHAR(400) = NULL,
-    @Dias INT = NULL
+    @Dias INT = NULL,
+    @Orden NVARCHAR(20) = N'recientes',
+    @Desde INT = 0,
+    @Cantidad INT = 42
 AS
 BEGIN
     DECLARE @Patron NVARCHAR(700)
     SET @Patron = CASE WHEN TRIM(ISNULL(@Texto, N'')) = N'' THEN NULL
                    ELSE N'%' + REPLACE(REPLACE(REPLACE(TRIM(@Texto), N'[', N'[[]'), N'%', N'[%]'), N'_', N'[_]') + N'%' END
 
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
-           pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
-           CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
-           o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
-           (SELECT STRING_AGG(p.Nombre, ', ') FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto
-            WHERE op.IDOfertaLaboral = o.ID) AS Puestos,
-           (SELECT COUNT(*) FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS CantidadPostulantes,
-           CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
-           CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                             WHERE fo.IDOfertaLaboral = o.ID AND f.IDUsuario = @IDUsuarioActual)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
-    FROM OfertaLaboral o
-    JOIN Empresa e ON e.ID = o.IDEmpresa
-    LEFT JOIN Usuario pu ON pu.ID = o.IDUsuario_Publicador
-    LEFT JOIN Provincia pr ON pr.ID = o.IDProvincia
-    WHERE o.Estado_Publicacion = N'Aprobada' AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))
-      AND (@Patron IS NULL OR o.Titulo LIKE @Patron OR o.Descripcion LIKE @Patron OR e.Nombre LIKE @Patron
-           OR EXISTS (SELECT 1 FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto
-                      WHERE op.IDOfertaLaboral = o.ID AND p.Nombre LIKE @Patron))
-      AND (@IDProvincia IS NULL OR o.IDProvincia = @IDProvincia OR o.Modalidad = N'Remoto')
-      AND (@Modalidades IS NULL OR o.Modalidad IN (SELECT value FROM STRING_SPLIT(@Modalidades, ',')))
-      AND (@Tipos IS NULL OR o.Tipo_Contrato IN (SELECT value FROM STRING_SPLIT(@Tipos, ',')))
-      AND (@Dias IS NULL OR o.Fecha_Publicacion >= DATEADD(DAY, -@Dias, CAST(GETDATE() AS DATE)))
-    ORDER BY o.Fecha_Publicacion DESC, o.ID DESC
+    DECLARE @FechaMinima DATE
+    SET @FechaMinima = CASE WHEN @Dias IS NULL THEN NULL ELSE DATEADD(DAY, -@Dias, CAST(GETDATE() AS DATE)) END
+
+    DECLARE @ConRemoto BIT, @ConPresencial BIT
+    SET @ConRemoto = CASE WHEN EXISTS (SELECT 1 FROM STRING_SPLIT(@Modalidades, ',') WHERE value = N'Remoto') THEN 1 ELSE 0 END
+    SET @ConPresencial = CASE WHEN EXISTS (SELECT 1 FROM STRING_SPLIT(@Modalidades, ',') WHERE value <> N'Remoto') THEN 1 ELSE 0 END
+
+    ;WITH Resultados AS (
+        SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+               pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, CAST(NULL AS NVARCHAR(100)) AS SalarioTexto,
+               o.Cantidad_Puestos, CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion,
+               CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre, o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador,
+               o.Estado_Publicacion, CAST(NULL AS NVARCHAR(100)) AS Publicador,
+               CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
+               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                 WHERE fo.IDOfertaLaboral = o.ID AND f.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada,
+               CAST(o.Fecha_Publicacion AS DATETIME2) AS FechaOrden
+        FROM OfertaLaboral o
+        JOIN Empresa e ON e.ID = o.IDEmpresa
+        LEFT JOIN Usuario pu ON pu.ID = o.IDUsuario_Publicador
+        LEFT JOIN Provincia pr ON pr.ID = o.IDProvincia
+        WHERE o.Estado_Publicacion = N'Aprobada' AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))
+          AND (@Patron IS NULL OR o.Titulo LIKE @Patron OR o.Descripcion LIKE @Patron OR e.Nombre LIKE @Patron
+               OR EXISTS (SELECT 1 FROM OfertaPuesto op JOIN Puesto p ON p.ID = op.IDPuesto
+                          WHERE op.IDOfertaLaboral = o.ID AND p.Nombre LIKE @Patron))
+          AND (@IDPais IS NULL OR o.IDProvincia IS NULL OR pr.IDPais = @IDPais)
+          AND (@IDProvincia IS NULL OR o.IDProvincia = @IDProvincia OR o.Modalidad = N'Remoto')
+          AND (@Modalidades IS NULL OR o.Modalidad IN (SELECT value FROM STRING_SPLIT(@Modalidades, ',')))
+          AND (@Tipos IS NULL OR o.Tipo_Contrato IN (SELECT value FROM STRING_SPLIT(@Tipos, ',')))
+          AND (@FechaMinima IS NULL OR o.Fecha_Publicacion >= @FechaMinima)
+
+        UNION ALL
+
+        SELECT CAST(1 AS BIT), x.ID, x.Titulo, ISNULL(x.Empresa, N'Empresa sin nombre'), NULL, x.Logo, x.Ubicacion,
+               NULL, x.IDProvincia, CASE WHEN x.Es_Remoto = 1 THEN N'Remoto' ELSE NULL END, x.Tipo_Contrato, NULL, x.Salario,
+               1, x.Fecha_Publicacion, NULL, NULL, NULL, N'Aprobada', x.Publicador,
+               CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
+               CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
+                                 WHERE fo.IDOfertaExterna = x.ID AND f.IDUsuario = @IDUsuarioActual)
+                    THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
+               ISNULL(x.Fecha_Publicacion, x.Fecha_Alta)
+        FROM OfertaExterna x
+        WHERE (@Patron IS NULL OR x.Titulo LIKE @Patron OR x.Empresa LIKE @Patron OR x.Descripcion LIKE @Patron)
+          AND (@IDPais IS NULL OR x.IDPais IS NULL OR x.IDPais = @IDPais)
+          AND (@IDProvincia IS NULL OR x.IDProvincia = @IDProvincia OR x.Es_Remoto = 1)
+          AND (@Modalidades IS NULL OR (x.Es_Remoto = 1 AND @ConRemoto = 1) OR (x.Es_Remoto = 0 AND @ConPresencial = 1))
+          AND (@Tipos IS NULL OR x.Tipo_Contrato IN (SELECT value FROM STRING_SPLIT(@Tipos, ',')))
+          AND (@FechaMinima IS NULL OR ISNULL(x.Fecha_Publicacion, x.Fecha_Alta) >= @FechaMinima)
+    )
+    SELECT *, COUNT(*) OVER () AS Total
+    FROM Resultados
+    ORDER BY CASE WHEN @Orden = N'az' THEN Titulo END ASC,
+             CASE WHEN @Orden = N'antiguas' THEN FechaOrden END ASC,
+             CASE WHEN @Orden NOT IN (N'az', N'antiguas') THEN FechaOrden END DESC,
+             EsExterna ASC, ID DESC
+    OFFSET @Desde ROWS FETCH NEXT @Cantidad ROWS ONLY
 END
 GO
 
@@ -1280,38 +1318,49 @@ CREATE OR ALTER PROCEDURE GuardarOfertaExterna
     @Salario NVARCHAR(100),
     @Link_Postulacion NVARCHAR(2000),
     @Publicador NVARCHAR(100),
-    @Fecha_Publicacion DATETIME2
+    @Fecha_Publicacion DATETIME2,
+    @IDPais INT = NULL,
+    @IDProvincia INT = NULL
 AS
 BEGIN
-    DECLARE @IDUsuarioActual INT
-    SET @IDUsuarioActual = 0
-
     IF EXISTS (SELECT 1 FROM OfertaExterna WHERE ID_Externo = @ID_Externo)
     BEGIN
         UPDATE OfertaExterna
         SET Titulo = @Titulo, Empresa = @Empresa, Logo = @Logo, Ubicacion = @Ubicacion, Descripcion = @Descripcion,
             Es_Remoto = @Es_Remoto, Tipo_Contrato = @Tipo_Contrato, Salario = @Salario, Link_Postulacion = @Link_Postulacion,
-            Publicador = @Publicador, Fecha_Publicacion = @Fecha_Publicacion, Fecha_Consulta = SYSUTCDATETIME()
+            Publicador = @Publicador, Fecha_Publicacion = @Fecha_Publicacion, Fecha_Consulta = SYSUTCDATETIME(),
+            IDPais = ISNULL(@IDPais, IDPais), IDProvincia = ISNULL(@IDProvincia, IDProvincia)
         WHERE ID_Externo = @ID_Externo
     END
     ELSE
     BEGIN
         INSERT INTO OfertaExterna (ID_Externo, Titulo, Empresa, Logo, Ubicacion, Descripcion, Es_Remoto, Tipo_Contrato,
-                                   Salario, Link_Postulacion, Publicador, Fecha_Publicacion)
+                                   Salario, Link_Postulacion, Publicador, Fecha_Publicacion, IDPais, IDProvincia)
         VALUES (@ID_Externo, @Titulo, @Empresa, @Logo, @Ubicacion, @Descripcion, @Es_Remoto, @Tipo_Contrato,
-                @Salario, @Link_Postulacion, @Publicador, @Fecha_Publicacion)
+                @Salario, @Link_Postulacion, @Publicador, @Fecha_Publicacion, @IDPais, @IDProvincia)
     END
 
-    SELECT CAST(1 AS BIT) AS EsExterna, x.ID, x.ID_Externo, x.Titulo, ISNULL(x.Empresa, N'Empresa sin nombre') AS Empresa,
-           x.Logo, x.Ubicacion, CASE WHEN x.Es_Remoto = 1 THEN N'Remoto' ELSE NULL END AS Modalidad, x.Tipo_Contrato,
-           x.Salario AS SalarioTexto, x.Descripcion, x.Fecha_Publicacion, x.Link_Postulacion, x.Publicador,
-           CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuarioActual)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
-           CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                             WHERE fo.IDOfertaExterna = x.ID AND f.IDUsuario = @IDUsuarioActual)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
+END
+GO
+
+CREATE OR ALTER PROCEDURE ObtenerUltimaImportacion
+AS
+BEGIN
+    SELECT MAX(Fecha_Consulta) FROM OfertaExterna
+END
+GO
+
+CREATE OR ALTER PROCEDURE BorrarOfertasExternasViejas
+    @Dias INT
+AS
+BEGIN
+    DELETE x
     FROM OfertaExterna x
-    WHERE x.ID_Externo = @ID_Externo
+    WHERE x.Fecha_Consulta < DATEADD(DAY, -@Dias, SYSUTCDATETIME())
+      AND NOT EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID)
+      AND NOT EXISTS (SELECT 1 FROM FavoritoOferta fo WHERE fo.IDOfertaExterna = x.ID)
+
+    SELECT @@ROWCOUNT AS Filas
 END
 GO
 
@@ -1330,22 +1379,6 @@ BEGIN
                 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
     FROM OfertaExterna x
     WHERE x.ID = @ID
-END
-GO
-
-CREATE OR ALTER PROCEDURE ObtenerMarcasExternas
-    @IDUsuario INT,
-    @IDs NVARCHAR(MAX)
-AS
-BEGIN
-    SELECT x.ID,
-           CASE WHEN EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuario)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS YaPostulado,
-           CASE WHEN EXISTS (SELECT 1 FROM FavoritoOferta fo JOIN Favorito f ON f.ID_favorito = fo.IDFavorito
-                             WHERE fo.IDOfertaExterna = x.ID AND f.IDUsuario = @IDUsuario)
-                THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Guardada
-    FROM OfertaExterna x
-    WHERE x.ID IN (SELECT CAST(value AS INT) FROM STRING_SPLIT(@IDs, ','))
 END
 GO
 

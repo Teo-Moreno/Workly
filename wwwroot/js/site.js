@@ -49,24 +49,6 @@
     window.addEventListener("hashchange", mostrar);
   });
 
-  document.addEventListener("click", (evento) => {
-    const tarjeta = evento.target.closest("[data-resultados] [data-oferta]");
-    const panelDetalles = $("[data-detalles]");
-    if (!tarjeta || !panelDetalles) return;
-    if (getComputedStyle(panelDetalles).display === "none") return;
-    evento.preventDefault();
-    const id = tarjeta.dataset.oferta;
-    $$("[data-oferta]").forEach((t) => t.classList.toggle("es-seleccionada", t === tarjeta));
-    $$("[data-detalle-oferta]", panelDetalles).forEach((detalle) => {
-      detalle.hidden = detalle.dataset.detalleOferta !== id;
-      detalle.classList.toggle("es-nueva", !detalle.hidden);
-      if (!detalle.hidden) detalle.scrollTop = 0;
-    });
-    const url = new URL(location.href);
-    url.searchParams.set("id", id);
-    history.replaceState(null, "", url);
-  });
-
   function validar(formulario) {
     let valido = true;
     $$("input, select, textarea", formulario).forEach((control) => {
@@ -239,6 +221,12 @@
     boton.classList.add("esta-cargando");
     boton.setAttribute("aria-disabled", "true");
     boton.insertAdjacentHTML("afterbegin", `<span class="spinner-border-sm${boton.matches("[class*='btn-outline'], [class*='btn-link'], .btn-externo, .btn-archivo, .btn-archivo-block, .btn-guardada, .buscar-ver-filtros, .btn-chip") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
+  };
+
+  const quitarCargando = (boton) => {
+    $("[data-spinner-boton]", boton)?.replaceWith();
+    boton.classList.remove("esta-cargando");
+    boton.removeAttribute("aria-disabled");
   };
 
   $$("form[data-formulario-real]").forEach((formulario) => {
@@ -440,24 +428,23 @@
     mostrarCargando(enlace.dataset.cargando);
   });
 
+  const pedirPartes = async (url) => {
+    const respuesta = await fetch(url, { headers: { Accept: "text/html" }, credentials: "same-origin" });
+    if (!respuesta.ok) throw new Error(respuesta.statusText);
+    const plantilla = document.createElement("template");
+    plantilla.innerHTML = await respuesta.text();
+    return (nombre) => plantilla.content.querySelector(`template[data-parte="${nombre}"]`)?.content;
+  };
+
   const cargarResultados = async (zona) => {
     const contenido = $("[data-resultados-contenido]", zona);
-    const detalles = zona.dataset.resultadosDetalles ? $(zona.dataset.resultadosDetalles) : null;
     mostrarCargando(zona);
     try {
-      const respuesta = await fetch(zona.dataset.resultadosUrl, { headers: { Accept: "text/html" }, credentials: "same-origin" });
-      if (!respuesta.ok) throw new Error(respuesta.statusText);
-      const plantilla = document.createElement("template");
-      plantilla.innerHTML = await respuesta.text();
-      const parte = (nombre) => plantilla.content.querySelector(`template[data-parte="${nombre}"]`)?.content;
+      const parte = await pedirPartes(zona.dataset.resultadosUrl);
       const titulo = parte("titulo");
       const lugarTitulo = $("[data-resultados-titulo]", zona);
       if (titulo && lugarTitulo) lugarTitulo.textContent = titulo.textContent.trim();
       contenido.replaceChildren(parte("contenido") ?? "");
-      if (detalles) {
-        detalles.replaceChildren(parte("detalles") ?? "");
-        detalles.hidden = detalles.children.length === 0;
-      }
     } catch {
       const error = $("template[data-cargando-error]", zona);
       contenido.replaceChildren(error ? error.content.cloneNode(true) : "");
@@ -467,6 +454,28 @@
   };
 
   $$("[data-resultados-url]").forEach(cargarResultados);
+
+  document.addEventListener("click", async (evento) => {
+    const boton = evento.target.closest("[data-ver-mas]");
+    if (!boton || boton.getAttribute("aria-disabled") === "true") return;
+    const zonaBoton = boton.closest("[data-ver-mas-zona]");
+    const grilla = zonaBoton?.parentElement.querySelector("[data-resultados]");
+    if (!grilla) return;
+    ponerCargando(boton);
+    try {
+      const contenido = (await pedirPartes(boton.dataset.verMas))("contenido");
+      const nuevas = contenido ? [...contenido.querySelectorAll("[data-resultados] > *")] : [];
+      nuevas.forEach((tarjeta) => tarjeta.classList.add("es-nueva"));
+      grilla.append(...nuevas);
+      const siguiente = contenido?.querySelector("[data-ver-mas-zona]");
+      if (siguiente) zonaBoton.replaceWith(siguiente);
+      else zonaBoton.replaceWith();
+      nuevas[0]?.querySelector("a")?.focus({ preventScroll: true });
+    } catch {
+      quitarCargando(boton);
+      snackbar("No pudimos cargar más ofertas. Probá de nuevo.", "error");
+    }
+  });
 
   document.addEventListener("click", (evento) => {
     const boton = evento.target.closest("[data-recargar-resultados]");
@@ -480,12 +489,7 @@
       contenedor.classList.remove("esta-buscando");
       contenedor.removeAttribute("aria-busy");
     });
-    $$("[data-spinner-boton]").forEach((spinner) => {
-      const boton = spinner.parentElement;
-      spinner.remove();
-      boton.classList.remove("esta-cargando");
-      boton.removeAttribute("aria-disabled");
-    });
+    $$("[data-spinner-boton]").forEach((spinner) => quitarCargando(spinner.parentElement));
   });
 
   $$("[data-telefono]").forEach((entrada) => {
