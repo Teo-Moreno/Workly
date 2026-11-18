@@ -1,15 +1,6 @@
 <template data-parte="titulo">@ViewBag.Busqueda.Titulo</template>
 
 <template data-parte="contenido">
-    @if (ViewBag.Busqueda.ErrorExternas)
-    {
-        <partial name="_AvisoExternas" />
-    }
-    @if (!ViewBag.Busqueda.BuscoAlgo && ViewBag.Busqueda.Ofertas.Count > 0)
-    {
-        <p class="small text-body-secondary">Estas son las búsquedas publicadas en Workly y las ofertas de otros sitios en @ViewBag.Busqueda.Lugar. Escribí un puesto para buscar uno en particular.</p>
-    }
-
     @if (ViewBag.Busqueda.Ofertas.Count == 0)
     {
         <div class="estado-vacio">
@@ -32,24 +23,17 @@
     }
     else
     {
-        <div class="resultados-lista" data-resultados>
+        <div class="resultados-grilla" data-resultados>
             @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
             {
-                <partial name="_OfertaTarjeta" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Seleccionada", (object)ViewBag.Busqueda.EsSeleccionada(oferta) } }' />
+                <partial name="_OfertaTarjeta" model="oferta" />
             }
         </div>
-        @if (ViewBag.Busqueda.CursorSiguiente != null)
+        @if (ViewBag.Busqueda.HayMas)
         {
-            <div class="resultados-mas">
-                <a class="btn btn-outline-primary" href="@ViewBag.Busqueda.UrlMas" data-cargando="#resultados-busqueda">Ver más ofertas de otros sitios</a>
+            <div class="resultados-mas" data-ver-mas-zona>
+                <button class="btn btn-outline-primary" type="button" data-ver-mas="@ViewBag.Busqueda.UrlMas">Ver más</button>
             </div>
         }
-    }
-</template>
-
-<template data-parte="detalles">
-    @foreach (Oferta oferta in ViewBag.Busqueda.Ofertas)
-    {
-        <partial name="_OfertaDetallePanel" model="oferta" view-data='new ViewDataDictionary(ViewData) { { "Visible", (object)ViewBag.Busqueda.EsSeleccionada(oferta) }, { "Volver", (object)ViewBag.Busqueda.ConOferta(oferta.Clave) } }' />
     }
 </template>

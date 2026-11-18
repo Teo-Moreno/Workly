@@ -1,45 +1,38 @@
 using System.Text.Json;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Workly.Models;
 
 public class JSearch
 {
     private const string Host = "jsearch.p.rapidapi.com";
-    private static readonly TimeSpan DuracionBusqueda = TimeSpan.FromHours(6);
-    private static readonly TimeSpan DuracionAnimacion = TimeSpan.FromHours(24);
 
     private readonly HttpClient _http;
-    private readonly IMemoryCache _cache;
     private readonly ILogger<JSearch> _logger;
     private readonly string? _clave;
 
-    public JSearch(HttpClient http, IMemoryCache cache, IConfiguration configuracion, ILogger<JSearch> logger)
+    public JSearch(HttpClient http, IConfiguration configuracion, ILogger<JSearch> logger)
     {
         _http = http;
-        _cache = cache;
         _logger = logger;
         _clave = configuracion["JSearch:ApiKey"];
         _http.BaseAddress = new Uri($"https://{Host}/");
-        _http.Timeout = TimeSpan.FromSeconds(20);
+        _http.Timeout = TimeSpan.FromSeconds(30);
     }
 
     public bool Configurada => !string.IsNullOrWhiteSpace(_clave);
 
-    public class Resultado
+    public class Pagina
     {
-        public List<Oferta> Ofertas { get; set; } = new();
+        public List<OfertaExternaDatos> Ofertas { get; set; } = new();
         public string? Cursor { get; set; }
-
         public bool Error { get; set; }
     }
 
-    public async Task<Resultado> Buscar(string consulta, string pais, bool soloRemoto, IEnumerable<string> tiposEmpleo,
-                                        string? fecha, string? cursor)
+    public async Task<Pagina> Buscar(string consulta, string pais, string fecha, string? cursor, CancellationToken cancelar)
     {
-        if (!Configurada || string.IsNullOrWhiteSpace(consulta))
+        if (!Configurada)
         {
-            return new Resultado { Error = !Configurada };
+            return new Pagina { Error = true };
         }
 
         var parametros = new Dictionary<string, string?>
@@ -47,32 +40,24 @@ public class JSearch
             ["query"] = consulta.Trim(),
             ["country"] = pais,
             ["num_pages"] = "1",
-            ["date_posted"] = string.IsNullOrEmpty(fecha) ? "all" : fecha,
-            ["work_from_home"] = soloRemoto ? "true" : null,
-            ["employment_types"] = tiposEmpleo.Any() ? string.Join(",", tiposEmpleo) : null,
+            ["date_posted"] = fecha,
             ["cursor"] = cursor
         };
         var url = "search-v2?" + string.Join("&", parametros.Where(p => !string.IsNullOrEmpty(p.Value))
                                                              .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
-
-        if (_cache.TryGetValue(url, out (List<OfertaExternaDatos> Ofertas, string? Cursor) enMemoria))
-        {
-            return new Resultado { Ofertas = BD.GuardarOfertasExternas(enMemoria.Ofertas), Cursor = enMemoria.Cursor };
-        }
-
         try
         {
             using var pedido = new HttpRequestMessage(HttpMethod.Get, url);
             pedido.Headers.Add("x-rapidapi-key", _clave);
             pedido.Headers.Add("x-rapidapi-host", Host);
-            using var respuesta = await _http.SendAsync(pedido);
+            using var respuesta = await _http.SendAsync(pedido, cancelar);
             if (!respuesta.IsSuccessStatusCode)
             {
                 _logger.LogWarning("JSearch respondió {Codigo} para {Url}", (int)respuesta.StatusCode, url);
-                return new Resultado { Error = true };
+                return new Pagina { Error = true };
             }
 
-            using var json = JsonDocument.Parse(await respuesta.Content.ReadAsStreamAsync());
+            using var json = await JsonDocument.ParseAsync(await respuesta.Content.ReadAsStreamAsync(cancelar), cancellationToken: cancelar);
             var datos = json.RootElement.GetProperty("data");
             var trabajos = datos.ValueKind == JsonValueKind.Object && datos.TryGetProperty("jobs", out var lista) ? lista : datos;
             var ofertas = trabajos.ValueKind == JsonValueKind.Array
@@ -81,37 +66,13 @@ public class JSearch
             var siguiente = datos.ValueKind == JsonValueKind.Object && datos.TryGetProperty("cursor", out var c) && c.ValueKind == JsonValueKind.String
                 ? c.GetString()
                 : null;
-
-            var cursorSiguiente = ofertas.Count > 0 ? siguiente : null;
-            _cache.Set(url, (ofertas, cursorSiguiente), DuracionBusqueda);
-            return new Resultado { Ofertas = BD.GuardarOfertasExternas(ofertas), Cursor = cursorSiguiente };
+            return new Pagina { Ofertas = ofertas, Cursor = ofertas.Count > 0 ? siguiente : null };
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
         {
             _logger.LogWarning(ex, "No se pudo consultar JSearch");
-            return new Resultado { Error = true };
+            return new Pagina { Error = true };
         }
-    }
-
-    public async Task<List<string>> PuestosParaAnimacion()
-    {
-        if (_cache.TryGetValue("animacion", out List<string>? puestos) && puestos != null)
-        {
-            return puestos;
-        }
-
-        var resultado = await Buscar("empleos en Argentina", "ar", false, Array.Empty<string>(), "week", null);
-        puestos = resultado.Ofertas.Select(o => Textos.Recortar(o.Titulo, 48)).ToList();
-        if (puestos.Count == 0)
-        {
-            puestos = BD.ObtenerTitulosRecientes(10);
-        }
-        puestos = puestos.Where(t => t.Length > 2).Distinct(StringComparer.OrdinalIgnoreCase).Take(8).ToList();
-        if (puestos.Count > 0)
-        {
-            _cache.Set("animacion", puestos, DuracionAnimacion);
-        }
-        return puestos;
     }
 
     private static OfertaExternaDatos? Leer(JsonElement j)
@@ -135,6 +96,7 @@ public class JSearch
             ubicacion = string.Join(", ", new[] { Texto(j, "job_city"), Texto(j, "job_state") }.Where(t => !string.IsNullOrWhiteSpace(t)));
         }
         ubicacion = System.Text.RegularExpressions.Regex.Replace(ubicacion ?? "", @"\s*[•·]\s*a través de .*$", "").Trim();
+        ubicacion = System.Text.RegularExpressions.Regex.Replace(ubicacion, @"\s*\(y \d+ ubicaci[oó]n(es)? más\)\s*$", "").Trim();
 
         return new OfertaExternaDatos
         {
@@ -174,4 +136,6 @@ public class OfertaExternaDatos
     public string? Link_Postulacion { get; set; }
     public string? Publicador { get; set; }
     public DateTime? Fecha_Publicacion { get; set; }
+    public int? IDPais { get; set; }
+    public int? IDProvincia { get; set; }
 }

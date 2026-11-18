@@ -74,8 +74,12 @@ public class OfertaNueva
 public class FiltrosOfertas
 {
     public string? Texto { get; set; }
+    public int? IDPais { get; set; }
     public int? IDProvincia { get; set; }
     public List<string> Modalidades { get; set; } = new();
     public List<string> TiposEmpleo { get; set; } = new();
     public int? Dias { get; set; }
+    public string Orden { get; set; } = "recientes";
+    public int Desde { get; set; }
+    public int Cantidad { get; set; } = 42;
 }

@@ -16,6 +16,7 @@ builder.Services.AddAntiforgery(opciones => opciones.Cookie.Name = "Workly.Segur
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.CookieTempDataProviderOptions>(opciones => opciones.Cookie.Name = "Workly.Avisos");
 
 builder.Services.AddHttpClient<JSearch>();
+builder.Services.AddHostedService<ImportadorOfertas>();
 
 var autenticacion = builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

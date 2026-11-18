@@ -1,4 +1,4 @@
-<article class="oferta-tarjeta @(ViewData["Seleccionada"] is true ? "es-seleccionada" : "")" data-oferta="@Model.Clave">
+<article class="oferta-tarjeta" data-oferta="@Model.Clave">
     <div class="oferta-tarjeta-cabecera">
         <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa-principal")' />
         <div class="oferta-tarjeta-datos">
