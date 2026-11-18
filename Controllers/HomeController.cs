@@ -7,17 +7,14 @@ namespace Workly.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly JSearch _jsearch;
-
-    public HomeController(ILogger<HomeController> logger, JSearch jsearch)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _jsearch = jsearch;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        ViewBag.Puestos = await _jsearch.PuestosParaAnimacion();
+        ViewBag.Puestos = Empleos.PuestosParaAnimacion();
         ViewBag.Empresas = BD.ObtenerEmpresasConBusquedas(12);
         return View();
     }

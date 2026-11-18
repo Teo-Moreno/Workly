@@ -41,6 +41,7 @@ public class Oferta
     public bool Guardada { get; set; }
 
     public DateTime? Fecha_Guardado { get; set; }
+    public int Total { get; set; }
     public int IDFavorito { get; set; }
 
     public string Clave => (EsExterna ? "x" : "w") + ID;

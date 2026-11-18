@@ -7,13 +7,6 @@ namespace Workly.Controllers;
 [Authorize]
 public class PanelController : Controller
 {
-    private readonly JSearch _jsearch;
-
-    public PanelController(JSearch jsearch)
-    {
-        _jsearch = jsearch;
-    }
-
     public IActionResult Index()
     {
         if (User.EsEmpresa())
@@ -33,18 +26,11 @@ public class PanelController : Controller
         return View();
     }
 
-    public async Task<IActionResult> ParaVos()
+    public IActionResult ParaVos()
     {
         var perfil = User.EsPersona() ? BD.ObtenerMiPerfil(User.IdUsuario()) : null;
         ViewBag.Puesto = perfil?.Preferencia.Puesto_Buscado;
-        ViewBag.ErrorExternas = false;
-        ViewBag.ParaVos = new List<Oferta>();
-        if (perfil != null)
-        {
-            var (ofertas, error) = await Empleos.ParaVos(perfil, User.IdUsuario(), _jsearch);
-            ViewBag.ParaVos = ofertas;
-            ViewBag.ErrorExternas = error;
-        }
+        ViewBag.ParaVos = perfil == null ? new List<Oferta>() : Empleos.ParaVos(perfil, User.IdUsuario());
         return PartialView("_ParaVos");
     }
 }

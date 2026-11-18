@@ -6,13 +6,6 @@ namespace Workly.Controllers;
 
 public class EmpleosController : Controller
 {
-    private readonly JSearch _jsearch;
-
-    public EmpleosController(JSearch jsearch)
-    {
-        _jsearch = jsearch;
-    }
-
     public IActionResult Index(BuscarTrabajoViewModel filtros)
     {
         ViewBag.Busqueda = Empleos.Preparar(filtros);
@@ -20,9 +13,9 @@ public class EmpleosController : Controller
         return View();
     }
 
-    public async Task<IActionResult> Resultados(BuscarTrabajoViewModel filtros, string? id)
+    public IActionResult Resultados(BuscarTrabajoViewModel filtros)
     {
-        ViewBag.Busqueda = await Empleos.Buscar(filtros, id, Request.Query, User.IdUsuario(), _jsearch);
+        ViewBag.Busqueda = Empleos.Buscar(filtros, Request.Query, User.IdUsuario());
         return PartialView("_Resultados");
     }
 
