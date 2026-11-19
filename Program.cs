@@ -7,6 +7,16 @@ using Workly.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddResponseCompression(opciones =>
+{
+    opciones.EnableForHttps = true;
+    opciones.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    opciones.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(opciones =>
+    opciones.Level = System.IO.Compression.CompressionLevel.Fastest);
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(opciones =>
+    opciones.Level = System.IO.Compression.CompressionLevel.Fastest);
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<Captcha>();
 builder.Services.AddSingleton<IntentosLogin>();
@@ -16,7 +26,11 @@ builder.Services.AddAntiforgery(opciones => opciones.Cookie.Name = "Workly.Segur
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.CookieTempDataProviderOptions>(opciones => opciones.Cookie.Name = "Workly.Avisos");
 
 builder.Services.AddHttpClient<JSearch>();
+builder.Services.AddHttpClient<Groq>();
+builder.Services.AddTransient<LectorCV>();
+builder.Services.AddTransient<Asistente>();
 builder.Services.AddHostedService<ImportadorOfertas>();
+builder.Services.AddHostedService<ResumenPostulaciones>();
 
 var autenticacion = builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -84,12 +98,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = contexto =>
+        contexto.Context.Response.Headers.CacheControl = contexto.Context.Request.Query.ContainsKey("v")
+            ? "public, max-age=31536000, immutable"
+            : "public, max-age=86400"
+});
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseStaticFiles();
 app.MapStaticAssets();
 
 app.MapControllerRoute(

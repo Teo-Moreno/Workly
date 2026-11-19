@@ -73,6 +73,26 @@ public class Correo
             "Workly");
     }
 
+    public Task<bool> EnviarResumen(OfertaParaResumen oferta, int nuevos, Postulante? mejor, string? enlace)
+    {
+        var texto = $"Hola, {oferta.Nombre}.\n\n" +
+                    $"Este es el resumen de los últimos {ResumenPostulaciones.DiasEntreResumenes} días de tu búsqueda \"{oferta.Titulo}\".\n\n" +
+                    (nuevos == 0
+                        ? "En estos días no se postuló nadie nuevo.\n\n"
+                        : (nuevos == 1 ? "Se postuló 1 persona nueva.\n\n" : $"Se postularon {nuevos} personas nuevas.\n\n")) +
+                    $"En total, la búsqueda tiene {oferta.Total} {(oferta.Total == 1 ? "postulación" : "postulaciones")}.\n\n";
+        if (mejor != null)
+        {
+            texto += $"Quien más coincide con lo que pediste es {mejor.NombreCompleto} ({mejor.Puntaje}% de coincidencia" +
+                     (mejor.Motivos.Count > 0 ? ": " + string.Join(", ", mejor.Motivos) : "") + ").\n\n";
+        }
+        if (enlace != null)
+        {
+            texto += $"Mirá todos los postulantes acá: {enlace}\n\n";
+        }
+        return Enviar(oferta.Email, $"Workly: resumen de tu búsqueda \"{oferta.Titulo}\"", texto + "Workly");
+    }
+
     private async Task<bool> EnviarPorResend(string destino, string asunto, string texto)
     {
         try

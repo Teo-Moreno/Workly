@@ -44,32 +44,58 @@
     }
     else
     {
-        <ul class="list-group lista">
-            @foreach (Postulante p in ViewBag.Postulantes)
-            {
-                <li class="list-group-item fila-lista">
-                    <span class="foto-perfil" aria-hidden="true">
-                        @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt=""> } else { @p.Iniciales }
-                    </span>
-                    <div class="fila-lista-datos">
-                        <h3 class="tarjeta-titulo"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h3>
-                        <p class="texto-suave">@p.Resumen</p>
-                        <p>
-                            <a href="mailto:@p.Email">@p.Email</a>
-                            @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a href="tel:@p.TelefonoLink">@p.Telefono</a></span> }
-                        </p>
-                        <p class="texto-suave">Se postuló el @Vistas.Fecha(p.Fecha)</p>
-                    </div>
-                    <div class="fila-lista-acciones">
-                        @if (p.TieneCV)
+        <p class="texto-suave">Dentro de cada grupo, primero aparece quien más coincide con lo que pediste: habilidades del rubro, puesto que busca, ubicación y modalidad.</p>
+        @foreach (var (etapa, lista) in (List<(string Etapa, List<Postulante> Lista)>)ViewBag.Etapas)
+        {
+            <section class="etapa-postulantes" aria-labelledby="etapa-@Vistas.Clave(etapa)">
+                <h3 class="subtitulo-chico" id="etapa-@Vistas.Clave(etapa)">@etapa (@lista.Count)</h3>
+                @if (lista.Count == 0)
+                {
+                    <p class="texto-suave">Nadie en este grupo.</p>
+                }
+                else
+                {
+                    <ul class="list-group lista">
+                        @foreach (Postulante p in lista)
                         {
-                            <a class="btn-outline theme-primary boton btn-sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion">Descargar CV</a>
+                            <li class="list-group-item fila-lista">
+                                <span class="foto-perfil" aria-hidden="true">
+                                    @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt=""> } else { @p.Iniciales }
+                                </span>
+                                <div class="fila-lista-datos">
+                                    <h4 class="tarjeta-titulo"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h4>
+                                    <p><span class="etiqueta @(p.Puntaje >= 60 ? "etiqueta-exito" : p.Puntaje >= 30 ? "etiqueta-advertencia" : "etiqueta-gris")">Coincide @p.Puntaje%</span>@(p.Motivos.Count > 0 ? " " + string.Join(" · ", p.Motivos) : "")</p>
+                                    <p class="texto-suave">@p.Resumen</p>
+                                    <p>
+                                        <a href="mailto:@p.Email">@p.Email</a>
+                                        @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a href="tel:@p.TelefonoLink">@p.Telefono</a></span> }
+                                    </p>
+                                    <p class="texto-suave">Se postuló el @Vistas.Fecha(p.Fecha)</p>
+                                </div>
+                                <div class="fila-lista-acciones">
+                                    @foreach (var (otraEtapa, estado, boton) in Postulaciones.EtapasEmpresa)
+                                    {
+                                        if (otraEtapa != etapa)
+                                        {
+                                            <form asp-controller="Publicaciones" asp-action="CambiarEstado" asp-route-id="@ViewBag.Oferta.ID" method="post">
+                                                <input type="hidden" name="idPostulacion" value="@p.IDPostulacion">
+                                                <input type="hidden" name="estado" value="@estado">
+                                                <button class="btn-outline theme-primary boton btn-sm" type="submit">@boton</button>
+                                            </form>
+                                        }
+                                    }
+                                    @if (p.TieneCV)
+                                    {
+                                        <a class="btn-outline theme-primary boton btn-sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion">Descargar CV</a>
+                                    }
+                                    <a class="btn-solid theme-primary boton btn-sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
+                                </div>
+                            </li>
                         }
-                        <a class="btn-solid theme-primary boton btn-sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
-                    </div>
-                </li>
-            }
-        </ul>
+                    </ul>
+                }
+            </section>
+        }
     }
 
     <details class="accordion-item agregar peligro">
