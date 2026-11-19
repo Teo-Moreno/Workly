@@ -1346,7 +1346,15 @@ GO
 CREATE OR ALTER PROCEDURE ObtenerUltimaImportacion
 AS
 BEGIN
-    SELECT MAX(Fecha_Consulta) FROM OfertaExterna
+    SELECT MAX(Fecha) FROM Importacion
+END
+GO
+
+CREATE OR ALTER PROCEDURE RegistrarImportacion
+    @Cantidad INT
+AS
+BEGIN
+    INSERT INTO Importacion (Cantidad) VALUES (@Cantidad)
 END
 GO
 

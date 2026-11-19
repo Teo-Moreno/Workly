@@ -438,6 +438,8 @@ public static class BD
 
     public static DateTime? ObtenerUltimaImportacion() => Valor<DateTime?>("ObtenerUltimaImportacion");
 
+    public static void RegistrarImportacion(int cantidad) => Ejecutar("RegistrarImportacion", new { Cantidad = cantidad });
+
     public static int BorrarOfertasExternasViejas(int dias) => Valor<int>("BorrarOfertasExternasViejas", new { Dias = dias });
 
     public static Oferta? ObtenerOfertaExterna(int id, int idUsuarioActual) =>
