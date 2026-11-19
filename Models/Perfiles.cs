@@ -68,7 +68,17 @@ public static class Perfiles
         return Resultado.Bien(esEmpresa ? "Quitamos el logo." : "Quitamos tu foto de perfil.");
     }
 
-    public static async Task<Resultado> CambiarCV(int idUsuario, IFormFile? archivo, Carpetas carpetas)
+    public static async Task<string?> CompletarDesdeCV(int idUsuario, LectorCV lector, Carpetas carpetas)
+    {
+        var nombre = BD.ObtenerCV(idUsuario)?.Nombre_Archivo;
+        if (!lector.Disponible || string.IsNullOrEmpty(nombre))
+        {
+            return null;
+        }
+        return await lector.CompletarPerfil(idUsuario, Path.Combine(Archivos.CarpetaCV(carpetas.Raiz), nombre));
+    }
+
+    public static async Task<Resultado> CambiarCV(int idUsuario, IFormFile? archivo, Carpetas carpetas, LectorCV lector)
     {
         if (archivo == null || archivo.Length == 0)
         {
@@ -80,7 +90,8 @@ public static class Perfiles
         }
         var nombre = await Archivos.GuardarCV(archivo, carpetas.Raiz);
         Archivos.BorrarCV(BD.ActualizarArchivoCV(idUsuario, nombre), carpetas.Raiz);
-        return Resultado.Bien("Subimos tu CV.");
+        var completado = await CompletarDesdeCV(idUsuario, lector, carpetas);
+        return Resultado.Bien(completado == null ? "Subimos tu CV." : $"Subimos tu CV. {completado}");
     }
 
     public static Resultado QuitarCV(int idUsuario, Carpetas carpetas)

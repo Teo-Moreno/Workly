@@ -1,7 +1,7 @@
 <span class="@Model.Clases" aria-hidden="true">
     @if (!string.IsNullOrEmpty(Model.Logo))
     {
-        <img src="@Model.Logo" alt="" loading="lazy">
+        <img src="@Model.Logo" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
     }
     else
     {

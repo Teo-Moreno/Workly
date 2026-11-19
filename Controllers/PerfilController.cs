@@ -10,10 +10,12 @@ namespace Workly.Controllers;
 public class PerfilController : Controller
 {
     private readonly Carpetas _carpetas;
+    private readonly LectorCV _lector;
 
-    public PerfilController(IWebHostEnvironment entorno)
+    public PerfilController(IWebHostEnvironment entorno, LectorCV lector)
     {
         _carpetas = Carpetas.Desde(entorno);
+        _lector = lector;
     }
 
     public async Task<IActionResult> Index()
@@ -68,7 +70,7 @@ public class PerfilController : Controller
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(6 * 1024 * 1024)]
     public async Task<IActionResult> SubirCV(IFormFile? archivo, string? volver) =>
-        Volver(await Perfiles.CambiarCV(User.IdUsuario(), archivo, _carpetas), volver);
+        Volver(await Perfiles.CambiarCV(User.IdUsuario(), archivo, _carpetas, _lector), volver);
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -151,7 +153,8 @@ public class PerfilController : Controller
             ViewBag.Completar = modelo;
             return View();
         }
-        return Volver(Resultado.Bien("Guardamos tu perfil."));
+        var completado = modelo.ArchivoCV is { Length: > 0 } ? await Perfiles.CompletarDesdeCV(User.IdUsuario(), _lector, _carpetas) : null;
+        return Volver(Resultado.Bien(completado == null ? "Guardamos tu perfil." : $"Guardamos tu perfil. {completado}"));
     }
 
     public async Task<IActionResult> Configuracion()

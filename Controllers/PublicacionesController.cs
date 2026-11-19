@@ -58,9 +58,23 @@ public class PublicacionesController : Controller
         {
             return NotFound();
         }
+        var postulantes = BD.ObtenerPostulantes(id);
         ViewBag.Oferta = oferta;
-        ViewBag.Postulantes = BD.ObtenerPostulantes(id);
+        ViewBag.Postulantes = postulantes;
+        ViewBag.Etapas = Postulaciones.EtapasEmpresa
+            .Select(e => (e.Etapa, Lista: postulantes.Where(p => p.Etapa == e.Etapa).OrderByDescending(p => p.Puntaje).ThenBy(p => p.Fecha).ToList()))
+            .ToList();
         return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult CambiarEstado(int id, int idPostulacion, string? estado)
+    {
+        var resultado = Postulaciones.CambiarEstadoPostulante(User.IdUsuario(), idPostulacion, estado);
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["MensajeTipo"] = resultado.Tipo;
+        return RedirectToAction(nameof(Detalle), new { id });
     }
 
     public IActionResult Postulante(int id)

@@ -250,6 +250,16 @@ public static class BD
         }
     }
 
+    public static void GuardarHabilidadesEIdiomas(int idUsuario, List<string> habilidades, List<(int, string)> idiomas)
+    {
+        using var conexion = Conectar();
+        conexion.Open();
+        using var tx = conexion.BeginTransaction();
+        GuardarHabilidades(conexion, tx, idUsuario, habilidades);
+        GuardarIdiomas(conexion, tx, idUsuario, idiomas);
+        tx.Commit();
+    }
+
     public static List<ExperienciaItem> ObtenerExperiencias(int idUsuario) =>
         Lista<ExperienciaItem>("ObtenerExperiencias", new { IDUsuario = idUsuario });
 
@@ -485,8 +495,16 @@ public static class BD
         return Catalogos.EstadosPostulacion.ToDictionary(e => e.Estado, e => cuentas.GetValueOrDefault(e.Estado));
     }
 
-    public static List<Postulante> ObtenerPostulantes(int idOferta) =>
-        Lista<Postulante>("ObtenerPostulantes", new { IDOferta = idOferta });
+    public static List<Postulante> ObtenerPostulantes(int idOferta, DateTime? desde = null) =>
+        Lista<Postulante>("ObtenerPostulantes", new { IDOferta = idOferta, Desde = desde });
+
+    public static List<OfertaParaResumen> ObtenerOfertasParaResumen(int dias) =>
+        Lista<OfertaParaResumen>("ObtenerOfertasParaResumen", new { Dias = dias });
+
+    public static void MarcarResumenEnviado(int idOferta) => Ejecutar("MarcarResumenEnviado", new { ID = idOferta });
+
+    public static bool CambiarEstadoPostulante(int idPostulacion, int idPublicador, string estado) =>
+        Cambio("CambiarEstadoPostulante", new { ID = idPostulacion, IDPublicador = idPublicador, Estado = estado });
 
     public static (int IDUsuario, int IDOferta)? ObtenerPostulacionDePublicador(int idPostulacion, int idPublicador)
     {

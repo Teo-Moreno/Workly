@@ -286,6 +286,7 @@ CREATE TABLE [dbo].[OfertaLaboral](
 	[Estado_Publicacion] [nvarchar](20) NOT NULL,
 	[Motivo_Rechazo] [nvarchar](500) NULL,
 	[Fecha_Revision] [date] NULL,
+	[Fecha_Ultimo_Resumen] [datetime2](7) NULL,
  CONSTRAINT [PK_OfertaLaboral] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -3539,18 +3540,47 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE ObtenerPostulantes
-    @IDOferta INT
+    @IDOferta INT,
+    @Desde DATE = NULL
 AS
 BEGIN
-    SELECT po.ID AS IDPostulacion, u.ID AS IDUsuario, CAST(po.Fecha AS DATETIME2) AS Fecha, u.Nombre, u.Apellido, u.Email,
-           pe.Telefono, pe.Foto, pr.Nombre AS Provincia, pe.Estado_Busqueda, pf.Puesto_Buscado, cv.Nombre_Archivo
+    SELECT po.ID AS IDPostulacion, u.ID AS IDUsuario, CAST(po.Fecha AS DATETIME2) AS Fecha, po.Estado, u.Nombre, u.Apellido, u.Email,
+           pe.Telefono, pe.Foto, pr.Nombre AS Provincia, pe.Estado_Busqueda, pf.Puesto_Buscado, cv.Nombre_Archivo,
+           ISNULL(hab.Coincidencias, 0) AS Coincidencias, hab.Habilidades,
+           CASE WHEN ISNULL(hab.Coincidencias, 0) > 5 THEN 5 ELSE ISNULL(hab.Coincidencias, 0) END * 10 AS PuntosHabilidades,
+           CASE WHEN o.Modalidad = N'Remoto' THEN 20
+                WHEN o.IDProvincia IS NOT NULL AND COALESCE(pf.IDProvincia, pe.IDProvincia) = o.IDProvincia THEN 20
+                ELSE 0 END AS PuntosUbicacion,
+           CASE WHEN pf.Modalidades IS NOT NULL AND CHARINDEX(N',' + o.Modalidad + N',', N',' + REPLACE(pf.Modalidades, N', ', N',') + N',') > 0
+                THEN 15 ELSE 0 END AS PuntosModalidad,
+           CASE WHEN NULLIF(LTRIM(RTRIM(pf.Puesto_Buscado)), N'') IS NOT NULL
+                     AND (o.Titulo LIKE N'%' + REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(pf.Puesto_Buscado)), N'[', N'[[]'), N'%', N'[%]'), N'_', N'[_]') + N'%'
+                          OR ISNULL(pu.Puestos, N'') LIKE N'%' + REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(pf.Puesto_Buscado)), N'[', N'[[]'), N'%', N'[%]'), N'_', N'[_]') + N'%')
+                THEN 15 ELSE 0 END AS PuntosPuesto
     FROM Postulacion po
+    JOIN OfertaLaboral o ON o.ID = po.IDOfertaLaboral
     JOIN Usuario u ON u.ID = po.IDUsuario
     LEFT JOIN Perfil pe ON pe.IDUsuario = u.ID
     LEFT JOIN Provincia pr ON pr.ID = pe.IDProvincia
     LEFT JOIN Preferencia pf ON pf.IDUsuario = u.ID
     LEFT JOIN CV cv ON cv.IDUsuario = u.ID
+    OUTER APPLY (
+        SELECT COUNT(DISTINCT uh.IDHabilidad) AS Coincidencias, STRING_AGG(h.Nombre, N', ') AS Habilidades
+        FROM (SELECT DISTINCT p.IDSector
+              FROM OfertaPuesto op
+              JOIN Puesto p ON p.ID = op.IDPuesto
+              WHERE op.IDOfertaLaboral = o.ID) s
+        JOIN Habilidad h ON h.IDSector = s.IDSector
+        JOIN UsuarioHabilidad uh ON uh.IDHabilidad = h.ID AND uh.IDUsuario = u.ID
+    ) hab
+    OUTER APPLY (
+        SELECT STRING_AGG(p.Nombre, N', ') AS Puestos
+        FROM OfertaPuesto op
+        JOIN Puesto p ON p.ID = op.IDPuesto
+        WHERE op.IDOfertaLaboral = o.ID
+    ) pu
     WHERE po.IDOfertaLaboral = @IDOferta
+      AND (@Desde IS NULL OR po.Fecha >= @Desde)
     ORDER BY po.Fecha DESC, po.ID DESC
 END
 GO
@@ -4144,6 +4174,46 @@ CREATE PROCEDURE RegistrarImportacion
 AS
 BEGIN
     INSERT INTO Importacion (Cantidad) VALUES (@Cantidad)
+END
+GO
+
+CREATE PROCEDURE CambiarEstadoPostulante
+    @ID INT,
+    @IDPublicador INT,
+    @Estado NVARCHAR(20)
+AS
+BEGIN
+    UPDATE po
+    SET Estado = @Estado
+    FROM Postulacion po
+    JOIN OfertaLaboral o ON o.ID = po.IDOfertaLaboral
+    WHERE po.ID = @ID AND o.IDUsuario_Publicador = @IDPublicador
+
+    SELECT @@ROWCOUNT AS Filas
+END
+GO
+
+CREATE PROCEDURE ObtenerOfertasParaResumen
+    @Dias INT
+AS
+BEGIN
+    SELECT o.ID, o.Titulo, u.Email, u.Nombre,
+           COALESCE(o.Fecha_Ultimo_Resumen, CAST(o.Fecha_Publicacion AS DATETIME2)) AS Desde,
+           (SELECT COUNT(*) FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID) AS Total
+    FROM OfertaLaboral o
+    JOIN Usuario u ON u.ID = o.IDUsuario_Publicador
+    WHERE o.Estado_Publicacion = N'Aprobada'
+      AND (o.Fecha_Cierre IS NULL OR o.Fecha_Cierre >= CAST(GETDATE() AS DATE))
+      AND COALESCE(o.Fecha_Ultimo_Resumen, CAST(o.Fecha_Publicacion AS DATETIME2)) <= DATEADD(DAY, -@Dias, SYSDATETIME())
+    ORDER BY o.ID
+END
+GO
+
+CREATE PROCEDURE MarcarResumenEnviado
+    @ID INT
+AS
+BEGIN
+    UPDATE OfertaLaboral SET Fecha_Ultimo_Resumen = SYSDATETIME() WHERE ID = @ID
 END
 GO
 

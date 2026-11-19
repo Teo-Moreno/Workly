@@ -42,7 +42,8 @@ public static class Empleos
         };
         modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
         modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
-        if (await Completar(modelo, jsearch, cache))
+        var completar = Completar(modelo, jsearch, cache);
+        if (await Task.WhenAny(completar, Task.Delay(TimeSpan.FromSeconds(3))) == completar && await completar)
         {
             modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
             modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
@@ -87,8 +88,15 @@ public static class Empleos
             oferta.IDProvincia = ImportadorOfertas.DetectarProvincia(oferta.Ubicacion, delPais)
                                  ?? (string.IsNullOrWhiteSpace(oferta.Ubicacion) ? provincia?.ID : null);
         }
-        BD.GuardarOfertasExternas(resultado.Ofertas);
-        return true;
+        try
+        {
+            BD.GuardarOfertasExternas(resultado.Ofertas);
+            return true;
+        }
+        catch (Microsoft.Data.SqlClient.SqlException)
+        {
+            return false;
+        }
     }
 
     public static List<string> PuestosParaAnimacion() =>

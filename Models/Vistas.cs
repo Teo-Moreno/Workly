@@ -66,6 +66,10 @@ public static class Vistas
     public static string Fecha(DateTime fecha, string formato = "d 'de' MMMM") => fecha.ToString(formato, Cultura);
 
     public static string Fecha(DateTime? fecha, string formato = "d 'de' MMMM") => fecha?.ToString(formato, Cultura) ?? "";
+
+    public static string Clave(string texto) =>
+        string.Concat(texto.Normalize(System.Text.NormalizationForm.FormD)
+            .Where(c => char.IsAsciiLetterOrDigit(c) || c == ' ')).Trim().ToLowerInvariant().Replace(' ', '-');
 }
 
 public class LogoEmpresa

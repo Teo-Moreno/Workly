@@ -70,6 +70,16 @@ h4 {
   margin: 25px 0 15px;
 }
 
+.subtitulo-chico {
+  font-size: 20px;
+  color: #133461;
+  margin: 22px 0 10px;
+}
+
+.etapa-postulantes + .etapa-postulantes {
+  margin-top: 10px;
+}
+
 .texto-suave {
   color: #5b6472;
 }
@@ -1442,4 +1452,45 @@ footer a:hover {
   .empresas-inicio {
     grid-template-columns: 1fr;
   }
+}
+
+.conversacion {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mensaje-chat {
+  max-width: 760px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid #dde3ec;
+  background: #ffffff;
+}
+
+.mensaje-chat p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.mensaje-chat-usuario {
+  align-self: flex-end;
+  background: #133461;
+  border-color: #133461;
+  color: #ffffff;
+}
+
+.mensaje-chat-asistente {
+  align-self: flex-start;
+}
+
+.ofertas-chat {
+  margin-top: 12px;
+}
+
+.asistente .formulario {
+  max-width: 760px;
 }

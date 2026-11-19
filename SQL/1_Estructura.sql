@@ -286,6 +286,7 @@ CREATE TABLE [dbo].[OfertaLaboral](
 	[Estado_Publicacion] [nvarchar](20) NOT NULL,
 	[Motivo_Rechazo] [nvarchar](500) NULL,
 	[Fecha_Revision] [date] NULL,
+	[Fecha_Ultimo_Resumen] [datetime2](7) NULL,
  CONSTRAINT [PK_OfertaLaboral] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC

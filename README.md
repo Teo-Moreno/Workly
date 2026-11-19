@@ -18,12 +18,13 @@
 
 - **Cuentas de persona y de empresa**, con verificación del email por código, recuperación de contraseña e inicio de sesión con Google o LinkedIn.
 - **Validaciones de empresa**: CUIT válido, email del dominio de la empresa y sin repetir nombre ni CUIT.
-- **Perfil y CV**: foto, "Sobre mí", experiencia laboral, formación, habilidades, idiomas, preferencias de búsqueda y CV en PDF o Word.
+- **Perfil y CV**: foto, "Sobre mí", experiencia laboral, formación, habilidades, idiomas, preferencias de búsqueda y CV en PDF o Word. Al subir el CV, la app lo lee con IA y completa el perfil con los datos que encuentra.
 - **Buscar trabajo** con filtros por texto, provincia, modalidad, tipo de empleo y fecha, ordenando por fecha o de la A a la Z. Los resultados se muestran de a 42 ofertas por página, con botones "Anterior" y "Ver más".
 - **Ofertas externas** de otros sitios guardadas en la base, junto con las ofertas publicadas en Workly. La app las actualiza sola desde la API JSearch una vez por semana, y cuando una búsqueda da menos de 42 resultados trae más en ese momento y las guarda.
 - **Postulaciones** a ofertas de Workly y registro de postulaciones externas, en un tablero donde cada tarjeta se mueve de etapa con un formulario.
 - **Ofertas guardadas** y recomendaciones **"Para vos"** según lo que busca cada persona.
-- **Publicaciones**: las empresas publican directo y las personas mandan su búsqueda a moderación.
+- **Publicaciones**: las empresas publican directo y las personas mandan su búsqueda a moderación. Quien publica ve a los postulantes en tres grupos (en revisión, pasaron y no pasaron), ordenados por cuánto coinciden con lo que pidió, y recibe un mail cada 15 días con un resumen.
+- **Asistente**: un chat que recomienda trabajos de la base según lo que la persona cuenta y su perfil.
 - **Moderación**: aprobar o rechazar búsquedas con un motivo, que le llega a quien publicó.
 - **Directorio de empresas** con buscador y página de cada empresa.
 
@@ -38,6 +39,8 @@
 | Acceso a datos | Dapper 2.1.89 + Microsoft.Data.SqlClient 7.1.1 |
 | Frontend | HTML, CSS y Bootstrap 6 (sin JavaScript propio) |
 | Ofertas externas | API JSearch |
+| Inteligencia artificial | API de Groq (asistente y lectura del CV) |
+| Lectura de CV | PdfPig y DocumentFormat.OpenXml |
 
 ## 📂 Estructura del proyecto
 
@@ -77,11 +80,12 @@ cd Workly
 5. *(Opcional)* Cargar las claves con `dotnet user-secrets`, nunca en el código:
 ```bash
 dotnet user-secrets set "JSearch:ApiKey" "TU_CLAVE"
+dotnet user-secrets set "Groq:ApiKey" "TU_CLAVE_DE_GROQ"
 dotnet user-secrets set "Correo:Contrasena" "TU_CONTRASEÑA"
 dotnet user-secrets set "Authentication:Google:ClientId" "TU_CLIENT_ID"
 dotnet user-secrets set "Authentication:Google:ClientSecret" "TU_CLIENT_SECRET"
 ```
-Sin estas claves la app funciona igual: muestra las ofertas que ya están en la base pero no las actualiza, no manda mails y en desarrollo el código de verificación aparece en la consola.
+Sin estas claves la app funciona igual: muestra las ofertas que ya están en la base pero no las actualiza, no manda mails, el asistente y la lectura del CV no están disponibles, y en desarrollo el código de verificación aparece en la consola. La clave de Groq es gratis y se saca en console.groq.com. Para que los mails de resumen tengan el link a los postulantes, poné la dirección del sitio en `Sitio:Url` de `appsettings.json`.
 
 6. Ejecutar el programa:
 ```bash
