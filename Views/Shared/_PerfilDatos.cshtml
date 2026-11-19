@@ -1,0 +1,36 @@
+@* Datos del perfil que se ven igual en "Mi perfil" y en el perfil de un postulante. *@
+<section class="card tarjeta">
+    <h2 class="card-title">Habilidades</h2>
+    @if (Model.Habilidades.Count == 0)
+    {
+        <p class="texto-suave">Sin habilidades cargadas.</p>
+    }
+    else
+    {
+        <div class="etiquetas">
+            @foreach (string habilidad in Model.Habilidades)
+            {
+                <span class="badge etiqueta">@habilidad</span>
+            }
+        </div>
+    }
+</section>
+
+<section class="card tarjeta">
+    <h2 class="card-title">Idiomas</h2>
+    @if (Model.Idiomas.Count == 0)
+    {
+        <p class="texto-suave">Sin idiomas cargados.</p>
+    }
+    else
+    {
+        <table class="table datos">
+            <tbody>
+                @foreach (IdiomaElegido idioma in Model.Idiomas)
+                {
+                    <tr><th scope="row">@idioma.Idioma</th><td>@idioma.Nivel</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

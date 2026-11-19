@@ -2,9 +2,7 @@
     ViewData["Title"] = "Link vencido";
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Este link ya no sirve</h1>
-    <p class="cuenta-tarjeta-bajada">Puede que haya vencido (dura 1 hora) o que ya lo hayas usado. Pedí uno nuevo y usalo apenas te llegue.</p>
-    <a class="btn btn-block-lg" asp-controller="Cuenta" asp-action="RecuperarClave">Pedir otro link</a>
-    <a class="btn btn-outline-block" asp-controller="Cuenta" asp-action="IniciarSesion">Volver a iniciar sesión</a>
-</div>
+<h1 class="titulo">Este link ya no sirve</h1>
+<p class="texto-suave">Puede que haya vencido (dura 1 hora) o que ya lo hayas usado. Pedí uno nuevo y usalo apenas te llegue.</p>
+<a class="btn-solid theme-primary boton w-100" asp-controller="Cuenta" asp-action="RecuperarClave">Pedir otro link</a>
+<a class="btn-outline theme-primary boton w-100" asp-controller="Cuenta" asp-action="IniciarSesion">Volver a iniciar sesión</a>

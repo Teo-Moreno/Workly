@@ -24,10 +24,6 @@ public class PostulacionesController : Controller
     public IActionResult CambiarEstado(int id, string estado)
     {
         var cambiado = Postulaciones.CambiarEstado(User.IdUsuario(), id, estado);
-        if (Request.Headers.Accept.ToString().Contains("application/json"))
-        {
-            return cambiado ? Json(new { ok = true }) : BadRequest(new { ok = false });
-        }
         TempData["Mensaje"] = cambiado ? $"Movimos la postulación a \"{estado}\"." : "No pudimos mover la postulación.";
         TempData["MensajeTipo"] = cambiado ? "exito" : "error";
         return RedirectToAction(nameof(Index));

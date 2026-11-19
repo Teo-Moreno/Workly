@@ -203,13 +203,11 @@ public class CompletarPerfilViewModel
 
     public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
 
-    public static readonly string[] Pasos = { "Tus datos", "Qué buscás", "Experiencia", "Tu CV" };
-
     public List<ExperienciaEnviada> ExperienciasEnviadas => ExpPuesto.Select((p, i) =>
-        new ExperienciaEnviada(Valor(ExpPuesto, i), Valor(ExpEmpresa, i), Valor(ExpInicio, i), Valor(ExpFin, i), Valor(ExpDescripcion, i))).ToList();
+        new ExperienciaEnviada(Valor(ExpPuesto, i), Valor(ExpEmpresa, i), Valor(ExpInicio, i), Valor(ExpFin, i), Valor(ExpDescripcion, i))).Where(e => !e.EstaVacia).ToList();
 
     public List<FormacionEnviada> FormacionesEnviadas => ForTitulo.Select((t, i) =>
-        new FormacionEnviada(Valor(ForTitulo, i), Valor(ForInstitucion, i), Valor(ForInicio, i), Valor(ForFin, i))).ToList();
+        new FormacionEnviada(Valor(ForTitulo, i), Valor(ForInstitucion, i), Valor(ForInicio, i), Valor(ForFin, i))).Where(f => !f.EstaVacia).ToList();
 
     private static string Valor(List<string> lista, int i) => i < lista.Count ? lista[i] ?? "" : "";
 }
@@ -491,9 +489,11 @@ public static class Fechas
 public record ExperienciaEnviada(string Puesto, string Empresa, string Inicio, string Fin, string Descripcion)
 {
     public string FinTexto => Fin.Length > 0 ? Fin : "Actualidad";
+    public bool EstaVacia => (Puesto + Empresa + Inicio + Fin + Descripcion).Trim().Length == 0;
 }
 
 public record FormacionEnviada(string Titulo, string Institucion, string Inicio, string Fin)
 {
     public string FinTexto => Fin.Length > 0 ? Fin : "En curso";
+    public bool EstaVacia => (Titulo + Institucion + Inicio + Fin).Trim().Length == 0;
 }

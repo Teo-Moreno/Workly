@@ -1,183 +1,188 @@
+@model CamposBusqueda
 @if (Model.IncluirEstado)
 {
-    <fieldset class="formulario-grupo @Html.ClaseError("EstadoBusqueda")">
-        <legend class="form-label">¿Estás buscando trabajo?</legend>
-        <div class="opciones-tarjeta">
+    <div class="form-field @Html.ClaseError("EstadoBusqueda")">
+        <p class="form-label">¿Estás buscando trabajo?</p>
+        <div class="opciones">
             @foreach (var estado in Catalogos.EstadosBusqueda)
             {
-                <label class="opcion-tarjeta">
-                    <input class="btn-check" type="radio" name="EstadoBusqueda" value="@estado" checked="@(Model.EstadoBusqueda == estado)" />
-                    <span><span class="opcion-tarjeta-titulo">@estado</span></span>
+                <label class="opcion">
+                    <input type="radio" name="EstadoBusqueda" value="@estado" checked="@(Model.EstadoBusqueda == estado)">
+                    @estado
                 </label>
             }
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("EstadoBusqueda", "Elegí una opción")</span>
-    </fieldset>
+        <p class="error-texto">@Html.MensajeError("EstadoBusqueda", "Elegí una opción")</p>
+    </div>
 }
 
-<div class="formulario-fila">
-    <div class="campo @Html.ClaseError("PuestoBuscado")">
-        <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="campo-opcional">(opcional)</span></label>
-        <div class="control-con-icono">
-            <icono nombre="briefcase" />
-            <input class="form-control" id="@(Model.Prefijo)-puesto" name="PuestoBuscado" value="@Model.PuestoBuscado" maxlength="100" placeholder="Ej.: Administrativo/a, Desarrollador/a, Vendedor/a" />
+<div class="row g-4">
+    <div class="md:col-6">
+        <div class="form-field @Html.ClaseError("PuestoBuscado")">
+            <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="opcional">(opcional)</span></label>
+            <input class="form-control" id="@(Model.Prefijo)-puesto" name="PuestoBuscado" value="@Model.PuestoBuscado" type="text" placeholder="Ej.: Administrativo/a, Desarrollador/a">
+            <p class="form-text">Lo usamos para mostrarte ofertas en tu inicio.</p>
+            <p class="error-texto">@Html.MensajeError("PuestoBuscado", "Usá hasta 100 caracteres")</p>
         </div>
-        <span class="form-text">Lo usamos para mostrarte ofertas en tu inicio.</span>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("PuestoBuscado", "Usá hasta 100 caracteres")</span>
     </div>
-    <div class="campo">
-        <label class="form-label" for="@(Model.Prefijo)-disponibilidad">Disponibilidad <span class="campo-opcional">(opcional)</span></label>
-        <select class="form-select" id="@(Model.Prefijo)-disponibilidad" name="Disponibilidad">
-            <option value="">Elegí una opción</option>
-            @foreach (var opcion in Catalogos.Disponibilidades)
-            {
-                <option selected="@(Model.Disponibilidad == opcion)">@opcion</option>
-            }
-        </select>
+    <div class="md:col-6">
+        <div class="form-field">
+            <label class="form-label" for="@(Model.Prefijo)-disponibilidad">Disponibilidad <span class="opcional">(opcional)</span></label>
+            <select class="form-control" id="@(Model.Prefijo)-disponibilidad" name="Disponibilidad">
+                <partial name="_Opciones" model='new OpcionesSelect(Model.Disponibilidad, Catalogos.Disponibilidades, "Elegí una opción")' />
+            </select>
+        </div>
     </div>
 </div>
 
-<fieldset class="formulario-grupo">
-    <legend class="form-label">Nivel de experiencia <span class="campo-opcional">(podés elegir más de uno)</span></legend>
-    <div class="lista-tags lista-tags-holgada">
+<div class="form-field">
+    <p class="form-label">Nivel de experiencia <span class="opcional">(podés elegir más de uno)</span></p>
+    <div class="opciones">
         @foreach (var nivel in Catalogos.Niveles)
         {
-            <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Niveles" value="@nivel" checked="@Model.Niveles.Contains(nivel)" /><span class="btn btn-chip">@nivel</span></label>
+            <label class="opcion"><input type="checkbox" name="Niveles" value="@nivel" checked="@Model.Niveles.Contains(nivel)"> @nivel</label>
         }
     </div>
-</fieldset>
+</div>
 
-<fieldset class="formulario-grupo">
-    <legend class="form-label">Modalidad <span class="campo-opcional">(podés elegir más de una)</span></legend>
-    <div class="lista-tags lista-tags-holgada">
+<div class="form-field">
+    <p class="form-label">Modalidad <span class="opcional">(podés elegir más de una)</span></p>
+    <div class="opciones">
         @foreach (var modalidad in Catalogos.Modalidades)
         {
-            <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Modalidades" value="@modalidad" checked="@Model.Modalidades.Contains(modalidad)" /><span class="btn btn-chip">@modalidad</span></label>
+            <label class="opcion"><input type="checkbox" name="Modalidades" value="@modalidad" checked="@Model.Modalidades.Contains(modalidad)"> @modalidad</label>
         }
     </div>
-</fieldset>
-
-<div class="formulario-fila">
-    <div class="campo">
-        <label class="form-label" for="@(Model.Prefijo)-jornada">Jornada <span class="campo-opcional">(opcional)</span></label>
-        <select class="form-select" id="@(Model.Prefijo)-jornada" name="Jornada">
-            <option value="">Elegí una opción</option>
-            @foreach (var opcion in Catalogos.Jornadas)
-            {
-                <option selected="@(Model.Jornada == opcion)">@opcion</option>
-            }
-        </select>
-    </div>
-    <div class="campo">
-        <label class="form-label" for="@(Model.Prefijo)-contratacion">Contratación <span class="campo-opcional">(opcional)</span></label>
-        <select class="form-select" id="@(Model.Prefijo)-contratacion" name="Contratacion">
-            <option value="">Elegí una opción</option>
-            @foreach (var opcion in Catalogos.Contrataciones)
-            {
-                <option selected="@(Model.Contratacion == opcion)">@opcion</option>
-            }
-        </select>
-    </div>
 </div>
 
-<div class="formulario-fila">
-    <div class="campo">
-        <label class="form-label" for="@(Model.Prefijo)-donde">¿Dónde querés trabajar?</label>
-        <select class="form-select" id="@(Model.Prefijo)-donde" name="IDProvinciaPreferida">
-            <option value="">Todo el país</option>
-            @foreach (Provincia provincia in Model.ProvinciasDelPais)
-            {
-                <option value="@provincia.ID" selected="@(provincia.ID == Model.IDProvinciaPreferida)">@provincia.Nombre</option>
-            }
-        </select>
-    </div>
-    <div class="campo @(Html.ClaseError("SalarioMaximo") != "" ? "campo-error" : Html.ClaseError("SalarioMinimo"))">
-        <span class="form-label">Expectativa salarial bruta por mes <span class="campo-opcional">(opcional)</span></span>
-        <div class="rango-campos">
-            <label class="visually-hidden" for="@(Model.Prefijo)-salario-min">Mínimo</label>
-            <input class="form-control" id="@(Model.Prefijo)-salario-min" name="SalarioMinimo" value="@Model.SalarioMinimo" type="number" min="0" step="1000" placeholder="Mínimo" />
-            <span aria-hidden="true">–</span>
-            <label class="visually-hidden" for="@(Model.Prefijo)-salario-max">Máximo</label>
-            <input class="form-control" id="@(Model.Prefijo)-salario-max" name="SalarioMaximo" value="@Model.SalarioMaximo" type="number" min="0" step="1000" placeholder="Máximo" />
+<div class="row g-4">
+    <div class="md:col-6">
+        <div class="form-field">
+            <label class="form-label" for="@(Model.Prefijo)-jornada">Jornada <span class="opcional">(opcional)</span></label>
+            <select class="form-control" id="@(Model.Prefijo)-jornada" name="Jornada">
+                <partial name="_Opciones" model='new OpcionesSelect(Model.Jornada, Catalogos.Jornadas, "Elegí una opción")' />
+            </select>
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("SalarioMaximo", Html.MensajeError("SalarioMinimo", "Revisá los montos"))</span>
+    </div>
+    <div class="md:col-6">
+        <div class="form-field">
+            <label class="form-label" for="@(Model.Prefijo)-contratacion">Contratación <span class="opcional">(opcional)</span></label>
+            <select class="form-control" id="@(Model.Prefijo)-contratacion" name="Contratacion">
+                <partial name="_Opciones" model='new OpcionesSelect(Model.Contratacion, Catalogos.Contrataciones, "Elegí una opción")' />
+            </select>
+        </div>
     </div>
 </div>
 
-<fieldset class="formulario-grupo @Html.ClaseError("Habilidades")" data-habilidades>
-    <legend class="form-label">Habilidades <span class="campo-opcional">(elegí un sector y marcá las que tengas)</span></legend>
-    @if (Model.Sectores.Count > 0)
-    {
-        <div class="campo">
-            <label class="visually-hidden" for="@(Model.Prefijo)-sector">Sector</label>
-            <select class="form-select" id="@(Model.Prefijo)-sector" data-habilidades-sector>
-                <option value="">Elegí un sector</option>
-                @foreach ((int IDSector, string Sector) sector in Model.Sectores)
+<div class="row g-4">
+    <div class="md:col-6">
+        <div class="form-field">
+            <label class="form-label" for="@(Model.Prefijo)-donde">¿Dónde querés trabajar?</label>
+            <select class="form-control" id="@(Model.Prefijo)-donde" name="IDProvinciaPreferida">
+                @foreach (Provincia provincia in Model.ProvinciasDelPais)
                 {
-                    <option value="@sector.IDSector">@sector.Sector</option>
+                    if (provincia.ID == Model.IDProvinciaPreferida)
+                    {
+                        <option value="@provincia.ID">@provincia.Nombre</option>
+                    }
                 }
+                <option value="">Todo el país</option>
+                @foreach (Provincia provincia in Model.ProvinciasDelPais)
+                {
+                    if (provincia.ID != Model.IDProvinciaPreferida)
+                    {
+                        <option value="@provincia.ID">@provincia.Nombre</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="md:col-6">
+        <div class="form-field @(Html.ClaseError("SalarioMaximo") != "" ? "campo-error" : Html.ClaseError("SalarioMinimo"))">
+            <p class="form-label">Expectativa salarial bruta por mes <span class="opcional">(opcional)</span></p>
+            <div class="rango">
+                <input class="form-control" name="SalarioMinimo" value="@Model.SalarioMinimo" type="number" min="0" step="1000" placeholder="Mínimo" aria-label="Salario mínimo">
+                <span>–</span>
+                <input class="form-control" name="SalarioMaximo" value="@Model.SalarioMaximo" type="number" min="0" step="1000" placeholder="Máximo" aria-label="Salario máximo">
+            </div>
+            <p class="error-texto">@Html.MensajeError("SalarioMaximo", Html.MensajeError("SalarioMinimo", "Revisá los montos"))</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-field @Html.ClaseError("Habilidades")">
+    <p class="form-label">Habilidades <span class="opcional">(abrí un sector y marcá las que tengas)</span></p>
+    @if (Model.HabilidadesPropias.Count > 0)
+    {
+        <div class="opciones">
+            @foreach (string habilidad in Model.HabilidadesPropias)
+            {
+                <label class="opcion"><input type="checkbox" name="Habilidades" value="@habilidad" checked> @habilidad</label>
+            }
+        </div>
+    }
+    <div class="accordion sectores">
+        @foreach (var sector in Model.Sectores)
+        {
+            <details class="accordion-item" name="sectores-@Model.Prefijo">
+                <summary class="accordion-header">@sector.Sector</summary>
+                <div class="accordion-body opciones">
+                    @foreach (Habilidad habilidad in Model.CatalogoHabilidades)
+                    {
+                        if (habilidad.IDSector == sector.IDSector)
+                        {
+                            <label class="opcion"><input type="checkbox" name="Habilidades" value="@habilidad.Nombre" checked="@Model.Elegida(habilidad.Nombre)"> @habilidad.Nombre</label>
+                        }
+                    }
+                </div>
+            </details>
+        }
+    </div>
+    <label class="form-label" for="@(Model.Prefijo)-nueva-habilidad">¿No está la tuya? Escribila acá</label>
+    <input class="form-control" id="@(Model.Prefijo)-nueva-habilidad" name="Habilidades" type="text" placeholder="Ej.: Atención al cliente">
+    <p class="form-text">Las que agregás vos solo aparecen en tu perfil.</p>
+    <p class="error-texto">@Html.MensajeError("Habilidades", "Revisá las habilidades")</p>
+</div>
+
+<div class="form-field @Html.ClaseError("Idiomas")">
+    <p class="form-label">Idiomas <span class="opcional">(opcional)</span></p>
+    @foreach (var fila in Model.Idiomas)
+    {
+        <div class="fila-idioma">
+            <select class="form-control" name="IdiomaIds" aria-label="Idioma">
+                @foreach (Idioma idioma in Model.CatalogoIdiomas)
+                {
+                    if (idioma.ID == fila.IDIdioma)
+                    {
+                        <option value="@idioma.ID">@idioma.Nombre</option>
+                    }
+                }
+                <option value="0">Quitar este idioma</option>
+                @foreach (Idioma idioma in Model.CatalogoIdiomas)
+                {
+                    if (idioma.ID != fila.IDIdioma)
+                    {
+                        <option value="@idioma.ID">@idioma.Nombre</option>
+                    }
+                }
+            </select>
+            <select class="form-control" name="IdiomaNiveles" aria-label="Nivel">
+                <partial name="_Opciones" model="new OpcionesSelect(fila.Nivel, Catalogos.NivelesIdioma)" />
             </select>
         </div>
     }
-    <div class="lista-tags lista-tags-holgada" data-habilidades-lista>
-        @foreach (string habilidad in Model.HabilidadesPropias)
-        {
-            <label class="chip-seleccion" data-sector=""><input class="btn-check" type="checkbox" name="Habilidades" value="@habilidad" checked /><span class="btn btn-chip">@habilidad</span></label>
-        }
-        @foreach (Habilidad habilidad in Model.CatalogoHabilidades)
-        {
-            <label class="chip-seleccion" data-sector="@habilidad.IDSector"><input class="btn-check" type="checkbox" name="Habilidades" value="@habilidad.Nombre" checked="@Model.Elegida(habilidad.Nombre)" /><span class="btn btn-chip">@habilidad.Nombre</span></label>
-        }
+    <div class="fila-idioma">
+        <select class="form-control" name="IdiomaIds" aria-label="Agregar idioma">
+            <option value="0">Agregar un idioma</option>
+            @foreach (Idioma idioma in Model.CatalogoIdiomas)
+            {
+                <option value="@idioma.ID">@idioma.Nombre</option>
+            }
+        </select>
+        <select class="form-control" name="IdiomaNiveles" aria-label="Nivel">
+            <partial name="_Opciones" model="new OpcionesSelect(null, Catalogos.NivelesIdioma)" />
+        </select>
     </div>
-    <p class="small text-body-secondary" data-habilidades-vacio hidden>Elegí un sector para ver sus habilidades.</p>
-    <div class="campo-agregar">
-        <label class="visually-hidden" for="@(Model.Prefijo)-nueva-habilidad">Agregar otra habilidad</label>
-        <input class="form-control" id="@(Model.Prefijo)-nueva-habilidad" type="text" maxlength="60" placeholder="¿No está la tuya? Escribila acá" data-habilidad-nueva />
-        <button class="btn btn-icono" type="button" data-habilidad-agregar><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
-    </div>
-    <span class="form-text">Las que agregás vos solo aparecen en tu perfil.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Habilidades", "Revisá las habilidades")</span>
-</fieldset>
-
-<fieldset class="formulario-grupo @Html.ClaseError("Idiomas")" data-idiomas>
-    <legend class="form-label">Idiomas <span class="campo-opcional">(opcional)</span></legend>
-    <ul class="filas-idioma" role="list" data-idiomas-lista>
-        @foreach ((int IDIdioma, string Nivel) fila in Model.Idiomas)
-        {
-            <li class="fila-idioma" data-idioma-fila>
-                <select class="form-select" name="IdiomaIds" aria-label="Idioma">
-                    @foreach (Idioma idioma in Model.CatalogoIdiomas)
-                    {
-                        <option value="@idioma.ID" selected="@(idioma.ID == fila.IDIdioma)">@idioma.Nombre</option>
-                    }
-                </select>
-                <select class="form-select" name="IdiomaNiveles" aria-label="Nivel">
-                    @foreach (var opcion in Catalogos.NivelesIdioma)
-                    {
-                        <option selected="@(opcion == fila.Nivel)">@opcion</option>
-                    }
-                </select>
-                <button class="btn btn-icono-borde" type="button" data-idioma-quitar><icono nombre="trash-full" etiqueta="Quitar idioma" /></button>
-            </li>
-        }
-    </ul>
-    <template data-idioma-plantilla>
-        <li class="fila-idioma" data-idioma-fila>
-            <select class="form-select" name="IdiomaIds" aria-label="Idioma">
-                @foreach (Idioma idioma in Model.CatalogoIdiomas)
-                {
-                    <option value="@idioma.ID">@idioma.Nombre</option>
-                }
-            </select>
-            <select class="form-select" name="IdiomaNiveles" aria-label="Nivel">
-                @foreach (var opcion in Catalogos.NivelesIdioma)
-                {
-                    <option>@opcion</option>
-                }
-            </select>
-            <button class="btn btn-icono-borde" type="button" data-idioma-quitar><icono nombre="trash-full" etiqueta="Quitar idioma" /></button>
-        </li>
-    </template>
-    <button class="btn btn-outline-sm" type="button" data-idioma-agregar><icono nombre="plus" />Agregar idioma</button>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Idiomas", "Elegí el idioma y el nivel de cada fila")</span>
-</fieldset>
+    <p class="form-text">Para sumar otro idioma, guardá y vas a ver una fila nueva.</p>
+    <p class="error-texto">@Html.MensajeError("Idiomas", "Elegí el idioma y el nivel de cada fila")</p>
+</div>

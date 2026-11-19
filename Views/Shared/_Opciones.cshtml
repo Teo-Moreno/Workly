@@ -1,0 +1,16 @@
+@model OpcionesSelect
+@if (Model.HayActual)
+{
+    <option>@Model.Actual</option>
+}
+@if (Model.TextoVacio != null)
+{
+    <option value="">@Model.TextoVacio</option>
+}
+@foreach (var opcion in Model.Opciones)
+{
+    if (opcion != Model.Actual)
+    {
+        <option>@opcion</option>
+    }
+}

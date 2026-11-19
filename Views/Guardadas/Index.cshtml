@@ -2,57 +2,48 @@
     ViewData["Title"] = "Guardadas";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
-        <div class="encabezado-pagina-fila">
-            <div>
-                <h1 class="encabezado-pagina-titulo">Guardadas</h1>
-                <p class="encabezado-pagina-bajada">Las ofertas que guardaste para ver después o postularte más tarde.</p>
-            </div>
-            <div class="encabezado-pagina-acciones">
-                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
-            </div>
+<div class="container seccion">
+    <div class="encabezado">
+        <div>
+            <h1 class="titulo">Guardadas</h1>
+            <p class="texto-suave">Las ofertas que guardaste para ver después o postularte más tarde.</p>
         </div>
-    </header>
+        <a class="btn-solid theme-primary boton" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    </div>
 
     @if (ViewBag.Guardadas.Count == 0)
     {
-        <div class="estado-vacio">
-            <span class="caja-icono-lg"><icono nombre="bookmark" /></span>
-            <h2 class="estado-vacio-titulo">Todavía no guardaste ofertas</h2>
+        <div class="vacio">
+            <h2>Todavía no guardaste ofertas</h2>
             <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
-            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
     {
-        <ul class="lista-guardadas" role="list">
+        <ul class="list-group lista">
             @foreach (Oferta oferta in ViewBag.Guardadas)
             {
-                <li class="guardada">
+                <li class="list-group-item fila-lista">
                     <partial name="_LogoEmpresa" model='new LogoEmpresa(oferta.Logo, oferta.Empresa, "logo-empresa-md")' />
-                    <div class="guardada-datos">
-                        <h2 class="guardada-titulo"><a href="@oferta.Enlace">@oferta.Titulo</a></h2>
-                        <p class="guardada-meta">@oferta.Resumen</p>
-                        <div class="lista-tags">
+                    <div class="fila-lista-datos">
+                        <h2 class="tarjeta-titulo"><a href="@oferta.Enlace">@oferta.Titulo</a></h2>
+                        <p class="texto-suave">@oferta.Resumen</p>
+                        <div class="etiquetas">
                             <partial name="_SelloOficial" model="oferta" />
-                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge tag-borde">@oferta.Modalidad</span> }
-                            <span class="badge @(oferta.EsExterna ? "tag" : "tag-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
-                            @if (oferta.YaPostulado) { <span class="badge badge-exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
-                            @if (oferta.NoDisponible) { <span class="badge badge-error">Ya no recibe postulaciones</span> }
+                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge etiqueta etiqueta-borde">@oferta.Modalidad</span> }
+                            <span class="badge etiqueta @(oferta.EsExterna ? "" : "etiqueta-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
+                            @if (oferta.YaPostulado) { <span class="badge etiqueta etiqueta-exito">✓ Ya te postulaste</span> }
+                            @if (oferta.NoDisponible) { <span class="badge etiqueta etiqueta-error">Ya no recibe postulaciones</span> }
                         </div>
                         @if (oferta.Fecha_Guardado.HasValue)
                         {
-                            <p class="small text-body-secondary">Guardada el @Vistas.Fecha(oferta.Fecha_Guardado)</p>
+                            <p class="texto-suave">Guardada el @Vistas.Fecha(oferta.Fecha_Guardado)</p>
                         }
                     </div>
-                    <div class="guardada-acciones">
-                        <a class="btn btn-sm" href="@oferta.Enlace">Ver oferta</a>
-                        <form asp-controller="Guardadas" asp-action="Quitar" method="post">
-                            <input type="hidden" name="id" value="@oferta.ID" />
-                            <input type="hidden" name="externa" value="@(oferta.EsExterna ? "true" : "false")" />
-                            <input type="hidden" name="volver" value="@Url.Action("Index", "Guardadas")" />
-                            <button class="btn btn-link-sm" type="submit"><icono nombre="trash-full" />Quitar</button>
+                    <div class="fila-lista-acciones">
+                        <a class="btn-solid theme-primary boton btn-sm" href="@oferta.Enlace">Ver oferta</a>
+                        <form asp-controller="Guardadas" asp-action="Quitar" asp-route-id="@oferta.ID" asp-route-externa="@(oferta.EsExterna ? "true" : "false")" asp-route-volver="@Url.Action("Index", "Guardadas")" method="post">
+                            <button class="boton-link" type="submit">Quitar</button>
                         </form>
                     </div>
                 </li>

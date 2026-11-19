@@ -2,27 +2,22 @@
     ViewData["Title"] = "Verificá tu email";
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Revisá tu email</h1>
-    <p class="cuenta-tarjeta-bajada">Te mandamos un código de @VerificacionEmail.Digitos números a <strong>@ViewBag.Formulario.Email</strong>. Escribilo acá para terminar de crear tu cuenta.</p>
+<h1 class="titulo">Revisá tu email</h1>
+<p class="texto-suave">Te mandamos un código de @VerificacionEmail.Digitos números a <span class="negrita">@ViewBag.Formulario.Email</span>. Escribilo acá para terminar de crear tu cuenta.</p>
 
-    <partial name="_ErroresFormulario" />
+<partial name="_ErroresFormulario" />
 
-    <form class="formulario" asp-controller="Cuenta" asp-action="VerificarEmail" method="post" novalidate data-formulario-real>
-        <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
-        <div class="campo @Html.ClaseError("Codigo")">
-            <label class="form-label" for="Codigo">Código</label>
-            <input class="form-control codigo-email" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
-                   pattern="\d{@VerificacionEmail.Digitos}" placeholder="000000" required autofocus />
-            <span class="form-text">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</span>
-            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Codigo", "El código tiene 6 números")</span>
-        </div>
-        <button class="btn btn-warning-block" type="submit">Verificar y crear mi cuenta</button>
-    </form>
+<form class="formulario" asp-controller="Cuenta" asp-action="VerificarEmail" asp-route-Token="@ViewBag.Formulario.Token" method="post">
+    <div class="form-field @Html.ClaseError("Codigo")">
+        <label class="form-label" for="Codigo">Código</label>
+        <input class="form-control codigo" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" type="text" autocomplete="one-time-code" placeholder="000000" required>
+        <p class="form-text">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</p>
+        <p class="error-texto">@Html.MensajeError("Codigo", "El código tiene 6 números")</p>
+    </div>
+    <button class="btn-solid theme-primary boton boton-acento w-100" type="submit">Verificar y crear mi cuenta</button>
+</form>
 
-    <form asp-controller="Cuenta" asp-action="ReenviarCodigo" method="post">
-        <input type="hidden" name="token" value="@ViewBag.Formulario.Token" />
-        <button class="btn btn-outline-block" type="submit"><icono nombre="refresh" />Mandarme otro código</button>
-    </form>
-    <p class="cuenta-tarjeta-legal">¿Escribiste mal el email? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>
-</div>
+<form asp-controller="Cuenta" asp-action="ReenviarCodigo" asp-route-token="@ViewBag.Formulario.Token" method="post">
+    <button class="btn-outline theme-primary boton w-100" type="submit">Mandarme otro código</button>
+</form>
+<p class="texto-suave">¿Escribiste mal el email? <a asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>

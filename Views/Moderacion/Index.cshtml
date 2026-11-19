@@ -2,52 +2,46 @@
     ViewData["Title"] = "Moderación";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
-        <h1 class="encabezado-pagina-titulo">Moderación</h1>
-        <p class="encabezado-pagina-bajada">Revisá las búsquedas que publicaron las personas. Si la aceptás se publica con las demás; si la rechazás, quien la publicó ve el motivo.</p>
-    </header>
+<div class="container seccion">
+    <h1 class="titulo">Moderación</h1>
+    <p class="texto-suave">Revisá las búsquedas que publicaron las personas. Si la aceptás se publica con las demás; si la rechazás, quien la publicó ve el motivo.</p>
 
-    <section aria-labelledby="pendientes-titulo">
-        <h2 class="h4" id="pendientes-titulo">Para revisar (@ViewBag.Pendientes.Count)</h2>
-        @if (ViewBag.Pendientes.Count == 0)
-        {
-            <div class="estado-vacio estado-vacio-chico"><p>No hay búsquedas esperando revisión.</p></div>
-        }
-        else
-        {
-            <ul class="lista-publicaciones" role="list">
-                @foreach (Oferta oferta in ViewBag.Pendientes)
-                {
-                    <li class="publicacion">
-                        <div class="publicacion-datos">
-                            <h3 class="publicacion-titulo"><a asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">@oferta.Titulo</a></h3>
-                            <p class="publicacion-meta">@oferta.Empresa@(oferta.UbicacionVisible != null ? " · " + oferta.UbicacionVisible : "") · enviada el @Vistas.Fecha(oferta.Fecha_Publicacion)</p>
-                        </div>
-                        <a class="btn btn-sm" asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">Revisar</a>
-                    </li>
-                }
-            </ul>
-        }
-    </section>
+    <h2 class="subtitulo">Para revisar (@ViewBag.Pendientes.Count)</h2>
+    @if (ViewBag.Pendientes.Count == 0)
+    {
+        <div class="vacio"><p>No hay búsquedas esperando revisión.</p></div>
+    }
+    else
+    {
+        <ul class="list-group lista">
+            @foreach (Oferta oferta in ViewBag.Pendientes)
+            {
+                <li class="list-group-item fila-lista">
+                    <div class="fila-lista-datos">
+                        <h3 class="tarjeta-titulo"><a asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">@oferta.Titulo</a></h3>
+                        <p class="texto-suave">@oferta.Empresa@(oferta.UbicacionVisible != null ? " · " + oferta.UbicacionVisible : "") · enviada el @Vistas.Fecha(oferta.Fecha_Publicacion)</p>
+                    </div>
+                    <a class="btn-solid theme-primary boton btn-sm" asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">Revisar</a>
+                </li>
+            }
+        </ul>
+    }
 
     @if (ViewBag.Revisadas.Count > 0)
     {
-        <section aria-labelledby="revisadas-titulo">
-            <h2 class="h4" id="revisadas-titulo">Revisadas hace poco</h2>
-            <ul class="lista-publicaciones" role="list">
-                @foreach (Oferta oferta in ViewBag.Revisadas)
-                {
-                    <li class="publicacion">
-                        <div class="publicacion-datos">
-                            <h3 class="publicacion-titulo"><a asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">@oferta.Titulo</a></h3>
-                            <p class="publicacion-meta">@oferta.Empresa</p>
-                            @if (oferta.Estado_Publicacion == "Rechazada") { <p class="publicacion-motivo"><strong>Motivo:</strong> @oferta.Motivo_Rechazo</p> }
-                        </div>
-                        <span class="badge badge-@(oferta.Estado_Publicacion == "Aprobada" ? "exito" : "error")">@(oferta.Estado_Publicacion == "Aprobada" ? "Aceptada" : "Rechazada")</span>
-                    </li>
-                }
-            </ul>
-        </section>
+        <h2 class="subtitulo">Revisadas hace poco</h2>
+        <ul class="list-group lista">
+            @foreach (Oferta oferta in ViewBag.Revisadas)
+            {
+                <li class="list-group-item fila-lista">
+                    <div class="fila-lista-datos">
+                        <h3 class="tarjeta-titulo"><a asp-controller="Moderacion" asp-action="Revisar" asp-route-id="@oferta.ID">@oferta.Titulo</a></h3>
+                        <p class="texto-suave">@oferta.Empresa</p>
+                        @if (oferta.Estado_Publicacion == "Rechazada") { <p><span class="negrita">Motivo:</span> @oferta.Motivo_Rechazo</p> }
+                    </div>
+                    <span class="badge etiqueta etiqueta-@(oferta.Estado_Publicacion == "Aprobada" ? "exito" : "error")">@(oferta.Estado_Publicacion == "Aprobada" ? "Aceptada" : "Rechazada")</span>
+                </li>
+            }
+        </ul>
     }
 </div>

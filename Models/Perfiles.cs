@@ -244,6 +244,10 @@ public static class Perfiles
             var finTexto = Valor(m.ExpFin, i);
             var fin = Fechas.ParsearMesAnio(finTexto);
             var descripcion = Valor(m.ExpDescripcion, i);
+            if ((puesto + empresa + Valor(m.ExpInicio, i) + finTexto + descripcion).Length == 0)
+            {
+                continue; // la fila vacía que muestra el formulario para sumar una nueva
+            }
             if (puesto.Length is 0 or > 100 || empresa.Length is 0 or > 100 || inicio == null || inicio > Fechas.MesActual ||
                 (finTexto.Length > 0 && (fin == null || fin < inicio || fin > Fechas.MesActual)) || descripcion.Length > 500)
             {
@@ -265,6 +269,10 @@ public static class Perfiles
             var inicio = Fechas.ParsearMesAnio(Valor(m.ForInicio, i));
             var finTexto = Valor(m.ForFin, i);
             var fin = Fechas.ParsearMesAnio(finTexto);
+            if ((titulo + institucion + Valor(m.ForInicio, i) + finTexto).Length == 0)
+            {
+                continue; // la fila vacía que muestra el formulario para sumar una nueva
+            }
             if (titulo.Length is 0 or > 150 || institucion.Length is 0 or > 150 || inicio == null || inicio > Fechas.MesActual ||
                 (finTexto.Length > 0 && (fin == null || fin < inicio)))
             {

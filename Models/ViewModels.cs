@@ -35,7 +35,7 @@ public class BuscarTrabajoViewModel
 
     public string? Lugar => Provincias.FirstOrDefault(p => p.ID == IDProvincia)?.Nombre ?? Paises.FirstOrDefault(p => p.ID == IDPais)?.Nombre;
 
-    public string UrlMas => "/Empleos/Resultados?" + string.Join("&", Consulta.Append("Pagina=" + (Pagina + 1)));
+    public string UrlPagina(int pagina) => "?" + string.Join("&", Consulta.Append("Pagina=" + pagina));
 }
 
 public class EmpresasViewModel

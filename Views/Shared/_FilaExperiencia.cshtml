@@ -1,0 +1,20 @@
+@model ExperienciaEnviada
+<div class="fila-cargar">
+    <div class="row g-4">
+        <div class="md:col-6">
+            <label class="form-label">Puesto <input class="form-control" name="ExpPuesto" value="@Model.Puesto" type="text" placeholder="Ej.: Cajero/a"></label>
+        </div>
+        <div class="md:col-6">
+            <label class="form-label">Empresa <input class="form-control" name="ExpEmpresa" value="@Model.Empresa" type="text" placeholder="Nombre de la empresa"></label>
+        </div>
+        <div class="col-6">
+            <label class="form-label">Inicio <input class="form-control" name="ExpInicio" value="@Model.Inicio" type="text" placeholder="MM/AAAA"></label>
+        </div>
+        <div class="col-6">
+            <label class="form-label">Fin (vacío si seguís) <input class="form-control" name="ExpFin" value="@Model.Fin" type="text" placeholder="MM/AAAA"></label>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Qué hacías <span class="opcional">(opcional)</span> <textarea class="form-control" name="ExpDescripcion" rows="2">@Model.Descripcion</textarea></label>
+        </div>
+    </div>
+</div>

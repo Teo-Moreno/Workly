@@ -2,209 +2,118 @@
     ViewData["Title"] = "Completar perfil";
 }
 
-<div class="container seccion-app">
-    <div class="completar-perfil">
-        <header class="encabezado-pagina">
-            <nav aria-label="Estás en">
-                <ol class="breadcrumb breadcrumb-chica">
-                    <li class="breadcrumb-item"><a asp-controller="Perfil" asp-action="Index">Mi perfil</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Completar perfil</li>
-                </ol>
-            </nav>
-            <h1 class="encabezado-pagina-titulo">Completá tu perfil</h1>
-            <p class="encabezado-pagina-bajada">Paso <strong data-paso-actual>1</strong> de @CompletarPerfilViewModel.Pasos.Length. Todo es opcional y lo podés cambiar cuando quieras.</p>
-        </header>
-
-        <ol class="pasos registro-pasos" aria-label="Progreso">
-            @for (var i = 0; i < CompletarPerfilViewModel.Pasos.Length; i++)
-            {
-                <li class="pasos-item @(i == 0 ? "esta-actual" : "")" data-paso-indicador>
-                    <span class="pasos-circulo"><span class="pasos-numero">@(i + 1)</span><icono nombre="check" /></span>
-                    @CompletarPerfilViewModel.Pasos[i]
-                </li>
-            }
+<div class="container seccion angosto">
+    <nav aria-label="Estás en">
+        <ol class="migas">
+            <li><a asp-controller="Perfil" asp-action="Index">Mi perfil</a></li>
+            <li aria-current="page">Completar perfil</li>
         </ol>
+    </nav>
+    <h1 class="titulo">Completá tu perfil</h1>
+    <p class="texto-suave">Todo es opcional y lo podés cambiar cuando quieras.</p>
 
-        <partial name="_ErroresFormulario" />
+    <partial name="_ErroresFormulario" />
 
-        <form class="registro" asp-controller="Perfil" asp-action="Completar" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
-        <fieldset class="formulario registro-paso" data-paso>
-            <legend class="visually-hidden">Paso 1: tus datos</legend>
+    <form class="formulario" asp-controller="Perfil" asp-action="Completar" method="post" enctype="multipart/form-data">
+        <section class="card tarjeta">
+            <h2 class="subtitulo">1. Tus datos</h2>
 
-            <div class="campo @Html.ClaseError("Foto")">
-                <span class="form-label">Foto de perfil <span class="campo-opcional">(opcional)</span></span>
-                <div class="subir-foto">
-                    <span class="avatar-xl subir-foto-vista" data-vista-foto aria-hidden="true">
-                        @if (!string.IsNullOrEmpty(ViewBag.Completar.FotoActual))
-                        {
-                            <img src="@ViewBag.Completar.FotoActual" alt="" />
-                        }
-                        else
-                        {
-                            <icono nombre="user" tamano="40" />
-                        }
-                    </span>
-                    <div class="pila" style="--pila-espacio: 8px">
-                        <label class="btn btn-archivo">
-                            <icono nombre="upload" />@(string.IsNullOrEmpty(ViewBag.Completar.FotoActual) ? "Elegir foto" : "Cambiar foto")
-                            <input id="Foto" name="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
-                                   data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
-                        </label>
-                        <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB.</span>
-                    </div>
-                </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Foto", "Subí una imagen JPG, PNG o WEBP")</span>
+            <div class="form-field @Html.ClaseError("Foto")">
+                <label class="form-label" for="Foto">Foto de perfil <span class="opcional">(opcional)</span></label>
+                @if (!string.IsNullOrEmpty(ViewBag.Completar.FotoActual))
+                {
+                    <img class="foto-perfil foto-perfil-xl" src="@ViewBag.Completar.FotoActual" alt="Tu foto actual">
+                }
+                <input class="form-control" id="Foto" name="Foto" type="file">
+                <p class="form-text">JPG, PNG o WEBP de hasta 5 MB.</p>
+                <p class="error-texto">@Html.MensajeError("Foto", "Subí una imagen JPG, PNG o WEBP")</p>
             </div>
 
             <partial name="_CampoUbicacion" model='new CampoUbicacion { Prefijo = "cmp-", Paises = ViewBag.Completar.Paises, Provincias = ViewBag.Completar.Provincias, IDPais = ViewBag.Completar.IDPais, IDProvincia = ViewBag.Completar.IDProvincia, EtiquetaProvincia = "Provincia donde vivís", Requerido = false }' />
             <partial name="_CampoTelefono" model='new CampoTelefono { Valor = ViewBag.Completar.Telefono, Prefijo = ViewBag.Completar.PrefijoTelefono }' />
 
-            <fieldset class="formulario-grupo @Html.ClaseError("EstadoBusqueda")">
-                <legend class="form-label">¿Estás buscando trabajo? <span class="campo-opcional">(opcional)</span></legend>
-                <div class="opciones-tarjeta">
-                    @foreach (var estado in Catalogos.EstadosBusqueda)
-                    {
-                        <label class="opcion-tarjeta">
-                            <input class="btn-check" type="radio" name="EstadoBusqueda" value="@estado" checked="@(ViewBag.Completar.EstadoBusqueda == estado)" />
-                            <span><span class="opcion-tarjeta-titulo">@estado</span></span>
-                        </label>
-                    }
-                </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("EstadoBusqueda", "Elegí una opción")</span>
-            </fieldset>
-
-            <div class="campo @Html.ClaseError("Descripcion")">
-                <label class="form-label" for="Descripcion">Contanos sobre vos <span class="campo-opcional">(opcional)</span></label>
-                <textarea class="form-control" id="Descripcion" name="Descripcion" rows="4" maxlength="500" placeholder="Qué hacés, qué te gusta y qué tipo de trabajo estás buscando.">@ViewBag.Completar.Descripcion</textarea>
-                <span class="form-text">Aparece en la sección "Sobre mí" de tu perfil. Hasta 500 caracteres.</span>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Usá hasta 500 caracteres")</span>
+            <div class="form-field @Html.ClaseError("Descripcion")">
+                <label class="form-label" for="Descripcion">Contanos sobre vos <span class="opcional">(opcional)</span></label>
+                <textarea class="form-control" id="Descripcion" name="Descripcion" rows="4" placeholder="Qué hacés, qué te gusta y qué tipo de trabajo estás buscando.">@ViewBag.Completar.Descripcion</textarea>
+                <p class="form-text">Aparece en la sección "Sobre mí" de tu perfil. Hasta 500 caracteres.</p>
+                <p class="error-texto">@Html.MensajeError("Descripcion", "Usá hasta 500 caracteres")</p>
             </div>
+        </section>
 
-            <div class="registro-acciones">
-                <a class="btn btn-link-lg" asp-controller="Panel" asp-action="Index">Lo completo después</a>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
-            </div>
-        </fieldset>
-
-        <fieldset class="formulario registro-paso" data-paso hidden>
-            <legend class="visually-hidden">Paso 2: qué buscás</legend>
-            <p class="text-body-secondary">Todo es opcional: completá lo que tengas claro.</p>
+        <section class="card tarjeta">
+            <h2 class="subtitulo">2. Qué buscás</h2>
             <partial name="_CamposBusqueda" model="CamposBusqueda.Desde(ViewBag.Completar)" />
-            <div class="registro-acciones">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
-            </div>
-        </fieldset>
+        </section>
 
-        <fieldset class="formulario registro-paso" data-paso hidden>
-            <legend class="visually-hidden">Paso 3: experiencia y formación</legend>
-            <p class="text-body-secondary">Opcional: podés sumarlas ahora o más adelante desde tu perfil.</p>
-
-            <section class="lista-local @Html.ClaseError("Experiencias")" aria-labelledby="titulo-exp">
-                <div class="lista-local-cabecera">
-                    <h2 class="formulario-subtitulo" id="titulo-exp">Experiencia laboral</h2>
-                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-experiencia"><icono nombre="plus" />Agregar experiencia</button>
-                </div>
-                @if (ViewBag.Completar.ExperienciasCargadas.Count > 0)
-                {
-                    <ul class="lista-local-items" role="list">
-                        @foreach (ExperienciaItem x in ViewBag.Completar.ExperienciasCargadas)
-                        {
-                            <li class="item-local"><div><strong>@x.Puesto</strong><span>@x.Empresa · @x.Periodo</span></div></li>
-                        }
-                    </ul>
-                    <p class="small text-body-secondary">Para editar o borrar las que ya cargaste, andá a <a class="enlace" asp-controller="Perfil" asp-action="Index">tu perfil</a>.</p>
-                }
-                <ul class="lista-local-items" role="list" data-lista-local="experiencia" data-vacio="@(ViewBag.Completar.ExperienciasCargadas.Count > 0 ? "" : "Todavía no agregaste experiencias.")">
-                    @foreach (ExperienciaEnviada x in ViewBag.Completar.ExperienciasEnviadas)
+        <section class="card tarjeta @Html.ClaseError("Experiencias")">
+            <h2 class="subtitulo">3. Experiencia laboral</h2>
+            @if (ViewBag.Completar.ExperienciasCargadas.Count > 0)
+            {
+                <ul class="list-group linea">
+                    @foreach (ExperienciaItem x in ViewBag.Completar.ExperienciasCargadas)
                     {
-                        <li class="item-local" data-item-local>
-                            <div><strong>@x.Puesto</strong><span>@x.Empresa · @x.Inicio – @x.FinTexto</span></div>
-                            <input type="hidden" name="ExpPuesto" value="@x.Puesto" /><input type="hidden" name="ExpEmpresa" value="@x.Empresa" />
-                            <input type="hidden" name="ExpInicio" value="@x.Inicio" /><input type="hidden" name="ExpFin" value="@x.Fin" />
-                            <input type="hidden" name="ExpDescripcion" value="@x.Descripcion" />
-                            <button class="btn btn-link" type="button" data-quitar-item>Quitar</button>
-                        </li>
+                        <li class="list-group-item"><span class="negrita">@x.Puesto</span> · @x.Empresa · @x.Periodo</li>
                     }
                 </ul>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Experiencias", "Revisá las experiencias")</span>
-            </section>
+                <p class="texto-suave">Para editar o borrar las que ya cargaste, andá a <a asp-controller="Perfil" asp-action="Index">tu perfil</a>.</p>
+            }
+            <p class="texto-suave">Dejá la fila vacía si no querés sumar ninguna. Podés agregar más después desde tu perfil.</p>
+            @foreach (ExperienciaEnviada x in ViewBag.Completar.ExperienciasEnviadas)
+            {
+                <partial name="_FilaExperiencia" model="x" />
+            }
+            <partial name="_FilaExperiencia" model='new ExperienciaEnviada("", "", "", "", "")' />
+            <p class="error-texto">@Html.MensajeError("Experiencias", "Revisá las experiencias")</p>
+        </section>
 
-            <section class="lista-local @Html.ClaseError("Formaciones")" aria-labelledby="titulo-for">
-                <div class="lista-local-cabecera">
-                    <h2 class="formulario-subtitulo" id="titulo-for">Formación</h2>
-                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-formacion"><icono nombre="plus" />Agregar formación</button>
-                </div>
-                @if (ViewBag.Completar.FormacionesCargadas.Count > 0)
-                {
-                    <ul class="lista-local-items" role="list">
-                        @foreach (FormacionItem f in ViewBag.Completar.FormacionesCargadas)
-                        {
-                            <li class="item-local"><div><strong>@f.Titulo</strong><span>@f.Institucion · @f.Periodo</span></div></li>
-                        }
-                    </ul>
-                }
-                <ul class="lista-local-items" role="list" data-lista-local="formacion" data-vacio="@(ViewBag.Completar.FormacionesCargadas.Count > 0 ? "" : "Todavía no agregaste estudios.")">
-                    @foreach (FormacionEnviada f in ViewBag.Completar.FormacionesEnviadas)
+        <section class="card tarjeta @Html.ClaseError("Formaciones")">
+            <h2 class="subtitulo">4. Formación</h2>
+            @if (ViewBag.Completar.FormacionesCargadas.Count > 0)
+            {
+                <ul class="list-group linea">
+                    @foreach (FormacionItem f in ViewBag.Completar.FormacionesCargadas)
                     {
-                        <li class="item-local" data-item-local>
-                            <div><strong>@f.Titulo</strong><span>@f.Institucion · @f.Inicio – @f.FinTexto</span></div>
-                            <input type="hidden" name="ForTitulo" value="@f.Titulo" /><input type="hidden" name="ForInstitucion" value="@f.Institucion" />
-                            <input type="hidden" name="ForInicio" value="@f.Inicio" /><input type="hidden" name="ForFin" value="@f.Fin" />
-                            <button class="btn btn-link" type="button" data-quitar-item>Quitar</button>
-                        </li>
+                        <li class="list-group-item"><span class="negrita">@f.Titulo</span> · @f.Institucion · @f.Periodo</li>
                     }
                 </ul>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Formaciones", "Revisá la formación")</span>
-            </section>
+            }
+            <p class="texto-suave">Dejá la fila vacía si no querés sumar ninguna.</p>
+            @foreach (FormacionEnviada f in ViewBag.Completar.FormacionesEnviadas)
+            {
+                <partial name="_FilaFormacion" model="f" />
+            }
+            <partial name="_FilaFormacion" model='new FormacionEnviada("", "", "", "")' />
+            <p class="error-texto">@Html.MensajeError("Formaciones", "Revisá la formación")</p>
+        </section>
 
-            <div class="registro-acciones">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
-            </div>
-        </fieldset>
-
-        <fieldset class="formulario registro-paso" data-paso hidden>
-            <legend class="visually-hidden">Paso 4: tu CV</legend>
-
-            <div class="campo @Html.ClaseError("ArchivoCV")">
-                <span class="form-label">CV <span class="campo-opcional">(opcional, lo podés subir después)</span></span>
+        <section class="card tarjeta">
+            <h2 class="subtitulo">5. Tu CV</h2>
+            <div class="form-field @Html.ClaseError("ArchivoCV")">
+                <label class="form-label" for="ArchivoCV">CV <span class="opcional">(opcional, lo podés subir después)</span></label>
                 @if (ViewBag.Completar.CVActual != null)
                 {
-                    <span class="form-text">Ya subiste: @ViewBag.Completar.CVActual. Si elegís otro, lo reemplazamos.</span>
+                    <p class="form-text">Ya subiste: @ViewBag.Completar.CVActual. Si elegís otro, lo reemplazamos.</p>
                 }
-                <label class="zona-archivo" data-zona-archivo>
-                    <span class="caja-icono"><icono nombre="upload" /></span>
-                    <strong class="zona-archivo-nombre" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
-                    <span class="small">PDF, DOC o DOCX de hasta 5 MB</span>
-                    <input id="ArchivoCV" name="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                           data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
-                </label>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("ArchivoCV", "Subí un archivo PDF, DOC o DOCX")</span>
+                <input class="form-control" id="ArchivoCV" name="ArchivoCV" type="file">
+                <p class="form-text">PDF, DOC o DOCX de hasta 5 MB.</p>
+                <p class="error-texto">@Html.MensajeError("ArchivoCV", "Subí un archivo PDF, DOC o DOCX")</p>
             </div>
 
-            <div class="campo @Html.ClaseError("SitioWeb")">
-                <label class="form-label" for="SitioWeb">Sitio web, portfolio o LinkedIn <span class="campo-opcional">(opcional)</span></label>
-                <div class="control-con-icono">
-                    <icono nombre="globe" />
-                    <input class="form-control" id="SitioWeb" name="SitioWeb" value="@ViewBag.Completar.SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="linkedin.com/in/tu-nombre" maxlength="200" />
-                </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("SitioWeb", "Usá hasta 200 caracteres")</span>
+            <div class="form-field @Html.ClaseError("SitioWeb")">
+                <label class="form-label" for="SitioWeb">Sitio web, portfolio o LinkedIn <span class="opcional">(opcional)</span></label>
+                <input class="form-control" id="SitioWeb" name="SitioWeb" value="@ViewBag.Completar.SitioWeb" type="text" autocomplete="url" placeholder="linkedin.com/in/tu-nombre">
+                <p class="error-texto">@Html.MensajeError("SitioWeb", "Usá hasta 200 caracteres")</p>
             </div>
 
             @if (ViewBag.Completar.Foto != null || ViewBag.Completar.ArchivoCV != null)
             {
-                <p class="small text-body-secondary">Por seguridad, si hubo un error tenés que volver a elegir la foto y el CV.</p>
+                <p class="texto-suave">Por seguridad, si hubo un error tenés que volver a elegir la foto y el CV.</p>
             }
+        </section>
 
-            <div class="registro-acciones">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
-                <button class="btn btn-warning-lg" type="submit">Guardar perfil</button>
-            </div>
-        </fieldset>
-        </form>
-    </div>
+        <div class="acciones">
+            <a class="boton-link" asp-controller="Panel" asp-action="Index">Lo completo después</a>
+            <button class="btn-solid theme-primary boton boton-acento" type="submit">Guardar perfil</button>
+        </div>
+    </form>
 </div>
-
-<partial name="_ModalExperiencia" model="new ModalExperiencia(false, null, null)" />
-<partial name="_ModalFormacion" model="new ModalFormacion(false, null, ViewBag.Completar.Instituciones, null)" />

@@ -1,22 +1,18 @@
-<article class="empresa-tarjeta">
-    <div class="empresa-tarjeta-cabecera">
-        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Nombre, "logo-empresa-md")' />
-        <div class="empresa-tarjeta-datos">
-            <h3 class="empresa-tarjeta-nombre">
+<div class="card tarjeta">
+    <div class="tarjeta-fila">
+        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Nombre, "logo-empresa")' />
+        <div>
+            <h3 class="tarjeta-titulo">
                 <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID">@Model.Nombre</a>
             </h3>
-            <p class="empresa-tarjeta-industria">@Model.Resumen</p>
+            <p class="texto-suave">@Model.Resumen</p>
         </div>
     </div>
-
     @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
     {
-        <p class="empresa-tarjeta-descripcion">@Textos.Recortar(Model.Descripcion, 160)</p>
+        <p>@Textos.Recortar(Model.Descripcion, 160)</p>
     }
-
-    <div class="empresa-tarjeta-pie">
-        <a class="enlace" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID" asp-fragment="ofertas">
-            @(Model.BusquedasActivas == 0 ? "Sin búsquedas abiertas" : Model.BusquedasActivas == 1 ? "Ver 1 búsqueda abierta →" : $"Ver {Model.BusquedasActivas} búsquedas abiertas →")
-        </a>
-    </div>
-</article>
+    <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID" asp-fragment="ofertas">
+        @(Model.BusquedasActivas == 0 ? "Sin búsquedas abiertas" : Model.BusquedasActivas == 1 ? "Ver 1 búsqueda abierta →" : $"Ver {Model.BusquedasActivas} búsquedas abiertas →")
+    </a>
+</div>

@@ -1,29 +1,25 @@
 @inject Captcha Generador
 @{
     ViewData["Title"] = "Recuperar contraseña";
+    var captcha = Generador.Nuevo();
 }
 @section Barra {
-    <p class="text-body-secondary">¿Te acordaste? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p>¿Te acordaste? <a asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Creá una contraseña nueva</h1>
-    <p class="cuenta-tarjeta-bajada">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
+<h1 class="titulo">Creá una contraseña nueva</h1>
+<p class="texto-suave">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
 
-    <partial name="_ErroresFormulario" />
+<partial name="_ErroresFormulario" />
 
-    <form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
-        <div class="campo @Html.ClaseError("Email")">
-            <label class="form-label" for="Email">Email</label>
-            <div class="control-con-icono">
-                <icono nombre="mail" />
-                <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
-            </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
-        </div>
+<form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" asp-route-CaptchaToken="@captcha.Token" method="post">
+    <div class="form-field @Html.ClaseError("Email")">
+        <label class="form-label" for="Email">Email</label>
+        <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required>
+        <p class="error-texto">@Html.MensajeError("Email", "Ingresá un email válido")</p>
+    </div>
 
-        <partial name="_Captcha" model="Generador.Nuevo()" />
+    <partial name="_Captcha" model="captcha" />
 
-        <button class="btn btn-block-lg" type="submit"><icono nombre="send" />Mandarme el link</button>
-    </form>
-</div>
+    <button class="btn-solid theme-primary boton w-100" type="submit">Mandarme el link</button>
+</form>

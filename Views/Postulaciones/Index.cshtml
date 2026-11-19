@@ -2,47 +2,40 @@
     ViewData["Title"] = "Mis postulaciones";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
-        <div class="encabezado-pagina-fila">
-            <div>
-                <h1 class="encabezado-pagina-titulo">Mis postulaciones</h1>
-                <p class="encabezado-pagina-bajada">Mové cada tarjeta a medida que avanza el proceso: arrastrala a otra columna o elegí la etapa en la tarjeta.</p>
-            </div>
-            <div class="encabezado-pagina-acciones">
-                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
-            </div>
+<div class="container seccion">
+    <div class="encabezado">
+        <div>
+            <h1 class="titulo">Mis postulaciones</h1>
+            <p class="texto-suave">A medida que avanza cada proceso, elegí la etapa en la tarjeta y tocá "Mover".</p>
         </div>
-    </header>
+        <a class="btn-solid theme-primary boton" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    </div>
 
     @if (!ViewBag.HayPostulaciones)
     {
-        <div class="estado-vacio">
-            <span class="caja-icono-lg"><icono nombre="send" /></span>
-            <h2 class="estado-vacio-titulo">Todavía no tenés postulaciones</h2>
+        <div class="vacio">
+            <h2>Todavía no tenés postulaciones</h2>
             <p>Cuando te postules a una búsqueda de Workly, o toques "Ya me postulé" en una de otro sitio, aparece acá para que le hagas el seguimiento.</p>
-            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn-solid theme-primary boton" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
         </div>
     }
     else
     {
-        <div class="tablero" data-tablero data-url-estado="@Url.Action("CambiarEstado", "Postulaciones")">
-            @Html.AntiForgeryToken()
+        <div class="tablero">
             @foreach (ColumnaTablero columna in ViewBag.Columnas)
             {
-                <section class="tablero-columna @(columna.Tarjetas.Count == 0 ? "esta-vacia" : "")" data-columna="@columna.Estado" aria-labelledby="columna-@columna.Color">
-                    <header class="tablero-cabecera">
-                        <span class="punto punto-@columna.Color" aria-hidden="true"></span>
-                        <h2 class="tablero-titulo" id="columna-@columna.Color" data-columna-nombre>@columna.Nombre</h2>
-                        <span class="tablero-contador" data-columna-contador>@columna.Tarjetas.Count</span>
-                    </header>
-                    <div class="tablero-lista" data-columna-lista>
+                <section class="tablero-columna">
+                    <h2 class="tablero-titulo"><span class="punto punto-@columna.Color"></span>@columna.Nombre <span class="badge contador">@columna.Tarjetas.Count</span></h2>
+                    <ul class="list-group">
                         @foreach (PostulacionItem postulacion in columna.Tarjetas)
                         {
                             <partial name="_PostulacionTarjeta" model="postulacion" />
                         }
-                        <p class="tablero-vacio">Arrastrá una tarjeta acá</p>
-                    </div>
+                    </ul>
+                    @if (columna.Tarjetas.Count == 0)
+                    {
+                        <p class="texto-suave">No hay postulaciones en esta etapa.</p>
+                    }
                 </section>
             }
         </div>

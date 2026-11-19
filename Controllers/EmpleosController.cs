@@ -16,17 +16,10 @@ public class EmpleosController : Controller
         _cache = cache;
     }
 
-    public IActionResult Index(BuscarTrabajoViewModel filtros)
-    {
-        ViewBag.Busqueda = Empleos.Preparar(filtros);
-        ViewBag.UrlResultados = Url.Action(nameof(Resultados)) + Request.QueryString;
-        return View();
-    }
-
-    public async Task<IActionResult> Resultados(BuscarTrabajoViewModel filtros)
+    public async Task<IActionResult> Index(BuscarTrabajoViewModel filtros)
     {
         ViewBag.Busqueda = await Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
-        return PartialView("_Resultados");
+        return View();
     }
 
     public IActionResult Detalle(int id)

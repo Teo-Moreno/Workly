@@ -1,7 +1,7 @@
-<div class="campo @Html.ClaseError("AceptaTerminos")">
-    <label class="form-check">
-        <input class="form-check-input" id="AceptaTerminos" name="AceptaTerminos" value="true" checked="@ViewBag.Formulario.AceptaTerminos" type="checkbox" required />
-        <span class="form-check-label">Acepto los <a class="enlace" asp-controller="Home" asp-action="Terminos" target="_blank">Términos</a> y la <a class="enlace" asp-controller="Home" asp-action="Privacy" target="_blank">Política de privacidad</a></span>
+<div class="form-field @Html.ClaseError("AceptaTerminos")">
+    <label class="casilla">
+        <input id="AceptaTerminos" name="AceptaTerminos" value="true" checked="@ViewBag.Formulario.AceptaTerminos" type="checkbox" required>
+        Acepto los <a asp-controller="Home" asp-action="Terminos" target="_blank">Términos</a> y la <a asp-controller="Home" asp-action="Privacy" target="_blank">Política de privacidad</a>
     </label>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("AceptaTerminos", "Tenés que aceptar los términos para continuar")</span>
+    <p class="error-texto">@Html.MensajeError("AceptaTerminos", "Tenés que aceptar los términos para continuar")</p>
 </div>
