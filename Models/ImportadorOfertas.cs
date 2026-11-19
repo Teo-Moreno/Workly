@@ -121,6 +121,7 @@ public class ImportadorOfertas : BackgroundService
 
         if (guardadas > 0)
         {
+            BD.RegistrarImportacion(guardadas);
             var borradas = BD.BorrarOfertasExternasViejas(_diasParaBorrar);
             _logger.LogInformation("Importamos {Guardadas} ofertas de otros sitios y borramos {Borradas} viejas", guardadas, borradas);
         }

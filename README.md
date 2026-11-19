@@ -20,7 +20,7 @@
 - **Validaciones de empresa**: CUIT válido, email del dominio de la empresa y sin repetir nombre ni CUIT.
 - **Perfil y CV**: foto, "Sobre mí", experiencia laboral, formación, habilidades, idiomas, preferencias de búsqueda y CV en PDF o Word.
 - **Buscar trabajo** con filtros por texto, provincia, modalidad, tipo de empleo y fecha, ordenando por fecha o de la A a la Z. Los resultados se muestran en una grilla de 42 ofertas con un botón "Ver más".
-- **Ofertas externas** de otros sitios guardadas en la base, junto con las ofertas publicadas en Workly. La app las actualiza sola desde la API JSearch una vez por semana.
+- **Ofertas externas** de otros sitios guardadas en la base, junto con las ofertas publicadas en Workly. La app las actualiza sola desde la API JSearch una vez por semana, y cuando una búsqueda da menos de 42 resultados trae más en ese momento y las guarda.
 - **Postulaciones** a ofertas de Workly y registro de postulaciones externas, en un tablero que cambia de estado sin recargar la página (`fetch`).
 - **Ofertas guardadas** y recomendaciones **"Para vos"** según lo que busca cada persona.
 - **Publicaciones**: las empresas publican directo y las personas mandan su búsqueda a moderación.

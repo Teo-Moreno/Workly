@@ -1,11 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Workly.Models;
 
 namespace Workly.Controllers;
 
 public class EmpleosController : Controller
 {
+    private readonly JSearch _jsearch;
+    private readonly IMemoryCache _cache;
+
+    public EmpleosController(JSearch jsearch, IMemoryCache cache)
+    {
+        _jsearch = jsearch;
+        _cache = cache;
+    }
+
     public IActionResult Index(BuscarTrabajoViewModel filtros)
     {
         ViewBag.Busqueda = Empleos.Preparar(filtros);
@@ -13,9 +23,9 @@ public class EmpleosController : Controller
         return View();
     }
 
-    public IActionResult Resultados(BuscarTrabajoViewModel filtros)
+    public async Task<IActionResult> Resultados(BuscarTrabajoViewModel filtros)
     {
-        ViewBag.Busqueda = Empleos.Buscar(filtros, Request.Query, User.IdUsuario());
+        ViewBag.Busqueda = await Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
         return PartialView("_Resultados");
     }
 
