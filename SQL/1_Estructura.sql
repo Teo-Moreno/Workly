@@ -255,6 +255,20 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[Importacion](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Fecha] [datetime2](7) NOT NULL,
+	[Cantidad] [int] NOT NULL,
+ CONSTRAINT [PK_Importacion] PRIMARY KEY CLUSTERED
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[OfertaLaboral](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[IDEmpresa] [int] NOT NULL,
@@ -745,6 +759,8 @@ GO
 ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Fecha_Consulta]  DEFAULT (sysutcdatetime()) FOR [Fecha_Consulta]
 GO
 ALTER TABLE [dbo].[OfertaExterna] ADD  CONSTRAINT [DF_OfertaExterna_Fecha_Alta]  DEFAULT (sysutcdatetime()) FOR [Fecha_Alta]
+GO
+ALTER TABLE [dbo].[Importacion] ADD  CONSTRAINT [DF_Importacion_Fecha]  DEFAULT (sysutcdatetime()) FOR [Fecha]
 GO
 ALTER TABLE [dbo].[OfertaLaboral] ADD  CONSTRAINT [DF_OfertaLaboral_Cantidad_Puestos]  DEFAULT ((1)) FOR [Cantidad_Puestos]
 GO

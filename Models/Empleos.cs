@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Workly.Models;
 
@@ -21,12 +22,13 @@ public static class Empleos
 
     public const int OfertasPorPagina = 42;
 
-    public static BuscarTrabajoViewModel Buscar(BuscarTrabajoViewModel filtros, IQueryCollection consulta, int idUsuario)
+    public static async Task<BuscarTrabajoViewModel> Buscar(BuscarTrabajoViewModel filtros, IQueryCollection consulta, int idUsuario,
+                                                            JSearch jsearch, IMemoryCache cache)
     {
         var modelo = Preparar(filtros);
         var fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha);
         modelo.Pagina = Math.Clamp(modelo.Pagina, 1, 1000);
-        modelo.Ofertas = BD.BuscarOfertas(new FiltrosOfertas
+        var filtrosBase = new FiltrosOfertas
         {
             Texto = modelo.Q,
             IDPais = modelo.IDPais,
@@ -37,12 +39,56 @@ public static class Empleos
             Orden = modelo.Orden,
             Desde = (modelo.Pagina - 1) * OfertasPorPagina,
             Cantidad = OfertasPorPagina
-        }, idUsuario);
+        };
+        modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
         modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
+        if (await Completar(modelo, jsearch, cache))
+        {
+            modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
+            modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
+        }
         modelo.PorPagina = OfertasPorPagina;
         modelo.Consulta = consulta.Where(q => q.Key != "Pagina")
             .SelectMany(q => q.Value.Select(v => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(v ?? "")}")).ToList();
         return modelo;
+    }
+
+    private static async Task<bool> Completar(BuscarTrabajoViewModel modelo, JSearch jsearch, IMemoryCache cache)
+    {
+        if (!jsearch.Configurada || !modelo.BuscoAlgo || modelo.Pagina != 1 || modelo.Total >= OfertasPorPagina)
+        {
+            return false;
+        }
+        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais);
+        if (pais == null)
+        {
+            return false;
+        }
+        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia);
+        var clave = $"completar:{pais.ID}:{provincia?.ID}:{modelo.Q!.Trim().ToLowerInvariant()}";
+        if (cache.TryGetValue(clave, out _))
+        {
+            return false;
+        }
+        cache.Set(clave, true, TimeSpan.FromHours(1));
+
+        using var limite = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var resultado = await jsearch.Buscar($"{modelo.Q} en {provincia?.Nombre ?? pais.Nombre}", pais.Codigo_ISO, "month", null, limite.Token);
+        if (resultado.Error || resultado.Ofertas.Count == 0)
+        {
+            return false;
+        }
+        cache.Set(clave, true, TimeSpan.FromHours(24));
+
+        var delPais = modelo.Provincias.Where(p => p.IDPais == pais.ID).ToList();
+        foreach (var oferta in resultado.Ofertas)
+        {
+            oferta.IDPais = pais.ID;
+            oferta.IDProvincia = ImportadorOfertas.DetectarProvincia(oferta.Ubicacion, delPais)
+                                 ?? (string.IsNullOrWhiteSpace(oferta.Ubicacion) ? provincia?.ID : null);
+        }
+        BD.GuardarOfertasExternas(resultado.Ofertas);
+        return true;
     }
 
     public static List<string> PuestosParaAnimacion() =>
