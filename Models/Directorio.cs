@@ -28,7 +28,7 @@ public static class Directorio
         {
             return null;
         }
-        var abiertas = BD.ObtenerOfertasDeEmpresa(idEmpresa, idUsuario).Where(o => !o.EstaCerrada).ToList();
+        var abiertas = BD.ObtenerOfertasDeEmpresa(idEmpresa, idUsuario);
         return (empresa, abiertas, esEmpresa && empresa.IDUsuario == idUsuario);
     }
 }

@@ -359,7 +359,8 @@ public static class BD
             f.Dias,
             f.Orden,
             f.Desde,
-            f.Cantidad
+            f.Cantidad,
+            f.SoloNoPostuladas
         });
 
     public static Oferta? ObtenerOferta(int idOferta, int idUsuarioActual) =>

@@ -197,15 +197,15 @@ public static class Empleos
         }
         var idProvincia = perfil.Preferencia.IDProvincia ?? perfil.Perfil.IDProvincia;
         var provincia = BD.ObtenerProvincias().FirstOrDefault(p => p.ID == idProvincia);
-        var ofertas = BD.BuscarOfertas(new FiltrosOfertas
+        return BD.BuscarOfertas(new FiltrosOfertas
         {
             Texto = puesto,
             IDPais = provincia?.IDPais ?? perfil.Perfil.IDPais,
             IDProvincia = provincia?.ID,
             Modalidades = perfil.Preferencia.ListaModalidades,
-            Cantidad = 30
+            Cantidad = 6,
+            SoloNoPostuladas = true
         }, idUsuario);
-        return ofertas.Where(o => !o.YaPostulado).Take(6).ToList();
     }
 }
 
