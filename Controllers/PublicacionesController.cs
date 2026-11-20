@@ -61,8 +61,9 @@ public class PublicacionesController : Controller
         var postulantes = BD.ObtenerPostulantes(id);
         ViewBag.Oferta = oferta;
         ViewBag.Postulantes = postulantes;
+        var porEtapa = postulantes.ToLookup(p => p.Etapa);
         ViewBag.Etapas = Postulaciones.EtapasEmpresa
-            .Select(e => (e.Etapa, Lista: postulantes.Where(p => p.Etapa == e.Etapa).OrderByDescending(p => p.Puntaje).ThenBy(p => p.Fecha).ToList()))
+            .Select(e => (e.Etapa, Lista: porEtapa[e.Etapa].OrderByDescending(p => p.Puntaje).ThenBy(p => p.Fecha).ToList()))
             .ToList();
         return View();
     }

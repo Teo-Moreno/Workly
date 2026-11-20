@@ -82,4 +82,5 @@ public class FiltrosOfertas
     public string Orden { get; set; } = "recientes";
     public int Desde { get; set; }
     public int Cantidad { get; set; } = 42;
+    public bool SoloNoPostuladas { get; set; }
 }

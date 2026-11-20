@@ -939,7 +939,8 @@ CREATE OR ALTER PROCEDURE BuscarOfertas
     @Dias INT = NULL,
     @Orden NVARCHAR(20) = N'recientes',
     @Desde INT = 0,
-    @Cantidad INT = 42
+    @Cantidad INT = 42,
+    @SoloNoPostuladas BIT = 0
 AS
 BEGIN
     DECLARE @Patron NVARCHAR(700)
@@ -978,6 +979,7 @@ BEGIN
           AND (@Modalidades IS NULL OR o.Modalidad IN (SELECT value FROM STRING_SPLIT(@Modalidades, ',')))
           AND (@Tipos IS NULL OR o.Tipo_Contrato IN (SELECT value FROM STRING_SPLIT(@Tipos, ',')))
           AND (@FechaMinima IS NULL OR o.Fecha_Publicacion >= @FechaMinima)
+          AND (@SoloNoPostuladas = 0 OR NOT EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaLaboral = o.ID AND po.IDUsuario = @IDUsuarioActual))
 
         UNION ALL
 
@@ -997,6 +999,7 @@ BEGIN
           AND (@Modalidades IS NULL OR (x.Es_Remoto = 1 AND @ConRemoto = 1) OR (x.Es_Remoto = 0 AND @ConPresencial = 1))
           AND (@Tipos IS NULL OR x.Tipo_Contrato IN (SELECT value FROM STRING_SPLIT(@Tipos, ',')))
           AND (@FechaMinima IS NULL OR ISNULL(x.Fecha_Publicacion, x.Fecha_Alta) >= @FechaMinima)
+          AND (@SoloNoPostuladas = 0 OR NOT EXISTS (SELECT 1 FROM Postulacion po WHERE po.IDOfertaExterna = x.ID AND po.IDUsuario = @IDUsuarioActual))
     )
     SELECT *, COUNT(*) OVER () AS Total
     FROM Resultados
