@@ -170,11 +170,13 @@ GO
 SET IDENTITY_INSERT [dbo].[Usuario] ON 
 
 INSERT [dbo].[Usuario] ([ID], [Nombre], [Apellido], [Email], [Contraseña], [Fecha_Registro], [Tipo], [Es_Moderador]) VALUES (1, N'Teo', N'Moreno', N'50291929@est.ort.edu.ar', N'PBKDF2$600000$5PeX0WMGc2StUFT8LB6ytQ==$bp2ZHrIULGDmEzGP+cwo8mLhDEHzqmbNUIJe8GM19lE=', CAST(N'2026-11-02' AS Date), N'Persona', 1)
+INSERT [dbo].[Usuario] ([ID], [Nombre], [Apellido], [Email], [Contraseña], [Fecha_Registro], [Tipo], [Es_Moderador]) VALUES (2, N'Prueba', N'Workly', N'prueba', N'PBKDF2$600000$KaIRIyn27PEXCPICmj0sQQ==$qEH1P9ytAg7SJtJ1E+ttq1+lChe3Isvr+wcZbShNllM=', CAST(N'2026-11-24' AS Date), N'Persona', 0)
 SET IDENTITY_INSERT [dbo].[Usuario] OFF
 GO
 SET IDENTITY_INSERT [dbo].[Perfil] ON 
 
 INSERT [dbo].[Perfil] ([ID], [IDUsuario], [IDProvincia], [Foto], [Descripcion], [Telefono], [Estado_Busqueda]) VALUES (1, 1, NULL, NULL, NULL, NULL, NULL)
+INSERT [dbo].[Perfil] ([ID], [IDUsuario], [IDProvincia], [Foto], [Descripcion], [Telefono], [Estado_Busqueda]) VALUES (2, 2, NULL, NULL, NULL, NULL, NULL)
 SET IDENTITY_INSERT [dbo].[Perfil] OFF
 GO
 SET IDENTITY_INSERT [dbo].[OfertaExterna] ON 

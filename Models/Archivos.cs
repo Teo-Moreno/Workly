@@ -46,6 +46,9 @@ public static class Archivos
     public static Task<string?> GuardarLogo(IFormFile? archivo, string carpetaWwwroot) =>
         GuardarImagen(archivo, carpetaWwwroot, "logos");
 
+    public static Task<string?> GuardarImagenOferta(IFormFile? archivo, string carpetaWwwroot) =>
+        GuardarImagen(archivo, carpetaWwwroot, "ofertas");
+
     private static async Task<string?> GuardarImagen(IFormFile? archivo, string carpetaWwwroot, string subcarpeta)
     {
         if (archivo == null || archivo.Length == 0)

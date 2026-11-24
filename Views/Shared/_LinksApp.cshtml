@@ -1,40 +1,37 @@
 @if (!User.EstaLogueado())
 {
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a></li>
-    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="como-funciona">Cómo funciona</a></li>
+    <a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    <a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a>
+    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
 }
 else if (User.EsEmpresa())
 {
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Publicaciones", "Index")" asp-controller="Publicaciones" asp-action="Index">Mis búsquedas</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Publicaciones", "Nueva")" asp-controller="Publicaciones" asp-action="Nueva">Publicar búsqueda</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil de la empresa</a></li>
+    <a class="@ViewContext.ClaseLink("Publicaciones", "Index")" asp-controller="Publicaciones" asp-action="Index">Mis búsquedas</a>
+    <a class="@ViewContext.ClaseLink("Publicaciones", "Nueva")" asp-controller="Publicaciones" asp-action="Nueva">Publicar búsqueda</a>
+    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+    <a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil de la empresa</a>
 }
 else
 {
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Guardadas")" asp-controller="Guardadas" asp-action="Index">Guardadas</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a></li>
-    <li class="nav-item"><a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a></li>
+    <a class="@ViewContext.ClaseLink("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a>
+    <a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+    <a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a>
+    <a class="@ViewContext.ClaseLink("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
+    <a class="@ViewContext.ClaseLink("Guardadas")" asp-controller="Guardadas" asp-action="Index">Guardadas</a>
+    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+    <a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
     @if (ViewContext.TienePublicaciones())
     {
-        <li class="nav-item"><a class="@ViewContext.ClaseLink("Publicaciones")" asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
+        <a class="@ViewContext.ClaseLink("Publicaciones")" asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
     }
 }
 @if (User.EsModerador())
 {
-    <li class="nav-item">
-        <a class="@ViewContext.ClaseLink("Moderacion")" asp-controller="Moderacion" asp-action="Index">
-            Moderación
-            @if (ViewContext.OfertasPendientes() > 0)
-            {
-                <span class="badge contador">@ViewContext.OfertasPendientes()</span>
-            }
-        </a>
-    </li>
+    <a class="@ViewContext.ClaseLink("Moderacion")" asp-controller="Moderacion" asp-action="Index">
+        <span>Moderación</span>
+        @if (ViewContext.OfertasPendientes() > 0)
+        {
+            <span class="badge navbar-contador" aria-label="@ViewContext.OfertasPendientes() por revisar">@ViewContext.OfertasPendientes()</span>
+        }
+    </a>
 }

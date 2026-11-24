@@ -29,6 +29,12 @@ public class CuentaController : Controller
     }
 
     [HttpGet]
+    public Captcha.Desafio NuevoCaptcha()
+    {
+        return _captcha.Nuevo();
+    }
+
+    [HttpGet]
     public async Task<IActionResult> IniciarSesion(string? returnUrl = null)
     {
         if (User.EstaLogueado())
@@ -45,7 +51,7 @@ public class CuentaController : Controller
     {
         ViewBag.Proveedores = await Cuentas.ProveedoresDisponibles(_esquemas);
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var usuario = Cuentas.IniciarSesion(modelo, ip, _intentos, _captcha, Request.Query[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta],
+        var usuario = Cuentas.IniciarSesion(modelo, ip, _intentos, _captcha, Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta],
                                             ModelState, _logger);
         ViewBag.PideCaptcha = _intentos.PideCaptcha(Cuentas.NormalizarEmail(modelo.Email), ip);
         if (usuario == null)
@@ -77,7 +83,7 @@ public class CuentaController : Controller
         {
             return NotFound();
         }
-        if (!_captcha.Verificar(Request.Query[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
+        if (!_captcha.Verificar(Request.Form[Captcha.CampoToken], Request.Form[Captcha.CampoRespuesta]))
         {
             ModelState.AddModelError(Captcha.CampoRespuesta, "Escribí las letras de la imagen");
         }

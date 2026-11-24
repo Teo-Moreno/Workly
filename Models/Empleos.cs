@@ -22,8 +22,8 @@ public static class Empleos
 
     public const int OfertasPorPagina = 42;
 
-    public static async Task<BuscarTrabajoViewModel> Buscar(BuscarTrabajoViewModel filtros, IQueryCollection consulta, int idUsuario,
-                                                            JSearch jsearch, IMemoryCache cache)
+    public static BuscarTrabajoViewModel Buscar(BuscarTrabajoViewModel filtros, IQueryCollection consulta, int idUsuario,
+                                                JSearch jsearch, IMemoryCache cache)
     {
         var modelo = Preparar(filtros);
         var fecha = Catalogos.FechasPublicacion.FirstOrDefault(f => f.Valor == modelo.Fecha);
@@ -42,11 +42,10 @@ public static class Empleos
         };
         modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
         modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
-        var completar = Completar(modelo, jsearch, cache);
-        if (await Task.WhenAny(completar, Task.Delay(TimeSpan.FromSeconds(3))) == completar && await completar)
+        if (DebeCompletar(modelo, jsearch))
         {
-            modelo.Ofertas = BD.BuscarOfertas(filtrosBase, idUsuario);
-            modelo.Total = modelo.Ofertas.FirstOrDefault()?.Total ?? 0;
+            var (texto, paises, provincias, idPais, idProvincia) = (modelo.Q!, modelo.Paises, modelo.Provincias, modelo.IDPais, modelo.IDProvincia);
+            _ = Task.Run(() => Completar(texto, paises, provincias, idPais, idProvincia, jsearch, cache));
         }
         modelo.PorPagina = OfertasPorPagina;
         modelo.Consulta = consulta.Where(q => q.Key != "Pagina")
@@ -54,34 +53,34 @@ public static class Empleos
         return modelo;
     }
 
-    private static async Task<bool> Completar(BuscarTrabajoViewModel modelo, JSearch jsearch, IMemoryCache cache)
+    private static bool DebeCompletar(BuscarTrabajoViewModel modelo, JSearch jsearch) =>
+        jsearch.Configurada && modelo.BuscoAlgo && modelo.Pagina == 1 && modelo.Total < OfertasPorPagina;
+
+    private static async Task Completar(string texto, List<Pais> paises, List<Provincia> provincias, int? idPais, int? idProvincia,
+                                        JSearch jsearch, IMemoryCache cache)
     {
-        if (!jsearch.Configurada || !modelo.BuscoAlgo || modelo.Pagina != 1 || modelo.Total >= OfertasPorPagina)
-        {
-            return false;
-        }
-        var pais = modelo.Paises.FirstOrDefault(p => p.ID == modelo.IDPais);
+        var pais = paises.FirstOrDefault(p => p.ID == idPais);
         if (pais == null)
         {
-            return false;
+            return;
         }
-        var provincia = modelo.Provincias.FirstOrDefault(p => p.ID == modelo.IDProvincia);
-        var clave = $"completar:{pais.ID}:{provincia?.ID}:{modelo.Q!.Trim().ToLowerInvariant()}";
+        var provincia = provincias.FirstOrDefault(p => p.ID == idProvincia);
+        var clave = $"completar:{pais.ID}:{provincia?.ID}:{texto.Trim().ToLowerInvariant()}";
         if (cache.TryGetValue(clave, out _))
         {
-            return false;
+            return;
         }
         cache.Set(clave, true, TimeSpan.FromHours(1));
 
         using var limite = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var resultado = await jsearch.Buscar($"{modelo.Q} en {provincia?.Nombre ?? pais.Nombre}", pais.Codigo_ISO, "month", null, limite.Token);
+        var resultado = await jsearch.Buscar($"{texto} en {provincia?.Nombre ?? pais.Nombre}", pais.Codigo_ISO, "month", null, limite.Token);
         if (resultado.Error || resultado.Ofertas.Count == 0)
         {
-            return false;
+            return;
         }
         cache.Set(clave, true, TimeSpan.FromHours(24));
 
-        var delPais = modelo.Provincias.Where(p => p.IDPais == pais.ID).ToList();
+        var delPais = provincias.Where(p => p.IDPais == pais.ID).ToList();
         foreach (var oferta in resultado.Ofertas)
         {
             oferta.IDPais = pais.ID;
@@ -91,11 +90,9 @@ public static class Empleos
         try
         {
             BD.GuardarOfertasExternas(resultado.Ofertas);
-            return true;
         }
         catch (Microsoft.Data.SqlClient.SqlException)
         {
-            return false;
         }
     }
 

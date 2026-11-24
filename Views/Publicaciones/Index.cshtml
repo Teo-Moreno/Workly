@@ -2,45 +2,50 @@
     ViewData["Title"] = "Mis publicaciones";
 }
 
-<div class="container seccion">
-    <div class="encabezado">
-        <div>
-            <h1 class="titulo">Mis publicaciones</h1>
-            <p class="texto-suave">
-                @(ViewBag.EsEmpresa
-                    ? "Las búsquedas de tu empresa y las personas que se postularon a cada una."
-                    : "Las búsquedas que publicaste. Antes de salir las revisa el equipo de Workly.")
-            </p>
+<div class="container seccion-app">
+    <header class="encabezado-pagina">
+        <div class="encabezado-pagina-fila">
+            <div>
+                <h1 class="encabezado-pagina-titulo">Mis publicaciones</h1>
+                <p class="encabezado-pagina-bajada">
+                    @(ViewBag.EsEmpresa
+                        ? "Las búsquedas de tu empresa y las personas que se postularon a cada una."
+                        : "Las búsquedas que publicaste. Antes de salir las revisa el equipo de Workly.")
+                </p>
+            </div>
+            <div class="encabezado-pagina-acciones">
+                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+            </div>
         </div>
-        <a class="btn-solid theme-primary boton" asp-controller="Publicaciones" asp-action="Nueva">+ Publicar búsqueda</a>
-    </div>
+    </header>
 
     @if (ViewBag.Ofertas.Count == 0)
     {
-        <div class="vacio">
-            <h2>Todavía no publicaste ninguna búsqueda</h2>
+        <div class="estado-vacio">
+            <span class="caja-icono-lg"><icono nombre="briefcase" /></span>
+            <h2 class="estado-vacio-titulo">Todavía no publicaste ninguna búsqueda</h2>
             <p>Contá qué puesto querés cubrir y en qué condiciones. Las personas se postulan con su perfil y su CV, y las ves acá.</p>
-            <a class="btn-solid theme-primary boton" asp-controller="Publicaciones" asp-action="Nueva">+ Publicar mi primera búsqueda</a>
+            <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
         </div>
     }
     else
     {
-        <ul class="list-group lista">
+        <ul class="lista-publicaciones" role="list">
             @foreach (Oferta oferta in ViewBag.Ofertas)
             {
-                <li class="list-group-item fila-lista">
-                    <div class="fila-lista-datos">
-                        <h2 class="tarjeta-titulo"><a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">@oferta.Titulo</a></h2>
-                        <p class="texto-suave">@oferta.Empresa@(oferta.UbicacionVisible != null ? " · " + oferta.UbicacionVisible : "") · @oferta.PublicadaTexto</p>
+                <li class="publicacion">
+                    <div class="publicacion-datos">
+                        <h2 class="publicacion-titulo"><a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">@oferta.Titulo</a></h2>
+                        <p class="publicacion-meta">@oferta.Empresa@(oferta.UbicacionVisible != null ? " · " + oferta.UbicacionVisible : "") · @oferta.PublicadaTexto</p>
                         @if (oferta.Estado_Publicacion == "Rechazada" && !string.IsNullOrEmpty(oferta.Motivo_Rechazo))
                         {
-                            <p><span class="negrita">Motivo:</span> @oferta.Motivo_Rechazo</p>
+                            <p class="publicacion-motivo"><strong>Motivo:</strong> @oferta.Motivo_Rechazo</p>
                         }
                     </div>
-                    <span class="badge etiqueta etiqueta-@oferta.EstadoColor">@oferta.EstadoTexto</span>
-                    <a class="cantidad" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">
-                        <span class="cantidad-numero">@oferta.CantidadPostulantes</span>
-                        @(oferta.CantidadPostulantes == 1 ? "postulante" : "postulantes")
+                    <span class="badge badge-@oferta.EstadoColor">@oferta.EstadoTexto</span>
+                    <a class="publicacion-postulantes" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">
+                        <strong>@oferta.CantidadPostulantes</strong>
+                        <span>@(oferta.CantidadPostulantes == 1 ? "postulante" : "postulantes")</span>
                     </a>
                 </li>
             }

@@ -54,6 +54,7 @@ public class EmpresaNueva
 
 public class OfertaNueva
 {
+    public string? Logo { get; set; }
     public int IDUsuario_Publicador { get; set; }
     public int? IDEmpresa { get; set; }
     public string? EmpresaNombre { get; set; }

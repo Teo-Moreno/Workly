@@ -77,7 +77,12 @@ public class Asistente
             }
             if (mensaje["tool_calls"] is JsonArray llamadas && llamadas.Count > 0)
             {
-                pedido.Add(mensaje.DeepClone());
+                pedido.Add(new JsonObject
+                {
+                    ["role"] = "assistant",
+                    ["content"] = mensaje["content"]?.DeepClone(),
+                    ["tool_calls"] = llamadas.DeepClone()
+                });
                 foreach (var llamada in llamadas.OfType<JsonObject>())
                 {
                     var ofertas = Buscar(llamada["function"]?["arguments"]?.GetValue<string>(), idUsuario);

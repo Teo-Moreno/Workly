@@ -34,20 +34,6 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult AceptarCookies(string? volver)
-    {
-        Response.Cookies.Append("Workly.Cookies", "ok", new CookieOptions
-        {
-            MaxAge = TimeSpan.FromDays(365),
-            IsEssential = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = Request.IsHttps
-        });
-        return !string.IsNullOrEmpty(volver) && Url.IsLocalUrl(volver) ? LocalRedirect(volver) : RedirectToAction(nameof(Index));
-    }
-
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

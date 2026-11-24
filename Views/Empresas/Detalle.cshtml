@@ -2,68 +2,66 @@
     ViewData["Title"] = ViewBag.Empresa.Nombre;
 }
 
-<div class="portada"></div>
+<div class="empresa-portada" aria-hidden="true"></div>
 
-<div class="container seccion">
-    <div class="oferta-cabecera">
+<div class="container seccion-app">
+    <header class="empresa-cabecera">
         <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "logo-empresa-xl")' />
-        <div>
+        <div class="empresa-cabecera-datos">
             <nav aria-label="Estás en">
-                <ol class="migas">
-                    <li><a asp-controller="Empresas" asp-action="Index">Empresas</a></li>
-                    <li aria-current="page">@ViewBag.Empresa.Nombre</li>
+                <ol class="breadcrumb breadcrumb-chica">
+                    <li class="breadcrumb-item"><a asp-controller="Empresas" asp-action="Index">Empresas</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@ViewBag.Empresa.Nombre</li>
                 </ol>
             </nav>
-            <h1 class="titulo">@ViewBag.Empresa.Nombre</h1>
-            <p class="texto-suave">
-                @if (ViewBag.Empresa.Rubro != null) { <span>@ViewBag.Empresa.Rubro</span> }
-                @if (ViewBag.Empresa.UbicacionCompleta != null) { <span> · @ViewBag.Empresa.UbicacionCompleta</span> }
-                @if (ViewBag.Empresa.EnlaceSitio != null) { <span> · <a href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></span> }
+            <h1 class="empresa-cabecera-nombre">@ViewBag.Empresa.Nombre</h1>
+            <p class="empresa-cabecera-meta">
+                @if (ViewBag.Empresa.Rubro != null) { <span><icono nombre="building" tamano="18" />@ViewBag.Empresa.Rubro</span> }
+                @if (ViewBag.Empresa.UbicacionCompleta != null) { <span><icono nombre="near-me" tamano="18" />@ViewBag.Empresa.UbicacionCompleta</span> }
+                @if (ViewBag.Empresa.EnlaceSitio != null) { <span><icono nombre="globe" tamano="18" /><a class="enlace" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></span> }
             </p>
         </div>
-    </div>
-    @if (ViewBag.EsPropia)
-    {
-        <div class="acciones">
-            <a class="btn-outline theme-primary boton" asp-controller="Perfil" asp-action="Configuracion">Editar datos</a>
-            <a class="btn-solid theme-primary boton" asp-controller="Publicaciones" asp-action="Nueva">+ Publicar búsqueda</a>
-        </div>
-    }
+        @if (ViewBag.EsPropia)
+        {
+            <div class="empresa-cabecera-acciones">
+                <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar datos</a>
+                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+            </div>
+        }
+    </header>
 
-    <div class="row g-4">
-        <div class="lg:col-5">
-            <section class="card tarjeta">
-                <h2 class="card-title">Sobre la empresa</h2>
-                @if (string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion))
-                {
-                    <p class="texto-suave">La empresa todavía no contó a qué se dedica.</p>
-                }
-                else
-                {
-                    <p class="texto-con-saltos">@ViewBag.Empresa.Descripcion</p>
-                }
-                @if (ViewBag.Empresa.TieneCuenta)
-                {
-                    <p class="verificada">✓ Registrada en Workly con su CUIT</p>
-                }
-            </section>
-        </div>
+    <div class="empresa-cuerpo">
+        <section class="card">
+            <h2 class="card-title">Sobre la empresa</h2>
+            @if (string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion))
+            {
+                <p class="perfil-vacio">La empresa todavía no contó a qué se dedica.</p>
+            }
+            else
+            {
+                <p class="perfil-texto">@ViewBag.Empresa.Descripcion</p>
+            }
+            @if (ViewBag.Empresa.TieneCuenta)
+            {
+                <p class="small empresa-verificada"><icono nombre="circle-check" tamano="16" />Registrada en Workly con su CUIT</p>
+            }
+        </section>
 
-        <section class="lg:col-7" id="ofertas">
-            <h2 class="subtitulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
+        <section class="empresa-ofertas" id="ofertas" aria-labelledby="ofertas-titulo">
+            <h2 class="h4" id="ofertas-titulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
             @if (ViewBag.Abiertas.Count == 0)
             {
-                <div class="vacio">
+                <div class="estado-vacio estado-vacio-chico">
                     <p>@(ViewBag.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
                     @if (ViewBag.EsPropia)
                     {
-                        <a class="btn-solid theme-primary boton" asp-controller="Publicaciones" asp-action="Nueva">+ Publicar mi primera búsqueda</a>
+                        <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
                     }
                 </div>
             }
             else
             {
-                <div class="lista-ofertas">
+                <div class="resultados-lista">
                     @foreach (Oferta oferta in ViewBag.Abiertas)
                     {
                         <partial name="_OfertaTarjeta" model="oferta" />

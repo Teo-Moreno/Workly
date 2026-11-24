@@ -16,9 +16,9 @@ public class EmpleosController : Controller
         _cache = cache;
     }
 
-    public async Task<IActionResult> Index(BuscarTrabajoViewModel filtros)
+    public IActionResult Index(BuscarTrabajoViewModel filtros)
     {
-        ViewBag.Busqueda = await Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
+        ViewBag.Busqueda = Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
         return View();
     }
 

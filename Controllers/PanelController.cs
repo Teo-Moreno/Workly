@@ -22,7 +22,16 @@ public class PanelController : Controller
 
         ViewBag.Perfil = perfil;
         ViewBag.Puesto = perfil.Preferencia.Puesto_Buscado;
-        ViewBag.ParaVos = string.IsNullOrWhiteSpace(perfil.Preferencia.Puesto_Buscado) ? new List<Oferta>() : Empleos.ParaVos(perfil, User.IdUsuario());
+        ViewBag.UrlParaVos = Url.Action(nameof(ParaVos));
+        ViewBag.Publicadas = BD.ObtenerOfertasPublicadas(User.IdUsuario(), 3);
         return View();
+    }
+
+    public IActionResult ParaVos()
+    {
+        var perfil = User.EsPersona() ? BD.ObtenerMiPerfil(User.IdUsuario()) : null;
+        ViewBag.Puesto = perfil?.Preferencia.Puesto_Buscado;
+        ViewBag.ParaVos = perfil == null ? new List<Oferta>() : Empleos.ParaVos(perfil, User.IdUsuario());
+        return PartialView("_ParaVos");
     }
 }

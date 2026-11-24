@@ -1,13 +1,16 @@
 @if (!User.EstaLogueado())
 {
-    <a class="btn-outline theme-primary boton" asp-controller="Cuenta" asp-action="IniciarSesion" asp-route-returnUrl="@ViewContext.Volver()">Guardar</a>
+    <a class="btn btn-outline-lg" href="@Url.Action("IniciarSesion", "Cuenta", new { returnUrl = ViewContext.Volver() })"><icono nombre="bookmark" />Guardar</a>
 }
 else if (User.EsPersona() && !User.EsPropia((int?)Model.IDUsuario_Publicador))
 {
-    <form asp-controller="Guardadas" asp-action="@(Model.Guardada ? "Quitar" : "Guardar")" asp-route-id="@Model.ID" asp-route-externa="@(Model.EsExterna ? "true" : "false")" asp-route-volver="@ViewContext.Volver()" method="post">
-        <button class="@(Model.Guardada ? "btn-solid theme-primary boton boton-guardada" : "btn-outline theme-primary boton")" type="submit"
+    <form asp-controller="Guardadas" asp-action="@(Model.Guardada ? "Quitar" : "Guardar")" method="post">
+        <input type="hidden" name="id" value="@Model.ID" />
+        <input type="hidden" name="externa" value="@(Model.EsExterna ? "true" : "false")" />
+        <input type="hidden" name="volver" value="@ViewContext.Volver()" />
+        <button class="@(Model.Guardada ? "btn btn-guardada" : "btn btn-outline-lg")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
                 title="@(Model.Guardada ? "Sacar de Guardadas" : "Guardar para verla después")">
-            @(Model.Guardada ? "★ Guardada" : "☆ Guardar")
+            <icono nombre="@(Model.Guardada ? "bookmark-fill" : "bookmark")" />@(Model.Guardada ? "Guardada" : "Guardar")
         </button>
     </form>
 }

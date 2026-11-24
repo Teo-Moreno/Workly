@@ -2,13 +2,18 @@
     ViewData["Title"] = "Algo salió mal";
 }
 
-<section class="container seccion seccion-centrada">
-    <h1 class="titulo">Algo salió mal</h1>
-    <p>No pudimos procesar tu pedido. Probá de nuevo en unos minutos o volvé al inicio.</p>
+<section class="container error-pagina">
+    <span class="caja-icono-acento error-pagina-icono"><icono nombre="warning-outline" /></span>
+    <h1 class="h1">Algo salió mal</h1>
+    <p class="lead">No pudimos procesar tu pedido. Probá de nuevo en unos minutos o volvé al inicio.</p>
+
     @if (!string.IsNullOrEmpty(ViewBag.CodigoSolicitud))
     {
-        <p class="texto-suave">Código de la solicitud: @ViewBag.CodigoSolicitud</p>
+        <p class="small text-body-secondary">Código de la solicitud: <code>@ViewBag.CodigoSolicitud</code></p>
     }
-    <a class="btn-solid theme-primary boton" asp-controller="Home" asp-action="Index">Volver al inicio</a>
-    <a class="btn-outline theme-primary boton" asp-controller="Perfil" asp-action="Ayuda">Ir a la ayuda</a>
+
+    <div class="fila fila-envolver">
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Volver al inicio</a>
+        <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="Ayuda">Ir a la ayuda</a>
+    </div>
 </section>

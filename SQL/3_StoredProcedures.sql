@@ -955,7 +955,7 @@ BEGIN
     SET @ConPresencial = CASE WHEN EXISTS (SELECT 1 FROM STRING_SPLIT(@Modalidades, ',') WHERE value <> N'Remoto') THEN 1 ELSE 0 END
 
     ;WITH Resultados AS (
-        SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+        SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
                pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, CAST(NULL AS NVARCHAR(100)) AS SalarioTexto,
                o.Cantidad_Puestos, CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion,
                CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre, o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador,
@@ -1016,7 +1016,7 @@ CREATE OR ALTER PROCEDURE ObtenerOferta
     @IDUsuarioActual INT
 AS
 BEGIN
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1041,7 +1041,7 @@ CREATE OR ALTER PROCEDURE ObtenerOfertasDeEmpresa
     @IDUsuarioActual INT
 AS
 BEGIN
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1064,13 +1064,14 @@ END
 GO
 
 CREATE OR ALTER PROCEDURE ObtenerOfertasPublicadas
-    @IDUsuario INT
+    @IDUsuario INT,
+    @Cantidad INT = NULL
 AS
 BEGIN
     DECLARE @IDUsuarioActual INT
     SET @IDUsuarioActual = 0
 
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT TOP (ISNULL(@Cantidad, 2147483647)) CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1134,7 +1135,8 @@ CREATE OR ALTER PROCEDURE CrearOferta
     @Salario INT,
     @Cantidad_Puestos INT,
     @Fecha_Cierre DATE,
-    @Estado_Publicacion NVARCHAR(20)
+    @Estado_Publicacion NVARCHAR(20),
+    @Logo NVARCHAR(260) = NULL
 AS
 BEGIN
     SET XACT_ABORT ON
@@ -1156,9 +1158,9 @@ BEGIN
         END
 
         INSERT INTO OfertaLaboral (IDEmpresa, Titulo, Descripcion, Ubicacion, Modalidad, Tipo_Contrato, Salario, Cantidad_Puestos,
-                                   Fecha_Publicacion, Fecha_Cierre, IDUsuario_Publicador, IDProvincia, Estado_Publicacion)
+                                   Fecha_Publicacion, Fecha_Cierre, IDUsuario_Publicador, IDProvincia, Estado_Publicacion, Logo)
         VALUES (@IDEmpresa, @Titulo, @Descripcion, @Ubicacion, @Modalidad, @Tipo_Contrato, @Salario, @Cantidad_Puestos,
-                CAST(GETDATE() AS DATE), @Fecha_Cierre, @IDUsuario_Publicador, @IDProvincia, @Estado_Publicacion)
+                CAST(GETDATE() AS DATE), @Fecha_Cierre, @IDUsuario_Publicador, @IDProvincia, @Estado_Publicacion, @Logo)
         SET @ID = SCOPE_IDENTITY()
 
         IF NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = @Puesto)
@@ -1187,7 +1189,7 @@ CREATE OR ALTER PROCEDURE CerrarOferta
 AS
 BEGIN
     UPDATE OfertaLaboral
-    SET Fecha_Cierre = CAST(GETDATE() AS DATE)
+    SET Fecha_Cierre = DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
     WHERE ID = @ID AND IDUsuario_Publicador = @IDPublicador
       AND (Fecha_Cierre IS NULL OR Fecha_Cierre >= CAST(GETDATE() AS DATE))
 
@@ -1231,7 +1233,7 @@ BEGIN
     DECLARE @IDUsuarioActual INT
     SET @IDUsuarioActual = 0
 
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1261,7 +1263,7 @@ BEGIN
 
     SELECT TOP (@Cantidad) *
     FROM (
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1463,7 +1465,7 @@ BEGIN
 
     SELECT w.*, CAST(f.fecha_guardado AS DATETIME2) AS Fecha_Guardado, f.ID_favorito AS IDFavorito
     FROM (
-    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, e.Logo, o.Ubicacion,
+    SELECT CAST(0 AS BIT) AS EsExterna, o.ID, o.Titulo, e.Nombre AS Empresa, e.ID AS IDEmpresa, ISNULL(o.Logo, e.Logo) AS Logo, o.Ubicacion,
            pr.Nombre AS Provincia, o.IDProvincia, o.Modalidad, o.Tipo_Contrato, o.Salario, o.Cantidad_Puestos, o.Descripcion,
            CAST(o.Fecha_Publicacion AS DATETIME2) AS Fecha_Publicacion, CAST(o.Fecha_Cierre AS DATETIME2) AS Fecha_Cierre,
            o.IDUsuario_Publicador, pu.Tipo AS TipoPublicador, o.Estado_Publicacion, o.Motivo_Rechazo,
@@ -1558,7 +1560,8 @@ BEGIN
            COALESCE(e.Nombre, x.Empresa, N'Empresa sin nombre') AS Empresa,
            COALESCE(o.Ubicacion, pr.Nombre, x.Ubicacion) AS Ubicacion,
            CASE WHEN x.ID IS NULL THEN N'Workly' ELSE x.Publicador END AS Publicador,
-           x.Link_Postulacion
+           x.Link_Postulacion,
+           COALESCE(o.Logo, e.Logo, x.Logo) AS Logo
     FROM Postulacion po
     LEFT JOIN OfertaLaboral o ON o.ID = po.IDOfertaLaboral
     LEFT JOIN Empresa e ON e.ID = o.IDEmpresa

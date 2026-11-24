@@ -2,92 +2,116 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="container seccion">
-    <div class="encabezado">
+<div class="container seccion-app">
+    <header class="panel-saludo">
         <div>
-            <p class="texto-suave">@Vistas.Hoy</p>
-            <h1 class="titulo">Hola, @ViewBag.Perfil.Usuario.Nombre</h1>
-            <p class="texto-suave">
+            <p class="panel-saludo-fecha">@Vistas.Hoy</p>
+            <h1 class="encabezado-pagina-titulo">Hola, @ViewBag.Perfil.Usuario.Nombre</h1>
+            <p class="encabezado-pagina-bajada">
                 @(ViewBag.Perfil.TotalPostulaciones == 0
                     ? "Todavía no te postulaste a ninguna búsqueda."
                     : $"Tenés {ViewBag.Perfil.TotalPostulaciones} {(ViewBag.Perfil.TotalPostulaciones == 1 ? "postulación" : "postulaciones")} en tu tablero.")
             </p>
         </div>
-        <form class="buscador" asp-controller="Empleos" asp-action="Index" method="get">
-            <label class="visually-hidden" for="panel-busqueda">Buscar trabajo</label>
-            <input class="form-control" id="panel-busqueda" type="text" name="Q" placeholder="¿Qué trabajo buscás?">
-            <button class="btn-solid theme-primary boton" type="submit">Buscar</button>
+        <form class="panel-saludo-buscador" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+            <div class="control-con-icono">
+                <icono nombre="search" />
+                <label class="visually-hidden" for="panel-busqueda">Buscar trabajo</label>
+                <input class="form-control" id="panel-busqueda" type="search" name="Q" maxlength="100" placeholder="¿Qué trabajo buscás?" />
+            </div>
+            <button class="btn btn-primary" type="submit">Buscar</button>
         </form>
-    </div>
+    </header>
 
     @if (ViewBag.Perfil.SiguientePaso != null)
     {
-        <p class="mensaje mensaje-info">
-            <span class="negrita">Tu perfil está al @ViewBag.Perfil.PorcentajeCompleto%.</span>
-            Te falta: @ViewBag.Perfil.SiguientePaso.Texto.ToLower(Vistas.Cultura). Quienes publican búsquedas lo ven cuando te postulás.
-            <a asp-controller="Perfil" asp-action="Completar">Completar perfil →</a>
-        </p>
+        <a class="aviso-perfil" asp-controller="Perfil" asp-action="Completar">
+            <span class="caja-icono-sm"><icono nombre="user-square" /></span>
+            <span class="aviso-perfil-texto"><strong>Tu perfil está al @ViewBag.Perfil.PorcentajeCompleto%.</strong> Te falta: @ViewBag.Perfil.SiguientePaso.Texto.ToLower(Vistas.Cultura). Quienes publican búsquedas lo ven cuando te postulás.</span>
+            <span class="btn btn-sm">Completar perfil</span>
+        </a>
     }
 
-    <div class="row g-4">
-        <div class="lg:col-7">
-            <section class="card tarjeta">
-                <div class="tarjeta-cabecera">
-                    <h2 class="card-title">@(string.IsNullOrWhiteSpace(ViewBag.Puesto) ? "Ofertas para vos" : $"Ofertas de {ViewBag.Puesto}")</h2>
+    <div class="panel-grilla">
+        <div class="panel-grilla-principal">
+            <section class="card" aria-labelledby="panel-para-vos">
+                <div class="card-header">
+                    <h2 class="card-title" id="panel-para-vos">@(string.IsNullOrWhiteSpace(ViewBag.Puesto) ? "Ofertas para vos" : $"Ofertas de {ViewBag.Puesto}")</h2>
                     @if (!string.IsNullOrWhiteSpace(ViewBag.Puesto))
                     {
-                        <a asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Puesto">Ver todas →</a>
+                        <a class="enlace" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Puesto">Ver todas →</a>
                     }
                 </div>
                 @if (string.IsNullOrWhiteSpace(ViewBag.Puesto))
                 {
-                    <div class="vacio">
+                    <div class="estado-vacio estado-vacio-chico">
                         <p>Contanos qué puesto buscás y acá te mostramos las ofertas de Workly y de otros sitios que coinciden.</p>
-                        <a class="btn-outline theme-primary boton btn-sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda">+ Completar qué busco</a>
-                    </div>
-                }
-                else if (ViewBag.ParaVos.Count == 0)
-                {
-                    <div class="vacio">
-                        <p>No encontramos ningún puesto de "@ViewBag.Puesto" nuevo para vos. Probá buscar con otras palabras.</p>
-                        <a class="btn-outline theme-primary boton btn-sm" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
+                        <a class="btn btn-outline-sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="plus" />Completar qué busco</a>
                     </div>
                 }
                 else
                 {
-                    <div class="lista-ofertas">
-                        @foreach (Oferta oferta in ViewBag.ParaVos)
-                        {
-                            <partial name="_OfertaTarjeta" model="oferta" />
-                        }
+                    <div class="esta-buscando" aria-busy="true" data-resultados-url="@ViewBag.UrlParaVos">
+                        <partial name="_CargandoResultados" model='"Buscando ofertas para vos…"' />
+                        <div data-resultados-contenido></div>
                     </div>
                 }
             </section>
         </div>
 
-        <aside class="lg:col-5">
-            <section class="card tarjeta">
-                <div class="tarjeta-cabecera">
+        <aside class="panel-grilla-lateral">
+            <section class="card">
+                <div class="card-header">
                     <h2 class="card-title">Tus postulaciones</h2>
                     @if (ViewBag.Perfil.TotalPostulaciones > 0)
                     {
-                        <a asp-controller="Postulaciones" asp-action="Index">Ir al tablero →</a>
+                        <a class="enlace" asp-controller="Postulaciones" asp-action="Index">Ir al tablero →</a>
                     }
                 </div>
                 @if (ViewBag.Perfil.TotalPostulaciones == 0)
                 {
-                    <p class="texto-suave">Cuando te postules, vas a poder seguir cada proceso desde tu tablero.</p>
+                    <p class="perfil-vacio">Cuando te postules, vas a poder seguir cada proceso desde tu tablero.</p>
                 }
                 else
                 {
-                    <partial name="_Estados" model="ViewBag.Perfil" />
+                    <ul class="actividad-estados" role="list">
+                        @foreach (var etapa in Catalogos.EstadosPostulacion)
+                        {
+                            <li class="actividad-estados-item actividad-estados-item-@etapa.Color">
+                                <strong>@ViewBag.Perfil.CantidadEnEstado(etapa.Estado)</strong><span>@etapa.Estado</span>
+                            </li>
+                        }
+                    </ul>
                 }
             </section>
 
-            <section class="card tarjeta">
-                <h2 class="card-title">¿Buscás a alguien?</h2>
-                <p class="texto-suave">También podés publicar una búsqueda. La revisamos antes de publicarla.</p>
-                <a class="btn-outline theme-primary boton w-100" asp-controller="Publicaciones" asp-action="Nueva">+ Publicar búsqueda</a>
+            <section class="card">
+                @if (ViewBag.Publicadas.Count == 0)
+                {
+                    <h2 class="card-title">¿Buscás a alguien?</h2>
+                    <p class="text-body-secondary">También podés publicar una búsqueda. La revisamos antes de publicarla.</p>
+                    <a class="btn btn-outline-block" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                }
+                else
+                {
+                    <div class="card-header">
+                        <h2 class="card-title">Tus búsquedas</h2>
+                        <a class="enlace" asp-controller="Publicaciones" asp-action="Index">Ver todas →</a>
+                    </div>
+                    <ul class="panel-publicaciones" role="list">
+                        @foreach (Oferta oferta in ViewBag.Publicadas)
+                        {
+                            <li class="panel-publicacion">
+                                <div class="panel-publicacion-datos">
+                                    <a class="panel-publicacion-titulo" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@oferta.ID">@oferta.Titulo</a>
+                                    <span class="panel-publicacion-meta">@oferta.CantidadPostulantes @(oferta.CantidadPostulantes == 1 ? "postulante" : "postulantes")</span>
+                                </div>
+                                <span class="badge badge-@oferta.EstadoColor">@oferta.EstadoTexto</span>
+                            </li>
+                        }
+                    </ul>
+                    <a class="btn btn-outline-block" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar otra búsqueda</a>
+                }
             </section>
         </aside>
     </div>

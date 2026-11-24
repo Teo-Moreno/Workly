@@ -12,6 +12,7 @@ public class PostulacionItem
     public string? Ubicacion { get; set; }
     public string? Publicador { get; set; }
     public string? Link_Postulacion { get; set; }
+    public string? Logo { get; set; }
 
     public bool EsExterna => IDOfertaExterna.HasValue;
     public string Iniciales => Textos.Iniciales(Empresa);

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Workly.Models;
 
@@ -26,10 +27,7 @@ public class BuscarTrabajoViewModel
     public int CantidadFiltros => Modalidad.Count + Tipo.Count + (Fecha != null ? 1 : 0);
     public bool HayFiltros => CantidadFiltros > 0 || IDProvincia != null;
 
-    public string TituloCargando => BuscoAlgo ? $"Ofertas para “{Q}”" : "Ofertas";
-
-    public string Titulo => Total == 0 ? "Sin resultados"
-        : $"{Total.ToString("N0", new System.Globalization.CultureInfo("es-AR"))} {(Total == 1 ? "oferta" : "ofertas")}" + (BuscoAlgo ? $" para “{Q}”" : "");
+    public string Titulo => Ofertas.Count == 0 ? "Sin resultados" : BuscoAlgo ? $"Ofertas para “{Q}”" : "Ofertas";
 
     public bool HayMas => Pagina * PorPagina < Total;
 
@@ -52,6 +50,8 @@ public class EmpresasViewModel
 
 public class PublicarViewModel
 {
+    public IFormFile? Imagen { get; set; }
+
     [Required(ErrorMessage = "Escribí el título de la búsqueda")]
     [StringLength(150, ErrorMessage = "Usá hasta 150 caracteres")]
     public string Titulo { get; set; } = "";
@@ -97,6 +97,7 @@ public class PublicarViewModel
 
     public bool EsEmpresa { get; set; }
     public string? EmpresaFija { get; set; }
+    public string? EmpresaLogo { get; set; }
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
 }

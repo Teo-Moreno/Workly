@@ -78,7 +78,7 @@ public class Oferta
             var datos = new List<DatoOferta>();
             if (SalarioVisible != null) datos.Add(new DatoOferta("Salario", SalarioVisible));
             if (!EsExterna) datos.Add(new DatoOferta("Vacantes", Cantidad_Puestos.ToString()));
-            if (Fecha_Cierre.HasValue) datos.Add(new DatoOferta("Recibe postulaciones hasta", Vistas.Fecha(Fecha_Cierre)));
+            if (Fecha_Cierre.HasValue && !EstaCerrada) datos.Add(new DatoOferta("Recibe postulaciones hasta", Vistas.Fecha(Fecha_Cierre)));
             return datos;
         }
     }
