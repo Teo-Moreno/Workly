@@ -14,6 +14,7 @@ public static class Publicaciones
         {
             var empresa = BD.ObtenerEmpresaDeUsuario(idUsuario);
             modelo.EmpresaFija = empresa?.Nombre;
+            modelo.EmpresaLogo = empresa?.Logo;
             if (esNueva)
             {
                 modelo.IDProvincia = empresa?.IDProvincia;
@@ -28,7 +29,7 @@ public static class Publicaciones
         modelo.IDPais ??= provincia?.IDPais ?? modelo.Paises.FirstOrDefault()?.ID;
     }
 
-    public static int? Crear(PublicarViewModel modelo, int idUsuario, Empresa? empresa, ModelStateDictionary estado)
+    public static async Task<int?> Crear(PublicarViewModel modelo, int idUsuario, Empresa? empresa, ModelStateDictionary estado, string carpetaPublica)
     {
         var esEmpresa = empresa != null;
         modelo.Descripcion = (modelo.Descripcion ?? "").Replace("\r\n", "\n");
@@ -56,13 +57,19 @@ public static class Publicaciones
         {
             estado.AddModelError(nameof(modelo.EmpresaNombre), "Esa empresa tiene cuenta en Workly: sus búsquedas las publica ella.");
         }
+        if (Archivos.Validar(modelo.Imagen, Archivos.ExtensionesFoto) is { } errorImagen)
+        {
+            estado.AddModelError(nameof(modelo.Imagen), errorImagen);
+        }
         if (!estado.IsValid)
         {
             return null;
         }
 
+        var imagen = await Archivos.GuardarImagenOferta(modelo.Imagen, carpetaPublica);
         return BD.CrearOferta(new OfertaNueva
         {
+            Logo = imagen,
             IDUsuario_Publicador = idUsuario,
             IDEmpresa = empresa?.ID,
             EmpresaNombre = modelo.EmpresaNombre?.Trim(),
@@ -113,6 +120,22 @@ public static class Publicaciones
         Resultado.Segun(BD.CerrarOferta(idOferta, idUsuario),
             "Cerramos la búsqueda: ya no aparece en Buscar trabajo ni recibe postulaciones.", "No pudimos cerrar esa búsqueda.", "exito");
 
-    public static Resultado Eliminar(int idOferta, int idUsuario) =>
-        Resultado.Segun(BD.EliminarOferta(idOferta, idUsuario), "Eliminamos la búsqueda y sus postulaciones.", "No encontramos esa búsqueda.");
+    public static Resultado Eliminar(int idOferta, int idUsuario, string carpetaPublica)
+    {
+        var imagen = OfertaPropia(idOferta, idUsuario)?.Logo;
+        var eliminada = BD.EliminarOferta(idOferta, idUsuario);
+        if (eliminada)
+        {
+            BorrarImagenPropia(imagen, carpetaPublica);
+        }
+        return Resultado.Segun(eliminada, "Eliminamos la búsqueda y sus postulaciones.", "No encontramos esa búsqueda.");
+    }
+
+    public static void BorrarImagenPropia(string? imagen, string carpetaPublica)
+    {
+        if (imagen != null && imagen.StartsWith("/uploads/ofertas/"))
+        {
+            Archivos.BorrarImagen(imagen, carpetaPublica);
+        }
+    }
 }

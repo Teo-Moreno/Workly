@@ -369,8 +369,8 @@ public static class BD
     public static List<Oferta> ObtenerOfertasDeEmpresa(int idEmpresa, int idUsuarioActual) =>
         Lista<Oferta>("ObtenerOfertasDeEmpresa", new { IDEmpresa = idEmpresa, IDUsuarioActual = idUsuarioActual });
 
-    public static List<Oferta> ObtenerOfertasPublicadas(int idUsuario) =>
-        Lista<Oferta>("ObtenerOfertasPublicadas", new { IDUsuario = idUsuario });
+    public static List<Oferta> ObtenerOfertasPublicadas(int idUsuario, int? cantidad = null) =>
+        Lista<Oferta>("ObtenerOfertasPublicadas", new { IDUsuario = idUsuario, Cantidad = cantidad });
 
     public static bool TieneOfertasPublicadas(int idUsuario) =>
         Valor<bool>("TieneOfertasPublicadas", new { IDUsuario = idUsuario });
@@ -395,7 +395,8 @@ public static class BD
             o.Salario,
             o.Cantidad_Puestos,
             o.Fecha_Cierre,
-            o.Estado_Publicacion
+            o.Estado_Publicacion,
+            o.Logo
         });
 
     public static bool CerrarOferta(int idOferta, int idPublicador) =>

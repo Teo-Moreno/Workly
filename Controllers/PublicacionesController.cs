@@ -32,7 +32,7 @@ public class PublicacionesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Nueva(PublicarViewModel modelo)
+    public async Task<IActionResult> Nueva(PublicarViewModel modelo)
     {
         Publicaciones.CargarFormulario(modelo, User.IdUsuario(), User.EsEmpresa(), false);
         var empresa = User.EsEmpresa() ? BD.ObtenerEmpresaDeUsuario(User.IdUsuario()) : null;
@@ -41,7 +41,7 @@ public class PublicacionesController : Controller
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
 
-        var id = Publicaciones.Crear(modelo, User.IdUsuario(), empresa, ModelState);
+        var id = await Publicaciones.Crear(modelo, User.IdUsuario(), empresa, ModelState, _entorno.WebRootPath);
         if (id == null)
         {
             ViewBag.Formulario = modelo;
@@ -109,7 +109,7 @@ public class PublicacionesController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Eliminar(int id)
     {
-        var resultado = Publicaciones.Eliminar(id, User.IdUsuario());
+        var resultado = Publicaciones.Eliminar(id, User.IdUsuario(), _entorno.WebRootPath);
         TempData["Mensaje"] = resultado.Mensaje;
         TempData["MensajeTipo"] = resultado.Tipo;
         return RedirectToAction(nameof(Index));

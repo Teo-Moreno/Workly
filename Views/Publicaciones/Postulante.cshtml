@@ -2,93 +2,120 @@
     ViewData["Title"] = ViewBag.Perfil.Usuario.NombreCompleto;
 }
 
-<div class="container seccion">
+<div class="container seccion-app">
     <nav aria-label="Estás en">
-        <ol class="migas">
-            <li><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
-            <li><a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID">@ViewBag.Oferta.Titulo</a></li>
-            <li aria-current="page">@ViewBag.Perfil.Usuario.NombreCompleto</li>
+        <ol class="breadcrumb breadcrumb-chica">
+            <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID">@ViewBag.Oferta.Titulo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@ViewBag.Perfil.Usuario.NombreCompleto</li>
         </ol>
     </nav>
 
-    <div class="perfil-cabecera">
-        <span class="foto-perfil foto-perfil-xl" aria-hidden="true">
-            @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto)) { <img src="@ViewBag.Perfil.Perfil.Foto" alt=""> } else { @ViewBag.Perfil.Iniciales }
+    <section class="perfil-cabecera" aria-label="Datos principales">
+        <span class="avatar-xl" aria-hidden="true">
+            @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto)) { <img src="@ViewBag.Perfil.Perfil.Foto" alt="" /> } else { @ViewBag.Perfil.Iniciales }
         </span>
         <div class="perfil-cabecera-datos">
-            <h1 class="titulo">@ViewBag.Perfil.Usuario.NombreCompleto</h1>
-            @if (!string.IsNullOrWhiteSpace(ViewBag.Perfil.Preferencia.Puesto_Buscado)) { <p>Busca trabajo de @ViewBag.Perfil.Preferencia.Puesto_Buscado</p> }
-            <ul class="contacto">
-                @if (ViewBag.Perfil.Perfil.Ubicacion != null) { <li>@ViewBag.Perfil.Perfil.Ubicacion</li> }
-                <li><a href="mailto:@ViewBag.Perfil.Usuario.Email">@ViewBag.Perfil.Usuario.Email</a></li>
-                @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Telefono)) { <li><a href="tel:@ViewBag.Perfil.Perfil.TelefonoLink">@ViewBag.Perfil.Perfil.Telefono</a></li> }
-                @if (ViewBag.Perfil.EnlaceSitio != null) { <li><a href="@ViewBag.Perfil.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Perfil.CV.Sitio_Web</a></li> }
+            <h1 class="perfil-cabecera-nombre">@ViewBag.Perfil.Usuario.NombreCompleto</h1>
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Perfil.Preferencia.Puesto_Buscado)) { <p class="perfil-cabecera-rol">Busca trabajo de @ViewBag.Perfil.Preferencia.Puesto_Buscado</p> }
+            <ul class="perfil-cabecera-contacto" role="list">
+                @if (ViewBag.Perfil.Perfil.Ubicacion != null) { <li><icono nombre="near-me" tamano="18" />@ViewBag.Perfil.Perfil.Ubicacion</li> }
+                <li><icono nombre="mail" tamano="18" /><a href="mailto:@ViewBag.Perfil.Usuario.Email">@ViewBag.Perfil.Usuario.Email</a></li>
+                @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Telefono)) { <li><icono nombre="message-writing" tamano="18" /><a href="tel:@ViewBag.Perfil.Perfil.TelefonoLink">@ViewBag.Perfil.Perfil.Telefono</a></li> }
+                @if (ViewBag.Perfil.EnlaceSitio != null) { <li><icono nombre="globe" tamano="18" /><a href="@ViewBag.Perfil.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Perfil.CV.Sitio_Web</a></li> }
             </ul>
-            @if (ViewBag.Perfil.Perfil.Estado_Busqueda != null) { <span class="badge etiqueta etiqueta-info">@ViewBag.Perfil.Perfil.Estado_Busqueda</span> }
+            @if (ViewBag.Perfil.Perfil.Estado_Busqueda != null) { <span class="badge badge-info">@ViewBag.Perfil.Perfil.Estado_Busqueda</span> }
         </div>
-        <div>
+        <div class="perfil-cabecera-acciones">
             @if (ViewBag.Perfil.TieneCV)
             {
-                <a class="btn-solid theme-primary boton" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@ViewBag.IDPostulacion">Descargar CV</a>
+                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@ViewBag.IDPostulacion"><icono nombre="download" />Descargar CV</a>
             }
             else
             {
-                <span class="texto-suave">No subió CV</span>
+                <span class="text-body-secondary">No subió CV</span>
             }
         </div>
-    </div>
+    </section>
 
-    <div class="row g-4">
-        <div class="lg:col-5">
-            <section class="card tarjeta">
+    <div class="perfil-cuerpo">
+        <div class="perfil-columna">
+            <section class="card">
                 <h2 class="card-title">Qué busca</h2>
                 @if (ViewBag.Perfil.Preferencia.TieneDatos)
                 {
-                    <partial name="_Preferencia" model="ViewBag.Perfil.Preferencia" />
+                    <dl class="lista-clave-valor lista-clave-valor-perfil">
+                        @if (ViewBag.Perfil.Preferencia.ListaNiveles.Count > 0) { <div><dt>Nivel</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaNiveles)</dd></div> }
+                        @if (ViewBag.Perfil.Preferencia.ListaModalidades.Count > 0) { <div><dt>Modalidad</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaModalidades)</dd></div> }
+                        @if (ViewBag.Perfil.Preferencia.Jornada != null) { <div><dt>Jornada</dt><dd>@ViewBag.Perfil.Preferencia.Jornada</dd></div> }
+                        @if (ViewBag.Perfil.Preferencia.Contratacion != null) { <div><dt>Contratación</dt><dd>@ViewBag.Perfil.Preferencia.Contratacion</dd></div> }
+                        @if (ViewBag.Perfil.Preferencia.Disponibilidad != null) { <div><dt>Disponibilidad</dt><dd>@ViewBag.Perfil.Preferencia.Disponibilidad</dd></div> }
+                    </dl>
                 }
                 else
                 {
-                    <p class="texto-suave">No lo completó.</p>
+                    <p class="perfil-vacio">No lo completó.</p>
                 }
             </section>
-            <partial name="_PerfilDatos" model="ViewBag.Perfil" />
+            <section class="card">
+                <h2 class="card-title">Habilidades</h2>
+                @if (ViewBag.Perfil.Habilidades.Count == 0) { <p class="perfil-vacio">No cargó habilidades.</p> }
+                else
+                {
+                    <ul class="lista-tags" role="list">@foreach (string h in ViewBag.Perfil.Habilidades) { <li class="badge tag">@h</li> }</ul>
+                }
+            </section>
+            <section class="card">
+                <h2 class="card-title">Idiomas</h2>
+                @if (ViewBag.Perfil.Idiomas.Count == 0) { <p class="perfil-vacio">No cargó idiomas.</p> }
+                else
+                {
+                    <dl class="lista-clave-valor">@foreach (IdiomaElegido i in ViewBag.Perfil.Idiomas) { <div><dt>@i.Idioma</dt><dd>@i.Nivel</dd></div> }</dl>
+                }
+            </section>
         </div>
-        <div class="lg:col-7">
-            <section class="card tarjeta">
+        <div class="perfil-columna">
+            <section class="card">
                 <h2 class="card-title">Sobre mí</h2>
-                @if (string.IsNullOrWhiteSpace(ViewBag.Perfil.Perfil.Descripcion)) { <p class="texto-suave">No escribió nada.</p> }
-                else { <p class="texto-con-saltos">@ViewBag.Perfil.Perfil.Descripcion</p> }
+                @if (string.IsNullOrWhiteSpace(ViewBag.Perfil.Perfil.Descripcion)) { <p class="perfil-vacio">No escribió nada.</p> }
+                else { <p class="perfil-texto">@ViewBag.Perfil.Perfil.Descripcion</p> }
             </section>
-            <section class="card tarjeta">
+            <section class="card">
                 <h2 class="card-title">Experiencia</h2>
-                @if (ViewBag.Perfil.Experiencias.Count == 0) { <p class="texto-suave">No cargó experiencia laboral.</p> }
+                @if (ViewBag.Perfil.Experiencias.Count == 0) { <p class="perfil-vacio">No cargó experiencia laboral.</p> }
                 else
                 {
-                    <ol class="list-group linea">
+                    <ol class="linea-tiempo" role="list">
                         @foreach (ExperienciaItem e in ViewBag.Perfil.Experiencias)
                         {
-                            <li class="list-group-item">
-                                <h3 class="tarjeta-titulo">@e.Puesto</h3>
-                                <p>@e.Empresa</p>
-                                <p class="texto-suave">@e.Periodo</p>
-                                @if (!string.IsNullOrWhiteSpace(e.Descripcion)) { <p class="texto-con-saltos">@e.Descripcion</p> }
+                            <li class="linea-tiempo-item">
+                                <span class="logo-empresa-md logo-empresa-principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
+                                <div class="linea-tiempo-contenido">
+                                    <h3 class="linea-tiempo-titulo">@e.Puesto</h3>
+                                    <p class="linea-tiempo-lugar">@e.Empresa</p>
+                                    <p class="linea-tiempo-fecha">@e.Periodo</p>
+                                    @if (!string.IsNullOrWhiteSpace(e.Descripcion)) { <p class="linea-tiempo-texto">@e.Descripcion</p> }
+                                </div>
                             </li>
                         }
                     </ol>
                 }
             </section>
-            <section class="card tarjeta">
+            <section class="card">
                 <h2 class="card-title">Formación</h2>
-                @if (ViewBag.Perfil.Formaciones.Count == 0) { <p class="texto-suave">No cargó formación.</p> }
+                @if (ViewBag.Perfil.Formaciones.Count == 0) { <p class="perfil-vacio">No cargó formación.</p> }
                 else
                 {
-                    <ol class="list-group linea">
+                    <ol class="linea-tiempo" role="list">
                         @foreach (FormacionItem f in ViewBag.Perfil.Formaciones)
                         {
-                            <li class="list-group-item">
-                                <h3 class="tarjeta-titulo">@f.Titulo</h3>
-                                <p>@f.Institucion</p>
-                                <p class="texto-suave">@f.Periodo</p>
+                            <li class="linea-tiempo-item">
+                                <span class="logo-empresa-md" aria-hidden="true"><icono nombre="book" /></span>
+                                <div class="linea-tiempo-contenido">
+                                    <h3 class="linea-tiempo-titulo">@f.Titulo</h3>
+                                    <p class="linea-tiempo-lugar">@f.Institucion</p>
+                                    <p class="linea-tiempo-fecha">@f.Periodo</p>
+                                </div>
                             </li>
                         }
                     </ol>

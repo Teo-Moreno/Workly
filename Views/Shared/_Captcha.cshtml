@@ -1,8 +1,12 @@
-@* El token de la imagen viaja en la dirección del formulario (asp-route-CaptchaToken). *@
-<div class="form-field @Html.ClaseError(Captcha.CampoRespuesta)">
+<div class="campo @Html.ClaseError(Captcha.CampoRespuesta)" data-captcha data-captcha-url="@Url.Action("NuevoCaptcha", "Cuenta")">
     <label class="form-label" for="captcha-respuesta">Escribí las letras de la imagen</label>
-    <img class="captcha-imagen" src="@Model.Imagen" alt="Letras para comprobar que sos una persona">
-    <input class="form-control" id="captcha-respuesta" name="@Captcha.CampoRespuesta" type="text" autocomplete="off" required placeholder="Ej.: K7P3Q">
-    <p class="form-text">No distingue mayúsculas de minúsculas. ¿No se entiende? Recargá la página para ver otra.</p>
-    <p class="error-texto">@Html.MensajeError(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</p>
+    <div class="captcha-fila">
+        <img class="captcha-imagen" src="@Model.Imagen" width="200" height="64" alt="Letras para comprobar que sos una persona" data-captcha-imagen />
+        <button class="btn btn-outline-sm" type="button" data-captcha-otra><icono nombre="refresh" />Otra imagen</button>
+    </div>
+    <input type="hidden" name="@Captcha.CampoToken" value="@Model.Token" data-captcha-token />
+    <input class="form-control captcha-entrada" id="captcha-respuesta" name="@Captcha.CampoRespuesta" autocomplete="off" autocapitalize="characters"
+           spellcheck="false" maxlength="10" required placeholder="Ej.: K7P3Q" />
+    <span class="form-text">No distingue mayúsculas de minúsculas.</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
 </div>

@@ -6,7 +6,6 @@ namespace Workly.Models;
 public class LoginViewModel
 {
     [Required(ErrorMessage = "Ingresá tu email")]
-    [EmailAddress(ErrorMessage = "Ingresá un email válido")]
     [StringLength(100)]
     public string Email { get; set; } = "";
 
@@ -202,6 +201,8 @@ public class CompletarPerfilViewModel
     public List<FormacionItem> FormacionesCargadas { get; set; } = new();
 
     public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
+
+    public static readonly string[] Pasos = { "Tus datos", "Qué buscás", "Experiencia", "Tu CV" };
 
     public List<ExperienciaEnviada> ExperienciasEnviadas => ExpPuesto.Select((p, i) =>
         new ExperienciaEnviada(Valor(ExpPuesto, i), Valor(ExpEmpresa, i), Valor(ExpInicio, i), Valor(ExpFin, i), Valor(ExpDescripcion, i))).Where(e => !e.EstaVacia).ToList();

@@ -287,6 +287,7 @@ CREATE TABLE [dbo].[OfertaLaboral](
 	[Motivo_Rechazo] [nvarchar](500) NULL,
 	[Fecha_Revision] [date] NULL,
 	[Fecha_Ultimo_Resumen] [datetime2](7) NULL,
+	[Logo] [nvarchar](260) NULL,
  CONSTRAINT [PK_OfertaLaboral] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -985,7 +986,7 @@ ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_
 GO
 ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Estado_Publicacion]
 GO
-ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Fechas] CHECK  (([Fecha_Cierre] IS NULL OR [Fecha_Cierre]>=[Fecha_Publicacion]))
+ALTER TABLE [dbo].[OfertaLaboral]  WITH CHECK ADD  CONSTRAINT [CK_OfertaLaboral_Fechas] CHECK  (([Fecha_Cierre] IS NULL OR [Fecha_Cierre]>=dateadd(day,(-1),[Fecha_Publicacion])))
 GO
 ALTER TABLE [dbo].[OfertaLaboral] CHECK CONSTRAINT [CK_OfertaLaboral_Fechas]
 GO

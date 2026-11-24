@@ -1,27 +1,29 @@
-<div class="card tarjeta oferta">
-    <div class="tarjeta-fila">
-        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa logo-empresa-principal")' />
-        <div class="tarjeta-datos">
-            <h3 class="tarjeta-titulo"><a href="@(ViewData["Enlace"] as string ?? Model.Enlace)">@Model.Titulo</a></h3>
-            <p class="texto-suave">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
+<article class="oferta-tarjeta" data-oferta="@Model.Clave">
+    <div class="oferta-tarjeta-cabecera">
+        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "logo-empresa-principal")' />
+        <div class="oferta-tarjeta-datos">
+            <h3 class="oferta-tarjeta-puesto">
+                <a href="@(ViewData["Enlace"] as string ?? Model.Enlace)" data-oferta-enlace>@Model.Titulo</a>
+            </h3>
+            <p class="oferta-tarjeta-meta">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
         </div>
         @if (Model.YaPostulado)
         {
-            <span class="badge etiqueta etiqueta-exito">✓ Postulado</span>
+            <span class="badge badge-exito"><icono nombre="circle-check" tamano="16" />Postulado</span>
         }
         else if (Model.Guardada)
         {
-            <span class="badge etiqueta etiqueta-principal">★ Guardada</span>
+            <span class="badge badge-principal"><icono nombre="bookmark-fill" tamano="16" />Guardada</span>
         }
     </div>
-    <div class="etiquetas">
+    <div class="lista-tags">
         <partial name="_SelloOficial" model="Model" />
-        @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="badge etiqueta etiqueta-borde">@Model.Modalidad</span> }
-        @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="badge etiqueta etiqueta-borde">@Model.Tipo_Contrato</span> }
-        <span class="badge etiqueta @(Model.EsExterna ? "" : "etiqueta-principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>
+        @if (!string.IsNullOrEmpty(Model.Modalidad)) { <span class="badge tag-borde">@Model.Modalidad</span> }
+        @if (!string.IsNullOrEmpty(Model.Tipo_Contrato)) { <span class="badge tag-borde">@Model.Tipo_Contrato</span> }
+        <span class="badge @(Model.EsExterna ? "tag" : "tag-principal")">@(Model.EsExterna ? "Vía " + Model.Fuente : "En Workly")</span>
     </div>
-    <div class="tarjeta-pie">
-        <span class="negrita">@(Model.SalarioVisible ?? "")</span>
-        <span class="texto-suave">@Model.PublicadaTexto</span>
+    <div class="oferta-tarjeta-pie">
+        <span class="oferta-tarjeta-salario">@(Model.SalarioVisible ?? "")</span>
+        <span class="oferta-tarjeta-fecha">@Model.PublicadaTexto</span>
     </div>
-</div>
+</article>

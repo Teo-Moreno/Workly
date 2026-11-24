@@ -2,58 +2,62 @@
     ViewData["Title"] = "Crear cuenta";
 }
 @section Barra {
-    <p>¿Ya tenés cuenta? <a asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<h1 class="titulo">Creá tu cuenta</h1>
-<p class="texto-suave">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
+<div class="cuenta-tarjeta cuenta-tarjeta-ancha">
+    <h1 class="cuenta-tarjeta-titulo">Creá tu cuenta</h1>
+    <p class="cuenta-tarjeta-bajada">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
 
-<partial name="_TipoCuenta" model='"persona"' />
+    <partial name="_TipoCuenta" model='"persona"' />
 
-<partial name="_ErroresFormulario" />
-
-@if (!ViewBag.Formulario.EsExterno)
-{
-    <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "persona", null)' />
-}
-
-<form class="formulario" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post">
-    @if (ViewBag.Formulario.EsExterno)
-    {
-        <p class="mensaje mensaje-exito">Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
-    }
-    <div class="dos-columnas">
-        <div class="form-field @Html.ClaseError("Nombre")">
-            <label class="form-label" for="Nombre">Nombre</label>
-            <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" type="text" autocomplete="given-name" placeholder="Escribí acá" required>
-            <p class="error-texto">@Html.MensajeError("Nombre", "Completá tu nombre")</p>
-        </div>
-        <div class="form-field @Html.ClaseError("Apellido")">
-            <label class="form-label" for="Apellido">Apellido</label>
-            <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" type="text" autocomplete="family-name" placeholder="Escribí acá" required>
-            <p class="error-texto">@Html.MensajeError("Apellido", "Completá tu apellido")</p>
-        </div>
-    </div>
-
-    <div class="form-field @Html.ClaseError("Email")">
-        <label class="form-label" for="Email">Email</label>
-        @if (ViewBag.Formulario.EsExterno)
-        {
-            <p class="form-control">@ViewBag.Formulario.Email</p>
-        }
-        else
-        {
-            <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required>
-        }
-        <p class="error-texto">@Html.MensajeError("Email", "Ingresá un email válido")</p>
-    </div>
+    <partial name="_ErroresFormulario" />
 
     @if (!ViewBag.Formulario.EsExterno)
     {
-        <partial name="_CampoContrasena" />
+        <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "persona", null)' />
     }
 
-    <partial name="_AceptaTerminos" />
+    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" novalidate data-formulario-real>
+        <fieldset class="formulario registro-paso">
+            <legend class="visually-hidden">Tus datos</legend>
+            @if (ViewBag.Formulario.EsExterno)
+            {
+                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
+            }
+            <div class="formulario-fila">
+                <div class="campo @Html.ClaseError("Nombre")">
+                    <label class="form-label" for="Nombre">Nombre</label>
+                    <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
+                </div>
+                <div class="campo @Html.ClaseError("Apellido")">
+                    <label class="form-label" for="Apellido">Apellido</label>
+                    <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
+                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
+                </div>
+            </div>
 
-    <button class="btn-solid theme-primary boton boton-acento w-100" type="submit">Crear mi cuenta</button>
-</form>
+            <div class="campo @Html.ClaseError("Email")">
+                <label class="form-label" for="Email">Email</label>
+                <div class="control-con-icono">
+                    <icono nombre="mail" />
+                    <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
+                </div>
+                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+            </div>
+
+            @if (!ViewBag.Formulario.EsExterno)
+            {
+                <partial name="_CampoContrasena" />
+            }
+
+            <partial name="_AceptaTerminos" />
+
+            <div class="registro-acciones">
+                <span></span>
+                <button class="btn btn-warning-lg" type="submit">Crear mi cuenta</button>
+            </div>
+        </fieldset>
+    </form>
+</div>

@@ -2,22 +2,33 @@
     ViewData["Title"] = "Contraseña nueva";
 }
 
-<h1 class="titulo">Elegí tu contraseña nueva</h1>
-<p class="texto-suave">Después vas a poder iniciar sesión con ella.</p>
+<div class="cuenta-tarjeta">
+    <h1 class="cuenta-tarjeta-titulo">Elegí tu contraseña nueva</h1>
+    <p class="cuenta-tarjeta-bajada">Después vas a poder iniciar sesión con ella.</p>
 
-<partial name="_ErroresFormulario" />
+    <partial name="_ErroresFormulario" />
 
-<form class="formulario" asp-controller="Cuenta" asp-action="NuevaClave" asp-route-Token="@ViewBag.Formulario.Token" method="post">
-    <div class="form-field @Html.ClaseError("Nueva")">
-        <label class="form-label" for="clave-nueva">Contraseña nueva</label>
-        <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" required>
-        <p class="form-text">Al menos 8 caracteres, con letras y números.</p>
-        <p class="error-texto">@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</p>
-    </div>
-    <div class="form-field @Html.ClaseError("Repetir")">
-        <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
-        <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required>
-        <p class="error-texto">@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</p>
-    </div>
-    <button class="btn-solid theme-primary boton w-100" type="submit">Guardar contraseña</button>
-</form>
+    <form class="formulario" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
+        <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
+        <div class="campo @Html.ClaseError("Nueva")">
+            <label class="form-label" for="clave-nueva">Contraseña nueva</label>
+            <div class="control-con-icono">
+                <icono nombre="lock" />
+                <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
+                       pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required autofocus />
+                <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+            </div>
+            <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+        </div>
+        <div class="campo @Html.ClaseError("Repetir")">
+            <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
+            <div class="control-con-icono">
+                <icono nombre="lock" />
+                <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
+            </div>
+            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
+        </div>
+        <button class="btn btn-block-lg" type="submit">Guardar contraseña</button>
+    </form>
+</div>

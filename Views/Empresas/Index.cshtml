@@ -2,86 +2,85 @@
     ViewData["Title"] = "Empresas";
 }
 
-<div class="container seccion">
-    <h1 class="titulo">Empresas</h1>
-    <p class="texto-suave">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
+<div class="container seccion-app">
+    <header class="encabezado-pagina">
+        <h1 class="encabezado-pagina-titulo">Empresas</h1>
+        <p class="encabezado-pagina-bajada">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
+    </header>
 
-    <form class="buscador buscador-app" asp-controller="Empresas" asp-action="Index" method="get">
-        <div class="form-field">
-            <label class="form-label" for="buscar-empresa">Buscar empresa</label>
-            <input class="form-control" id="buscar-empresa" type="text" name="Q" value="@ViewBag.Q" placeholder="Buscá por nombre o a qué se dedica">
+    <form class="filtros-empresas" asp-controller="Empresas" asp-action="Index" method="get" role="search" data-cargando="#empresas-resultados">
+        <div class="campo filtros-empresas-buscar">
+            <label class="visually-hidden" for="buscar-empresa">Buscar empresa</label>
+            <div class="control-con-icono">
+                <icono nombre="search" />
+                <input class="form-control" id="buscar-empresa" type="search" name="Q" value="@ViewBag.Q" maxlength="100" placeholder="Buscá por nombre o a qué se dedica" />
+            </div>
         </div>
-        <div class="form-field">
-            <label class="form-label" for="empresas-provincia">Provincia</label>
-            <select class="form-control" id="empresas-provincia" name="IDProvincia">
-                @foreach (Provincia provincia in ViewBag.Provincias)
+        <div class="campo">
+            <label class="form-label" for="empresas-pais">País</label>
+            <select class="form-select" id="empresas-pais" name="IDPais" data-selector-pais data-enviar-al-cambiar data-seleccion>
+                @foreach (Pais pais in ViewBag.Paises)
                 {
-                    if (provincia.ID == ViewBag.IDProvincia)
-                    {
-                        <option value="@provincia.ID">@provincia.Nombre</option>
-                    }
+                    <option value="@pais.ID" selected="@(pais.ID == ViewBag.IDPais)">@pais.Nombre</option>
                 }
+            </select>
+        </div>
+        <div class="campo">
+            <label class="form-label" for="empresas-provincia">Provincia</label>
+            <select class="form-select" id="empresas-provincia" name="IDProvincia" data-selector-provincia data-enviar-al-cambiar data-seleccion>
                 <option value="">Todo el país</option>
                 @foreach (Provincia provincia in ViewBag.Provincias)
                 {
-                    if (provincia.ID != ViewBag.IDProvincia)
-                    {
-                        <option value="@provincia.ID">@provincia.Nombre</option>
-                    }
+                    <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == ViewBag.IDProvincia)">@provincia.Nombre</option>
                 }
             </select>
         </div>
-        <div class="form-field">
+        <div class="campo">
             <label class="form-label" for="empresas-orden">Ordenar por</label>
-            <select class="form-control" id="empresas-orden" name="Orden">
+            <select class="form-select" id="empresas-orden" name="Orden" data-enviar-al-cambiar data-seleccion>
                 @foreach (var (valor, texto) in Catalogos.Ordenes)
                 {
-                    if (ViewBag.Orden == valor)
-                    {
-                        <option value="@valor">@texto</option>
-                    }
-                }
-                @foreach (var (valor, texto) in Catalogos.Ordenes)
-                {
-                    if (ViewBag.Orden != valor)
-                    {
-                        <option value="@valor">@texto</option>
-                    }
+                    <option value="@valor" selected="@(ViewBag.Orden == valor)">@texto</option>
                 }
             </select>
         </div>
-        <button class="btn-solid theme-primary boton" type="submit">Buscar</button>
+        <button class="btn btn-primary" type="submit"><icono nombre="search" />Buscar</button>
     </form>
 
-    <h2 class="subtitulo">@(ViewBag.Empresas.Count == 1 ? "1 empresa" : $"{ViewBag.Empresas.Count} empresas")</h2>
+    <div id="empresas-resultados">
+        <partial name="_CargandoResultados" model='"Buscando empresas…"' />
 
-    @if (ViewBag.Empresas.Count == 0)
-    {
-        <div class="vacio">
-            @if (ViewBag.Filtrando)
-            {
-                <h3>No encontramos empresas con esa búsqueda</h3>
-                <p>Probá con otro nombre o buscá en todo el país.</p>
-                <a class="btn-outline theme-primary boton" asp-controller="Empresas" asp-action="Index">Ver todo el país</a>
-            }
-            else
-            {
-                <h3>Todavía no hay empresas en Workly</h3>
-                <p>Cuando una empresa cree su cuenta o publique una búsqueda, aparece acá.</p>
-            }
-            @if (!User.EstaLogueado())
-            {
-                <a class="btn-solid theme-primary boton" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Registrar mi empresa</a>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="grilla-ofertas">
-            @foreach (Empresa empresa in ViewBag.Empresas)
-            {
-                <partial name="_EmpresaTarjeta" model="empresa" />
-            }
-        </div>
-    }
+        <p class="resultados-titulo">@(ViewBag.Empresas.Count == 1 ? "1 empresa" : $"{ViewBag.Empresas.Count} empresas")</p>
+
+        @if (ViewBag.Empresas.Count == 0)
+        {
+            <div class="estado-vacio">
+                <span class="caja-icono-lg"><icono nombre="building" /></span>
+                @if (ViewBag.Filtrando)
+                {
+                    <h2 class="estado-vacio-titulo">No encontramos empresas con esa búsqueda</h2>
+                    <p>Probá con otro nombre o buscá en todo el país.</p>
+                    <a class="btn btn-outline-primary" asp-controller="Empresas" asp-action="Index" asp-route-IDPais="@ViewBag.IDPais" asp-route-IDProvincia="" data-cargando="#empresas-resultados">Ver todo el país</a>
+                }
+                else
+                {
+                    <h2 class="estado-vacio-titulo">Todavía no hay empresas en Workly</h2>
+                    <p>Cuando una empresa cree su cuenta o publique una búsqueda, aparece acá.</p>
+                }
+                @if (!User.EstaLogueado())
+                {
+                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Registrar mi empresa</a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="grilla-empresas">
+                @foreach (Empresa empresa in ViewBag.Empresas)
+                {
+                    <partial name="_EmpresaTarjeta" model="empresa" />
+                }
+            </div>
+        }
+    </div>
 </div>

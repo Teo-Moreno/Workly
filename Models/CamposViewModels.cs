@@ -166,9 +166,3 @@ public class ModalFormacion
     public List<string> Instituciones { get; }
     public bool Abierto { get; }
 }
-
-// Opciones de un <select> sin usar "selected": la guardada va primera y el navegador la muestra elegida.
-public record OpcionesSelect(string? Actual, IEnumerable<string> Opciones, string? TextoVacio = null)
-{
-    public bool HayActual => Actual != null && Opciones.Contains(Actual);
-}

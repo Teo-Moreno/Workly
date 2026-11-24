@@ -124,7 +124,7 @@ public static class Validaciones
             var nivel = i < niveles.Count ? niveles[i] : null;
             if (ids[i] == 0)
             {
-                continue; // fila sin idioma elegido: "Agregar un idioma" o "Quitar este idioma"
+                continue;
             }
             if (!catalogo.Any(c => c.ID == ids[i]) || !Catalogos.NivelesIdioma.Contains(nivel))
             {

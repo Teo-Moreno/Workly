@@ -257,7 +257,7 @@ public static class Perfiles
             var descripcion = Valor(m.ExpDescripcion, i);
             if ((puesto + empresa + Valor(m.ExpInicio, i) + finTexto + descripcion).Length == 0)
             {
-                continue; // la fila vacía que muestra el formulario para sumar una nueva
+                continue;
             }
             if (puesto.Length is 0 or > 100 || empresa.Length is 0 or > 100 || inicio == null || inicio > Fechas.MesActual ||
                 (finTexto.Length > 0 && (fin == null || fin < inicio || fin > Fechas.MesActual)) || descripcion.Length > 500)
@@ -282,7 +282,7 @@ public static class Perfiles
             var fin = Fechas.ParsearMesAnio(finTexto);
             if ((titulo + institucion + Valor(m.ForInicio, i) + finTexto).Length == 0)
             {
-                continue; // la fila vacía que muestra el formulario para sumar una nueva
+                continue;
             }
             if (titulo.Length is 0 or > 150 || institucion.Length is 0 or > 150 || inicio == null || inicio > Fechas.MesActual ||
                 (finTexto.Length > 0 && (fin == null || fin < inicio)))
@@ -447,7 +447,9 @@ public static class Perfiles
         {
             return Resultado.Mal("Para eliminar la cuenta escribí ELIMINAR en mayúsculas.");
         }
+        var imagenesDeOfertas = BD.ObtenerOfertasPublicadas(idUsuario).Select(o => o.Logo).ToList();
         var (foto, cv, logo) = BD.EliminarCuenta(idUsuario);
+        imagenesDeOfertas.ForEach(imagen => Publicaciones.BorrarImagenPropia(imagen, carpetas.Publica));
         Archivos.BorrarImagen(foto, carpetas.Publica);
         Archivos.BorrarImagen(logo, carpetas.Publica);
         Archivos.BorrarCV(cv, carpetas.Raiz);

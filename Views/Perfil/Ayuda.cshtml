@@ -2,41 +2,53 @@
     ViewData["Title"] = "Ayuda y soporte";
 }
 
-<section class="hero hero-chico">
-    <div class="container">
-        <span class="badge etiqueta etiqueta-acento">Centro de ayuda</span>
-        <h1 class="hero-titulo">¿En qué te podemos ayudar?</h1>
+<section class="ayuda-hero">
+    <div class="container ayuda-hero-interior">
+        <span class="badge badge-acento">Centro de ayuda</span>
+        <h1 class="ayuda-hero-titulo">¿En qué te podemos ayudar?</h1>
+        <form class="ayuda-hero-buscador" role="search">
+            <div class="control-con-icono">
+                <icono nombre="search" />
+                <label class="visually-hidden" for="buscar-ayuda">Buscar en la ayuda</label>
+                <input class="form-control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
+            </div>
+        </form>
     </div>
 </section>
 
-<div class="container seccion">
-    <ul class="categorias">
+<div class="container seccion-app">
+    <ul class="ayuda-categorias" role="list">
         @foreach (var categoria in Ayuda.Categorias)
         {
             <li>
-                <a class="card tarjeta" href="#@categoria.Id">
-                    <span class="negrita">@categoria.Nombre</span>
-                    <span class="texto-suave">@categoria.Texto</span>
+                <a class="ayuda-categoria" href="#@categoria.Id">
+                    <span class="caja-icono"><icono nombre="@categoria.Icono" /></span>
+                    <strong>@categoria.Nombre</strong>
+                    <span>@categoria.Texto</span>
                 </a>
             </li>
         }
     </ul>
 
-    <h2 class="subtitulo">Preguntas frecuentes</h2>
-    @foreach (var categoria in Ayuda.Categorias)
-    {
-        <h3 class="grupo-preguntas" id="@categoria.Id">@categoria.Nombre</h3>
-        <div class="accordion info">
-            @foreach (var item in Ayuda.PreguntasDe(categoria.Id))
+    <section class="ayuda-preguntas ayuda-preguntas-sola" id="preguntas" aria-labelledby="preguntas-titulo">
+        <h2 class="h4" id="preguntas-titulo">Preguntas frecuentes</h2>
+        <div class="accordion" data-acordeon>
+            @foreach (var categoria in Ayuda.Categorias)
             {
-                <details class="accordion-item" name="@categoria.Id">
-                    <summary class="accordion-header">
-                        @item.Pregunta
-                        <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m2 5 6 6 6-6"/></svg>
-                    </summary>
-                    <div class="accordion-body">@item.Respuesta</div>
-                </details>
+                <h3 class="acordeon-grupo" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
+                @foreach (var item in Ayuda.PreguntasDe(categoria.Id))
+                {
+                    <div class="accordion-item" data-grupo="@categoria.Id">
+                        <div class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@item.Id" aria-expanded="false" aria-controls="@item.Id">@item.Pregunta</button>
+                        </div>
+                        <div class="accordion-collapse collapse" id="@item.Id">
+                            <p class="accordion-body">@item.Respuesta</p>
+                        </div>
+                    </div>
+                }
             }
         </div>
-    }
+        <p class="estado-vacio" hidden data-acordeon-vacio>No encontramos preguntas con esas palabras. Probá con otras.</p>
+    </section>
 </div>
