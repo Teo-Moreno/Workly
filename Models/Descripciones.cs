@@ -19,7 +19,7 @@ public static class Descripciones
     private static readonly Regex VinetaEnLinea = new(@"\s+[•·●▪◦►➢➤✔✓✅]\s+", RegexOptions.Compiled);
 
     private static readonly Regex TituloConDosPuntos = new(
-        @"(?<=^|[\s.;!?])((?:principales\s+|qué\s+|que\s+)?(?:responsabilidades|requisitos|requerimientos|funciones|tareas|beneficios|ofrecemos|se\s+ofrece|te\s+ofrecemos|condiciones|perfil\s+buscado|perfil|competencias|conocimientos|habilidades|lugar\s+de\s+trabajo|horario|horarios|modalidad|jornada|zona\s+de\s+trabajo|deseable|valoramos|objetivo\s+del\s+puesto|sobre\s+nosotros|sobre\s+el\s+puesto)(?:\s+[a-záéíóúñ]+){0,2})\s*:\s*",
+        @"(?<=^|[\s.;!?])((?:principales\s+|qué\s+|que\s+|descripci[oó]n\s+del?\s+(?:las\s+|los\s+)?)?(?:responsabilidades|requisitos|requerimientos|funciones|tareas|beneficios|ofrecemos|se\s+ofrece|te\s+ofrecemos|condiciones|perfil\s+buscado|perfil|competencias|conocimientos|habilidades|lugar\s+de\s+trabajo|horario|horarios|modalidad|jornada|zona\s+de\s+trabajo|deseable|valoramos|objetivo\s+del\s+puesto|sobre\s+nosotros|sobre\s+el\s+puesto)(?:\s+[a-záéíóúñ]+){0,2})\s*:\s*",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex TituloEnMayusculas = new(
