@@ -1,0 +1,13 @@
+<li class="mensaje-chat @(Model.EsDelUsuario ? "mensaje-chat-usuario" : "mensaje-chat-asistente")">
+    <span class="visually-hidden">@(Model.EsDelUsuario ? "Vos:" : "Asistente:")</span>
+    <p>@Model.Texto</p>
+    @if (Model.Ofertas.Count > 0)
+    {
+        <div class="resultados-lista ofertas-chat">
+            @foreach (Oferta oferta in Model.Ofertas)
+            {
+                <partial name="_OfertaTarjeta" model="oferta" />
+            }
+        </div>
+    }
+</li>

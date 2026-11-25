@@ -1013,5 +1013,77 @@
     });
   });
 
+  $$("form[data-asistente]").forEach((formulario) => {
+    const conversacion = $("[data-conversacion]");
+    const entrada = $("textarea", formulario);
+    const boton = $("button[type=submit]", formulario);
+    const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let enviando = false;
+
+    const agregar = (elemento, bloque) => {
+      conversacion.appendChild(elemento);
+      elemento.scrollIntoView({ block: bloque, behavior: sinMovimiento ? "auto" : "smooth" });
+    };
+
+    entrada.addEventListener("keydown", (evento) => {
+      if (evento.key !== "Enter" || evento.shiftKey || evento.isComposing) return;
+      evento.preventDefault();
+      if (!enviando && entrada.value.trim()) formulario.requestSubmit();
+    });
+
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const texto = entrada.value.trim();
+      if (enviando || !texto) return;
+      enviando = true;
+      boton.disabled = true;
+      const datos = new FormData(formulario);
+
+      const propio = document.createElement("li");
+      propio.className = "mensaje-chat mensaje-chat-usuario mensaje-chat-nuevo";
+      propio.innerHTML = '<span class="visually-hidden">Vos:</span><p></p>';
+      $("p", propio).textContent = texto;
+      agregar(propio, "nearest");
+      entrada.value = "";
+
+      const escribiendo = document.createElement("li");
+      escribiendo.className = "mensaje-chat mensaje-chat-asistente mensaje-chat-escribiendo mensaje-chat-nuevo";
+      escribiendo.setAttribute("role", "status");
+      escribiendo.innerHTML = '<span class="visually-hidden">El asistente está escribiendo</span><span class="puntos-escribiendo" aria-hidden="true"><span></span><span></span><span></span></span>';
+      agregar(escribiendo, "nearest");
+
+      try {
+        const respuesta = await fetch(formulario.action, {
+          method: "POST",
+          body: datos,
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+          credentials: "same-origin"
+        });
+        if (!respuesta.ok) {
+          const error = await respuesta.json().catch(() => ({}));
+          throw Object.assign(new Error(error.mensaje || ""), { tipo: error.tipo });
+        }
+        const plantilla = document.createElement("template");
+        plantilla.innerHTML = (await respuesta.text()).trim();
+        const nuevo = plantilla.content.firstElementChild;
+        if (!nuevo) throw new Error("");
+        nuevo.classList.add("mensaje-chat-nuevo");
+        escribiendo.replaceWith();
+        agregar(nuevo, "start");
+        $("[data-asistente-reiniciar]")?.removeAttribute("hidden");
+        history.replaceState(null, "", `${location.pathname}?c=${encodeURIComponent(datos.get("c"))}`);
+      } catch (error) {
+        escribiendo.replaceWith();
+        propio.replaceWith();
+        if (!entrada.value) entrada.value = texto;
+        snackbar(error.message || "No pudimos mandar tu mensaje. Probá de nuevo.", error.tipo || "error");
+      } finally {
+        enviando = false;
+        boton.disabled = false;
+        entrada.focus();
+      }
+    });
+  });
+
   window.Workly = { snackbar };
 })();
