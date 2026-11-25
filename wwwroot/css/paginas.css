@@ -911,6 +911,7 @@
 }
 
 .oferta-cabecera-principal {
+  flex: 1 1 auto;
   display: flex;
   align-items: flex-start;
   gap: 24px;
@@ -934,11 +935,27 @@
 }
 
 .oferta-cabecera-acciones {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
+}
+
+.oferta-cabecera-acciones > p {
+  width: 0;
+  min-width: 100%;
+}
+
+.oferta-cabecera-acciones .btn,
+.oferta-cabecera .lista-tags .badge {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.oferta-cabecera .lista-tags .badge {
+  text-align: left;
 }
 
 .oferta-cuerpo {
@@ -1111,6 +1128,7 @@
   }
 
   .oferta-cabecera-acciones {
+    max-width: none;
     flex-direction: row;
     justify-content: space-between;
     flex-wrap: wrap;
