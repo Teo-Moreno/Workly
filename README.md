@@ -24,7 +24,7 @@
 - **Postulaciones** a ofertas de Workly y registro de postulaciones externas, en un tablero donde cada tarjeta se arrastra a otra columna o se cambia de etapa desde la tarjeta.
 - **Ofertas guardadas** y recomendaciones **"Para vos"** según lo que busca cada persona.
 - **Publicaciones**: las empresas publican directo y las personas mandan su búsqueda a moderación. Cada búsqueda puede llevar una imagen, y al cerrarla deja de aparecer en Buscar trabajo. En el inicio se ven las últimas tres búsquedas publicadas. Quien publica ve a los postulantes en tres grupos (en revisión, pasaron y no pasaron), ordenados por cuánto coinciden con lo que pidió, y recibe un mail cada 15 días con un resumen.
-- **Asistente**: un chat que recomienda trabajos de la base según lo que la persona cuenta y su perfil, y responde dudas sobre cómo usar la página. Antes de contestar, un filtro revisa cada mensaje y, si no tiene que ver con buscar trabajo o con Workly, el asistente no lo responde.
+- **Asistente**: un chat que recomienda trabajos de la base según lo que la persona cuenta y su perfil, y responde dudas sobre cómo usar la página. Antes de contestar, un filtro revisa cada mensaje y, si no tiene que ver con buscar trabajo o con Workly, el asistente no lo responde. Los mensajes se mandan con Enter y la respuesta aparece sin recargar la página, con un aviso de que el asistente está escribiendo.
 - **Moderación**: aprobar o rechazar búsquedas con un motivo, que le llega a quien publicó.
 - **Directorio de empresas** con buscador y página de cada empresa.
 

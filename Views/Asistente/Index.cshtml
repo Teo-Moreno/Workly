@@ -9,12 +9,9 @@
                 <h1 class="encabezado-pagina-titulo">Asistente</h1>
                 <p class="encabezado-pagina-bajada">Contale qué trabajo buscás y dónde, y te recomendamos ofertas que están en Workly.</p>
             </div>
-            @if (ViewBag.Mensajes.Count > 0)
-            {
-                <div class="encabezado-pagina-acciones">
-                    <a class="btn btn-outline-primary" asp-controller="Asistente" asp-action="Index"><icono nombre="plus" />Empezar de nuevo</a>
-                </div>
-            }
+            <div class="encabezado-pagina-acciones" hidden="@(ViewBag.Mensajes.Count == 0)" data-asistente-reiniciar>
+                <a class="btn btn-outline-primary" asp-controller="Asistente" asp-action="Index"><icono nombre="plus" />Empezar de nuevo</a>
+            </div>
         </div>
     </header>
 
@@ -25,7 +22,7 @@
     else
     {
         <section class="card asistente-chat" aria-label="Conversación">
-            <ol class="conversacion" role="list">
+            <ol class="conversacion" role="list" data-conversacion>
                 @if (ViewBag.Mensajes.Count == 0)
                 {
                     <li class="mensaje-chat mensaje-chat-asistente">
@@ -34,34 +31,22 @@
                 }
                 @foreach (MensajeAsistente m in ViewBag.Mensajes)
                 {
-                    <li class="mensaje-chat @(m.EsDelUsuario ? "mensaje-chat-usuario" : "mensaje-chat-asistente")" id="@(m == ViewBag.Mensajes[ViewBag.Mensajes.Count - 1] ? "ultimo" : null)">
-                        <span class="visually-hidden">@(m.EsDelUsuario ? "Vos:" : "Asistente:")</span>
-                        <p>@m.Texto</p>
-                        @if (m.Ofertas.Count > 0)
-                        {
-                            <div class="resultados-lista ofertas-chat">
-                                @foreach (Oferta oferta in m.Ofertas)
-                                {
-                                    <partial name="_OfertaTarjeta" model="oferta" />
-                                }
-                            </div>
-                        }
-                    </li>
+                    <partial name="_Mensaje" model="m" />
                 }
             </ol>
 
             @if (ViewBag.Lleno)
             {
-                <p class="alert alert-warning"><icono nombre="warning-outline" />Esta conversación ya es muy larga. <a class="enlace" asp-controller="Asistente" asp-action="Index">Empezá una nueva</a>.</p>
+                <p class="alert alert-warning" id="ultimo"><icono nombre="warning-outline" />Esta conversación ya es muy larga. <a class="enlace" asp-controller="Asistente" asp-action="Index">Empezá una nueva</a>.</p>
             }
             else
             {
-                <form class="asistente-formulario" asp-controller="Asistente" asp-action="Enviar" method="post">
+                <form class="asistente-formulario" id="ultimo" asp-controller="Asistente" asp-action="Enviar" method="post" data-asistente>
                     <input type="hidden" name="c" value="@ViewBag.Conversacion" />
                     <label class="form-label" for="asistente-mensaje">Tu mensaje</label>
                     <textarea class="form-control" id="asistente-mensaje" name="mensaje" rows="3" maxlength="@Asistente.LargoMaximo" required placeholder="Por ejemplo: busco trabajo de administrativo en Rosario"></textarea>
                     <div class="asistente-formulario-pie">
-                        <p class="form-text">Las respuestas las escribe una inteligencia artificial y pueden tener errores. Revisá cada oferta antes de postularte.</p>
+                        <p class="form-text">Enter envía el mensaje y Shift + Enter baja de renglón. Las respuestas las escribe una inteligencia artificial y pueden tener errores. Revisá cada oferta antes de postularte.</p>
                         <button class="btn btn-primary" type="submit"><icono nombre="send" />Enviar</button>
                     </div>
                 </form>

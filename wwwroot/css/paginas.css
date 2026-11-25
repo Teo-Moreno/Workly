@@ -4434,6 +4434,97 @@ li:last-child > .onboarding-item {
   margin-top: 12px;
 }
 
+.mensaje-chat {
+  scroll-margin: 100px 0 24px;
+}
+
+.mensaje-chat-nuevo {
+  animation: mensaje-entra 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.mensaje-chat-usuario.mensaje-chat-nuevo {
+  transform-origin: right bottom;
+}
+
+.mensaje-chat-asistente.mensaje-chat-nuevo {
+  transform-origin: left bottom;
+}
+
+@keyframes mensaje-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mensaje-chat-escribiendo {
+  padding: 16px 20px;
+}
+
+.puntos-escribiendo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 12px;
+}
+
+.puntos-escribiendo span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-texto-suave);
+  animation: punto-salta 1.2s ease-in-out infinite;
+}
+
+.puntos-escribiendo span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.puntos-escribiendo span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes punto-salta {
+  0%,
+  60%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes mensaje-aparece {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes punto-titila {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mensaje-chat-nuevo {
+    animation: mensaje-aparece 200ms linear both;
+  }
+
+  .puntos-escribiendo span {
+    animation: punto-titila 1.2s linear infinite;
+  }
+}
+
 .asistente-formulario {
   display: flex;
   flex-direction: column;

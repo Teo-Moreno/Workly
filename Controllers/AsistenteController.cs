@@ -36,6 +36,12 @@ public class AsistenteController : Controller
         }
         var id = string.IsNullOrWhiteSpace(c) || c.Length != 32 ? Asistente.NuevaConversacion() : c;
         var resultado = await _asistente.Enviar(id, User.IdUsuario(), mensaje);
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return resultado.Exito
+                ? PartialView("_Mensaje", _asistente.Conversacion(id, User.IdUsuario()).Last())
+                : BadRequest(new { mensaje = resultado.Mensaje, tipo = resultado.Tipo });
+        }
         if (!resultado.Exito)
         {
             TempData["Mensaje"] = resultado.Mensaje;
