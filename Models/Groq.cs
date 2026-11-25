@@ -29,23 +29,35 @@ public class Groq
 
     public bool Configurada => !string.IsNullOrWhiteSpace(_clave);
 
-    public async Task<JsonObject?> Responder(JsonArray mensajes, JsonArray? herramientas, bool soloJson, CancellationToken cancelar)
+    public async Task<JsonObject?> Responder(JsonArray mensajes, JsonArray? herramientas, bool soloJson, CancellationToken cancelar,
+                                             bool sinUsarHerramientas = false)
     {
         if (!Configurada)
         {
             return null;
         }
         var modelo = _modeloDeReemplazo ?? _modelo;
-        var respuesta = await Pedir(modelo, mensajes, herramientas, soloJson, cancelar);
-        if (respuesta.ModeloNoExiste && await BuscarReemplazo(modelo, cancelar) is { } reemplazo)
+        var respuesta = await Pedir(modelo, mensajes, herramientas, soloJson, sinUsarHerramientas, cancelar);
+        if (respuesta.Falla == FallaGroq.ModeloNoExiste && await BuscarReemplazo(modelo, cancelar) is { } reemplazo)
         {
-            respuesta = await Pedir(reemplazo, mensajes, herramientas, soloJson, cancelar);
+            modelo = reemplazo;
+            respuesta = await Pedir(modelo, mensajes, herramientas, soloJson, sinUsarHerramientas, cancelar);
+        }
+        for (var intento = 0; intento < 2 && respuesta.Falla == FallaGroq.HerramientaMalUsada; intento++)
+        {
+            respuesta = await Pedir(modelo, mensajes, herramientas, soloJson, sinUsarHerramientas, cancelar);
+        }
+        if (respuesta.Falla == FallaGroq.HerramientaMalUsada)
+        {
+            respuesta = await Pedir(modelo, mensajes, herramientas, soloJson, true, cancelar);
         }
         return respuesta.Mensaje;
     }
 
-    private async Task<(JsonObject? Mensaje, bool ModeloNoExiste)> Pedir(string modelo, JsonArray mensajes, JsonArray? herramientas, bool soloJson,
-                                                                       CancellationToken cancelar)
+    private enum FallaGroq { Ninguna, ModeloNoExiste, HerramientaMalUsada, Otra }
+
+    private async Task<(JsonObject? Mensaje, FallaGroq Falla)> Pedir(string modelo, JsonArray mensajes, JsonArray? herramientas, bool soloJson,
+                                                                   bool sinUsarHerramientas, CancellationToken cancelar)
     {
         var cuerpo = new JsonObject
         {
@@ -56,6 +68,10 @@ public class Groq
         if (herramientas != null)
         {
             cuerpo["tools"] = herramientas.DeepClone();
+            if (sinUsarHerramientas)
+            {
+                cuerpo["tool_choice"] = "none";
+            }
         }
         if (soloJson)
         {
@@ -73,15 +89,18 @@ public class Groq
             if (!respuesta.IsSuccessStatusCode)
             {
                 _logger.LogWarning("Groq respondió {Codigo}: {Texto}", (int)respuesta.StatusCode, texto.Length > 300 ? texto[..300] : texto);
-                var noExiste = texto.Contains("model_not_found") || texto.Contains("model_decommissioned") || texto.Contains("decommissioned");
-                return (null, noExiste);
+                if (texto.Contains("model_not_found") || texto.Contains("decommissioned"))
+                {
+                    return (null, FallaGroq.ModeloNoExiste);
+                }
+                return (null, texto.Contains("tool_use_failed") ? FallaGroq.HerramientaMalUsada : FallaGroq.Otra);
             }
-            return (JsonNode.Parse(texto)?["choices"]?[0]?["message"]?.AsObject(), false);
+            return (JsonNode.Parse(texto)?["choices"]?[0]?["message"]?.AsObject(), FallaGroq.Ninguna);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException)
         {
             _logger.LogWarning(ex, "No se pudo consultar Groq");
-            return (null, false);
+            return (null, FallaGroq.Otra);
         }
     }
 

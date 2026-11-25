@@ -16,6 +16,7 @@ public class Asistente
 {
     public const int MaximoMensajes = 20;
     public const int LargoMaximo = 500;
+    private const int VueltasMaximas = 4;
 
     private static readonly string[] ModalidadesValidas = Catalogos.Modalidades;
 
@@ -68,9 +69,14 @@ public class Asistente
         var encontradas = new List<Oferta>();
         string? respuesta = null;
         using var limite = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-        for (var vuelta = 0; vuelta < 3 && respuesta == null; vuelta++)
+        for (var vuelta = 0; vuelta < VueltasMaximas && respuesta == null; vuelta++)
         {
-            var mensaje = await _groq.Responder(pedido, Herramientas(), false, limite.Token);
+            var ultima = vuelta == VueltasMaximas - 1;
+            if (ultima && pedido.Any(m => m?["role"]?.GetValue<string>() == "tool"))
+            {
+                pedido.Add(new JsonObject { ["role"] = "system", ["content"] = "Ya tenés los resultados de las búsquedas. Respondé ahora con lo que encontraste, sin volver a buscar." });
+            }
+            var mensaje = await _groq.Responder(pedido, Herramientas(), false, limite.Token, ultima);
             if (mensaje == null)
             {
                 return Resultado.Mal("No pudimos contestarte en este momento. Probá de nuevo en un rato.");
@@ -169,8 +175,13 @@ public class Asistente
                     ["properties"] = new JsonObject
                     {
                         ["texto"] = new JsonObject { ["type"] = "string", ["description"] = "Puesto o palabra clave, por ejemplo \"vendedor\" o \"programador\". Una o dos palabras." },
-                        ["provincia"] = new JsonObject { ["type"] = "string", ["description"] = "Provincia argentina, por ejemplo \"Córdoba\". Vacío para todo el país." },
-                        ["modalidad"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray(ModalidadesValidas.Select(m => (JsonNode)m).ToArray()) }
+                        ["provincia"] = new JsonObject { ["type"] = new JsonArray("string", "null"), ["description"] = "Provincia argentina, por ejemplo \"Córdoba\". null para todo el país." },
+                        ["modalidad"] = new JsonObject
+                        {
+                            ["type"] = new JsonArray("string", "null"),
+                            ["enum"] = new JsonArray(ModalidadesValidas.Select(m => (JsonNode?)m).Append(null).ToArray()),
+                            ["description"] = "Solo si la persona pidió una modalidad. Si no, null."
+                        }
                     },
                     ["required"] = new JsonArray("texto")
                 }
