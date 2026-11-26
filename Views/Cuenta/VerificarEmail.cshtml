@@ -2,17 +2,17 @@
     ViewData["Title"] = "Verificá tu email";
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Revisá tu email</h1>
-    <p class="cuenta-tarjeta-bajada">Te mandamos un código de @VerificacionEmail.Digitos números a <strong>@ViewBag.Formulario.Email</strong>. Escribilo acá para terminar de crear tu cuenta.</p>
+<div class="columna-angosta">
+    <h1 class="titulo-grande">Revisá tu email</h1>
+    <p class="subtitulo-pegado">Te mandamos un código de @VerificacionEmail.Digitos números a <strong>@ViewBag.Formulario.Email</strong>. Escribilo acá para terminar de crear tu cuenta.</p>
 
     <partial name="_ErroresFormulario" />
 
-    <form class="formulario" asp-controller="Cuenta" asp-action="VerificarEmail" method="post" novalidate data-formulario-real>
+    <form class="grilla-campos" asp-controller="Cuenta" asp-action="VerificarEmail" method="post" novalidate data-formulario-real>
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
         <div class="campo @Html.ClaseError("Codigo")">
             <label class="form-label" for="Codigo">Código</label>
-            <input class="form-control codigo-email" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
+            <input class="form-control entrada-grande" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
                    pattern="\d{@VerificacionEmail.Digitos}" placeholder="000000" required autofocus />
             <span class="form-text">Vence en @VerificacionEmail.Vigencia.TotalMinutes.ToString("0") minutos. Si no te llegó, revisá la carpeta de spam.</span>
             <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Codigo", "El código tiene 6 números")</span>
@@ -24,5 +24,5 @@
         <input type="hidden" name="token" value="@ViewBag.Formulario.Token" />
         <button class="btn btn-outline-block" type="submit"><icono nombre="refresh" />Mandarme otro código</button>
     </form>
-    <p class="cuenta-tarjeta-legal">¿Escribiste mal el email? <a class="enlace" asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>
+    <p class="nota-centrada">¿Escribiste mal el email? <a class="resaltado" asp-controller="Cuenta" asp-action="CrearCuenta">Volvé al registro</a></p>
 </div>

@@ -5,8 +5,8 @@
     <link rel="stylesheet" href="~/css/estilo.css" asp-append-version="true" />
     @await RenderSectionAsync("Head", required: false)
 </head>
-<body class="es-app @ViewData["ClaseBody"]">
-    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+<body>
+    <a class="oculto-hasta-foco" href="#contenido">Saltar al contenido</a>
 
     <header class="navbar navbar-app" data-navbar>
         <div class="container navbar-interior">
@@ -23,8 +23,8 @@
                 @if (User.EstaLogueado())
                 {
                 <div class="dropdown">
-                    <button class="boton-usuario" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-controls="menu-usuario">
-                        <span class="avatar" aria-hidden="true">
+                    <button class="pildora" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-controls="menu-usuario">
+                        <span class="circulo" aria-hidden="true">
                             @if (!string.IsNullOrEmpty(User.Foto()))
                             {
                                 <img src="@User.Foto()" alt="" />
@@ -34,17 +34,17 @@
                                 @(User.EsEmpresa() ? Textos.Iniciales(User.NombreCompleto()) : User.Iniciales())
                             }
                         </span>
-                        <span class="boton-usuario-datos">
-                            <span class="boton-usuario-nombre">@User.NombreCompleto()</span>
-                            <span class="boton-usuario-rol">@(User.Ubicacion() ?? "Mi cuenta")</span>
+                        <span class="pildora-textos">
+                            <span class="pildora-fuerte">@User.NombreCompleto()</span>
+                            <span class="pildora-suave">@(User.Ubicacion() ?? "Mi cuenta")</span>
                         </span>
                         <icono nombre="chevron-down" />
                         <span class="visually-hidden">Abrir menú de cuenta</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end" id="menu-usuario">
                         <div class="dropdown-header">
-                            <strong class="boton-usuario-nombre">@User.NombreCompleto()</strong>
-                            <span class="boton-usuario-rol">@User.Email()</span>
+                            <strong class="pildora-fuerte">@User.NombreCompleto()</strong>
+                            <span class="pildora-suave">@User.Email()</span>
                         </div>
                         <ul role="list">
                             @if (User.EsEmpresa())
@@ -87,7 +87,7 @@
             @if (User.EstaLogueado())
             {
                 <a class="nav-link" asp-controller="Perfil" asp-action="Configuracion">Configuración</a>
-                <form class="navbar-movil-salir" asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
+                <form class="navbar-movil-final" asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
                     <button class="btn btn-outline-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
                 </form>
             }
@@ -105,14 +105,14 @@
         @RenderBody()
     </main>
 
-    <footer class="pie pie-app">
-        <div class="container pie-interior">
+    <footer class="fondo-claro">
+        <div class="container fila-separada">
             <a class="logo logo-chico" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
-            <p class="pie-copy">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
-            <nav class="pie-links" aria-label="Legales y ayuda">
+            <p class="texto-tenue">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
+            <nav class="fila-espaciada" aria-label="Legales y ayuda">
                 <a asp-controller="Home" asp-action="Terminos">Términos</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 <a asp-controller="Home" asp-action="Cookies">Cookies</a>

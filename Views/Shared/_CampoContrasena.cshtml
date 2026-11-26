@@ -4,7 +4,7 @@
         <icono nombre="lock" />
         <input class="form-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="new-password" placeholder="Mínimo 8 caracteres"
                minlength="8" maxlength="100" pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
-        <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+        <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
     </div>
     <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
     <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Usá al menos 8 caracteres, con una letra y un número")</span>

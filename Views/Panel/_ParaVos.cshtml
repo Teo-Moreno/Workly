@@ -1,14 +1,14 @@
 <template data-parte="contenido">
     @if (ViewBag.ParaVos.Count == 0)
     {
-        <div class="estado-vacio estado-vacio-chico">
+        <div class="recuadro-punteado recuadro-punteado-chico">
             <p>No encontramos ningún puesto de "@ViewBag.Puesto" nuevo para vos. Probá buscar con otras palabras.</p>
             <a class="btn btn-outline-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
     {
-        <div class="resultados-lista">
+        <div class="columna-espaciada">
             @foreach (Oferta oferta in ViewBag.ParaVos)
             {
                 <partial name="_OfertaTarjeta" model="oferta" />

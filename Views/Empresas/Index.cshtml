@@ -2,14 +2,14 @@
     ViewData["Title"] = "Empresas";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
-        <h1 class="encabezado-pagina-titulo">Empresas</h1>
-        <p class="encabezado-pagina-bajada">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
+<div class="container espacio-abajo">
+    <header class="bloque-titulo">
+        <h1 class="titulo">Empresas</h1>
+        <p class="subtitulo">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
     </header>
 
-    <form class="filtros-empresas" asp-controller="Empresas" asp-action="Index" method="get" role="search" data-cargando="#empresas-resultados">
-        <div class="campo filtros-empresas-buscar">
+    <form class="grilla-cinco" asp-controller="Empresas" asp-action="Index" method="get" role="search" data-cargando="#empresas-resultados">
+        <div class="campo">
             <label class="visually-hidden" for="buscar-empresa">Buscar empresa</label>
             <div class="control-con-icono">
                 <icono nombre="search" />
@@ -50,21 +50,21 @@
     <div id="empresas-resultados">
         <partial name="_CargandoResultados" model='"Buscando empresas…"' />
 
-        <p class="resultados-titulo">@(ViewBag.Empresas.Count == 1 ? "1 empresa" : $"{ViewBag.Empresas.Count} empresas")</p>
+        <p class="titulo-oscuro">@(ViewBag.Empresas.Count == 1 ? "1 empresa" : $"{ViewBag.Empresas.Count} empresas")</p>
 
         @if (ViewBag.Empresas.Count == 0)
         {
-            <div class="estado-vacio">
+            <div class="recuadro-punteado">
                 <span class="caja-icono-lg"><icono nombre="building" /></span>
                 @if (ViewBag.Filtrando)
                 {
-                    <h2 class="estado-vacio-titulo">No encontramos empresas con esa búsqueda</h2>
+                    <h2 class="recuadro-punteado-titulo">No encontramos empresas con esa búsqueda</h2>
                     <p>Probá con otro nombre o buscá en todo el país.</p>
                     <a class="btn btn-outline-primary" asp-controller="Empresas" asp-action="Index" asp-route-IDPais="@ViewBag.IDPais" asp-route-IDProvincia="" data-cargando="#empresas-resultados">Ver todo el país</a>
                 }
                 else
                 {
-                    <h2 class="estado-vacio-titulo">Todavía no hay empresas en Workly</h2>
+                    <h2 class="recuadro-punteado-titulo">Todavía no hay empresas en Workly</h2>
                     <p>Cuando una empresa cree su cuenta o publique una búsqueda, aparece acá.</p>
                 }
                 @if (!User.EstaLogueado())
@@ -75,7 +75,7 @@
         }
         else
         {
-            <div class="grilla-empresas">
+            <div class="grilla-tres-media">
                 @foreach (Empresa empresa in ViewBag.Empresas)
                 {
                     <partial name="_EmpresaTarjeta" model="empresa" />

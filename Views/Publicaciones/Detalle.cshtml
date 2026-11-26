@@ -2,20 +2,20 @@
     ViewData["Title"] = ViewBag.Oferta.Titulo;
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
+<div class="container espacio-abajo">
+    <header class="bloque-titulo">
         <nav aria-label="Estás en">
             <ol class="breadcrumb breadcrumb-chica">
                 <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
                 <li class="breadcrumb-item active" aria-current="page">@ViewBag.Oferta.Titulo</li>
             </ol>
         </nav>
-        <div class="encabezado-pagina-fila">
+        <div class="fila-titulo">
             <div>
-                <h1 class="encabezado-pagina-titulo">@ViewBag.Oferta.Titulo</h1>
-                <p class="encabezado-pagina-bajada">@ViewBag.Oferta.Empresa@(ViewBag.Oferta.UbicacionVisible != null ? " · " + ViewBag.Oferta.UbicacionVisible : "") · @ViewBag.Oferta.PublicadaTexto</p>
+                <h1 class="titulo">@ViewBag.Oferta.Titulo</h1>
+                <p class="subtitulo">@ViewBag.Oferta.Empresa@(ViewBag.Oferta.UbicacionVisible != null ? " · " + ViewBag.Oferta.UbicacionVisible : "") · @ViewBag.Oferta.PublicadaTexto</p>
             </div>
-            <div class="encabezado-pagina-acciones">
+            <div class="acciones">
                 <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
                 @if (ViewBag.Oferta.Estado_Publicacion == "Aprobada" && !ViewBag.Oferta.EstaCerrada)
                 {
@@ -47,7 +47,7 @@
         <h2 class="h4" id="postulantes-titulo">Postulantes (@ViewBag.Postulantes.Count)</h2>
         @if (ViewBag.Postulantes.Count == 0)
         {
-            <div class="estado-vacio estado-vacio-chico">
+            <div class="recuadro-punteado recuadro-punteado-chico">
                 <p>@(ViewBag.Oferta.Estado_Publicacion == "Aprobada" ? "Todavía no se postuló nadie. Cuando alguien se postule, lo vas a ver acá con su perfil y su CV." : "Cuando la búsqueda esté publicada, acá vas a ver a quienes se postulen.")</p>
             </div>
         }
@@ -56,32 +56,32 @@
             <p class="text-body-secondary">Dentro de cada grupo, primero aparece quien más coincide con lo que pediste: habilidades del rubro, puesto que busca, ubicación y modalidad.</p>
             @foreach (var (etapa, lista) in (List<(string Etapa, List<Postulante> Lista)>)ViewBag.Etapas)
             {
-                <section class="etapa-postulantes" aria-labelledby="etapa-@Vistas.Clave(etapa)">
-                    <h3 class="etapa-postulantes-titulo" id="etapa-@Vistas.Clave(etapa)">@etapa <span class="tablero-contador">@lista.Count</span></h3>
+                <section class="grupo-separado" aria-labelledby="etapa-@Vistas.Clave(etapa)">
+                    <h3 class="grupo-separado-titulo" id="etapa-@Vistas.Clave(etapa)">@etapa <span class="contador">@lista.Count</span></h3>
                     @if (lista.Count == 0)
                     {
-                        <p class="etapa-postulantes-vacia">Nadie en este grupo.</p>
+                        <p class="grupo-separado-vacio">Nadie en este grupo.</p>
                     }
                     else
                     {
-                        <ul class="lista-postulantes" role="list">
+                        <ul class="lista-tarjetas" role="list">
                             @foreach (Postulante p in lista)
                             {
-                                <li class="postulante">
-                                    <span class="avatar-md" aria-hidden="true">
+                                <li class="tarjeta-fila-sombra">
+                                    <span class="circulo-md" aria-hidden="true">
                                         @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt="" /> } else { @p.Iniciales }
                                     </span>
-                                    <div class="postulante-datos">
-                                        <h4 class="postulante-nombre"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h4>
-                                        <p class="postulante-meta"><span class="badge @(p.Puntaje >= 60 ? "badge-exito" : p.Puntaje >= 30 ? "badge-advertencia" : "badge-neutra")">Coincide @p.Puntaje%</span>@(p.Motivos.Count > 0 ? " " + string.Join(" · ", p.Motivos) : "")</p>
-                                        <p class="postulante-meta">@p.Resumen</p>
-                                        <p class="postulante-contacto">
-                                            <a class="enlace" href="mailto:@p.Email">@p.Email</a>
-                                            @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a class="enlace" href="tel:@p.TelefonoLink">@p.Telefono</a></span> }
+                                    <div class="flexible">
+                                        <h4 class="titulo-chico"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h4>
+                                        <p class="texto-chico-separado"><span class="badge @(p.Puntaje >= 60 ? "badge-exito" : p.Puntaje >= 30 ? "badge-advertencia" : "badge-neutra")">Coincide @p.Puntaje%</span>@(p.Motivos.Count > 0 ? " " + string.Join(" · ", p.Motivos) : "")</p>
+                                        <p class="texto-chico-separado">@p.Resumen</p>
+                                        <p class="texto-chico-separado">
+                                            <a class="resaltado" href="mailto:@p.Email">@p.Email</a>
+                                            @if (!string.IsNullOrEmpty(p.Telefono)) { <span>· <a class="resaltado" href="tel:@p.TelefonoLink">@p.Telefono</a></span> }
                                         </p>
                                         <span class="small text-body-secondary">Se postuló el @Vistas.Fecha(p.Fecha)</span>
                                     </div>
-                                    <div class="fila postulante-acciones">
+                                    <div class="fila acciones-envueltas">
                                         @foreach (var (otraEtapa, estado, boton) in Postulaciones.EtapasEmpresa)
                                         {
                                             if (otraEtapa != etapa)

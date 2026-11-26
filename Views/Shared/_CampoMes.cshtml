@@ -1,24 +1,24 @@
 <div class="campo @(Model.Error != null ? "campo-error" : Html.ClaseError((string)Model.Nombre))">
     <label class="form-label" for="@Model.Id">@Model.Etiqueta</label>
-    <div class="selector-mes" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
-        <input class="form-control selector-mes-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
+    <div class="selector" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
+        <input class="form-control selector-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
                inputmode="numeric" maxlength="7" autocomplete="off" pattern="(0[1-9]|1[0-2])/(19|20)[0-9]{2}" required="@Model.Requerido"
                data-selector-mes-entrada />
-        <button class="selector-mes-abrir" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir>
+        <button class="selector-icono" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir>
             <icono nombre="calendar" />
         </button>
-        <div class="selector-mes-panel" role="dialog" aria-label="Elegí el mes y el año" hidden data-selector-mes-panel>
-            <div class="selector-mes-cabecera">
-                <strong class="selector-mes-anio" data-selector-mes-anio></strong>
-                <div class="selector-mes-flechas">
-                    <button class="selector-mes-flecha" type="button" aria-label="Año anterior" data-selector-mes-anterior><icono nombre="chevron-left" /></button>
-                    <button class="selector-mes-flecha" type="button" aria-label="Año siguiente" data-selector-mes-siguiente><icono nombre="chevron-right" /></button>
+        <div class="selector-panel" role="dialog" aria-label="Elegí el mes y el año" hidden data-selector-mes-panel>
+            <div class="selector-fila">
+                <strong class="selector-fuerte" data-selector-mes-anio></strong>
+                <div class="selector-flechas">
+                    <button class="selector-flecha" type="button" aria-label="Año anterior" data-selector-mes-anterior><icono nombre="chevron-left" /></button>
+                    <button class="selector-flecha" type="button" aria-label="Año siguiente" data-selector-mes-siguiente><icono nombre="chevron-right" /></button>
                 </div>
             </div>
-            <div class="selector-mes-meses">
+            <div class="selector-grilla">
                 @for (var i = 0; i < CampoMes.Meses.Length; i++)
                 {
-                    <button class="selector-mes-mes" type="button" data-mes="@(i + 1)">@CampoMes.Meses[i]</button>
+                    <button class="selector-opcion" type="button" data-mes="@(i + 1)">@CampoMes.Meses[i]</button>
                 }
             </div>
         </div>

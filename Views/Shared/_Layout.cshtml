@@ -5,8 +5,8 @@
     <link rel="stylesheet" href="~/css/estilo.css" asp-append-version="true" />
     @await RenderSectionAsync("Head", required: false)
 </head>
-<body class="@ViewData["ClaseBody"]">
-    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+<body>
+    <a class="oculto-hasta-foco" href="#contenido">Saltar al contenido</a>
 
     <header class="navbar" data-navbar>
         <div class="container navbar-interior">
@@ -27,7 +27,7 @@
                 @if (User.EstaLogueado())
                 {
                     <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="Index">
-                        <span class="avatar-mini" aria-hidden="true">@if (!string.IsNullOrEmpty(User.Foto())) {<img src="@User.Foto()" alt="" />} else {@User.Iniciales()}</span>@User.Nombre()
+                        <span class="circulo-mini" aria-hidden="true">@if (!string.IsNullOrEmpty(User.Foto())) {<img src="@User.Foto()" alt="" />} else {@User.Iniciales()}</span>@User.Nombre()
                     </a>
                     <a class="btn btn-primary" asp-controller="Panel" asp-action="Index">Ir a mi panel</a>
                 }
@@ -67,14 +67,14 @@
         @RenderBody()
     </main>
 
-    <footer class="pie">
-        <div class="container pie-interior">
+    <footer>
+        <div class="container fila-separada">
             <a class="logo logo-claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
                 <span class="logo-isotipo" aria-hidden="true">W</span>
                 <span class="logo-texto">Workly</span>
             </a>
-            <p class="pie-copy">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
-            <nav class="pie-links" aria-label="Legales y ayuda">
+            <p class="texto-tenue">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
+            <nav class="fila-espaciada" aria-label="Legales y ayuda">
                 <a asp-controller="Home" asp-action="Terminos">Términos</a>
                 <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 <a asp-controller="Home" asp-action="Cookies">Cookies</a>

@@ -2,12 +2,12 @@
     ViewData["Title"] = "Crear cuenta";
 }
 @section Barra {
-    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="resaltado" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<div class="cuenta-tarjeta cuenta-tarjeta-ancha">
-    <h1 class="cuenta-tarjeta-titulo">Creá tu cuenta</h1>
-    <p class="cuenta-tarjeta-bajada">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
+<div class="columna-angosta columna-media">
+    <h1 class="titulo-grande">Creá tu cuenta</h1>
+    <p class="subtitulo-pegado">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
 
     <partial name="_TipoCuenta" model='"persona"' />
 
@@ -18,14 +18,14 @@
         <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "persona", null)' />
     }
 
-    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" novalidate data-formulario-real>
-        <fieldset class="formulario registro-paso">
+    <form class="sin-grilla" asp-controller="Cuenta" asp-action="CrearCuentaPersona" method="post" novalidate data-formulario-real>
+        <fieldset class="grilla-campos paso-animado">
             <legend class="visually-hidden">Tus datos</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
-                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
+                <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
-            <div class="formulario-fila">
+            <div class="columnas">
                 <div class="campo @Html.ClaseError("Nombre")">
                     <label class="form-label" for="Nombre">Nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
@@ -54,7 +54,7 @@
 
             <partial name="_AceptaTerminos" />
 
-            <div class="registro-acciones">
+            <div class="acciones-entre">
                 <span></span>
                 <button class="btn btn-warning-lg" type="submit">Crear mi cuenta</button>
             </div>

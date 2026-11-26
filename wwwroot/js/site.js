@@ -4,7 +4,7 @@
   const $ = (selector, raiz = document) => raiz.querySelector(selector);
   const $$ = (selector, raiz = document) => Array.from(raiz.querySelectorAll(selector));
   const rutaIconos = "/img/iconos.svg";
-  const CAMPO = ".campo, .formulario-grupo, .lista-local";
+  const CAMPO = ".campo, .grupo-campos, .columna-items";
 
   const icono = (nombre, tamano = 24) =>
     `<svg class="icono" width="${tamano}" height="${tamano}" aria-hidden="true" focusable="false"><use href="${rutaIconos}#${nombre}"></use></svg>`;
@@ -220,7 +220,7 @@
     if (!boton || boton.classList.contains("esta-cargando")) return;
     boton.classList.add("esta-cargando");
     boton.setAttribute("aria-disabled", "true");
-    boton.insertAdjacentHTML("afterbegin", `<span class="spinner-border-sm${boton.matches("[class*='btn-outline'], [class*='btn-link'], .btn-externo, .btn-archivo, .btn-archivo-block, .btn-guardada, .buscar-ver-filtros, .btn-chip") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
+    boton.insertAdjacentHTML("afterbegin", `<span class="spinner-border-sm${boton.matches("[class*='btn-outline'], [class*='btn-link'], .btn-ancho, .btn-archivo, .btn-archivo-block, .btn-turquesa, .btn-solo-celu, .btn-chip") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
   };
 
   const quitarCargando = (boton) => {
@@ -670,7 +670,7 @@
     const hayItems = $$("[data-item-local]", lista).length > 0;
     if (!hayItems && !vacio && lista.dataset.vacio) {
       vacio = document.createElement("li");
-      vacio.className = "lista-local-vacio";
+      vacio.className = "columna-items-vacio";
       vacio.setAttribute("data-lista-vacia", "");
       vacio.textContent = lista.dataset.vacio;
       lista.appendChild(vacio);
@@ -732,7 +732,7 @@
       }
 
       const item = document.createElement("li");
-      item.className = "item-local";
+      item.className = "item-borde";
       item.setAttribute("data-item-local", "");
       const [titulo, detalle] = config.texto(valores);
       const textos = document.createElement("div");
@@ -909,7 +909,7 @@
           return evento.clientY < caja.top + caja.height / 2;
         });
         if (despues) lista.insertBefore(arrastrando, despues);
-        else lista.insertBefore(arrastrando, $(".tablero-vacio", lista));
+        else lista.insertBefore(arrastrando, $(".columna-gris-vacio", lista));
       });
       columna.addEventListener("dragleave", (evento) => {
         if (!columna.contains(evento.relatedTarget)) columna.classList.remove("es-destino");
@@ -1040,16 +1040,16 @@
       const datos = new FormData(formulario);
 
       const propio = document.createElement("li");
-      propio.className = "mensaje-chat mensaje-chat-usuario mensaje-chat-nuevo";
+      propio.className = "burbuja burbuja-azul burbuja-nueva";
       propio.innerHTML = '<span class="visually-hidden">Vos:</span><p></p>';
       $("p", propio).textContent = texto;
       agregar(propio, "nearest");
       entrada.value = "";
 
       const escribiendo = document.createElement("li");
-      escribiendo.className = "mensaje-chat mensaje-chat-asistente mensaje-chat-escribiendo mensaje-chat-nuevo";
+      escribiendo.className = "burbuja burbuja-gris burbuja-puntos burbuja-nueva";
       escribiendo.setAttribute("role", "status");
-      escribiendo.innerHTML = '<span class="visually-hidden">El asistente está escribiendo</span><span class="puntos-escribiendo" aria-hidden="true"><span></span><span></span><span></span></span>';
+      escribiendo.innerHTML = '<span class="visually-hidden">El asistente está escribiendo</span><span class="puntos-saltando" aria-hidden="true"><span></span><span></span><span></span></span>';
       agregar(escribiendo, "nearest");
 
       try {
@@ -1067,7 +1067,7 @@
         plantilla.innerHTML = (await respuesta.text()).trim();
         const nuevo = plantilla.content.firstElementChild;
         if (!nuevo) throw new Error("");
-        nuevo.classList.add("mensaje-chat-nuevo");
+        nuevo.classList.add("burbuja-nueva");
         escribiendo.replaceWith();
         agregar(nuevo, "start");
         $("[data-asistente-reiniciar]")?.removeAttribute("hidden");

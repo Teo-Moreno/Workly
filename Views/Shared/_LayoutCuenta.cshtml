@@ -5,20 +5,20 @@
     <link rel="stylesheet" href="~/css/estilo.css" asp-append-version="true" />
     @await RenderSectionAsync("Head", required: false)
 </head>
-<body class="es-blanco">
-    <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+<body class="fondo-blanco">
+    <a class="oculto-hasta-foco" href="#contenido">Saltar al contenido</a>
 
-    <div class="cuenta">
-        <aside class="cuenta-marca">
+    <div class="pantalla-dividida">
+        <aside class="lateral-degradado">
             <a class="logo logo-claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
 
-            <div class="cuenta-mensaje">
+            <div class="lateral-degradado-textos">
                 <span class="badge badge-acento">Por qué Workly</span>
-                <p class="cuenta-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></p>
-                <ul class="cuenta-lista" role="list">
+                <p class="lateral-degradado-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></p>
+                <ul class="lateral-degradado-lista" role="list">
                     <li>
                         <span class="caja-icono-sm caja-icono-secundario"><icono nombre="circle-check-outline" /></span>
                         <span><strong>Todo en un lugar.</strong> Ofertas de Workly y de otros sitios en una sola búsqueda.</span>
@@ -36,12 +36,12 @@
 
         </aside>
 
-        <main class="cuenta-contenido" id="contenido">
-            <div class="cuenta-barra">
-                <a class="enlace enlace-principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
+        <main class="contenido-holgado" id="contenido">
+            <div class="barra-superior-chica">
+                <a class="resaltado resaltado-principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
                 @await RenderSectionAsync("Barra", required: false)
             </div>
-            <div class="cuenta-formulario">
+            <div class="centro-vertical">
                 @RenderBody()
             </div>
         </main>

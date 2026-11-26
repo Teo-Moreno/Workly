@@ -2,13 +2,13 @@
     ViewData["Title"] = "Contraseña nueva";
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Elegí tu contraseña nueva</h1>
-    <p class="cuenta-tarjeta-bajada">Después vas a poder iniciar sesión con ella.</p>
+<div class="columna-angosta">
+    <h1 class="titulo-grande">Elegí tu contraseña nueva</h1>
+    <p class="subtitulo-pegado">Después vas a poder iniciar sesión con ella.</p>
 
     <partial name="_ErroresFormulario" />
 
-    <form class="formulario" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
+    <form class="grilla-campos" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
         <div class="campo @Html.ClaseError("Nueva")">
             <label class="form-label" for="clave-nueva">Contraseña nueva</label>
@@ -16,7 +16,7 @@
                 <icono nombre="lock" />
                 <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
                        pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required autofocus />
-                <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
             <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
             <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>

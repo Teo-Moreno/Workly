@@ -8,7 +8,7 @@ else if (User.EsPersona() && !User.EsPropia((int?)Model.IDUsuario_Publicador))
         <input type="hidden" name="id" value="@Model.ID" />
         <input type="hidden" name="externa" value="@(Model.EsExterna ? "true" : "false")" />
         <input type="hidden" name="volver" value="@ViewContext.Volver()" />
-        <button class="@(Model.Guardada ? "btn btn-guardada" : "btn btn-outline-lg")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
+        <button class="@(Model.Guardada ? "btn btn-turquesa" : "btn btn-outline-lg")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
                 title="@(Model.Guardada ? "Sacar de Guardadas" : "Guardar para verla después")">
             <icono nombre="@(Model.Guardada ? "bookmark-fill" : "bookmark")" />@(Model.Guardada ? "Guardada" : "Guardar")
         </button>

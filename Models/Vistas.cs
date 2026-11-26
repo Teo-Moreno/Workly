@@ -78,7 +78,7 @@ public class LogoEmpresa
     {
         Logo = logo;
         Nombre = nombre;
-        Clases = string.IsNullOrWhiteSpace(clases) ? "logo-empresa" : clases;
+        Clases = string.IsNullOrWhiteSpace(clases) ? "cuadro" : clases;
     }
 
     public string? Logo { get; }

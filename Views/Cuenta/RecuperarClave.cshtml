@@ -3,16 +3,16 @@
     ViewData["Title"] = "Recuperar contraseña";
 }
 @section Barra {
-    <p class="text-body-secondary">¿Te acordaste? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Te acordaste? <a class="resaltado" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<div class="cuenta-tarjeta">
-    <h1 class="cuenta-tarjeta-titulo">Creá una contraseña nueva</h1>
-    <p class="cuenta-tarjeta-bajada">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
+<div class="columna-angosta">
+    <h1 class="titulo-grande">Creá una contraseña nueva</h1>
+    <p class="subtitulo-pegado">Escribí el email de tu cuenta y te mandamos un link para elegir una contraseña nueva. El link vence en 1 hora.</p>
 
     <partial name="_ErroresFormulario" />
 
-    <form class="formulario" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
+    <form class="grilla-campos" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
         <div class="campo @Html.ClaseError("Email")">
             <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
