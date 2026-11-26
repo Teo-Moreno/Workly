@@ -5,8 +5,8 @@
 <div class="container espacio-abajo">
     <nav aria-label="Estás en">
         <ol class="breadcrumb breadcrumb-chica">
-            <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID">@ViewBag.Oferta.Titulo</a></li>
+            <li class="breadcrumb-item"><a href="/Publicaciones">Mis publicaciones</a></li>
+            <li class="breadcrumb-item"><a href="/Publicaciones/Detalle/@ViewBag.Oferta.ID">@ViewBag.Oferta.Titulo</a></li>
             <li class="breadcrumb-item active" aria-current="page">@ViewBag.Perfil.Usuario.NombreCompleto</li>
         </ol>
     </nav>
@@ -29,7 +29,7 @@
         <div class="recuadro-degradado-acciones">
             @if (ViewBag.Perfil.TieneCV)
             {
-                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@ViewBag.IDPostulacion"><icono nombre="download" />Descargar CV</a>
+                <a class="btn btn-primary" href="/Publicaciones/CV/@ViewBag.IDPostulacion"><icono nombre="download" />Descargar CV</a>
             }
             else
             {

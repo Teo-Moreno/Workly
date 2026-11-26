@@ -75,7 +75,7 @@
         ok = control.checkValidity();
       }
       campo?.classList.toggle("campo-error", !ok);
-      if (!ok) campo?.removeAttribute("data-sin-mensaje");
+      if (!ok) campo?.classList.remove("campo-sin-mensaje");
       if (!ok && valido) {
         control.focus();
         valido = false;
@@ -88,7 +88,7 @@
     const quitarError = () => {
       const campo = control.closest(CAMPO);
       if (!campo?.classList.contains("campo-error")) return;
-      campo.removeAttribute("data-sin-mensaje");
+      campo.classList.remove("campo-sin-mensaje");
       const ok = control.type === "radio" ? true : control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
       if (ok) campo.classList.remove("campo-error");
     };
@@ -117,7 +117,7 @@
     else if (archivo.size > maximo) error = `El archivo pesa más de ${Math.round(maximo / 1024 / 1024)} MB`;
 
     campo?.classList.toggle("campo-error", Boolean(error));
-    campo?.removeAttribute("data-sin-mensaje");
+    campo?.classList.remove("campo-sin-mensaje");
     if (!error) return true;
 
     input.value = "";

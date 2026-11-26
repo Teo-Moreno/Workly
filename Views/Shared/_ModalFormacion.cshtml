@@ -1,6 +1,6 @@
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(Model.Abierto ? "true" : null)"><div class="modal-dialog"><div class="modal-content">
     <form class="modal-body grilla-campos" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
-          action="@(Model.EnServidor ? Url.Action("AgregarFormacion", "Perfil") : null)"
+          action="@(Model.EnServidor ? "/Perfil/AgregarFormacion" : null)"
           data-modal-local="@(Model.EnServidor ? null : "formacion")" data-formulario-real="@(Model.EnServidor ? "" : null)">
         @if (Model.EnServidor)
         {
@@ -12,12 +12,12 @@
         </div>
         <p class="modal-texto">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
 
-        <div class="campo @(Model.Abierto ? Html.ClaseError("Titulo") : "")">
+        <div class="campo @Model.Errores.Clase("Titulo")">
             <label class="form-label" for="for-titulo">Título o curso</label>
             <input class="form-control" id="for-titulo" name="Titulo" value="@Model.Valores.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
-            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Titulo", "Completá el título o curso") : "Completá el título o curso")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Titulo", "Completá el título o curso")</span>
         </div>
-        <div class="campo @(Model.Abierto ? Html.ClaseError("Institucion") : "")">
+        <div class="campo @Model.Errores.Clase("Institucion")">
             <label class="form-label" for="for-institucion">Institución</label>
             <input class="form-control" id="for-institucion" name="Institucion" value="@Model.Valores.Institucion" maxlength="150" required list="lista-instituciones" placeholder="Escuela, universidad o academia" />
             <datalist id="lista-instituciones">
@@ -26,13 +26,13 @@
                     <option value="@institucion"></option>
                 }
             </datalist>
-            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Institucion", "Completá la institución") : "Completá la institución")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Institucion", "Completá la institución")</span>
         </div>
 
         <div class="columnas">
-            <partial name="_CampoMes" model='new CampoMes { Nombre = "Inicio", Id = "for-inicio", Etiqueta = "Inicio", Valor = Model.Valores.Inicio, Requerido = true, Error = Model.Abierto && Html.ClaseError("Inicio").Length > 0 ? Html.MensajeError("Inicio", "") : null }' />
+            <partial name="_CampoMes" model="Model.Inicio" />
             <div data-fin-de="for-en-curso" hidden="@Model.Valores.EnCurso">
-                <partial name="_CampoMes" model='new CampoMes { Nombre = "Fin", Id = "for-fin", Etiqueta = "Finalización", Valor = Model.Valores.Fin, Requerido = !Model.Valores.EnCurso, PermitirFuturo = true, Error = Model.Abierto && Html.ClaseError("Fin").Length > 0 ? Html.MensajeError("Fin", "") : null }' />
+                <partial name="_CampoMes" model="Model.Fin" />
             </div>
         </div>
 

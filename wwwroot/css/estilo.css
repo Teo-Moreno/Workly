@@ -2291,7 +2291,7 @@ footer {
   font-size: var(--texto-13);
 }
 
-[data-sin-mensaje] .invalid-feedback {
+.campo-sin-mensaje .invalid-feedback {
   display: none !important;
 }
 

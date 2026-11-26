@@ -5,8 +5,12 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class PanelController : Controller
+public class PanelController : Controlador
 {
+    public PanelController() : base("_LayoutApp")
+    {
+    }
+
     public IActionResult Index()
     {
         if (User.EsEmpresa())
@@ -22,7 +26,8 @@ public class PanelController : Controller
 
         ViewBag.Perfil = perfil;
         ViewBag.Puesto = perfil.Preferencia.Puesto_Buscado;
-        ViewBag.UrlParaVos = Url.Action(nameof(ParaVos));
+        ViewBag.TextoCargando = "Buscando ofertas para vos…";
+        ViewBag.UrlVerTodas = Vistas.Url("/Empleos", ("Q", perfil.Preferencia.Puesto_Buscado));
         ViewBag.Publicadas = BD.ObtenerOfertasPublicadas(User.IdUsuario(), 3);
         return View();
     }

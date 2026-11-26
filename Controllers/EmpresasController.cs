@@ -3,8 +3,12 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-public class EmpresasController : Controller
+public class EmpresasController : Controlador
 {
+    public EmpresasController() : base("_LayoutApp")
+    {
+    }
+
     public IActionResult Index(EmpresasViewModel filtros)
     {
         var modelo = Directorio.Buscar(filtros, Request.Query.ContainsKey(nameof(filtros.IDProvincia)), User.IdUsuario(), User.EsPersona());
@@ -16,6 +20,7 @@ public class EmpresasController : Controller
         ViewBag.Provincias = modelo.Provincias;
         ViewBag.Filtrando = modelo.Q != null || modelo.IDProvincia != null;
         ViewBag.Empresas = modelo.Empresas;
+        ViewBag.TextoCargando = "Buscando empresas…";
         return View();
     }
 

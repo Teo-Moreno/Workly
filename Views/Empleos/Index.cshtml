@@ -8,7 +8,7 @@
         <p class="subtitulo">Te mostramos las búsquedas publicadas en Workly y las ofertas de otros sitios de empleo.</p>
     </header>
 
-    <form class="barra-sombra barra-sombra-borde" id="form-buscar" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+    <form class="barra-sombra barra-sombra-borde" id="form-buscar" action="/Empleos" method="get" role="search">
         <label class="barra-sombra-campo">
             <icono nombre="search" />
             <span class="barra-sombra-textos">
@@ -56,7 +56,7 @@
                 <h2 class="subtitulo-chico">Filtros</h2>
                 @if (ViewBag.Busqueda.CantidadFiltros > 0)
                 {
-                    <a class="btn btn-link" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q" asp-route-IDPais="@ViewBag.Busqueda.IDPais" asp-route-IDProvincia="@ViewBag.Busqueda.IDProvincia">Limpiar</a>
+                    <a class="btn btn-link" href="@ViewBag.UrlLimpiar">Limpiar</a>
                 }
             </div>
 
@@ -132,7 +132,7 @@
                         <p>Revisá cómo lo escribiste, probá con otra palabra@(ViewBag.Busqueda.HayFiltros ? ", sacá algún filtro o buscá en todo el país" : " o con un puesto más general").</p>
                         @if (ViewBag.Busqueda.HayFiltros)
                         {
-                            <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Index" asp-route-Q="@ViewBag.Busqueda.Q">Buscar sin filtros</a>
+                            <a class="btn btn-outline-primary" href="@ViewBag.UrlSinFiltros">Buscar sin filtros</a>
                         }
                     }
                     else

@@ -1,37 +1,37 @@
 @if (!User.EstaLogueado())
 {
-    <a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
-    <a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a>
-    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
+    <a class="@ViewBag.Menu.Clase("Empleos")" href="/Empleos">Buscar trabajo</a>
+    <a class="@ViewBag.Menu.Clase("Asistente")" href="/Asistente">Asistente</a>
+    <a class="@ViewBag.Menu.Clase("Empresas")" href="/Empresas">Empresas</a>
 }
 else if (User.EsEmpresa())
 {
-    <a class="@ViewContext.ClaseLink("Publicaciones", "Index")" asp-controller="Publicaciones" asp-action="Index">Mis búsquedas</a>
-    <a class="@ViewContext.ClaseLink("Publicaciones", "Nueva")" asp-controller="Publicaciones" asp-action="Nueva">Publicar búsqueda</a>
-    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
-    <a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil de la empresa</a>
+    <a class="@ViewBag.Menu.Clase("Publicaciones", "Index")" href="/Publicaciones">Mis búsquedas</a>
+    <a class="@ViewBag.Menu.Clase("Publicaciones", "Nueva")" href="/Publicaciones/Nueva">Publicar búsqueda</a>
+    <a class="@ViewBag.Menu.Clase("Empresas")" href="/Empresas">Empresas</a>
+    <a class="@ViewBag.Menu.Clase("Perfil")" href="/Perfil">Perfil de la empresa</a>
 }
 else
 {
-    <a class="@ViewContext.ClaseLink("Panel")" asp-controller="Panel" asp-action="Index">Inicio</a>
-    <a class="@ViewContext.ClaseLink("Empleos")" asp-controller="Empleos" asp-action="Index">Buscar trabajo</a>
-    <a class="@ViewContext.ClaseLink("Asistente")" asp-controller="Asistente" asp-action="Index">Asistente</a>
-    <a class="@ViewContext.ClaseLink("Postulaciones")" asp-controller="Postulaciones" asp-action="Index">Postulaciones</a>
-    <a class="@ViewContext.ClaseLink("Guardadas")" asp-controller="Guardadas" asp-action="Index">Guardadas</a>
-    <a class="@ViewContext.ClaseLink("Empresas")" asp-controller="Empresas" asp-action="Index">Empresas</a>
-    <a class="@ViewContext.ClaseLink("Perfil")" asp-controller="Perfil" asp-action="Index">Perfil</a>
-    @if (ViewContext.TienePublicaciones())
+    <a class="@ViewBag.Menu.Clase("Panel")" href="/Panel">Inicio</a>
+    <a class="@ViewBag.Menu.Clase("Empleos")" href="/Empleos">Buscar trabajo</a>
+    <a class="@ViewBag.Menu.Clase("Asistente")" href="/Asistente">Asistente</a>
+    <a class="@ViewBag.Menu.Clase("Postulaciones")" href="/Postulaciones">Postulaciones</a>
+    <a class="@ViewBag.Menu.Clase("Guardadas")" href="/Guardadas">Guardadas</a>
+    <a class="@ViewBag.Menu.Clase("Empresas")" href="/Empresas">Empresas</a>
+    <a class="@ViewBag.Menu.Clase("Perfil")" href="/Perfil">Perfil</a>
+    @if (ViewBag.TienePublicaciones)
     {
-        <a class="@ViewContext.ClaseLink("Publicaciones")" asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a>
+        <a class="@ViewBag.Menu.Clase("Publicaciones")" href="/Publicaciones">Mis publicaciones</a>
     }
 }
 @if (User.EsModerador())
 {
-    <a class="@ViewContext.ClaseLink("Moderacion")" asp-controller="Moderacion" asp-action="Index">
+    <a class="@ViewBag.Menu.Clase("Moderacion")" href="/Moderacion">
         <span>Moderación</span>
-        @if (ViewContext.OfertasPendientes() > 0)
+        @if (ViewBag.OfertasPendientes > 0)
         {
-            <span class="badge navbar-contador" aria-label="@ViewContext.OfertasPendientes() por revisar">@ViewContext.OfertasPendientes()</span>
+            <span class="badge navbar-contador" aria-label="@ViewBag.OfertasPendientes por revisar">@ViewBag.OfertasPendientes</span>
         }
     </a>
 }

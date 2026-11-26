@@ -10,7 +10,7 @@
                 <p class="subtitulo">Mové cada tarjeta a medida que avanza el proceso: arrastrala a otra columna o elegí la etapa en la tarjeta.</p>
             </div>
             <div class="acciones">
-                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
     </header>
@@ -21,12 +21,12 @@
             <span class="caja-icono-lg"><icono nombre="send" /></span>
             <h2 class="recuadro-punteado-titulo">Todavía no tenés postulaciones</h2>
             <p>Cuando te postules a una búsqueda de Workly, o toques "Ya me postulé" en una de otro sitio, aparece acá para que le hagas el seguimiento.</p>
-            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
     {
-        <div class="columnas-scroll" data-tablero data-url-estado="@Url.Action("CambiarEstado", "Postulaciones")">
+        <div class="columnas-scroll" data-tablero data-url-estado="/Postulaciones/CambiarEstado">
             @Html.AntiForgeryToken()
             @foreach (ColumnaTablero columna in ViewBag.Columnas)
             {

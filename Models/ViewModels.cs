@@ -100,4 +100,6 @@ public class PublicarViewModel
     public string? EmpresaLogo { get; set; }
     public List<Pais> Paises { get; set; } = new();
     public List<Provincia> Provincias { get; set; } = new();
+
+    public CampoUbicacion CampoUbicacion => new() { Paises = Paises, Provincias = Provincias, IDPais = IDPais, IDProvincia = IDProvincia, EtiquetaProvincia = "Provincia del trabajo" };
 }

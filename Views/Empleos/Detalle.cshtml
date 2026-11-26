@@ -1,4 +1,3 @@
-@inject Correo Mail
 @{
     ViewData["Title"] = $"{ViewBag.Oferta.Titulo} en {ViewBag.Oferta.Empresa}";
 }
@@ -14,13 +13,14 @@
             @if (ViewBag.Oferta.Estado_Publicacion == "Pendiente")
             {
                 <div class="fila fila-envolver">
-                    <form asp-controller="Moderacion" asp-action="Aceptar" asp-route-id="@ViewBag.Oferta.ID" method="post">
+                    <form action="/Moderacion/Aceptar/@ViewBag.Oferta.ID" method="post">
+                        @Html.AntiForgeryToken()
                         <button class="btn btn-primary" type="submit"><icono nombre="check" />Aceptar y publicar</button>
                     </form>
                     <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#modal-rechazar">Rechazar</button>
                 </div>
             }
-            <a class="resaltado" asp-controller="Moderacion" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
+            <a class="resaltado" href="/Moderacion"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
         </div>
     }
     else
@@ -28,7 +28,7 @@
         <div class="barra-superior">
             <nav aria-label="Estás en">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a></li>
+                    <li class="breadcrumb-item"><a href="/Empleos">Buscar trabajo</a></li>
                     <li class="breadcrumb-item active" aria-current="page">@ViewBag.Oferta.Titulo</li>
                 </ol>
             </nav>
@@ -47,13 +47,13 @@
 
     <header class="recuadro-grande">
         <div class="recuadro-grande-izquierda">
-            <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Oferta.Logo, ViewBag.Oferta.Empresa, "cuadro-lg")' />
+            <span class="cuadro-lg" aria-hidden="true"><partial name="_LogoEmpresa" model="ViewBag.Oferta" /></span>
             <div class="recuadro-grande-textos">
                 <h1 class="titulo-mediano">@ViewBag.Oferta.Titulo</h1>
                 <p class="texto-suave">
                     @if (ViewBag.Empresa?.TieneCuenta == true)
                     {
-                        <a class="resaltado resaltado-principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">@ViewBag.Oferta.Empresa</a>
+                        <a class="resaltado resaltado-principal" href="/Empresas/Detalle/@ViewBag.Empresa.ID">@ViewBag.Oferta.Empresa</a>
                     }
                     else
                     {
@@ -82,7 +82,7 @@
                 </div>
                 @if (ViewBag.PuedePostular && User.EsPersona() && !ViewBag.TieneCV)
                 {
-                    <p class="small text-body-secondary">Para postularte necesitás tu CV. <a class="resaltado" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>
+                    <p class="small text-body-secondary">Para postularte necesitás tu CV. <a class="resaltado" href="/Perfil">Subilo desde tu perfil</a>.</p>
                 }
                 @if (ViewBag.Oferta.EsExterna)
                 {
@@ -115,7 +115,7 @@
                 }
                 else
                 {
-                    <partial name="_Descripcion" model="(string)ViewBag.Oferta.Descripcion" />
+                    <partial name="_Descripcion" model="ViewBag.Oferta.Descripcion" />
                 }
             </section>
 
@@ -138,7 +138,7 @@
             {
                 <section class="card">
                     <div class="fila">
-                        <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "cuadro-md")' />
+                        <span class="cuadro-md" aria-hidden="true"><partial name="_LogoEmpresa" model="ViewBag.Empresa" /></span>
                         <div>
                             <h2 class="card-title">@ViewBag.Empresa.Nombre</h2>
                             @if (ViewBag.Empresa.Rubro != null) { <p class="small text-body-secondary">@ViewBag.Empresa.Rubro</p> }
@@ -154,7 +154,7 @@
                     </dl>
                     @if (ViewBag.Empresa.TieneCuenta && !ViewBag.EsRevision)
                     {
-                        <a class="btn btn-outline-block" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">Ver la empresa</a>
+                        <a class="btn btn-outline-block" href="/Empresas/Detalle/@ViewBag.Empresa.ID">Ver la empresa</a>
                     }
                 </section>
             }
@@ -172,16 +172,17 @@
 @if (ViewBag.EsRevision && ViewBag.Oferta.Estado_Publicacion == "Pendiente")
 {
     <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-rechazar" aria-labelledby="modal-rechazar-titulo"><div class="modal-dialog"><div class="modal-content">
-        <form class="modal-body grilla-campos" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@ViewBag.Oferta.ID" method="post" novalidate data-formulario-real>
+        <form class="modal-body grilla-campos" action="/Moderacion/Rechazar/@ViewBag.Oferta.ID" method="post" novalidate data-formulario-real>
+            @Html.AntiForgeryToken()
             <div class="modal-header">
                 <h2 class="modal-title" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
                 <button class="modal-cerrar" type="button" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
             </div>
-            <p class="modal-texto">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
-            <div class="campo @Html.ClaseError("motivo")">
+            <p class="modal-texto">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(ViewBag.MailConfigurado ? " y le llega por mail" : "").</p>
+            <div class="campo @ViewBag.Errores.Clase("motivo")">
                 <label class="form-label" for="motivo-rechazo">Motivo</label>
                 <textarea class="form-control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("motivo", "Escribí el motivo (entre 10 y 500 caracteres)")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("motivo", "Escribí el motivo (entre 10 y 500 caracteres)")</span>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>

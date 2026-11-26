@@ -125,6 +125,8 @@ public class RegistroEmpresaViewModel : RegistroBase
     public IFormFile? Logo { get; set; }
 
     public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
+    public CampoUbicacion CampoUbicacion => new() { Paises = Paises, Provincias = Provincias, IDPais = IDPais, IDProvincia = IDProvincia, EtiquetaProvincia = "Provincia de la sede" };
+    public CampoTelefono CampoTelefono => new() { Valor = Telefono, Prefijo = PrefijoTelefono };
 
     public static readonly string[] Pasos = { "Quién la maneja", "La empresa" };
 
@@ -201,6 +203,9 @@ public class CompletarPerfilViewModel
     public List<FormacionItem> FormacionesCargadas { get; set; } = new();
 
     public string PrefijoTelefono => Paises.FirstOrDefault(p => p.ID == IDPais)?.Codigo_Telefono ?? "+54";
+    public CampoUbicacion CampoUbicacion => new() { Prefijo = "cmp-", Paises = Paises, Provincias = Provincias, IDPais = IDPais, IDProvincia = IDProvincia, EtiquetaProvincia = "Provincia donde vivís", Requerido = false };
+    public CampoTelefono CampoTelefono => new() { Valor = Telefono, Prefijo = PrefijoTelefono };
+    public CamposBusqueda CamposDeBusqueda => CamposBusqueda.Desde(this);
 
     public static readonly string[] Pasos = { "Tus datos", "Qué buscás", "Experiencia", "Tu CV" };
 

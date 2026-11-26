@@ -7,12 +7,12 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class PerfilController : Controller
+public class PerfilController : Controlador
 {
     private readonly Carpetas _carpetas;
     private readonly LectorCV _lector;
 
-    public PerfilController(IWebHostEnvironment entorno, LectorCV lector)
+    public PerfilController(IWebHostEnvironment entorno, LectorCV lector) : base("_LayoutApp")
     {
         _carpetas = Carpetas.Desde(entorno);
         _lector = lector;
@@ -31,6 +31,7 @@ public class PerfilController : Controller
             return await SesionInvalida();
         }
         ViewBag.Perfil = modelo;
+        Modales(true, null, null, modelo.Instituciones);
         return View();
     }
 
@@ -130,7 +131,9 @@ public class PerfilController : Controller
         {
             return await SesionInvalida();
         }
-        ViewBag.Completar = Perfiles.FormularioCompletar(perfil);
+        var completar = Perfiles.FormularioCompletar(perfil);
+        ViewBag.Completar = completar;
+        Modales(false, null, null, completar.Instituciones);
         return View();
     }
 
@@ -151,6 +154,7 @@ public class PerfilController : Controller
         if (!await Perfiles.Completar(User.IdUsuario(), modelo, perfil, ModelState, _carpetas))
         {
             ViewBag.Completar = modelo;
+            Modales(false, null, null, modelo.Instituciones);
             return View();
         }
         var completado = modelo.ArchivoCV is { Length: > 0 } ? await Perfiles.CompletarDesdeCV(User.IdUsuario(), _lector, _carpetas) : null;
@@ -275,10 +279,9 @@ public class PerfilController : Controller
         ViewBag.Activa = pantalla.Activa;
         ViewBag.FormularioCuenta = pantalla.FormularioCuenta;
         ViewBag.FormularioEmpresa = pantalla.FormularioEmpresa;
-        ViewBag.IDPais = pantalla.IDPais;
-        ViewBag.CodigoPais = pantalla.CodigoPais;
-        ViewBag.CodigoGuardado = pantalla.CodigoGuardado;
         ViewBag.CamposBusqueda = pantalla.CamposBusqueda;
+        ViewBag.CampoTelefono = pantalla.Telefono;
+        ViewBag.CampoUbicacion = pantalla.Ubicacion;
     }
 
     private IActionResult MostrarPerfilConModal(string modal, object formulario)
@@ -288,10 +291,15 @@ public class PerfilController : Controller
         {
             return RedirectToAction("IniciarSesion", "Cuenta");
         }
-        ViewBag.ModalAbierto = modal;
-        ViewBag.Formulario = formulario;
         ViewBag.Perfil = modelo;
+        Modales(true, formulario, modal, modelo.Instituciones);
         return View(nameof(Index));
+    }
+
+    private void Modales(bool enServidor, object? formulario, string? modal, List<string> instituciones)
+    {
+        ViewBag.ModalExperiencia = new ModalExperiencia(enServidor, formulario as ExperienciaFormulario, modal, ModelState);
+        ViewBag.ModalFormacion = new ModalFormacion(enServidor, formulario as FormacionFormulario, instituciones, modal, ModelState);
     }
 
     private IActionResult Volver(Resultado resultado, string? volver = null)

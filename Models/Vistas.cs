@@ -1,6 +1,4 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Workly.Models;
 
@@ -8,51 +6,10 @@ public static class Vistas
 {
     public static readonly System.Globalization.CultureInfo Cultura = new("es-AR");
 
-    public static string? Actual(this ViewContext vista, string controlador) =>
-        string.Equals(vista.RouteData.Values["controller"]?.ToString(), controlador, StringComparison.OrdinalIgnoreCase) ? "page" : null;
-
-    public static string? ActualAccion(this ViewContext vista, string controlador, string accion) =>
-        vista.Actual(controlador) != null && string.Equals(vista.RouteData.Values["action"]?.ToString(), accion, StringComparison.OrdinalIgnoreCase) ? "page" : null;
-
-    public static string Activo(this ViewContext vista, string controlador) => vista.Actual(controlador) != null ? "esta-activo" : "";
-
-    public static string ClaseLink(this ViewContext vista, string controlador, string? accion = null) =>
-        (accion == null ? vista.Actual(controlador) : vista.ActualAccion(controlador, accion)) != null ? "nav-link active" : "nav-link";
-
-    public static string Volver(this ViewContext vista) =>
-        vista.ViewData["Volver"] as string ?? (vista.HttpContext.Request.Path + vista.HttpContext.Request.QueryString);
-
-    public static string AquiMismo(this ViewContext vista) =>
-        vista.HttpContext.Request.Path + vista.HttpContext.Request.QueryString;
-
-    public static int OfertasPendientes(this ViewContext vista)
-    {
-        var items = vista.HttpContext.Items;
-        if (items["Pendientes"] is not int pendientes)
-        {
-            pendientes = vista.HttpContext.User.EsModerador() ? BD.ContarOfertasPendientes() : 0;
-            items["Pendientes"] = pendientes;
-        }
-        return pendientes;
-    }
-
-    public static bool TienePublicaciones(this ViewContext vista)
-    {
-        var items = vista.HttpContext.Items;
-        if (items["TienePublicaciones"] is not bool tiene)
-        {
-            var usuario = vista.HttpContext.User;
-            tiene = usuario.EstaLogueado() && !usuario.EsEmpresa() && BD.TieneOfertasPublicadas(usuario.IdUsuario());
-            items["TienePublicaciones"] = tiene;
-        }
-        return tiene;
-    }
-
-    public static string? Inicio(this IUrlHelper url, ClaimsPrincipal usuario) =>
-        !usuario.EstaLogueado() ? url.Action("Index", "Home") : usuario.EsEmpresa() ? url.Action("Index", "Publicaciones") : url.Action("Index", "Panel");
-
-    public static bool EsPropia(this ClaimsPrincipal usuario, int? idPublicador) =>
-        usuario.EstaLogueado() && idPublicador == usuario.IdUsuario();
+    public static string Url(string ruta, params (string Nombre, object? Valor)[] parametros) =>
+        QueryHelpers.AddQueryString(ruta, parametros
+            .Where(p => p.Valor != null && p.Valor.ToString() != "")
+            .Select(p => new KeyValuePair<string, string?>(p.Nombre, p.Valor!.ToString())));
 
     public static string Hoy
     {
@@ -72,18 +29,22 @@ public static class Vistas
             .Where(c => char.IsAsciiLetterOrDigit(c) || c == ' ')).Trim().ToLowerInvariant().Replace(' ', '-');
 }
 
-public class LogoEmpresa
+public class Menu
 {
-    public LogoEmpresa(string? logo, string nombre, string clases)
+    private readonly string? _controlador;
+    private readonly string? _accion;
+
+    public Menu(string? controlador, string? accion)
     {
-        Logo = logo;
-        Nombre = nombre;
-        Clases = string.IsNullOrWhiteSpace(clases) ? "cuadro" : clases;
+        _controlador = controlador;
+        _accion = accion;
     }
 
-    public string? Logo { get; }
-    public string Nombre { get; }
-    public string Clases { get; }
+    public string Clase(string controlador) =>
+        string.Equals(_controlador, controlador, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
+
+    public string Clase(string controlador, string accion) =>
+        string.Equals(_accion, accion, StringComparison.OrdinalIgnoreCase) ? Clase(controlador) : "nav-link";
 }
 
 public class BotonesExternos
@@ -98,6 +59,8 @@ public class BotonesExternos
     public string Texto { get; }
     public string? Tipo { get; }
     public string? ReturnUrl { get; }
+    public string UrlGoogle => Vistas.Url("/Cuenta/Externo", ("proveedor", "Google"), ("tipo", Tipo), ("returnUrl", ReturnUrl));
+    public string UrlLinkedIn => Vistas.Url("/Cuenta/Externo", ("proveedor", "LinkedIn"), ("tipo", Tipo), ("returnUrl", ReturnUrl));
 }
 
 public class ColumnaTablero

@@ -3,11 +3,11 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-public class AsistenteController : Controller
+public class AsistenteController : Controlador
 {
     private readonly Asistente _asistente;
 
-    public AsistenteController(Asistente asistente)
+    public AsistenteController(Asistente asistente) : base("_LayoutApp")
     {
         _asistente = asistente;
     }

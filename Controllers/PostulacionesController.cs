@@ -5,8 +5,12 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class PostulacionesController : Controller
+public class PostulacionesController : Controlador
 {
+    public PostulacionesController() : base("_LayoutApp")
+    {
+    }
+
     public IActionResult Index()
     {
         if (User.EsEmpresa())

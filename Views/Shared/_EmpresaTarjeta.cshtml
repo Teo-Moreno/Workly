@@ -1,9 +1,9 @@
 <article class="tarjeta-alta">
     <div class="tarjeta-alta-fila">
-        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Nombre, "cuadro-md")' />
+        <span class="cuadro-md" aria-hidden="true"><partial name="_LogoEmpresa" model="Model" /></span>
         <div class="flexible">
             <h3 class="tarjeta-alta-titulo">
-                <a asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID">@Model.Nombre</a>
+                <a href="/Empresas/Detalle/@Model.ID">@Model.Nombre</a>
             </h3>
             <p class="texto-chico">@Model.Resumen</p>
         </div>
@@ -15,7 +15,7 @@
     }
 
     <div class="tarjeta-alta-fila-entre">
-        <a class="resaltado" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@Model.ID" asp-fragment="ofertas">
+        <a class="resaltado" href="/Empresas/Detalle/@Model.ID#ofertas">
             @(Model.BusquedasActivas == 0 ? "Sin búsquedas abiertas" : Model.BusquedasActivas == 1 ? "Ver 1 búsqueda abierta →" : $"Ver {Model.BusquedasActivas} búsquedas abiertas →")
         </a>
     </div>

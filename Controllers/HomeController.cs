@@ -4,10 +4,10 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-public class HomeController : Controller
+public class HomeController : Controlador
 {
     private readonly ILogger<HomeController> _logger;
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger) : base("_Layout")
     {
         _logger = logger;
     }

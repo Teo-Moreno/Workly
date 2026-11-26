@@ -1,9 +1,5 @@
-@inject Captcha Generador
 @{
     ViewData["Title"] = "Recuperar contraseña";
-}
-@section Barra {
-    <p class="text-body-secondary">¿Te acordaste? <a class="resaltado" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
 <div class="columna-angosta">
@@ -12,17 +8,18 @@
 
     <partial name="_ErroresFormulario" />
 
-    <form class="grilla-campos" asp-controller="Cuenta" asp-action="RecuperarClave" method="post" novalidate data-formulario-real>
-        <div class="campo @Html.ClaseError("Email")">
+    <form class="grilla-campos" action="/Cuenta/RecuperarClave" method="post" novalidate data-formulario-real>
+        @Html.AntiForgeryToken()
+        <div class="campo @ViewBag.Errores.Clase("Email")">
             <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
                 <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
         </div>
 
-        <partial name="_Captcha" model="Generador.Nuevo()" />
+        <partial name="_Captcha" model="ViewBag.Captcha" />
 
         <button class="btn btn-block-lg" type="submit"><icono nombre="send" />Mandarme el link</button>
     </form>

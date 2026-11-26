@@ -8,9 +8,10 @@
 
     <partial name="_ErroresFormulario" />
 
-    <form class="grilla-campos" asp-controller="Cuenta" asp-action="NuevaClave" method="post" novalidate data-formulario-real>
+    <form class="grilla-campos" action="/Cuenta/NuevaClave" method="post" novalidate data-formulario-real>
+        @Html.AntiForgeryToken()
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
-        <div class="campo @Html.ClaseError("Nueva")">
+        <div class="campo @ViewBag.Errores.Clase("Nueva")">
             <label class="form-label" for="clave-nueva">Contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
@@ -19,15 +20,15 @@
                 <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
             <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
-            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
         </div>
-        <div class="campo @Html.ClaseError("Repetir")">
+        <div class="campo @ViewBag.Errores.Clase("Repetir")">
             <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
                 <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Repetir", "Las contraseñas no coinciden")</span>
         </div>
         <button class="btn btn-block-lg" type="submit">Guardar contraseña</button>
     </form>

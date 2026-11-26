@@ -1,6 +1,6 @@
 @if (Model.IncluirEstado)
 {
-    <fieldset class="grupo-campos @Html.ClaseError("EstadoBusqueda")">
+    <fieldset class="grupo-campos @ViewBag.Errores.Clase("EstadoBusqueda")">
         <legend class="form-label">¿Estás buscando trabajo?</legend>
         <div class="grilla-tres-chica">
             @foreach (var estado in Catalogos.EstadosBusqueda)
@@ -11,19 +11,19 @@
                 </label>
             }
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("EstadoBusqueda", "Elegí una opción")</span>
+        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("EstadoBusqueda", "Elegí una opción")</span>
     </fieldset>
 }
 
 <div class="columnas">
-    <div class="campo @Html.ClaseError("PuestoBuscado")">
+    <div class="campo @ViewBag.Errores.Clase("PuestoBuscado")">
         <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="campo-opcional">(opcional)</span></label>
         <div class="control-con-icono">
             <icono nombre="briefcase" />
             <input class="form-control" id="@(Model.Prefijo)-puesto" name="PuestoBuscado" value="@Model.PuestoBuscado" maxlength="100" placeholder="Ej.: Administrativo/a, Desarrollador/a, Vendedor/a" />
         </div>
         <span class="form-text">Lo usamos para mostrarte ofertas en tu inicio.</span>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("PuestoBuscado", "Usá hasta 100 caracteres")</span>
+        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("PuestoBuscado", "Usá hasta 100 caracteres")</span>
     </div>
     <div class="campo">
         <label class="form-label" for="@(Model.Prefijo)-disponibilidad">Disponibilidad <span class="campo-opcional">(opcional)</span></label>
@@ -91,7 +91,7 @@
             }
         </select>
     </div>
-    <div class="campo @(Html.ClaseError("SalarioMaximo") != "" ? "campo-error" : Html.ClaseError("SalarioMinimo"))">
+    <div class="campo @ViewBag.Errores.Clase(ViewBag.Errores.Tiene("SalarioMaximo") ? "SalarioMaximo" : "SalarioMinimo")">
         <span class="form-label">Expectativa salarial bruta por mes <span class="campo-opcional">(opcional)</span></span>
         <div class="fila-junta">
             <label class="visually-hidden" for="@(Model.Prefijo)-salario-min">Mínimo</label>
@@ -100,11 +100,11 @@
             <label class="visually-hidden" for="@(Model.Prefijo)-salario-max">Máximo</label>
             <input class="form-control" id="@(Model.Prefijo)-salario-max" name="SalarioMaximo" value="@Model.SalarioMaximo" type="number" min="0" step="1000" placeholder="Máximo" />
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("SalarioMaximo", Html.MensajeError("SalarioMinimo", "Revisá los montos"))</span>
+        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SalarioMaximo", ViewBag.Errores.Mensaje("SalarioMinimo", "Revisá los montos"))</span>
     </div>
 </div>
 
-<fieldset class="grupo-campos @Html.ClaseError("Habilidades")" data-habilidades>
+<fieldset class="grupo-campos @ViewBag.Errores.Clase("Habilidades")" data-habilidades>
     <legend class="form-label">Habilidades <span class="campo-opcional">(elegí un sector y marcá las que tengas)</span></legend>
     @if (Model.Sectores.Count > 0)
     {
@@ -136,10 +136,10 @@
         <button class="btn btn-icono" type="button" data-habilidad-agregar><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
     </div>
     <span class="form-text">Las que agregás vos solo aparecen en tu perfil.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Habilidades", "Revisá las habilidades")</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Habilidades", "Revisá las habilidades")</span>
 </fieldset>
 
-<fieldset class="grupo-campos @Html.ClaseError("Idiomas")" data-idiomas>
+<fieldset class="grupo-campos @ViewBag.Errores.Clase("Idiomas")" data-idiomas>
     <legend class="form-label">Idiomas <span class="campo-opcional">(opcional)</span></legend>
     <ul class="lista-junta" role="list" data-idiomas-lista>
         @foreach ((int IDIdioma, string Nivel) fila in Model.Idiomas)
@@ -179,5 +179,5 @@
         </li>
     </template>
     <button class="btn btn-outline-sm" type="button" data-idioma-agregar><icono nombre="plus" />Agregar idioma</button>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Idiomas", "Elegí el idioma y el nivel de cada fila")</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Idiomas", "Elegí el idioma y el nivel de cada fila")</span>
 </fieldset>

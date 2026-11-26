@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 namespace Workly.Models;
 
 public class CampoUbicacion
@@ -38,6 +40,17 @@ public class CampoMes
     public bool PermitirFuturo { get; set; }
 
     public string? Error { get; set; }
+
+    public static CampoMes Armar(string nombre, string id, string etiqueta, string? valor, bool requerido, bool permitirFuturo, Errores errores) => new()
+    {
+        Nombre = nombre,
+        Id = id,
+        Etiqueta = etiqueta,
+        Valor = valor,
+        Requerido = requerido,
+        PermitirFuturo = permitirFuturo,
+        Error = errores.Tiene(nombre) ? errores.Mensaje(nombre, "") : null
+    };
 
     public static readonly string[] Meses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic" };
 }
@@ -139,30 +152,42 @@ public class CamposBusqueda
 
 public class ModalExperiencia
 {
-    public ModalExperiencia(bool enServidor, ExperienciaFormulario? valores, string? modalAbierto)
+    public ModalExperiencia(bool enServidor, ExperienciaFormulario? valores, string? modalAbierto, ModelStateDictionary estado)
     {
         EnServidor = enServidor;
         Valores = valores ?? new ExperienciaFormulario();
         Abierto = enServidor && modalAbierto == "modal-experiencia";
+        Errores = new Errores(Abierto ? estado : new ModelStateDictionary());
+        Inicio = CampoMes.Armar("Inicio", "exp-inicio", "Inicio", Valores.Inicio, true, false, Errores);
+        Fin = CampoMes.Armar("Fin", "exp-fin", "Finalización", Valores.Fin, !Valores.Actual, false, Errores);
     }
 
     public bool EnServidor { get; }
     public ExperienciaFormulario Valores { get; }
     public bool Abierto { get; }
+    public Errores Errores { get; }
+    public CampoMes Inicio { get; }
+    public CampoMes Fin { get; }
 }
 
 public class ModalFormacion
 {
-    public ModalFormacion(bool enServidor, FormacionFormulario? valores, List<string> instituciones, string? modalAbierto)
+    public ModalFormacion(bool enServidor, FormacionFormulario? valores, List<string> instituciones, string? modalAbierto, ModelStateDictionary estado)
     {
         EnServidor = enServidor;
         Valores = valores ?? new FormacionFormulario();
         Instituciones = instituciones;
         Abierto = enServidor && modalAbierto == "modal-formacion";
+        Errores = new Errores(Abierto ? estado : new ModelStateDictionary());
+        Inicio = CampoMes.Armar("Inicio", "for-inicio", "Inicio", Valores.Inicio, true, false, Errores);
+        Fin = CampoMes.Armar("Fin", "for-fin", "Finalización", Valores.Fin, !Valores.EnCurso, true, Errores);
     }
 
     public bool EnServidor { get; }
     public FormacionFormulario Valores { get; }
     public List<string> Instituciones { get; }
     public bool Abierto { get; }
+    public Errores Errores { get; }
+    public CampoMes Inicio { get; }
+    public CampoMes Fin { get; }
 }

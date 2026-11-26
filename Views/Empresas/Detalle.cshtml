@@ -6,11 +6,11 @@
 
 <div class="container espacio-abajo">
     <header class="fila-portada">
-        <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "cuadro-xl")' />
+        <span class="cuadro-xl" aria-hidden="true"><partial name="_LogoEmpresa" model="ViewBag.Empresa" /></span>
         <div class="fila-portada-textos">
             <nav aria-label="Estás en">
                 <ol class="breadcrumb breadcrumb-chica">
-                    <li class="breadcrumb-item"><a asp-controller="Empresas" asp-action="Index">Empresas</a></li>
+                    <li class="breadcrumb-item"><a href="/Empresas">Empresas</a></li>
                     <li class="breadcrumb-item active" aria-current="page">@ViewBag.Empresa.Nombre</li>
                 </ol>
             </nav>
@@ -24,8 +24,8 @@
         @if (ViewBag.EsPropia)
         {
             <div class="fila-portada-acciones">
-                <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar datos</a>
-                <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                <a class="btn btn-outline-primary" href="/Perfil/Configuracion"><icono nombre="pen" />Editar datos</a>
+                <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar búsqueda</a>
             </div>
         }
     </header>
@@ -55,7 +55,7 @@
                     <p>@(ViewBag.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
                     @if (ViewBag.EsPropia)
                     {
-                        <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
+                        <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
                     }
                 </div>
             }

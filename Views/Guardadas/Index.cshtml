@@ -10,7 +10,7 @@
                 <p class="subtitulo">Las ofertas que guardaste para ver después o postularte más tarde.</p>
             </div>
             <div class="acciones">
-                <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
     </header>
@@ -21,7 +21,7 @@
             <span class="caja-icono-lg"><icono nombre="bookmark" /></span>
             <h2 class="recuadro-punteado-titulo">Todavía no guardaste ofertas</h2>
             <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
-            <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
@@ -30,7 +30,7 @@
             @foreach (Oferta oferta in ViewBag.Guardadas)
             {
                 <li class="tarjeta-larga">
-                    <partial name="_LogoEmpresa" model='new LogoEmpresa(oferta.Logo, oferta.Empresa, "cuadro-md")' />
+                    <span class="cuadro-md" aria-hidden="true"><partial name="_LogoEmpresa" model="oferta" /></span>
                     <div class="tarjeta-larga-textos">
                         <h2 class="titulo-chico"><a href="@oferta.Enlace">@oferta.Titulo</a></h2>
                         <p class="tarjeta-larga-texto">@oferta.Resumen</p>
@@ -48,10 +48,11 @@
                     </div>
                     <div class="tarjeta-larga-acciones">
                         <a class="btn btn-sm" href="@oferta.Enlace">Ver oferta</a>
-                        <form asp-controller="Guardadas" asp-action="Quitar" method="post">
+                        <form action="/Guardadas/Quitar" method="post">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@oferta.ID" />
                             <input type="hidden" name="externa" value="@(oferta.EsExterna ? "true" : "false")" />
-                            <input type="hidden" name="volver" value="@Url.Action("Index", "Guardadas")" />
+                            <input type="hidden" name="volver" value="/Guardadas" />
                             <button class="btn btn-link-sm" type="submit"><icono nombre="trash-full" />Quitar</button>
                         </form>
                     </div>

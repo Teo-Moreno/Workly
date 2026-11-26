@@ -1,15 +1,12 @@
 @{
     ViewData["Title"] = "Crear cuenta de empresa";
 }
-@section Barra {
-    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="resaltado" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
-}
 
 <div class="columna-angosta columna-media">
     <h1 class="titulo-grande">Registrá tu empresa</h1>
     <p class="subtitulo-pegado">Paso <strong data-paso-actual>1</strong> de @RegistroEmpresaViewModel.Pasos.Length. Con la cuenta de empresa publicás búsquedas y ves quién se postula.</p>
 
-    <partial name="_TipoCuenta" model='"empresa"' />
+    <partial name="_TipoCuenta" model="ViewBag.TipoCuenta" />
 
     <ol class="pasos pasos-espaciados" aria-label="Progreso del registro">
         @for (var i = 0; i < RegistroEmpresaViewModel.Pasos.Length; i++)
@@ -25,10 +22,11 @@
 
     @if (!ViewBag.Formulario.EsExterno)
     {
-        <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "empresa", null)' />
+        <partial name="_BotonesExternos" model="ViewBag.BotonesExternos" />
     }
 
-    <form class="sin-grilla" asp-controller="Cuenta" asp-action="CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+    <form class="sin-grilla" action="/Cuenta/CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+        @Html.AntiForgeryToken()
         <fieldset class="grilla-campos paso-animado" data-paso>
             <legend class="visually-hidden">Paso 1: quién maneja la cuenta</legend>
             @if (ViewBag.Formulario.EsExterno)
@@ -36,26 +34,26 @@
                 <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
             <div class="columnas">
-                <div class="campo @Html.ClaseError("Nombre")">
+                <div class="campo @ViewBag.Errores.Clase("Nombre")">
                     <label class="form-label" for="Nombre">Tu nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nombre", "Completá tu nombre")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                 </div>
-                <div class="campo @Html.ClaseError("Apellido")">
+                <div class="campo @ViewBag.Errores.Clase("Apellido")">
                     <label class="form-label" for="Apellido">Tu apellido</label>
                     <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Apellido", "Completá tu apellido")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
-            <div class="campo @Html.ClaseError("Email")">
+            <div class="campo @ViewBag.Errores.Clase("Email")">
                 <label class="form-label" for="Email">Email de la empresa</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
                     <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="nombre@tuempresa.com.ar" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
                 </div>
                 <span class="form-text">Tiene que ser del mismo dominio que el sitio web de la empresa. No se aceptan Gmail, Hotmail, Outlook ni similares.</span>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Email", "Ingresá un email válido")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
             </div>
 
             @if (!ViewBag.Formulario.EsExterno)
@@ -76,27 +74,27 @@
             <p class="text-body-secondary">Con estos datos comprobamos que la empresa existe: el CUIT tiene que ser válido y el email, del dominio de su sitio web.</p>
 
             <div class="columnas">
-                <div class="campo @Html.ClaseError("NombreEmpresa")">
+                <div class="campo @ViewBag.Errores.Clase("NombreEmpresa")">
                     <label class="form-label" for="NombreEmpresa">Nombre de la empresa</label>
                     <input class="form-control" id="NombreEmpresa" name="NombreEmpresa" value="@ViewBag.Formulario.NombreEmpresa" autocomplete="organization" placeholder="Como la conoce la gente" maxlength="100" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("NombreEmpresa", "Completá el nombre de la empresa")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("NombreEmpresa", "Completá el nombre de la empresa")</span>
                 </div>
-                <div class="campo @Html.ClaseError("RazonSocial")">
+                <div class="campo @ViewBag.Errores.Clase("RazonSocial")">
                     <label class="form-label" for="RazonSocial">Razón social</label>
                     <input class="form-control" id="RazonSocial" name="RazonSocial" value="@ViewBag.Formulario.RazonSocial" placeholder="Ej.: Nombre S.A., Nombre S.R.L." maxlength="150" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("RazonSocial", "Completá la razón social")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("RazonSocial", "Completá la razón social")</span>
                 </div>
             </div>
 
             <div class="columnas">
-                <div class="campo @Html.ClaseError("CUIT")">
+                <div class="campo @ViewBag.Errores.Clase("CUIT")">
                     <label class="form-label" for="CUIT">CUIT</label>
                     <input class="form-control" id="CUIT" name="CUIT" value="@ViewBag.Formulario.CUIT" inputmode="numeric" placeholder="30-12345678-9" maxlength="13" required
                            pattern="[0-9]{2}-?[0-9]{8}-?[0-9]" data-cuit />
                     <span class="form-text">11 números. Los guiones se ponen solos.</span>
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("CUIT", "Ingresá los 11 números del CUIT")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("CUIT", "Ingresá los 11 números del CUIT")</span>
                 </div>
-                <div class="campo @Html.ClaseError("Rubro")">
+                <div class="campo @ViewBag.Errores.Clase("Rubro")">
                     <label class="form-label" for="Rubro">Rubro</label>
                     <select class="form-select" id="Rubro" name="Rubro" required>
                         <option value="">Elegí el rubro</option>
@@ -105,38 +103,38 @@
                             <option selected="@(ViewBag.Formulario.Rubro == rubro)">@rubro</option>
                         }
                     </select>
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Rubro", "Elegí el rubro")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Rubro", "Elegí el rubro")</span>
                 </div>
             </div>
 
-            <div class="campo @Html.ClaseError("SitioWeb")">
+            <div class="campo @ViewBag.Errores.Clase("SitioWeb")">
                 <label class="form-label" for="SitioWeb">Sitio web de la empresa</label>
                 <div class="control-con-icono">
                     <icono nombre="globe" />
                     <input class="form-control" id="SitioWeb" name="SitioWeb" value="@ViewBag.Formulario.SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="tuempresa.com.ar" maxlength="200" required />
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("SitioWeb", "Ingresá el sitio web de la empresa")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SitioWeb", "Ingresá el sitio web de la empresa")</span>
             </div>
 
-            <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = ViewBag.Formulario.Paises, Provincias = ViewBag.Formulario.Provincias, IDPais = ViewBag.Formulario.IDPais, IDProvincia = ViewBag.Formulario.IDProvincia, EtiquetaProvincia = "Provincia de la sede" }' />
+            <partial name="_CampoUbicacion" model="ViewBag.Formulario.CampoUbicacion" />
 
             <div class="columnas">
-                <div class="campo @Html.ClaseError("Ubicacion")">
+                <div class="campo @ViewBag.Errores.Clase("Ubicacion")">
                     <label class="form-label" for="Ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                     <input class="form-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" placeholder="Ej.: Palermo, CABA" maxlength="100" />
-                    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Ubicacion", "Usá hasta 100 caracteres")</span>
+                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
                 </div>
-                <partial name="_CampoTelefono" model='new CampoTelefono { Valor = ViewBag.Formulario.Telefono, Prefijo = ViewBag.Formulario.PrefijoTelefono }' />
+                <partial name="_CampoTelefono" model="ViewBag.Formulario.CampoTelefono" />
             </div>
 
-            <div class="campo @Html.ClaseError("Descripcion")">
+            <div class="campo @ViewBag.Errores.Clase("Descripcion")">
                 <label class="form-label" for="Descripcion">¿Qué hace la empresa?</label>
                 <textarea class="form-control" id="Descripcion" name="Descripcion" rows="4" maxlength="500" required placeholder="Contá en pocas líneas a qué se dedica la empresa.">@ViewBag.Formulario.Descripcion</textarea>
                 <span class="form-text">Aparece en la página de la empresa. Hasta 500 caracteres.</span>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
             </div>
 
-            <div class="campo @Html.ClaseError("Logo")">
+            <div class="campo @ViewBag.Errores.Clase("Logo")">
                 <span class="form-label">Logo <span class="campo-opcional">(opcional)</span></span>
                 <div class="fila-imagen">
                     <span class="cuadro-lg vista-previa" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
@@ -149,7 +147,7 @@
                         <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB.</span>
                     </div>
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Logo", "Subí una imagen JPG, PNG o WEBP")</span>
+                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Logo", "Subí una imagen JPG, PNG o WEBP")</span>
             </div>
 
             @if (ViewBag.Formulario.Logo != null)
