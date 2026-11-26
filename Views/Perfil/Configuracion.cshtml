@@ -57,7 +57,7 @@
                                     @ViewBag.Perfil.Iniciales
                                 }
                             </span>
-                            <div class="pila" style="--pila-espacio: 8px">
+                            <div class="pila-junta">
                                 <strong>Foto de perfil</strong>
                                 <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB. Se ve mejor si es cuadrada.</span>
                                 <label class="btn btn-archivo" data-icono="upload">@(string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto) ? "Elegir foto" : "Cambiar foto")
@@ -145,7 +145,7 @@
                                     @ViewBag.Perfil.Empresa.Iniciales
                                 }
                             </span>
-                            <div class="pila" style="--pila-espacio: 8px">
+                            <div class="pila-junta">
                                 <strong>Logo</strong>
                                 <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB.</span>
                                 <label class="btn btn-archivo" data-icono="upload">@(string.IsNullOrEmpty(ViewBag.Perfil.Empresa.Logo) ? "Elegir logo" : "Cambiar logo")

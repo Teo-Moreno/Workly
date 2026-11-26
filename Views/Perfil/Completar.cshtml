@@ -41,7 +41,7 @@
                             <img src="@ViewBag.Completar.FotoActual" alt="" />
                         }
                     </span>
-                    <div class="pila" style="--pila-espacio: 8px">
+                    <div class="pila-junta">
                         <label class="btn btn-archivo" data-icono="upload">
                             @(string.IsNullOrEmpty(ViewBag.Completar.FotoActual) ? "Elegir foto" : "Cambiar foto")
                             <input id="Foto" name="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
