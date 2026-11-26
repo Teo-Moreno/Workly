@@ -25,13 +25,13 @@
 
     <div class="grilla-lateral-junta" data-pestanas-hash>
         <nav class="nav panel-fijo" aria-label="Secciones de configuración">
-            <a class="nav-link @(ViewBag.Activa == "cuenta" ? "active" : "")" href="#cuenta" data-bs-toggle="pill" data-bs-target="#panel-cuenta"><icono nombre="@(ViewBag.EsEmpresa ? "building" : "user-square")" />@(ViewBag.EsEmpresa ? "Empresa" : "Cuenta")</a>
+            <a class="nav-link @(ViewBag.Activa == "cuenta" ? "active" : "")" href="#cuenta" data-bs-toggle="pill" data-bs-target="#panel-cuenta" data-icono="@(ViewBag.EsEmpresa ? "building" : "user-square")">@(ViewBag.EsEmpresa ? "Empresa" : "Cuenta")</a>
             @if (!ViewBag.EsEmpresa)
             {
-                <a class="nav-link @(ViewBag.Activa == "busqueda" ? "active" : "")" href="#busqueda" data-bs-toggle="pill" data-bs-target="#panel-busqueda"><icono nombre="briefcase" />Qué busco</a>
+                <a class="nav-link @(ViewBag.Activa == "busqueda" ? "active" : "")" href="#busqueda" data-bs-toggle="pill" data-bs-target="#panel-busqueda" data-icono="briefcase">Qué busco</a>
             }
-            <a class="nav-link @(ViewBag.Activa == "seguridad" ? "active" : "")" href="#seguridad" data-bs-toggle="pill" data-bs-target="#panel-seguridad"><icono nombre="lock" />Seguridad</a>
-            <a class="nav-link" href="/Perfil/Ayuda"><icono nombre="help-circle-outline" />Ayuda y soporte</a>
+            <a class="nav-link @(ViewBag.Activa == "seguridad" ? "active" : "")" href="#seguridad" data-bs-toggle="pill" data-bs-target="#panel-seguridad" data-icono="lock">Seguridad</a>
+            <a class="nav-link" href="/Perfil/Ayuda" data-icono="help-circle-outline">Ayuda y soporte</a>
         </nav>
 
         <div class="tab-content">
@@ -60,36 +60,35 @@
                             <div class="pila" style="--pila-espacio: 8px">
                                 <strong>Foto de perfil</strong>
                                 <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB. Se ve mejor si es cuadrada.</span>
-                                <label class="btn btn-archivo"><icono nombre="upload" />@(string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto) ? "Elegir foto" : "Cambiar foto")
+                                <label class="btn btn-archivo" data-icono="upload">@(string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto) ? "Elegir foto" : "Cambiar foto")
                                     <input type="file" name="Foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
                                            data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
                                 </label>
                             </div>
                         </div>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Foto", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Foto", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
                     </div>
 
                     <div class="columnas">
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                             <label class="form-label" for="cfg-nombre">Nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioCuenta?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required autocomplete="given-name" />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                         </div>
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                             <label class="form-label" for="cfg-apellido">Apellido</label>
                             <input class="form-control" id="cfg-apellido" name="Apellido" value="@(ViewBag.FormularioCuenta?.Apellido ?? ViewBag.Perfil.Usuario.Apellido)" maxlength="50" required autocomplete="family-name" />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                         </div>
                     </div>
 
                     <div class="columnas">
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
                             <label class="form-label" for="cfg-email">Email</label>
-                            <div class="control-con-icono">
-                                <icono nombre="mail" />
+                            <div class="control-con-icono" data-icono="mail">
                                 <input class="form-control" id="cfg-email" name="Email" type="email" value="@(ViewBag.FormularioCuenta?.Email ?? ViewBag.Perfil.Usuario.Email)" maxlength="100" required autocomplete="email" />
                             </div>
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
                         </div>
                         <partial name="_CampoTelefono" model="ViewBag.CampoTelefono" />
                     </div>
@@ -98,11 +97,10 @@
 
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                         <label class="form-label" for="cfg-web">Sitio web, portfolio o LinkedIn <span class="campo-opcional">(opcional)</span></label>
-                        <div class="control-con-icono">
-                            <icono nombre="globe" />
+                        <div class="control-con-icono" data-icono="globe">
                             <input class="form-control" id="cfg-web" name="SitioWeb" value="@(ViewBag.FormularioCuenta?.SitioWeb ?? ViewBag.Perfil.CV?.Sitio_Web)" inputmode="url" maxlength="200" placeholder="linkedin.com/in/tu-nombre" />
                         </div>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SitioWeb", "Usá hasta 200 caracteres")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("SitioWeb", "Usá hasta 200 caracteres")</span>
                     </div>
 
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("ArchivoCV") ? "true" : null)">
@@ -112,13 +110,13 @@
                             <p class="small">Tu CV actual: <a class="resaltado" href="/Perfil/DescargarCV">@ViewBag.Perfil.CV.NombreOriginal</a>. Si elegís otro, lo reemplaza.</p>
                         }
                         <label class="zona-punteada" data-zona-archivo>
-                            <span class="caja-icono"><icono nombre="upload" /></span>
+                            <span class="caja-icono" data-icono="upload"></span>
                             <strong class="texto-fuerte" data-zona-archivo-nombre>@(ViewBag.Perfil.TieneCV ? "Elegí otro CV" : "Arrastrá tu CV acá o hacé clic para subirlo")</strong>
                             <span class="small">PDF, DOC o DOCX de hasta 5 MB</span>
                             <input type="file" name="ArchivoCV" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                    data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
                         </label>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("ArchivoCV", "Subí un archivo PDF, DOC o DOCX de hasta 5 MB")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("ArchivoCV", "Subí un archivo PDF, DOC o DOCX de hasta 5 MB")</span>
                     </div>
 
                     <div class="acciones-derecha">
@@ -150,20 +148,20 @@
                             <div class="pila" style="--pila-espacio: 8px">
                                 <strong>Logo</strong>
                                 <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB.</span>
-                                <label class="btn btn-archivo"><icono nombre="upload" />@(string.IsNullOrEmpty(ViewBag.Perfil.Empresa.Logo) ? "Elegir logo" : "Cambiar logo")
+                                <label class="btn btn-archivo" data-icono="upload">@(string.IsNullOrEmpty(ViewBag.Perfil.Empresa.Logo) ? "Elegir logo" : "Cambiar logo")
                                     <input type="file" name="Logo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
                                            data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
                                 </label>
                             </div>
                         </div>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Logo", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Logo", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
                     </div>
 
                     <div class="columnas">
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("NombreEmpresa") ? "true" : null)">
                             <label class="form-label" for="cfg-empresa">Nombre de la empresa</label>
                             <input class="form-control" id="cfg-empresa" name="NombreEmpresa" value="@(ViewBag.FormularioEmpresa?.NombreEmpresa ?? ViewBag.Perfil.Empresa.Nombre)" maxlength="100" required />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("NombreEmpresa", "Completá el nombre de la empresa")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("NombreEmpresa", "Completá el nombre de la empresa")</span>
                         </div>
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Rubro") ? "true" : null)">
                             <label class="form-label" for="cfg-rubro">Rubro</label>
@@ -174,18 +172,17 @@
                                     <option selected="@((ViewBag.FormularioEmpresa?.Rubro ?? ViewBag.Perfil.Empresa.Rubro) == rubro)">@rubro</option>
                                 }
                             </select>
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Rubro", "Elegí el rubro")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Rubro", "Elegí el rubro")</span>
                         </div>
                     </div>
 
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                         <label class="form-label" for="cfg-web">Sitio web</label>
-                        <div class="control-con-icono">
-                            <icono nombre="globe" />
+                        <div class="control-con-icono" data-icono="globe">
                             <input class="form-control" id="cfg-web" name="SitioWeb" value="@(ViewBag.FormularioEmpresa?.SitioWeb ?? ViewBag.Perfil.Empresa.Sitio_Web)" inputmode="url" maxlength="200" required />
                         </div>
                         <span class="form-text">Tiene que ser del dominio de tu email (@VerificacionEmpresa.DominioDelEmail(ViewBag.Perfil.Usuario.Email)).</span>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SitioWeb", "Ingresá el sitio web de la empresa")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("SitioWeb", "Ingresá el sitio web de la empresa")</span>
                     </div>
 
                     <partial name="_CampoUbicacion" model="ViewBag.CampoUbicacion" />
@@ -194,7 +191,7 @@
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Ubicacion") ? "true" : null)">
                             <label class="form-label" for="cfg-ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                             <input class="form-control" id="cfg-ubicacion" name="Ubicacion" value="@(ViewBag.FormularioEmpresa?.Ubicacion ?? ViewBag.Perfil.Empresa.Ubicacion)" maxlength="100" placeholder="Ej.: Palermo, CABA" />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
                         </div>
                         <partial name="_CampoTelefono" model="ViewBag.CampoTelefono" />
                     </div>
@@ -202,7 +199,7 @@
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Descripcion") ? "true" : null)">
                         <label class="form-label" for="cfg-descripcion">¿Qué hace la empresa?</label>
                         <textarea class="form-control" id="cfg-descripcion" name="Descripcion" rows="4" maxlength="500" required>@(ViewBag.FormularioEmpresa?.Descripcion ?? ViewBag.Perfil.Empresa.Descripcion)</textarea>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
                     </div>
 
                     <h3 class="subtitulo-chico">Quién maneja la cuenta</h3>
@@ -210,12 +207,12 @@
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                             <label class="form-label" for="cfg-nombre">Tu nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioEmpresa?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                         </div>
                         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                             <label class="form-label" for="cfg-apellido">Tu apellido</label>
                             <input class="form-control" id="cfg-apellido" name="Apellido" value="@(ViewBag.FormularioEmpresa?.Apellido ?? ViewBag.Perfil.Usuario.Apellido)" maxlength="50" required />
-                            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
+                            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                         </div>
                     </div>
                     <p class="small text-body-secondary">Email de la cuenta: @ViewBag.Perfil.Usuario.Email (es el que verifica la empresa, no se puede cambiar).</p>
@@ -263,33 +260,30 @@
                 {
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Actual") ? "true" : null)">
                         <label class="form-label" for="clave-actual">Contraseña actual</label>
-                        <div class="control-con-icono">
-                            <icono nombre="lock" />
+                        <div class="control-con-icono" data-icono="lock">
                             <input class="form-control" id="clave-actual" name="Actual" type="password" autocomplete="current-password" required />
-                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave data-icono="eye"></button>
                         </div>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Actual", "Ingresá tu contraseña actual")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Actual", "Ingresá tu contraseña actual")</span>
                     </div>
                 }
                 <div class="columnas">
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nueva") ? "true" : null)">
                         <label class="form-label" for="clave-nueva">Contraseña nueva</label>
-                        <div class="control-con-icono">
-                            <icono nombre="lock" />
+                        <div class="control-con-icono" data-icono="lock">
                             <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
                                    pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
-                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave data-icono="eye"></button>
                         </div>
                         <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
                     </div>
                     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Repetir") ? "true" : null)">
                         <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
-                        <div class="control-con-icono">
-                            <icono nombre="lock" />
+                        <div class="control-con-icono" data-icono="lock">
                             <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
                         </div>
-                        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Repetir", "Las contraseñas no coinciden")</span>
+                        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Repetir", "Las contraseñas no coinciden")</span>
                     </div>
                 </div>
                 <div class="acciones-derecha">
@@ -310,7 +304,7 @@
                 <div class="campo">
                     <label class="form-label" for="confirmar-eliminar">Para confirmar, escribí ELIMINAR</label>
                     <input class="form-control" id="confirmar-eliminar" name="confirmacion" autocomplete="off" required pattern="ELIMINAR" />
-                    <span class="invalid-feedback"><icono nombre="warning" />Escribí ELIMINAR en mayúsculas</span>
+                    <span class="invalid-feedback" data-icono="warning">Escribí ELIMINAR en mayúsculas</span>
                 </div>
                 <div class="acciones-derecha">
                     <button class="btn btn-danger" type="submit">Eliminar mi cuenta</button>

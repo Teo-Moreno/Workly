@@ -11,8 +11,7 @@
     <form class="grilla-cinco" action="/Empresas" method="get" role="search" data-cargando="#empresas-resultados">
         <div class="campo">
             <label class="visually-hidden" for="buscar-empresa">Buscar empresa</label>
-            <div class="control-con-icono">
-                <icono nombre="search" />
+            <div class="control-con-icono" data-icono="search">
                 <input class="form-control" id="buscar-empresa" type="search" name="Q" value="@ViewBag.Q" maxlength="100" placeholder="Buscá por nombre o a qué se dedica" />
             </div>
         </div>
@@ -44,7 +43,7 @@
                 }
             </select>
         </div>
-        <button class="btn btn-primary" type="submit"><icono nombre="search" />Buscar</button>
+        <button class="btn btn-primary" type="submit" data-icono="search">Buscar</button>
     </form>
 
     <div id="empresas-resultados">
@@ -55,7 +54,7 @@
         @if (ViewBag.Empresas.Count == 0)
         {
             <div class="recuadro-punteado">
-                <span class="caja-icono-lg"><icono nombre="building" /></span>
+                <span class="caja-icono-lg" data-icono="building"></span>
                 @if (ViewBag.Filtrando)
                 {
                     <h2 class="recuadro-punteado-titulo">No encontramos empresas con esa búsqueda</h2>

@@ -22,7 +22,7 @@
                 @if (User.EstaLogueado())
                 {
                 <div class="dropdown">
-                    <button class="pildora" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-controls="menu-usuario">
+                    <button class="pildora" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" aria-controls="menu-usuario" data-icono-fin="chevron-down">
                         <span class="circulo" aria-hidden="true">
                             @if (!string.IsNullOrEmpty(User.Foto()))
                             {
@@ -37,7 +37,6 @@
                             <span class="pildora-fuerte">@User.NombreCompleto()</span>
                             <span class="pildora-suave">@(User.Ubicacion() ?? "Mi cuenta")</span>
                         </span>
-                        <icono nombre="chevron-down" />
                         <span class="visually-hidden">Abrir menú de cuenta</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end" id="menu-usuario">
@@ -48,22 +47,22 @@
                         <ul role="list">
                             @if (User.EsEmpresa())
                             {
-                                <li><a class="dropdown-item" href="/Perfil"><icono nombre="building" />Perfil de la empresa</a></li>
-                                <li><a class="dropdown-item" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar una búsqueda</a></li>
+                                <li><a class="dropdown-item" href="/Perfil" data-icono="building">Perfil de la empresa</a></li>
+                                <li><a class="dropdown-item" href="/Publicaciones/Nueva" data-icono="plus">Publicar una búsqueda</a></li>
                             }
                             else
                             {
-                                <li><a class="dropdown-item" href="/Perfil"><icono nombre="user-square" />Mi perfil</a></li>
-                                <li><a class="dropdown-item" href="/Perfil/Configuracion#busqueda"><icono nombre="slider-03" />Qué estoy buscando</a></li>
-                                <li><a class="dropdown-item" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar un trabajo</a></li>
+                                <li><a class="dropdown-item" href="/Perfil" data-icono="user-square">Mi perfil</a></li>
+                                <li><a class="dropdown-item" href="/Perfil/Configuracion#busqueda" data-icono="slider-03">Qué estoy buscando</a></li>
+                                <li><a class="dropdown-item" href="/Publicaciones/Nueva" data-icono="plus">Publicar un trabajo</a></li>
                             }
-                            <li><a class="dropdown-item" href="/Perfil/Configuracion"><icono nombre="settings" />Configuración</a></li>
-                            <li><a class="dropdown-item" href="/Perfil/Ayuda"><icono nombre="help-circle-outline" />Ayuda</a></li>
+                            <li><a class="dropdown-item" href="/Perfil/Configuracion" data-icono="settings">Configuración</a></li>
+                            <li><a class="dropdown-item" href="/Perfil/Ayuda" data-icono="help-circle-outline">Ayuda</a></li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
                                 <form action="/Cuenta/CerrarSesion" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button class="dropdown-item text-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                                    <button class="dropdown-item text-danger" type="submit" data-icono="log-out">Cerrar sesión</button>
                                 </form>
                             </li>
                         </ul>
@@ -76,8 +75,7 @@
                     <a class="btn btn-primary" href="/Cuenta/CrearCuenta">Crear cuenta</a>
                 }
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-movil" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
-                    <icono nombre="menu" etiqueta="Abrir menú" />
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-movil" aria-expanded="false" aria-controls="menu-movil" data-menu-movil data-icono="menu" aria-label="Abrir menú">
                 </button>
             </div>
         </div>
@@ -89,7 +87,7 @@
                 <a class="nav-link" href="/Perfil/Configuracion">Configuración</a>
                 <form class="navbar-movil-final" action="/Cuenta/CerrarSesion" method="post">
                     @Html.AntiForgeryToken()
-                    <button class="btn btn-outline-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
+                    <button class="btn btn-outline-danger" type="submit" data-icono="log-out">Cerrar sesión</button>
                 </form>
             }
             else

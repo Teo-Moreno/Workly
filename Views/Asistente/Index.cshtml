@@ -10,14 +10,14 @@
                 <p class="subtitulo">Contale qué trabajo buscás y dónde, y te recomendamos ofertas que están en Workly.</p>
             </div>
             <div class="acciones" hidden="@(ViewBag.Mensajes.Count == 0)" data-asistente-reiniciar>
-                <a class="btn btn-outline-primary" href="/Asistente"><icono nombre="plus" />Empezar de nuevo</a>
+                <a class="btn btn-outline-primary" href="/Asistente" data-icono="plus">Empezar de nuevo</a>
             </div>
         </div>
     </header>
 
     @if (!ViewBag.Disponible)
     {
-        <p class="alert alert-info"><icono nombre="info" />El asistente no está disponible en este momento. Mientras tanto, podés usar <a class="resaltado" href="/Empleos">Buscar trabajo</a>.</p>
+        <p class="alert alert-info" data-icono="info">El asistente no está disponible en este momento. Mientras tanto, podés usar <a class="resaltado" href="/Empleos">Buscar trabajo</a>.</p>
     }
     else
     {
@@ -37,7 +37,7 @@
 
             @if (ViewBag.Lleno)
             {
-                <p class="alert alert-warning" id="ultimo"><icono nombre="warning-outline" />Esta conversación ya es muy larga. <a class="resaltado" href="/Asistente">Empezá una nueva</a>.</p>
+                <p class="alert alert-warning" id="ultimo" data-icono="warning-outline">Esta conversación ya es muy larga. <a class="resaltado" href="/Asistente">Empezá una nueva</a>.</p>
             }
             else
             {
@@ -48,7 +48,7 @@
                     <textarea class="form-control" id="asistente-mensaje" name="mensaje" rows="3" maxlength="@Asistente.LargoMaximo" required placeholder="Por ejemplo: busco trabajo de administrativo en Rosario"></textarea>
                     <div class="fila-entre-media">
                         <p class="form-text">Enter envía el mensaje y Shift + Enter baja de renglón. Las respuestas las escribe una inteligencia artificial y pueden tener errores. Revisá cada oferta antes de postularte.</p>
-                        <button class="btn btn-primary" type="submit"><icono nombre="send" />Enviar</button>
+                        <button class="btn btn-primary" type="submit" data-icono="send">Enviar</button>
                     </div>
                 </form>
             }

@@ -12,15 +12,14 @@
         @Html.AntiForgeryToken()
         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
             <label class="form-label" for="Email">Email</label>
-            <div class="control-con-icono">
-                <icono nombre="mail" />
+            <div class="control-con-icono" data-icono="mail">
                 <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
         </div>
 
         <partial name="_Captcha" model="ViewBag.Captcha" />
 
-        <button class="btn btn-block-lg" type="submit"><icono nombre="send" />Mandarme el link</button>
+        <button class="btn btn-block-lg" type="submit" data-icono="send">Mandarme el link</button>
     </form>
 </div>

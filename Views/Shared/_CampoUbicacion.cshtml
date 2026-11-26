@@ -11,7 +11,7 @@
                 <option value="@pais.ID" data-codigo="@pais.Codigo_Telefono" selected="@(pais.ID == Model.IDPais)">@pais.Nombre</option>
             }
         </select>
-        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Model.NombrePais, "Elegí el país")</span>
+        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje(Model.NombrePais, "Elegí el país")</span>
     </div>
     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene(Model.NombreProvincia) ? "true" : null)">
         <label class="form-label" for="@Model.IdProvincia">@Model.EtiquetaProvincia</label>
@@ -22,6 +22,6 @@
                 <option value="@provincia.ID" data-pais="@provincia.IDPais" selected="@(provincia.ID == Model.IDProvincia)">@provincia.Nombre</option>
             }
         </select>
-        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Model.NombreProvincia, "Elegí la provincia")</span>
+        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje(Model.NombreProvincia, "Elegí la provincia")</span>
     </div>
 </div>

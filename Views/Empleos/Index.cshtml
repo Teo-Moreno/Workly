@@ -9,16 +9,14 @@
     </header>
 
     <form class="barra-sombra-borde" id="form-buscar" action="/Empleos" method="get" role="search">
-        <label class="barra-sombra-campo">
-            <icono nombre="search" />
+        <label class="barra-sombra-campo" data-icono="search">
             <span class="barra-sombra-textos">
                 <span class="barra-sombra-rotulo">Puesto o palabra clave</span>
                 <input class="control-plano" type="search" name="Q" value="@ViewBag.Busqueda.Q" autocomplete="off" placeholder="¿Qué trabajo buscás?" maxlength="100" />
             </span>
         </label>
         <span class="barra-sombra-divisor" aria-hidden="true"></span>
-        <div class="barra-sombra-campo" data-ubicacion>
-            <icono nombre="near-me" />
+        <div class="barra-sombra-campo" data-ubicacion data-icono="near-me">
             <span class="barra-sombra-textos">
                 <label class="barra-sombra-rotulo" for="buscar-pais">País</label>
                 <select class="control-plano-flecha" id="buscar-pais" name="IDPais" data-selector-pais data-seleccion>
@@ -30,8 +28,7 @@
             </span>
         </div>
         <span class="barra-sombra-divisor" aria-hidden="true"></span>
-        <div class="barra-sombra-campo">
-            <icono nombre="building" />
+        <div class="barra-sombra-campo" data-icono="building">
             <span class="barra-sombra-textos">
                 <label class="barra-sombra-rotulo" for="buscar-provincia">Provincia</label>
                 <select class="control-plano-flecha" id="buscar-provincia" name="IDProvincia" data-selector-provincia data-seleccion>
@@ -43,12 +40,12 @@
                 </select>
             </span>
         </div>
-        <button class="btn btn-fijo" type="submit"><icono nombre="search" />Buscar</button>
+        <button class="btn btn-fijo" type="submit" data-icono="search">Buscar</button>
     </form>
 
     <div class="grilla-lateral">
-        <button class="btn btn-solo-celu" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros">
-            <icono nombre="filter-outline" />Filtros@(ViewBag.Busqueda.CantidadFiltros > 0 ? $" ({ViewBag.Busqueda.CantidadFiltros})" : "")
+        <button class="btn btn-solo-celu" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros" data-icono="filter-outline">
+            Filtros@(ViewBag.Busqueda.CantidadFiltros > 0 ? $" ({ViewBag.Busqueda.CantidadFiltros})" : "")
         </button>
 
         <aside class="panel-lateral collapse" id="filtros" aria-label="Filtros de búsqueda">
@@ -125,7 +122,7 @@
             @if (ViewBag.Busqueda.Ofertas.Count == 0)
             {
                 <div class="recuadro-punteado">
-                    <span class="caja-icono-lg"><icono nombre="search" /></span>
+                    <span class="caja-icono-lg" data-icono="search"></span>
                     @if (ViewBag.Busqueda.BuscoAlgo)
                     {
                         <h3 class="recuadro-punteado-titulo">No encontramos ningún puesto con ese nombre</h3>
@@ -155,11 +152,11 @@
                     <nav class="fila-centrada-separada" aria-label="Páginas de resultados">
                         @if (ViewBag.Busqueda.Pagina > 1)
                         {
-                            <a class="btn btn-outline-primary" href="@ViewBag.Busqueda.UrlPagina(ViewBag.Busqueda.Pagina - 1)"><icono nombre="arrow-left" />Anterior</a>
+                            <a class="btn btn-outline-primary" href="@ViewBag.Busqueda.UrlPagina(ViewBag.Busqueda.Pagina - 1)" data-icono="arrow-left">Anterior</a>
                         }
                         @if (ViewBag.Busqueda.HayMas)
                         {
-                            <a class="btn btn-primary" href="@ViewBag.Busqueda.UrlPagina(ViewBag.Busqueda.Pagina + 1)">Siguiente<icono nombre="arrow-right" /></a>
+                            <a class="btn btn-primary" href="@ViewBag.Busqueda.UrlPagina(ViewBag.Busqueda.Pagina + 1)" data-icono-fin="arrow-right">Siguiente</a>
                         }
                     </nav>
                 }

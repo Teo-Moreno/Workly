@@ -6,7 +6,7 @@
     }
     else if (Model.YaPostulado)
     {
-        <a class="btn btn-outline-lg" href="/Postulaciones"><icono nombre="circle-check" />Ya te postulaste</a>
+        <a class="btn btn-outline-lg" href="/Postulaciones" data-icono="circle-check">Ya te postulaste</a>
     }
     else if (Model.EstaCerrada)
     {
@@ -29,11 +29,11 @@ else
 {
     if (!string.IsNullOrEmpty(Model.Link_Postulacion))
     {
-        <a class="btn btn-lg" href="@Model.Link_Postulacion" target="_blank" rel="noopener noreferrer">Postularme en @Model.Fuente<icono nombre="external-link" /></a>
+        <a class="btn btn-lg" href="@Model.Link_Postulacion" target="_blank" rel="noopener noreferrer" data-icono-fin="external-link">Postularme en @Model.Fuente</a>
     }
     if (Model.YaPostulado)
     {
-        <a class="btn btn-outline-lg" href="/Postulaciones"><icono nombre="circle-check" />Está en tu tablero</a>
+        <a class="btn btn-outline-lg" href="/Postulaciones" data-icono="circle-check">Está en tu tablero</a>
     }
     else if (User.EsPersona())
     {

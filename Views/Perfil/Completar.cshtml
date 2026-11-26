@@ -19,7 +19,7 @@
             @for (var i = 0; i < CompletarPerfilViewModel.Pasos.Length; i++)
             {
                 <li class="pasos-item" aria-current="@(i == 0 ? "step" : null)" data-paso-indicador>
-                    <span class="pasos-circulo"><span class="pasos-numero">@(i + 1)</span><icono nombre="check" /></span>
+                    <span class="pasos-circulo" data-icono-fin="check-grueso"><span class="pasos-numero">@(i + 1)</span></span>
                     @CompletarPerfilViewModel.Pasos[i]
                 </li>
             }
@@ -35,26 +35,22 @@
             <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Foto") ? "true" : null)">
                 <span class="form-label">Foto de perfil <span class="campo-opcional">(opcional)</span></span>
                 <div class="fila-imagen">
-                    <span class="circulo-xl-previa" data-vista-foto aria-hidden="true">
+                    <span class="circulo-xl-previa" data-vista-foto aria-hidden="true" data-icono="@(string.IsNullOrEmpty(ViewBag.Completar.FotoActual) ? "user" : "")">
                         @if (!string.IsNullOrEmpty(ViewBag.Completar.FotoActual))
                         {
                             <img src="@ViewBag.Completar.FotoActual" alt="" />
                         }
-                        else
-                        {
-                            <icono nombre="user" tamano="40" />
-                        }
                     </span>
                     <div class="pila" style="--pila-espacio: 8px">
-                        <label class="btn btn-archivo">
-                            <icono nombre="upload" />@(string.IsNullOrEmpty(ViewBag.Completar.FotoActual) ? "Elegir foto" : "Cambiar foto")
+                        <label class="btn btn-archivo" data-icono="upload">
+                            @(string.IsNullOrEmpty(ViewBag.Completar.FotoActual) ? "Elegir foto" : "Cambiar foto")
                             <input id="Foto" name="Foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-foto-entrada
                                    data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí una imagen JPG, PNG o WEBP" />
                         </label>
                         <span class="small text-body-secondary">JPG, PNG o WEBP de hasta 5 MB.</span>
                     </div>
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Foto", "Subí una imagen JPG, PNG o WEBP")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Foto", "Subí una imagen JPG, PNG o WEBP")</span>
             </div>
 
             <partial name="_CampoUbicacion" model="ViewBag.Completar.CampoUbicacion" />
@@ -71,19 +67,19 @@
                         </label>
                     }
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("EstadoBusqueda", "Elegí una opción")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("EstadoBusqueda", "Elegí una opción")</span>
             </fieldset>
 
             <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Descripcion") ? "true" : null)">
                 <label class="form-label" for="Descripcion">Contanos sobre vos <span class="campo-opcional">(opcional)</span></label>
                 <textarea class="form-control" id="Descripcion" name="Descripcion" rows="4" maxlength="500" placeholder="Qué hacés, qué te gusta y qué tipo de trabajo estás buscando.">@ViewBag.Completar.Descripcion</textarea>
                 <span class="form-text">Aparece en la sección "Sobre mí" de tu perfil. Hasta 500 caracteres.</span>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Descripcion", "Usá hasta 500 caracteres")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Descripcion", "Usá hasta 500 caracteres")</span>
             </div>
 
             <div class="acciones-entre">
                 <a class="btn btn-link-lg" href="/Panel">Lo completo después</a>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+                <button class="btn btn-lg" type="button" data-paso-siguiente data-icono-fin="arrow-right">Siguiente</button>
             </div>
         </fieldset>
 
@@ -92,8 +88,8 @@
             <p class="text-body-secondary">Todo es opcional: completá lo que tengas claro.</p>
             <partial name="_CamposBusqueda" model="ViewBag.Completar.CamposDeBusqueda" />
             <div class="acciones-entre">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+                <button class="btn btn-outline-lg" type="button" data-paso-anterior data-icono="arrow-left">Atrás</button>
+                <button class="btn btn-lg" type="button" data-paso-siguiente data-icono-fin="arrow-right">Siguiente</button>
             </div>
         </fieldset>
 
@@ -104,7 +100,7 @@
             <section class="columna-items" aria-invalid="@(ViewBag.Errores.Tiene("Experiencias") ? "true" : null)" aria-labelledby="titulo-exp">
                 <div class="columna-items-fila">
                     <h2 class="subtitulo-chico" id="titulo-exp">Experiencia laboral</h2>
-                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-experiencia"><icono nombre="plus" />Agregar experiencia</button>
+                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-experiencia" data-icono="plus">Agregar experiencia</button>
                 </div>
                 @if (ViewBag.Completar.ExperienciasCargadas.Count > 0)
                 {
@@ -128,13 +124,13 @@
                         </li>
                     }
                 </ul>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Experiencias", "Revisá las experiencias")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Experiencias", "Revisá las experiencias")</span>
             </section>
 
             <section class="columna-items" aria-invalid="@(ViewBag.Errores.Tiene("Formaciones") ? "true" : null)" aria-labelledby="titulo-for">
                 <div class="columna-items-fila">
                     <h2 class="subtitulo-chico" id="titulo-for">Formación</h2>
-                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-formacion"><icono nombre="plus" />Agregar formación</button>
+                    <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-formacion" data-icono="plus">Agregar formación</button>
                 </div>
                 @if (ViewBag.Completar.FormacionesCargadas.Count > 0)
                 {
@@ -156,12 +152,12 @@
                         </li>
                     }
                 </ul>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Formaciones", "Revisá la formación")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Formaciones", "Revisá la formación")</span>
             </section>
 
             <div class="acciones-entre">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
-                <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
+                <button class="btn btn-outline-lg" type="button" data-paso-anterior data-icono="arrow-left">Atrás</button>
+                <button class="btn btn-lg" type="button" data-paso-siguiente data-icono-fin="arrow-right">Siguiente</button>
             </div>
         </fieldset>
 
@@ -175,22 +171,21 @@
                     <span class="form-text">Ya subiste: @ViewBag.Completar.CVActual. Si elegís otro, lo reemplazamos.</span>
                 }
                 <label class="zona-punteada" data-zona-archivo>
-                    <span class="caja-icono"><icono nombre="upload" /></span>
+                    <span class="caja-icono" data-icono="upload"></span>
                     <strong class="texto-fuerte" data-zona-archivo-nombre>Arrastrá tu CV acá o hacé clic para subirlo</strong>
                     <span class="small">PDF, DOC o DOCX de hasta 5 MB</span>
                     <input id="ArchivoCV" name="ArchivoCV" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                            data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
                 </label>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("ArchivoCV", "Subí un archivo PDF, DOC o DOCX")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("ArchivoCV", "Subí un archivo PDF, DOC o DOCX")</span>
             </div>
 
             <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                 <label class="form-label" for="SitioWeb">Sitio web, portfolio o LinkedIn <span class="campo-opcional">(opcional)</span></label>
-                <div class="control-con-icono">
-                    <icono nombre="globe" />
+                <div class="control-con-icono" data-icono="globe">
                     <input class="form-control" id="SitioWeb" name="SitioWeb" value="@ViewBag.Completar.SitioWeb" type="text" inputmode="url" autocomplete="url" placeholder="linkedin.com/in/tu-nombre" maxlength="200" />
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SitioWeb", "Usá hasta 200 caracteres")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("SitioWeb", "Usá hasta 200 caracteres")</span>
             </div>
 
             @if (ViewBag.Completar.Foto != null || ViewBag.Completar.ArchivoCV != null)
@@ -199,7 +194,7 @@
             }
 
             <div class="acciones-entre">
-                <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
+                <button class="btn btn-outline-lg" type="button" data-paso-anterior data-icono="arrow-left">Atrás</button>
                 <button class="btn btn-warning-lg" type="submit">Guardar perfil</button>
             </div>
         </fieldset>

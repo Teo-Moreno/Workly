@@ -5,7 +5,7 @@
             <h3 class="tarjeta-chica-titulo"><a href="@Model.Enlace">@Model.Titulo</a></h3>
             <p class="texto-mini">@Model.Empresa@(string.IsNullOrEmpty(Model.Ubicacion) ? "" : " · " + Model.Ubicacion)</p>
         </div>
-        <span class="agarre" aria-hidden="true"><icono nombre="drag" tamano="18" /></span>
+        <span class="agarre" aria-hidden="true" data-icono="drag"></span>
     </div>
 
     <span class="badge chapita">@Model.Fuente</span>

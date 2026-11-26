@@ -13,22 +13,20 @@
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nueva") ? "true" : null)">
             <label class="form-label" for="clave-nueva">Contraseña nueva</label>
-            <div class="control-con-icono">
-                <icono nombre="lock" />
+            <div class="control-con-icono" data-icono="lock">
                 <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
                        pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required autofocus />
-                <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave data-icono="eye"></button>
             </div>
             <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
-            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
+            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
         </div>
         <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Repetir") ? "true" : null)">
             <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
-            <div class="control-con-icono">
-                <icono nombre="lock" />
+            <div class="control-con-icono" data-icono="lock">
                 <input class="form-control" id="clave-repetir" name="Repetir" type="password" autocomplete="new-password" required data-igual-a="clave-nueva" />
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Repetir", "Las contraseñas no coinciden")</span>
+            <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Repetir", "Las contraseñas no coinciden")</span>
         </div>
         <button class="btn btn-block-lg" type="submit">Guardar contraseña</button>
     </form>

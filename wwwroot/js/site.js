@@ -3,7 +3,6 @@
 
   const $ = (selector, raiz = document) => raiz.querySelector(selector);
   const $$ = (selector, raiz = document) => Array.from(raiz.querySelectorAll(selector));
-  const rutaIconos = "/img/iconos.svg";
   const CAMPO = ".campo, .grupo-campos, .columna-items";
 
   const marcarError = (campo, error) => {
@@ -17,14 +16,6 @@
     if (mensaje) mensaje.hidden = false;
   };
 
-  const icono = (nombre, tamano = 24) =>
-    `<svg class="icono" width="${tamano}" height="${tamano}" aria-hidden="true" focusable="false"><use href="${rutaIconos}#${nombre}"></use></svg>`;
-
-  const cambiarIcono = (boton, nombre) => {
-    const uso = boton.querySelector(".icono use");
-    if (uso) uso.setAttribute("href", `${rutaIconos}#${nombre}`);
-  };
-
   const iconosSnackbar = { exito: "circle-check", advertencia: "warning", error: "error", "": "info" };
 
   function snackbar(texto, tipo = "") {
@@ -34,9 +25,9 @@
     elemento.className = tipo ? `toast toast-${tipo}` : "toast";
     elemento.setAttribute("role", tipo === "error" ? "alert" : "status");
     elemento.setAttribute("aria-atomic", "true");
-    elemento.innerHTML = `${icono(iconosSnackbar[tipo] || "info", 22)}
-      <span class="toast-body"></span>
-      <button class="toast-cerrar" type="button" aria-label="Cerrar aviso" data-bs-dismiss="toast">${icono("close-big", 20)}</button>`;
+    elemento.dataset.icono = iconosSnackbar[tipo] || "info";
+    elemento.innerHTML = `<span class="toast-body"></span>
+      <button class="toast-cerrar" type="button" aria-label="Cerrar aviso" data-bs-dismiss="toast" data-icono="close-big"></button>`;
     elemento.querySelector(".toast-body").textContent = texto;
     contenedor.appendChild(elemento);
     elemento.addEventListener("hidden.bs.toast", () => elemento.remove());
@@ -45,8 +36,8 @@
 
   $$("[data-menu-movil]").forEach((boton) => {
     const panel = document.getElementById(boton.getAttribute("aria-controls"));
-    panel?.addEventListener("show.bs.collapse", () => cambiarIcono(boton, "close-big"));
-    panel?.addEventListener("hide.bs.collapse", () => cambiarIcono(boton, "menu"));
+    panel?.addEventListener("show.bs.collapse", () => boton.dataset.icono = "close-big");
+    panel?.addEventListener("hide.bs.collapse", () => boton.dataset.icono = "menu");
   });
 
   $$("[data-pestanas-hash]").forEach((contenedor) => {
@@ -114,7 +105,7 @@
       input.type = visible ? "password" : "text";
       boton.setAttribute("aria-pressed", String(!visible));
       boton.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
-      cambiarIcono(boton, visible ? "eye" : "eye-off");
+      boton.dataset.icono = visible ? "eye" : "eye-off";
     });
   });
 
@@ -291,7 +282,7 @@
     const texto = document.createElement("span");
     texto.className = "seleccion-texto";
     boton.append(texto);
-    boton.insertAdjacentHTML("beforeend", icono("chevron-down", 18));
+    boton.dataset.iconoFin = "chevron-down";
     const lista = document.createElement("ul");
     lista.id = `${id}-lista`;
     lista.className = "seleccion-lista";
@@ -329,7 +320,7 @@
         item.setAttribute("aria-selected", String(opcion.selected));
         item.dataset.indice = i;
         item.textContent = opcion.textContent.trim();
-        item.insertAdjacentHTML("beforeend", icono("check", 18));
+        item.dataset.iconoFin = "check";
         return item;
       }));
     };
@@ -533,17 +524,20 @@
   $$("[data-foto-entrada]").forEach((entrada) => {
     const vista = $("[data-vista-foto]", entrada.closest("form") || document);
     const vistaInicial = vista?.innerHTML;
+    const iconoInicial = vista?.dataset.icono;
     entrada.addEventListener("change", () => {
       const archivo = entrada.files?.[0];
       if (!vista || !archivo) return;
       if (!archivoValido(entrada, archivo) || !archivo.type.startsWith("image/")) {
         vista.innerHTML = vistaInicial;
+        vista.dataset.icono = iconoInicial;
         return;
       }
       const imagen = document.createElement("img");
       imagen.alt = "";
       imagen.src = URL.createObjectURL(archivo);
       vista.replaceChildren(imagen);
+      vista.dataset.icono = "";
     });
   });
 

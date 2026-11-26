@@ -14,7 +14,7 @@
                 </p>
             </div>
             <div class="acciones">
-                <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                <a class="btn btn-primary" href="/Publicaciones/Nueva" data-icono="plus">Publicar búsqueda</a>
             </div>
         </div>
     </header>
@@ -22,10 +22,10 @@
     @if (ViewBag.Ofertas.Count == 0)
     {
         <div class="recuadro-punteado">
-            <span class="caja-icono-lg"><icono nombre="briefcase" /></span>
+            <span class="caja-icono-lg" data-icono="briefcase"></span>
             <h2 class="recuadro-punteado-titulo">Todavía no publicaste ninguna búsqueda</h2>
             <p>Contá qué puesto querés cubrir y en qué condiciones. Las personas se postulan con su perfil y su CV, y las ves acá.</p>
-            <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
+            <a class="btn btn-primary" href="/Publicaciones/Nueva" data-icono="plus">Publicar mi primera búsqueda</a>
         </div>
     }
     else
