@@ -14,23 +14,23 @@
         @Html.AntiForgeryToken()
         <input type="hidden" id="ReturnUrl" name="ReturnUrl" value="@ViewBag.Formulario.ReturnUrl" />
 
-        <div class="campo @ViewBag.Errores.ClaseConGenerales("Email")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.HayGenerales || ViewBag.Errores.Tiene("Email") ? "true" : null)">
             <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />
                 <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="text" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
         </div>
 
-        <div class="campo @ViewBag.Errores.ClaseConGenerales("Contrasena")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.HayGenerales || ViewBag.Errores.Tiene("Contrasena") ? "true" : null)">
             <label class="form-label" for="Contrasena">Contraseña</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
                 <input class="form-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
                 <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
             </div>
-            <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Contrasena", "Ingresá tu contraseña")</span>
+            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Contrasena", "Ingresá tu contraseña")</span>
         </div>
 
         @if (ViewBag.PideCaptcha == true)
@@ -38,7 +38,7 @@
             <partial name="_Captcha" model="ViewBag.Captcha" />
         }
 
-        <div class="fila fila-entre">
+        <div class="fila-entre">
             <label class="form-check">
                 <input class="form-check-input" id="Recordarme" name="Recordarme" value="true" checked="@ViewBag.Formulario.Recordarme" type="checkbox" />
                 <span class="form-check-label">Recordarme</span>

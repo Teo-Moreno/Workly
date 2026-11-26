@@ -44,14 +44,14 @@
                 </div>
                 @if (string.IsNullOrWhiteSpace(ViewBag.Puesto))
                 {
-                    <div class="recuadro-punteado recuadro-punteado-chico">
+                    <div class="recuadro-punteado-chico">
                         <p>Contanos qué puesto buscás y acá te mostramos las ofertas de Workly y de otros sitios que coinciden.</p>
                         <a class="btn btn-outline-sm" href="/Perfil/Configuracion?pestana=busqueda"><icono nombre="plus" />Completar qué busco</a>
                     </div>
                 }
                 else
                 {
-                    <div class="esta-buscando" aria-busy="true" data-resultados-url="/Panel/ParaVos">
+                    <div data-buscando aria-busy="true" data-resultados-url="/Panel/ParaVos">
                         <partial name="_CargandoResultados" />
                         <div data-resultados-contenido></div>
                     </div>
@@ -77,7 +77,7 @@
                     <ul class="grilla-bordes" role="list">
                         @foreach (var etapa in Catalogos.EstadosPostulacion)
                         {
-                            <li class="borde-izquierdo borde-izquierdo-@etapa.Color">
+                            <li class="borde-izquierdo-@etapa.Color">
                                 <strong>@ViewBag.Perfil.CantidadEnEstado(etapa.Estado)</strong><span>@etapa.Estado</span>
                             </li>
                         }

@@ -45,7 +45,7 @@
                         <p class="text-body-secondary">Estos datos los ven quienes publican una búsqueda cuando te postulás.</p>
                     </div>
 
-                    <div class="campo @ViewBag.Errores.Clase("Foto")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Foto") ? "true" : null)">
                         <div class="fila-gris-clara">
                             <span class="circulo-xl" data-vista-foto aria-hidden="true">
                                 @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto))
@@ -70,12 +70,12 @@
                     </div>
 
                     <div class="columnas">
-                        <div class="campo @ViewBag.Errores.Clase("Nombre")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                             <label class="form-label" for="cfg-nombre">Nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioCuenta?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required autocomplete="given-name" />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                         </div>
-                        <div class="campo @ViewBag.Errores.Clase("Apellido")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                             <label class="form-label" for="cfg-apellido">Apellido</label>
                             <input class="form-control" id="cfg-apellido" name="Apellido" value="@(ViewBag.FormularioCuenta?.Apellido ?? ViewBag.Perfil.Usuario.Apellido)" maxlength="50" required autocomplete="family-name" />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
@@ -83,7 +83,7 @@
                     </div>
 
                     <div class="columnas">
-                        <div class="campo @ViewBag.Errores.Clase("Email")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
                             <label class="form-label" for="cfg-email">Email</label>
                             <div class="control-con-icono">
                                 <icono nombre="mail" />
@@ -96,7 +96,7 @@
 
                     <partial name="_CampoUbicacion" model="ViewBag.CampoUbicacion" />
 
-                    <div class="campo @ViewBag.Errores.Clase("SitioWeb")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                         <label class="form-label" for="cfg-web">Sitio web, portfolio o LinkedIn <span class="campo-opcional">(opcional)</span></label>
                         <div class="control-con-icono">
                             <icono nombre="globe" />
@@ -105,7 +105,7 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SitioWeb", "Usá hasta 200 caracteres")</span>
                     </div>
 
-                    <div class="campo @ViewBag.Errores.Clase("ArchivoCV")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("ArchivoCV") ? "true" : null)">
                         <span class="form-label">CV</span>
                         @if (ViewBag.Perfil.TieneCV)
                         {
@@ -135,7 +135,7 @@
                         <p class="text-body-secondary">Se muestran en la página de la empresa y en sus búsquedas. El CUIT (@VerificacionEmpresa.Formatear(ViewBag.Perfil.Empresa.CUIT ?? "")) y la razón social (@ViewBag.Perfil.Empresa.Razon_Social) no se pueden cambiar.</p>
                     </div>
 
-                    <div class="campo @ViewBag.Errores.Clase("Logo")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Logo") ? "true" : null)">
                         <div class="fila-gris-clara">
                             <span class="cuadro-lg" data-vista-foto aria-hidden="true">
                                 @if (!string.IsNullOrEmpty(ViewBag.Perfil.Empresa.Logo))
@@ -160,12 +160,12 @@
                     </div>
 
                     <div class="columnas">
-                        <div class="campo @ViewBag.Errores.Clase("NombreEmpresa")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("NombreEmpresa") ? "true" : null)">
                             <label class="form-label" for="cfg-empresa">Nombre de la empresa</label>
                             <input class="form-control" id="cfg-empresa" name="NombreEmpresa" value="@(ViewBag.FormularioEmpresa?.NombreEmpresa ?? ViewBag.Perfil.Empresa.Nombre)" maxlength="100" required />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("NombreEmpresa", "Completá el nombre de la empresa")</span>
                         </div>
-                        <div class="campo @ViewBag.Errores.Clase("Rubro")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Rubro") ? "true" : null)">
                             <label class="form-label" for="cfg-rubro">Rubro</label>
                             <select class="form-select" id="cfg-rubro" name="Rubro" required>
                                 <option value="">Elegí el rubro</option>
@@ -178,7 +178,7 @@
                         </div>
                     </div>
 
-                    <div class="campo @ViewBag.Errores.Clase("SitioWeb")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                         <label class="form-label" for="cfg-web">Sitio web</label>
                         <div class="control-con-icono">
                             <icono nombre="globe" />
@@ -191,7 +191,7 @@
                     <partial name="_CampoUbicacion" model="ViewBag.CampoUbicacion" />
 
                     <div class="columnas">
-                        <div class="campo @ViewBag.Errores.Clase("Ubicacion")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Ubicacion") ? "true" : null)">
                             <label class="form-label" for="cfg-ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                             <input class="form-control" id="cfg-ubicacion" name="Ubicacion" value="@(ViewBag.FormularioEmpresa?.Ubicacion ?? ViewBag.Perfil.Empresa.Ubicacion)" maxlength="100" placeholder="Ej.: Palermo, CABA" />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
@@ -199,7 +199,7 @@
                         <partial name="_CampoTelefono" model="ViewBag.CampoTelefono" />
                     </div>
 
-                    <div class="campo @ViewBag.Errores.Clase("Descripcion")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Descripcion") ? "true" : null)">
                         <label class="form-label" for="cfg-descripcion">¿Qué hace la empresa?</label>
                         <textarea class="form-control" id="cfg-descripcion" name="Descripcion" rows="4" maxlength="500" required>@(ViewBag.FormularioEmpresa?.Descripcion ?? ViewBag.Perfil.Empresa.Descripcion)</textarea>
                         <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
@@ -207,12 +207,12 @@
 
                     <h3 class="subtitulo-chico">Quién maneja la cuenta</h3>
                     <div class="columnas">
-                        <div class="campo @ViewBag.Errores.Clase("Nombre")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                             <label class="form-label" for="cfg-nombre">Tu nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioEmpresa?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                         </div>
-                        <div class="campo @ViewBag.Errores.Clase("Apellido")">
+                        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                             <label class="form-label" for="cfg-apellido">Tu apellido</label>
                             <input class="form-control" id="cfg-apellido" name="Apellido" value="@(ViewBag.FormularioEmpresa?.Apellido ?? ViewBag.Perfil.Usuario.Apellido)" maxlength="50" required />
                             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
@@ -261,7 +261,7 @@
 
                 @if (ViewBag.Perfil.Usuario.TieneContrasena)
                 {
-                    <div class="campo @ViewBag.Errores.Clase("Actual")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Actual") ? "true" : null)">
                         <label class="form-label" for="clave-actual">Contraseña actual</label>
                         <div class="control-con-icono">
                             <icono nombre="lock" />
@@ -272,7 +272,7 @@
                     </div>
                 }
                 <div class="columnas">
-                    <div class="campo @ViewBag.Errores.Clase("Nueva")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nueva") ? "true" : null)">
                         <label class="form-label" for="clave-nueva">Contraseña nueva</label>
                         <div class="control-con-icono">
                             <icono nombre="lock" />
@@ -283,7 +283,7 @@
                         <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
                         <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
                     </div>
-                    <div class="campo @ViewBag.Errores.Clase("Repetir")">
+                    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Repetir") ? "true" : null)">
                         <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
                         <div class="control-con-icono">
                             <icono nombre="lock" />
@@ -297,7 +297,7 @@
                 </div>
             </form>
 
-            <form class="grilla-campos recuadro-rojo" action="/Perfil/EliminarCuenta" method="post" novalidate>
+            <form class="recuadro-rojo" action="/Perfil/EliminarCuenta" method="post" novalidate>
                 @Html.AntiForgeryToken()
                 <div class="titulos-juntos">
                     <h2 class="subtitulo-chico">Eliminar la cuenta</h2>

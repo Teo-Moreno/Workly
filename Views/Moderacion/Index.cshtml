@@ -9,10 +9,10 @@
     </header>
 
     <section aria-labelledby="pendientes-titulo">
-        <h2 class="h4" id="pendientes-titulo">Para revisar (@ViewBag.Pendientes.Count)</h2>
+        <h2 id="pendientes-titulo">Para revisar (@ViewBag.Pendientes.Count)</h2>
         @if (ViewBag.Pendientes.Count == 0)
         {
-            <div class="recuadro-punteado recuadro-punteado-chico"><p>No hay búsquedas esperando revisión.</p></div>
+            <div class="recuadro-punteado-chico"><p>No hay búsquedas esperando revisión.</p></div>
         }
         else
         {
@@ -34,7 +34,7 @@
     @if (ViewBag.Revisadas.Count > 0)
     {
         <section aria-labelledby="revisadas-titulo">
-            <h2 class="h4" id="revisadas-titulo">Revisadas hace poco</h2>
+            <h2 id="revisadas-titulo">Revisadas hace poco</h2>
             <ul class="lista-tarjetas" role="list">
                 @foreach (Oferta oferta in ViewBag.Revisadas)
                 {

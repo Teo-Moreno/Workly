@@ -1,4 +1,4 @@
-<div class="campo @ViewBag.Errores.Clase("Contrasena")">
+<div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Contrasena") ? "true" : null)">
     <label class="form-label" for="Contrasena">Contraseña</label>
     <div class="control-con-icono">
         <icono nombre="lock" />

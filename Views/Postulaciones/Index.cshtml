@@ -30,9 +30,9 @@
             @Html.AntiForgeryToken()
             @foreach (ColumnaTablero columna in ViewBag.Columnas)
             {
-                <section class="columna-gris @(columna.Tarjetas.Count == 0 ? "esta-vacia" : "")" data-columna="@columna.Estado" aria-labelledby="columna-@columna.Color">
+                <section class="columna-gris" data-columna="@columna.Estado" aria-labelledby="columna-@columna.Color">
                     <header class="columna-gris-fila">
-                        <span class="punto punto-@columna.Color" aria-hidden="true"></span>
+                        <span class="punto-@columna.Color" aria-hidden="true"></span>
                         <h2 class="columna-gris-titulo" id="columna-@columna.Color" data-columna-nombre>@columna.Nombre</h2>
                         <span class="contador" data-columna-contador>@columna.Tarjetas.Count</span>
                     </header>
@@ -41,7 +41,7 @@
                         {
                             <partial name="_PostulacionTarjeta" model="postulacion" />
                         }
-                        <p class="columna-gris-vacio">Arrastrá una tarjeta acá</p>
+                        <p class="columna-gris-vacio" hidden="@(columna.Tarjetas.Count == 0 ? null : "hidden")">Arrastrá una tarjeta acá</p>
                     </div>
                 </section>
             }

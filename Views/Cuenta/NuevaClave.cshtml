@@ -11,7 +11,7 @@
     <form class="grilla-campos" action="/Cuenta/NuevaClave" method="post" novalidate data-formulario-real>
         @Html.AntiForgeryToken()
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
-        <div class="campo @ViewBag.Errores.Clase("Nueva")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nueva") ? "true" : null)">
             <label class="form-label" for="clave-nueva">Contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />
@@ -22,7 +22,7 @@
             <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
         </div>
-        <div class="campo @ViewBag.Errores.Clase("Repetir")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Repetir") ? "true" : null)">
             <label class="form-label" for="clave-repetir">Repetí la contraseña nueva</label>
             <div class="control-con-icono">
                 <icono nombre="lock" />

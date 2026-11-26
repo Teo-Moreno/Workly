@@ -2,16 +2,16 @@
     ViewData["Title"] = "Crear cuenta de empresa";
 }
 
-<div class="columna-angosta columna-media">
+<div class="columna-media">
     <h1 class="titulo-grande">Registrá tu empresa</h1>
     <p class="subtitulo-pegado">Paso <strong data-paso-actual>1</strong> de @RegistroEmpresaViewModel.Pasos.Length. Con la cuenta de empresa publicás búsquedas y ves quién se postula.</p>
 
     <partial name="_TipoCuenta" model="ViewBag.TipoCuenta" />
 
-    <ol class="pasos pasos-espaciados" aria-label="Progreso del registro">
+    <ol class="pasos-espaciados" aria-label="Progreso del registro">
         @for (var i = 0; i < RegistroEmpresaViewModel.Pasos.Length; i++)
         {
-            <li class="pasos-item @(i == 0 ? "esta-actual" : "")" data-paso-indicador>
+            <li class="pasos-item" aria-current="@(i == 0 ? "step" : null)" data-paso-indicador>
                 <span class="pasos-circulo"><span class="pasos-numero">@(i + 1)</span><icono nombre="check" /></span>
                 @RegistroEmpresaViewModel.Pasos[i]
             </li>
@@ -27,26 +27,26 @@
 
     <form class="sin-grilla" action="/Cuenta/CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
         @Html.AntiForgeryToken()
-        <fieldset class="grilla-campos paso-animado" data-paso>
+        <fieldset class="paso-animado" data-paso>
             <legend class="visually-hidden">Paso 1: quién maneja la cuenta</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
                 <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
             <div class="columnas">
-                <div class="campo @ViewBag.Errores.Clase("Nombre")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                     <label class="form-label" for="Nombre">Tu nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                 </div>
-                <div class="campo @ViewBag.Errores.Clase("Apellido")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                     <label class="form-label" for="Apellido">Tu apellido</label>
                     <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
-            <div class="campo @ViewBag.Errores.Clase("Email")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
                 <label class="form-label" for="Email">Email de la empresa</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
@@ -69,17 +69,17 @@
             </div>
         </fieldset>
 
-        <fieldset class="grilla-campos paso-animado" data-paso hidden>
+        <fieldset class="paso-animado" data-paso hidden>
             <legend class="visually-hidden">Paso 2: datos de la empresa</legend>
             <p class="text-body-secondary">Con estos datos comprobamos que la empresa existe: el CUIT tiene que ser válido y el email, del dominio de su sitio web.</p>
 
             <div class="columnas">
-                <div class="campo @ViewBag.Errores.Clase("NombreEmpresa")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("NombreEmpresa") ? "true" : null)">
                     <label class="form-label" for="NombreEmpresa">Nombre de la empresa</label>
                     <input class="form-control" id="NombreEmpresa" name="NombreEmpresa" value="@ViewBag.Formulario.NombreEmpresa" autocomplete="organization" placeholder="Como la conoce la gente" maxlength="100" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("NombreEmpresa", "Completá el nombre de la empresa")</span>
                 </div>
-                <div class="campo @ViewBag.Errores.Clase("RazonSocial")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("RazonSocial") ? "true" : null)">
                     <label class="form-label" for="RazonSocial">Razón social</label>
                     <input class="form-control" id="RazonSocial" name="RazonSocial" value="@ViewBag.Formulario.RazonSocial" placeholder="Ej.: Nombre S.A., Nombre S.R.L." maxlength="150" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("RazonSocial", "Completá la razón social")</span>
@@ -87,14 +87,14 @@
             </div>
 
             <div class="columnas">
-                <div class="campo @ViewBag.Errores.Clase("CUIT")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("CUIT") ? "true" : null)">
                     <label class="form-label" for="CUIT">CUIT</label>
                     <input class="form-control" id="CUIT" name="CUIT" value="@ViewBag.Formulario.CUIT" inputmode="numeric" placeholder="30-12345678-9" maxlength="13" required
                            pattern="[0-9]{2}-?[0-9]{8}-?[0-9]" data-cuit />
                     <span class="form-text">11 números. Los guiones se ponen solos.</span>
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("CUIT", "Ingresá los 11 números del CUIT")</span>
                 </div>
-                <div class="campo @ViewBag.Errores.Clase("Rubro")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Rubro") ? "true" : null)">
                     <label class="form-label" for="Rubro">Rubro</label>
                     <select class="form-select" id="Rubro" name="Rubro" required>
                         <option value="">Elegí el rubro</option>
@@ -107,7 +107,7 @@
                 </div>
             </div>
 
-            <div class="campo @ViewBag.Errores.Clase("SitioWeb")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SitioWeb") ? "true" : null)">
                 <label class="form-label" for="SitioWeb">Sitio web de la empresa</label>
                 <div class="control-con-icono">
                     <icono nombre="globe" />
@@ -119,7 +119,7 @@
             <partial name="_CampoUbicacion" model="ViewBag.Formulario.CampoUbicacion" />
 
             <div class="columnas">
-                <div class="campo @ViewBag.Errores.Clase("Ubicacion")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Ubicacion") ? "true" : null)">
                     <label class="form-label" for="Ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                     <input class="form-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" placeholder="Ej.: Palermo, CABA" maxlength="100" />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
@@ -127,17 +127,17 @@
                 <partial name="_CampoTelefono" model="ViewBag.Formulario.CampoTelefono" />
             </div>
 
-            <div class="campo @ViewBag.Errores.Clase("Descripcion")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Descripcion") ? "true" : null)">
                 <label class="form-label" for="Descripcion">¿Qué hace la empresa?</label>
                 <textarea class="form-control" id="Descripcion" name="Descripcion" rows="4" maxlength="500" required placeholder="Contá en pocas líneas a qué se dedica la empresa.">@ViewBag.Formulario.Descripcion</textarea>
                 <span class="form-text">Aparece en la página de la empresa. Hasta 500 caracteres.</span>
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
             </div>
 
-            <div class="campo @ViewBag.Errores.Clase("Logo")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Logo") ? "true" : null)">
                 <span class="form-label">Logo <span class="campo-opcional">(opcional)</span></span>
                 <div class="fila-imagen">
-                    <span class="cuadro-lg vista-previa" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
+                    <span class="cuadro-lg-previa" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
                     <div class="pila" style="--pila-espacio: 8px">
                         <label class="btn btn-archivo">
                             <icono nombre="upload" />Elegir logo

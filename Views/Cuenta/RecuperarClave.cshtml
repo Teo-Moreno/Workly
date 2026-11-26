@@ -10,7 +10,7 @@
 
     <form class="grilla-campos" action="/Cuenta/RecuperarClave" method="post" novalidate data-formulario-real>
         @Html.AntiForgeryToken()
-        <div class="campo @ViewBag.Errores.Clase("Email")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
             <label class="form-label" for="Email">Email</label>
             <div class="control-con-icono">
                 <icono nombre="mail" />

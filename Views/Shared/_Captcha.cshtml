@@ -1,4 +1,4 @@
-<div class="campo @ViewBag.Errores.Clase(Captcha.CampoRespuesta)" data-captcha data-captcha-url="/Cuenta/NuevoCaptcha">
+<div class="campo" aria-invalid="@(ViewBag.Errores.Tiene(Captcha.CampoRespuesta) ? "true" : null)" data-captcha data-captcha-url="/Cuenta/NuevoCaptcha">
     <label class="form-label" for="captcha-respuesta">Escribí las letras de la imagen</label>
     <div class="fila-envuelta">
         <img class="imagen-borde" src="@Model.Imagen" width="200" height="64" alt="Letras para comprobar que sos una persona" data-captcha-imagen />

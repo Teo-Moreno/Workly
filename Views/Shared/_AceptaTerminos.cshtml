@@ -1,4 +1,4 @@
-<div class="campo @ViewBag.Errores.Clase("AceptaTerminos")">
+<div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("AceptaTerminos") ? "true" : null)">
     <label class="form-check">
         <input class="form-check-input" id="AceptaTerminos" name="AceptaTerminos" value="true" checked="@ViewBag.Formulario.AceptaTerminos" type="checkbox" required />
         <span class="form-check-label">Acepto los <a class="resaltado" href="/Home/Terminos" target="_blank">Términos</a> y la <a class="resaltado" href="/Home/Privacy" target="_blank">Política de privacidad</a></span>

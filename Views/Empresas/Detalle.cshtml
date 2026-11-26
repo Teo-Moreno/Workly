@@ -48,10 +48,10 @@
         </section>
 
         <section class="margen-scroll" id="ofertas" aria-labelledby="ofertas-titulo">
-            <h2 class="h4" id="ofertas-titulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
+            <h2 id="ofertas-titulo">Búsquedas abiertas (@ViewBag.Abiertas.Count)</h2>
             @if (ViewBag.Abiertas.Count == 0)
             {
-                <div class="recuadro-punteado recuadro-punteado-chico">
+                <div class="recuadro-punteado-chico">
                     <p>@(ViewBag.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
                     @if (ViewBag.EsPropia)
                     {

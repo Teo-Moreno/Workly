@@ -44,7 +44,7 @@
                 <h2 class="card-title">Qué busca</h2>
                 @if (ViewBag.Perfil.Preferencia.TieneDatos)
                 {
-                    <dl class="lista-clave-valor lista-clave-valor-lineas">
+                    <dl class="lista-clave-valor-lineas">
                         @if (ViewBag.Perfil.Preferencia.ListaNiveles.Count > 0) { <div><dt>Nivel</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaNiveles)</dd></div> }
                         @if (ViewBag.Perfil.Preferencia.ListaModalidades.Count > 0) { <div><dt>Modalidad</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaModalidades)</dd></div> }
                         @if (ViewBag.Perfil.Preferencia.Jornada != null) { <div><dt>Jornada</dt><dd>@ViewBag.Perfil.Preferencia.Jornada</dd></div> }
@@ -89,7 +89,7 @@
                         @foreach (ExperienciaItem e in ViewBag.Perfil.Experiencias)
                         {
                             <li class="linea-tiempo-item">
-                                <span class="cuadro-md cuadro-principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
+                                <span class="cuadro-md-principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
                                 <div class="linea-tiempo-contenido">
                                     <h3 class="linea-tiempo-titulo">@e.Puesto</h3>
                                     <p class="texto-fuerte">@e.Empresa</p>
