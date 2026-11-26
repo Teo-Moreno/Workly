@@ -2,11 +2,11 @@
     <label class="form-label" for="captcha-respuesta">Escribí las letras de la imagen</label>
     <div class="fila-envuelta">
         <img class="imagen-borde" src="@Model.Imagen" width="200" height="64" alt="Letras para comprobar que sos una persona" data-captcha-imagen />
-        <button class="btn btn-outline-sm" type="button" data-captcha-otra><icono nombre="refresh" />Otra imagen</button>
+        <button class="btn btn-outline-sm" type="button" data-captcha-otra data-icono="refresh">Otra imagen</button>
     </div>
     <input type="hidden" name="@Captcha.CampoToken" value="@Model.Token" data-captcha-token />
     <input class="form-control entrada-espaciada" id="captcha-respuesta" name="@Captcha.CampoRespuesta" autocomplete="off" autocapitalize="characters"
            spellcheck="false" maxlength="10" required placeholder="Ej.: K7P3Q" />
     <span class="form-text">No distingue mayúsculas de minúsculas.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
+    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
 </div>

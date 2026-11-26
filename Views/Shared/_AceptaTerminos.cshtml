@@ -3,5 +3,5 @@
         <input class="form-check-input" id="AceptaTerminos" name="AceptaTerminos" value="true" checked="@ViewBag.Formulario.AceptaTerminos" type="checkbox" required />
         <span class="form-check-label">Acepto los <a class="resaltado" href="/Home/Terminos" target="_blank">Términos</a> y la <a class="resaltado" href="/Home/Privacy" target="_blank">Política de privacidad</a></span>
     </label>
-    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("AceptaTerminos", "Tenés que aceptar los términos para continuar")</span>
+    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("AceptaTerminos", "Tenés que aceptar los términos para continuar")</span>
 </div>

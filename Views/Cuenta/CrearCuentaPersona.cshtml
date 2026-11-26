@@ -21,28 +21,27 @@
             <legend class="visually-hidden">Tus datos</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
-                <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
+                <p class="nota-turquesa" data-icono="circle-check">Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
             <div class="columnas">
                 <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                     <label class="form-label" for="Nombre">Nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
+                    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                 </div>
                 <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                     <label class="form-label" for="Apellido">Apellido</label>
                     <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
-                    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
+                    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
             <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
                 <label class="form-label" for="Email">Email</label>
-                <div class="control-con-icono">
-                    <icono nombre="mail" />
+                <div class="control-con-icono" data-icono="mail">
                     <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="email" autocomplete="email" placeholder="tu@mail.com" maxlength="100" required readonly="@ViewBag.Formulario.EsExterno" />
                 </div>
-                <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
+                <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
             </div>
 
             @if (!ViewBag.Formulario.EsExterno)

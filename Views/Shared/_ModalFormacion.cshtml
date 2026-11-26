@@ -8,14 +8,14 @@
         }
         <div class="modal-header">
             <h2 class="modal-title" id="modal-formacion-titulo">Agregar formación</h2>
-            <button class="modal-cerrar" type="button" value="cancelar" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
+            <button class="modal-cerrar" type="button" value="cancelar" aria-label="Cerrar" data-bs-dismiss="modal" data-icono="close-big"></button>
         </div>
         <p class="modal-texto">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
 
         <div class="campo" aria-invalid="@(Model.Errores.Tiene("Titulo") ? "true" : null)">
             <label class="form-label" for="for-titulo">Título o curso</label>
             <input class="form-control" id="for-titulo" name="Titulo" value="@Model.Valores.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
-            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Titulo", "Completá el título o curso")</span>
+            <span class="invalid-feedback" data-icono="warning">@Model.Errores.Mensaje("Titulo", "Completá el título o curso")</span>
         </div>
         <div class="campo" aria-invalid="@(Model.Errores.Tiene("Institucion") ? "true" : null)">
             <label class="form-label" for="for-institucion">Institución</label>
@@ -26,7 +26,7 @@
                     <option value="@institucion"></option>
                 }
             </datalist>
-            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Institucion", "Completá la institución")</span>
+            <span class="invalid-feedback" data-icono="warning">@Model.Errores.Mensaje("Institucion", "Completá la institución")</span>
         </div>
 
         <div class="columnas">

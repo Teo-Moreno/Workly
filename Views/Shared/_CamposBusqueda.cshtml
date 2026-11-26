@@ -11,19 +11,18 @@
                 </label>
             }
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("EstadoBusqueda", "Elegí una opción")</span>
+        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("EstadoBusqueda", "Elegí una opción")</span>
     </fieldset>
 }
 
 <div class="columnas">
     <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("PuestoBuscado") ? "true" : null)">
         <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="campo-opcional">(opcional)</span></label>
-        <div class="control-con-icono">
-            <icono nombre="briefcase" />
+        <div class="control-con-icono" data-icono="briefcase">
             <input class="form-control" id="@(Model.Prefijo)-puesto" name="PuestoBuscado" value="@Model.PuestoBuscado" maxlength="100" placeholder="Ej.: Administrativo/a, Desarrollador/a, Vendedor/a" />
         </div>
         <span class="form-text">Lo usamos para mostrarte ofertas en tu inicio.</span>
-        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("PuestoBuscado", "Usá hasta 100 caracteres")</span>
+        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("PuestoBuscado", "Usá hasta 100 caracteres")</span>
     </div>
     <div class="campo">
         <label class="form-label" for="@(Model.Prefijo)-disponibilidad">Disponibilidad <span class="campo-opcional">(opcional)</span></label>
@@ -100,7 +99,7 @@
             <label class="visually-hidden" for="@(Model.Prefijo)-salario-max">Máximo</label>
             <input class="form-control" id="@(Model.Prefijo)-salario-max" name="SalarioMaximo" value="@Model.SalarioMaximo" type="number" min="0" step="1000" placeholder="Máximo" />
         </div>
-        <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("SalarioMaximo", ViewBag.Errores.Mensaje("SalarioMinimo", "Revisá los montos"))</span>
+        <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("SalarioMaximo", ViewBag.Errores.Mensaje("SalarioMinimo", "Revisá los montos"))</span>
     </div>
 </div>
 
@@ -133,10 +132,10 @@
     <div class="campo-con-accion">
         <label class="visually-hidden" for="@(Model.Prefijo)-nueva-habilidad">Agregar otra habilidad</label>
         <input class="form-control" id="@(Model.Prefijo)-nueva-habilidad" type="text" maxlength="60" placeholder="¿No está la tuya? Escribila acá" data-habilidad-nueva />
-        <button class="btn btn-icono" type="button" data-habilidad-agregar><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
+        <button class="btn btn-icono" type="button" data-habilidad-agregar data-icono="plus" aria-label="Agregar habilidad"></button>
     </div>
     <span class="form-text">Las que agregás vos solo aparecen en tu perfil.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Habilidades", "Revisá las habilidades")</span>
+    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Habilidades", "Revisá las habilidades")</span>
 </fieldset>
 
 <fieldset class="grupo-campos" aria-invalid="@(ViewBag.Errores.Tiene("Idiomas") ? "true" : null)" data-idiomas>
@@ -157,7 +156,7 @@
                         <option selected="@(opcion == fila.Nivel)">@opcion</option>
                     }
                 </select>
-                <button class="btn btn-icono-borde" type="button" data-idioma-quitar><icono nombre="trash-full" etiqueta="Quitar idioma" /></button>
+                <button class="btn btn-icono-borde" type="button" data-idioma-quitar data-icono="trash-full" aria-label="Quitar idioma"></button>
             </li>
         }
     </ul>
@@ -175,9 +174,9 @@
                     <option>@opcion</option>
                 }
             </select>
-            <button class="btn btn-icono-borde" type="button" data-idioma-quitar><icono nombre="trash-full" etiqueta="Quitar idioma" /></button>
+            <button class="btn btn-icono-borde" type="button" data-idioma-quitar data-icono="trash-full" aria-label="Quitar idioma"></button>
         </li>
     </template>
-    <button class="btn btn-outline-sm" type="button" data-idioma-agregar><icono nombre="plus" />Agregar idioma</button>
-    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Idiomas", "Elegí el idioma y el nivel de cada fila")</span>
+    <button class="btn btn-outline-sm" type="button" data-idioma-agregar data-icono="plus">Agregar idioma</button>
+    <span class="invalid-feedback" data-icono="warning">@ViewBag.Errores.Mensaje("Idiomas", "Elegí el idioma y el nivel de cada fila")</span>
 </fieldset>

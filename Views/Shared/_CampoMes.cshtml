@@ -4,15 +4,14 @@
         <input class="form-control selector-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
                inputmode="numeric" maxlength="7" autocomplete="off" pattern="(0[1-9]|1[0-2])/(19|20)[0-9]{2}" required="@Model.Requerido"
                data-selector-mes-entrada />
-        <button class="selector-icono" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir>
-            <icono nombre="calendar" />
+        <button class="selector-icono" type="button" aria-label="Elegir mes y año" aria-expanded="false" data-selector-mes-abrir data-icono="calendar">
         </button>
         <div class="selector-panel" role="dialog" aria-label="Elegí el mes y el año" hidden data-selector-mes-panel>
             <div class="selector-fila">
                 <strong class="selector-fuerte" data-selector-mes-anio></strong>
                 <div class="selector-flechas">
-                    <button class="selector-flecha" type="button" aria-label="Año anterior" data-selector-mes-anterior><icono nombre="chevron-left" /></button>
-                    <button class="selector-flecha" type="button" aria-label="Año siguiente" data-selector-mes-siguiente><icono nombre="chevron-right" /></button>
+                    <button class="selector-flecha" type="button" aria-label="Año anterior" data-selector-mes-anterior data-icono="chevron-left"></button>
+                    <button class="selector-flecha" type="button" aria-label="Año siguiente" data-selector-mes-siguiente data-icono="chevron-right"></button>
                 </div>
             </div>
             <div class="selector-grilla">
@@ -23,5 +22,5 @@
             </div>
         </div>
     </div>
-    <span class="invalid-feedback"><icono nombre="warning" />@(Model.Error ?? "Elegí el mes y el año (MM/AAAA)")</span>
+    <span class="invalid-feedback" data-icono="warning">@(Model.Error ?? "Elegí el mes y el año (MM/AAAA)")</span>
 </div>

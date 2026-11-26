@@ -10,7 +10,7 @@
                 <p class="subtitulo">Las ofertas que guardaste para ver después o postularte más tarde.</p>
             </div>
             <div class="acciones">
-                <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
+                <a class="btn btn-primary" href="/Empleos" data-icono="search">Buscar trabajo</a>
             </div>
         </div>
     </header>
@@ -18,10 +18,10 @@
     @if (ViewBag.Guardadas.Count == 0)
     {
         <div class="recuadro-punteado">
-            <span class="caja-icono-lg"><icono nombre="bookmark" /></span>
+            <span class="caja-icono-lg" data-icono="bookmark"></span>
             <h2 class="recuadro-punteado-titulo">Todavía no guardaste ofertas</h2>
             <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
-            <a class="btn btn-primary" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
+            <a class="btn btn-primary" href="/Empleos" data-icono="search">Buscar trabajo</a>
         </div>
     }
     else
@@ -38,7 +38,7 @@
                             <partial name="_SelloOficial" model="oferta" />
                             @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge chapita-borde">@oferta.Modalidad</span> }
                             <span class="badge @(oferta.EsExterna ? "chapita" : "chapita-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
-                            @if (oferta.YaPostulado) { <span class="badge badge-exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
+                            @if (oferta.YaPostulado) { <span class="badge badge-exito" data-icono="circle-check">Ya te postulaste</span> }
                             @if (oferta.NoDisponible) { <span class="badge badge-error">Ya no recibe postulaciones</span> }
                         </div>
                         @if (oferta.Fecha_Guardado.HasValue)
@@ -53,7 +53,7 @@
                             <input type="hidden" name="id" value="@oferta.ID" />
                             <input type="hidden" name="externa" value="@(oferta.EsExterna ? "true" : "false")" />
                             <input type="hidden" name="volver" value="/Guardadas" />
-                            <button class="btn btn-link-sm" type="submit"><icono nombre="trash-full" />Quitar</button>
+                            <button class="btn btn-link-sm" type="submit" data-icono="trash-full">Quitar</button>
                         </form>
                     </div>
                 </li>

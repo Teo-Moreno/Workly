@@ -16,16 +16,16 @@
             </nav>
             <h1 class="fila-portada-titulo">@ViewBag.Empresa.Nombre</h1>
             <p class="fila-portada-datos">
-                @if (ViewBag.Empresa.Rubro != null) { <span><icono nombre="building" tamano="18" />@ViewBag.Empresa.Rubro</span> }
-                @if (ViewBag.Empresa.UbicacionCompleta != null) { <span><icono nombre="near-me" tamano="18" />@ViewBag.Empresa.UbicacionCompleta</span> }
-                @if (ViewBag.Empresa.EnlaceSitio != null) { <span><icono nombre="globe" tamano="18" /><a class="resaltado" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></span> }
+                @if (ViewBag.Empresa.Rubro != null) { <span data-icono="building">@ViewBag.Empresa.Rubro</span> }
+                @if (ViewBag.Empresa.UbicacionCompleta != null) { <span data-icono="near-me">@ViewBag.Empresa.UbicacionCompleta</span> }
+                @if (ViewBag.Empresa.EnlaceSitio != null) { <span data-icono="globe"><a class="resaltado" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></span> }
             </p>
         </div>
         @if (ViewBag.EsPropia)
         {
             <div class="fila-portada-acciones">
-                <a class="btn btn-outline-primary" href="/Perfil/Configuracion"><icono nombre="pen" />Editar datos</a>
-                <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar búsqueda</a>
+                <a class="btn btn-outline-primary" href="/Perfil/Configuracion" data-icono="pen">Editar datos</a>
+                <a class="btn btn-primary" href="/Publicaciones/Nueva" data-icono="plus">Publicar búsqueda</a>
             </div>
         }
     </header>
@@ -43,7 +43,7 @@
             }
             @if (ViewBag.Empresa.TieneCuenta)
             {
-                <p class="small texto-verde"><icono nombre="circle-check" tamano="16" />Registrada en Workly con su CUIT</p>
+                <p class="small texto-verde" data-icono="circle-check">Registrada en Workly con su CUIT</p>
             }
         </section>
 
@@ -55,7 +55,7 @@
                     <p>@(ViewBag.EsPropia ? "Todavía no publicaste búsquedas." : "Esta empresa no tiene búsquedas abiertas en este momento.")</p>
                     @if (ViewBag.EsPropia)
                     {
-                        <a class="btn btn-primary" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar mi primera búsqueda</a>
+                        <a class="btn btn-primary" href="/Publicaciones/Nueva" data-icono="plus">Publicar mi primera búsqueda</a>
                     }
                 </div>
             }

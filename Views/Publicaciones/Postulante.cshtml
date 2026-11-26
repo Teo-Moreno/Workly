@@ -19,17 +19,17 @@
             <h1 class="recuadro-degradado-titulo">@ViewBag.Perfil.Usuario.NombreCompleto</h1>
             @if (!string.IsNullOrWhiteSpace(ViewBag.Perfil.Preferencia.Puesto_Buscado)) { <p class="recuadro-degradado-subtitulo">Busca trabajo de @ViewBag.Perfil.Preferencia.Puesto_Buscado</p> }
             <ul class="recuadro-degradado-datos" role="list">
-                @if (ViewBag.Perfil.Perfil.Ubicacion != null) { <li><icono nombre="near-me" tamano="18" />@ViewBag.Perfil.Perfil.Ubicacion</li> }
-                <li><icono nombre="mail" tamano="18" /><a href="mailto:@ViewBag.Perfil.Usuario.Email">@ViewBag.Perfil.Usuario.Email</a></li>
-                @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Telefono)) { <li><icono nombre="message-writing" tamano="18" /><a href="tel:@ViewBag.Perfil.Perfil.TelefonoLink">@ViewBag.Perfil.Perfil.Telefono</a></li> }
-                @if (ViewBag.Perfil.EnlaceSitio != null) { <li><icono nombre="globe" tamano="18" /><a href="@ViewBag.Perfil.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Perfil.CV.Sitio_Web</a></li> }
+                @if (ViewBag.Perfil.Perfil.Ubicacion != null) { <li data-icono="near-me">@ViewBag.Perfil.Perfil.Ubicacion</li> }
+                <li data-icono="mail"><a href="mailto:@ViewBag.Perfil.Usuario.Email">@ViewBag.Perfil.Usuario.Email</a></li>
+                @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Telefono)) { <li data-icono="message-writing"><a href="tel:@ViewBag.Perfil.Perfil.TelefonoLink">@ViewBag.Perfil.Perfil.Telefono</a></li> }
+                @if (ViewBag.Perfil.EnlaceSitio != null) { <li data-icono="globe"><a href="@ViewBag.Perfil.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Perfil.CV.Sitio_Web</a></li> }
             </ul>
             @if (ViewBag.Perfil.Perfil.Estado_Busqueda != null) { <span class="badge badge-info">@ViewBag.Perfil.Perfil.Estado_Busqueda</span> }
         </div>
         <div class="recuadro-degradado-acciones">
             @if (ViewBag.Perfil.TieneCV)
             {
-                <a class="btn btn-primary" href="/Publicaciones/CV/@ViewBag.IDPostulacion"><icono nombre="download" />Descargar CV</a>
+                <a class="btn btn-primary" href="/Publicaciones/CV/@ViewBag.IDPostulacion" data-icono="download">Descargar CV</a>
             }
             else
             {
@@ -110,7 +110,7 @@
                         @foreach (FormacionItem f in ViewBag.Perfil.Formaciones)
                         {
                             <li class="linea-tiempo-item">
-                                <span class="cuadro-md" aria-hidden="true"><icono nombre="book" /></span>
+                                <span class="cuadro-md" aria-hidden="true" data-icono="book"></span>
                                 <div class="linea-tiempo-contenido">
                                     <h3 class="linea-tiempo-titulo">@f.Titulo</h3>
                                     <p class="texto-fuerte">@f.Institucion</p>

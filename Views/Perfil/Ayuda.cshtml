@@ -7,8 +7,7 @@
         <span class="badge badge-acento">Centro de ayuda</span>
         <h1 class="hero-degradado-titulo">¿En qué te podemos ayudar?</h1>
         <form class="ancho-medio" role="search">
-            <div class="control-con-icono">
-                <icono nombre="search" />
+            <div class="control-con-icono" data-icono="search">
                 <label class="visually-hidden" for="buscar-ayuda">Buscar en la ayuda</label>
                 <input class="form-control" id="buscar-ayuda" type="search" placeholder="Por ejemplo: contraseña, postulación, CV…" data-filtrar-preguntas />
             </div>
@@ -22,7 +21,7 @@
         {
             <li>
                 <a class="tarjeta-sombra" href="#@categoria.Id">
-                    <span class="caja-icono"><icono nombre="@categoria.Icono" /></span>
+                    <span class="caja-icono" data-icono="@categoria.Icono"></span>
                     <strong>@categoria.Nombre</strong>
                     <span>@categoria.Texto</span>
                 </a>

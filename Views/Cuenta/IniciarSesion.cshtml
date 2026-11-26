@@ -16,21 +16,19 @@
 
         <div class="campo" aria-invalid="@(ViewBag.Errores.HayGenerales || ViewBag.Errores.Tiene("Email") ? "true" : null)">
             <label class="form-label" for="Email">Email</label>
-            <div class="control-con-icono">
-                <icono nombre="mail" />
+            <div class="control-con-icono" data-icono="mail">
                 <input class="form-control" id="Email" name="Email" value="@ViewBag.Formulario.Email" type="text" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="tu@mail.com" required autofocus />
             </div>
-            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
+            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)" data-icono="warning">@ViewBag.Errores.Mensaje("Email", "Ingresá un email válido")</span>
         </div>
 
         <div class="campo" aria-invalid="@(ViewBag.Errores.HayGenerales || ViewBag.Errores.Tiene("Contrasena") ? "true" : null)">
             <label class="form-label" for="Contrasena">Contraseña</label>
-            <div class="control-con-icono">
-                <icono nombre="lock" />
+            <div class="control-con-icono" data-icono="lock">
                 <input class="form-control" id="Contrasena" name="Contrasena" type="password" value="" autocomplete="current-password" placeholder="Tu contraseña" required />
-                <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave data-icono="eye"></button>
             </div>
-            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Contrasena", "Ingresá tu contraseña")</span>
+            <span class="invalid-feedback" hidden="@(ViewBag.Errores.HayGenerales ? "hidden" : null)" data-icono="warning">@ViewBag.Errores.Mensaje("Contrasena", "Ingresá tu contraseña")</span>
         </div>
 
         @if (ViewBag.PideCaptcha == true)
@@ -54,7 +52,7 @@
 
     <div class="separador"><span>o</span></div>
 
-    <a class="btn btn-outline-block" href="/Cuenta/CrearCuenta"><icono nombre="user" />Crear una cuenta nueva</a>
+    <a class="btn btn-outline-block" href="/Cuenta/CrearCuenta" data-icono="user">Crear una cuenta nueva</a>
 
     <p class="nota-centrada">Al ingresar aceptás los <a class="resaltado" href="/Home/Terminos">Términos</a> y la <a class="resaltado" href="/Home/Privacy">Política de privacidad</a> de Workly.</p>
 </div>
