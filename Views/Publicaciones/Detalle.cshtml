@@ -46,10 +46,10 @@
     }
 
     <section aria-labelledby="postulantes-titulo">
-        <h2 class="h4" id="postulantes-titulo">Postulantes (@ViewBag.Postulantes.Count)</h2>
+        <h2 id="postulantes-titulo">Postulantes (@ViewBag.Postulantes.Count)</h2>
         @if (ViewBag.Postulantes.Count == 0)
         {
-            <div class="recuadro-punteado recuadro-punteado-chico">
+            <div class="recuadro-punteado-chico">
                 <p>@(ViewBag.Oferta.Estado_Publicacion == "Aprobada" ? "Todavía no se postuló nadie. Cuando alguien se postule, lo vas a ver acá con su perfil y su CV." : "Cuando la búsqueda esté publicada, acá vas a ver a quienes se postulen.")</p>
             </div>
         }
@@ -83,7 +83,7 @@
                                         </p>
                                         <span class="small text-body-secondary">Se postuló el @Vistas.Fecha(p.Fecha)</span>
                                     </div>
-                                    <div class="fila acciones-envueltas">
+                                    <div class="acciones-envueltas">
                                         @foreach (var (otraEtapa, estado, boton) in Postulaciones.EtapasEmpresa)
                                         {
                                             if (otraEtapa != etapa)

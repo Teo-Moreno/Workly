@@ -1,9 +1,9 @@
-<li class="burbuja @(Model.EsDelUsuario ? "burbuja-azul" : "burbuja-gris")">
+<li class="@(Model.EsDelUsuario ? "burbuja-azul" : "burbuja-gris")">
     <span class="visually-hidden">@(Model.EsDelUsuario ? "Vos:" : "Asistente:")</span>
     <p>@Model.Texto</p>
     @if (Model.Ofertas.Count > 0)
     {
-        <div class="columna-espaciada espacio-arriba">
+        <div class="columna-espaciada-arriba">
             @foreach (Oferta oferta in Model.Ofertas)
             {
                 <partial name="_OfertaTarjeta" model="oferta" />

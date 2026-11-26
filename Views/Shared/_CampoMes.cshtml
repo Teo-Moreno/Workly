@@ -1,4 +1,4 @@
-<div class="campo @(Model.Error != null ? "campo-error" : "")">
+<div class="campo" aria-invalid="@(Model.Error != null ? "true" : null)">
     <label class="form-label" for="@Model.Id">@Model.Etiqueta</label>
     <div class="selector" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
         <input class="form-control selector-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"

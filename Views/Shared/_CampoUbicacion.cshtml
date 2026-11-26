@@ -1,5 +1,5 @@
 <div class="columnas" data-ubicacion>
-    <div class="campo @ViewBag.Errores.Clase(Model.NombrePais)">
+    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene(Model.NombrePais) ? "true" : null)">
         <label class="form-label" for="@Model.IdPais">País</label>
         <select class="form-select" id="@Model.IdPais" name="@Model.NombrePais" required="@Model.Requerido" data-selector-pais>
             @if (Model.Paises.Count != 1)
@@ -13,7 +13,7 @@
         </select>
         <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Model.NombrePais, "Elegí el país")</span>
     </div>
-    <div class="campo @ViewBag.Errores.Clase(Model.NombreProvincia)">
+    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene(Model.NombreProvincia) ? "true" : null)">
         <label class="form-label" for="@Model.IdProvincia">@Model.EtiquetaProvincia</label>
         <select class="form-select" id="@Model.IdProvincia" name="@Model.NombreProvincia" required="@(Model.Requerido && !Model.TodoElPais)" data-selector-provincia>
             <option value="">@(Model.TodoElPais ? "Todo el país" : "Elegí la provincia")</option>

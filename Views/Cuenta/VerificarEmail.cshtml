@@ -11,7 +11,7 @@
     <form class="grilla-campos" action="/Cuenta/VerificarEmail" method="post" novalidate data-formulario-real>
         @Html.AntiForgeryToken()
         <input type="hidden" id="Token" name="Token" value="@ViewBag.Formulario.Token" />
-        <div class="campo @ViewBag.Errores.Clase("Codigo")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Codigo") ? "true" : null)">
             <label class="form-label" for="Codigo">Código</label>
             <input class="form-control entrada-grande" id="Codigo" name="Codigo" value="@ViewBag.Formulario.Codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="@VerificacionEmail.Digitos"
                    pattern="\d{@VerificacionEmail.Digitos}" placeholder="000000" required autofocus />

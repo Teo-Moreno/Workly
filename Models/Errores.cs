@@ -14,10 +14,6 @@ public class Errores
     public bool Tiene(string campo) =>
         _estado.TryGetValue(campo, out var entrada) && entrada.Errors.Count > 0;
 
-    public string Clase(string campo) => Tiene(campo) ? "campo-error" : "";
-
-    public string ClaseConGenerales(string campo) => HayGenerales ? "campo-error campo-sin-mensaje" : Clase(campo);
-
     public string Mensaje(string campo, string porDefecto) =>
         Tiene(campo) ? _estado[campo]!.Errors[0].ErrorMessage : porDefecto;
 

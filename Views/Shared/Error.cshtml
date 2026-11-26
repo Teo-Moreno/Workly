@@ -3,8 +3,8 @@
 }
 
 <section class="container centro-alto">
-    <span class="caja-icono-acento caja-icono-72"><icono nombre="warning-outline" /></span>
-    <h1 class="h1">Algo salió mal</h1>
+    <span class="caja-icono-acento"><icono nombre="warning-outline" /></span>
+    <h1>Algo salió mal</h1>
     <p class="lead">No pudimos procesar tu pedido. Probá de nuevo en unos minutos o volvé al inicio.</p>
 
     @if (!string.IsNullOrEmpty(ViewBag.CodigoSolicitud))
@@ -12,7 +12,7 @@
         <p class="small text-body-secondary">Código de la solicitud: <code>@ViewBag.CodigoSolicitud</code></p>
     }
 
-    <div class="fila fila-envolver">
+    <div class="fila-envolver">
         <a class="btn btn-primary" href="/">Volver al inicio</a>
         <a class="btn btn-outline-primary" href="/Perfil/Ayuda">Ir a la ayuda</a>
     </div>

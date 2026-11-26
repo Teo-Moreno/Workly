@@ -6,6 +6,17 @@
   const rutaIconos = "/img/iconos.svg";
   const CAMPO = ".campo, .grupo-campos, .columna-items";
 
+  const marcarError = (campo, error) => {
+    if (!campo) return;
+    if (error) campo.setAttribute("aria-invalid", "true");
+    else campo.removeAttribute("aria-invalid");
+  };
+
+  const mostrarMensaje = (campo) => {
+    const mensaje = campo && $(".invalid-feedback", campo);
+    if (mensaje) mensaje.hidden = false;
+  };
+
   const icono = (nombre, tamano = 24) =>
     `<svg class="icono" width="${tamano}" height="${tamano}" aria-hidden="true" focusable="false"><use href="${rutaIconos}#${nombre}"></use></svg>`;
 
@@ -67,15 +78,15 @@
         ok = control.checked;
       } else if (control.value.trim() === "") {
         if (!control.required) {
-          campo?.classList.remove("campo-error");
+          marcarError(campo, false);
           return;
         }
         ok = false;
       } else {
         ok = control.checkValidity();
       }
-      campo?.classList.toggle("campo-error", !ok);
-      if (!ok) campo?.classList.remove("campo-sin-mensaje");
+      marcarError(campo, !ok);
+      if (!ok) mostrarMensaje(campo);
       if (!ok && valido) {
         control.focus();
         valido = false;
@@ -87,10 +98,10 @@
   $$("form .campo input, form .campo select, form .campo textarea").forEach((control) => {
     const quitarError = () => {
       const campo = control.closest(CAMPO);
-      if (!campo?.classList.contains("campo-error")) return;
-      campo.classList.remove("campo-sin-mensaje");
+      if (!campo?.hasAttribute("aria-invalid")) return;
+      mostrarMensaje(campo);
       const ok = control.type === "radio" ? true : control.type === "checkbox" ? control.checked : control.value.trim() !== "" && control.checkValidity();
-      if (ok) campo.classList.remove("campo-error");
+      if (ok) marcarError(campo, false);
     };
     control.addEventListener("input", quitarError);
     control.addEventListener("change", quitarError);
@@ -116,8 +127,8 @@
     if (extensiones.length && !extensiones.includes(extension)) error = input.dataset.errorFormato || "Formato no permitido";
     else if (archivo.size > maximo) error = `El archivo pesa más de ${Math.round(maximo / 1024 / 1024)} MB`;
 
-    campo?.classList.toggle("campo-error", Boolean(error));
-    campo?.classList.remove("campo-sin-mensaje");
+    marcarError(campo, Boolean(error));
+    mostrarMensaje(campo);
     if (!error) return true;
 
     input.value = "";
@@ -133,25 +144,25 @@
     const input = $("input[type=file]", zona);
     const nombre = $("[data-zona-archivo-nombre]", zona);
     const textoInicial = nombre?.textContent;
-    const teniaArchivo = zona.classList.contains("tiene-archivo");
+    const teniaArchivo = zona.hasAttribute("data-archivo");
     const mostrar = (archivo) => {
       if (!archivo) return;
       if (input && !archivoValido(input, archivo)) {
-        zona.classList.toggle("tiene-archivo", teniaArchivo);
+        zona.toggleAttribute("data-archivo", teniaArchivo);
         if (nombre) nombre.textContent = textoInicial;
         return;
       }
-      zona.classList.add("tiene-archivo");
+      zona.setAttribute("data-archivo", "");
       if (nombre) nombre.textContent = archivo.name;
     };
     ["dragenter", "dragover"].forEach((tipo) =>
       zona.addEventListener(tipo, (evento) => {
         evento.preventDefault();
-        zona.classList.add("esta-arrastrando");
+        zona.setAttribute("data-arrastrando", "");
       })
     );
     ["dragleave", "drop"].forEach((tipo) =>
-      zona.addEventListener(tipo, () => zona.classList.remove("esta-arrastrando"))
+      zona.addEventListener(tipo, () => zona.removeAttribute("data-arrastrando"))
     );
     zona.addEventListener("drop", (evento) => {
       evento.preventDefault();
@@ -172,14 +183,15 @@
       actual = indice;
       pasos.forEach((paso, i) => (paso.hidden = i !== indice));
       indicadores.forEach((indicador, i) => {
-        indicador.classList.toggle("esta-completo", i < indice);
-        indicador.classList.toggle("esta-actual", i === indice);
+        indicador.toggleAttribute("data-completo", i < indice);
+        if (i === indice) indicador.setAttribute("aria-current", "step");
+        else indicador.removeAttribute("aria-current");
         if (i === indice) indicador.setAttribute("aria-current", "step");
         else indicador.removeAttribute("aria-current");
       });
       $("[data-paso-actual]")?.replaceChildren(String(indice + 1));
       if (enfocar) {
-        const primerCampo = $(".campo-error .form-control, .campo-error .form-select, .campo-error input", pasos[indice]) ||
+        const primerCampo = $("[aria-invalid] .form-control, [aria-invalid] .form-select, [aria-invalid] input", pasos[indice]) ||
           pasos[indice].querySelector("input:not([type=hidden]), select, textarea");
         primerCampo?.focus({ preventScroll: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -212,20 +224,20 @@
       snackbar("Revisá los campos marcados en rojo.", "error");
     });
 
-    const pasoConError = pasos.findIndex((paso) => paso.querySelector(".campo-error"));
+    const pasoConError = pasos.findIndex((paso) => paso.querySelector("[aria-invalid]"));
     mostrar(Math.max(pasoConError, 0), pasoConError >= 0);
   });
 
   const ponerCargando = (boton) => {
-    if (!boton || boton.classList.contains("esta-cargando")) return;
-    boton.classList.add("esta-cargando");
+    if (!boton || boton.getAttribute("aria-busy") === "true") return;
+    boton.setAttribute("aria-busy", "true");
     boton.setAttribute("aria-disabled", "true");
     boton.insertAdjacentHTML("afterbegin", `<span class="spinner-border-sm${boton.matches("[class*='btn-outline'], [class*='btn-link'], .btn-ancho, .btn-archivo, .btn-archivo-block, .btn-turquesa, .btn-solo-celu, .btn-chip") ? "" : " spinner-claro"}" aria-hidden="true" data-spinner-boton></span>`);
   };
 
   const quitarCargando = (boton) => {
     $("[data-spinner-boton]", boton)?.replaceWith();
-    boton.classList.remove("esta-cargando");
+    boton.removeAttribute("aria-busy");
     boton.removeAttribute("aria-disabled");
   };
 
@@ -268,11 +280,11 @@
   $$("select[data-seleccion]").forEach((select) => {
     const id = `seleccion-${++selecciones}`;
     const caja = document.createElement("div");
-    caja.className = `seleccion ${select.dataset.seleccion}`.trim();
+    caja.className = select.dataset.seleccion || "seleccion";
     const boton = document.createElement("button");
     boton.type = "button";
     boton.id = `${id}-boton`;
-    boton.className = select.classList.contains("form-select-sm") ? "form-control-sm seleccion-boton" : select.classList.contains("form-select") ? "form-control seleccion-boton" : `${select.classList[select.classList.length - 1]} seleccion-boton`;
+    boton.className = select.classList.contains("form-select-sm") ? "form-control-sm seleccion-boton" : select.classList.contains("form-select") ? "form-control seleccion-boton" : "seleccion-boton-plano";
     boton.setAttribute("aria-haspopup", "listbox");
     boton.setAttribute("aria-expanded", "false");
     boton.setAttribute("aria-controls", `${id}-lista`);
@@ -297,7 +309,7 @@
 
     select.before(caja);
     caja.append(boton, lista, select);
-    select.classList.add("seleccion-nativo");
+    select.setAttribute("data-nativo", "");
     select.tabIndex = -1;
     select.setAttribute("aria-hidden", "true");
 
@@ -324,16 +336,16 @@
     const marcar = (i) => {
       if (!opciones.length) return;
       activa = Math.max(0, Math.min(i, opciones.length - 1));
-      [...lista.children].forEach((item, k) => item.classList.toggle("esta-activa", k === activa));
+      [...lista.children].forEach((item, k) => item.toggleAttribute("data-activa", k === activa));
       const item = lista.children[activa];
       lista.setAttribute("aria-activedescendant", item.id);
       item.scrollIntoView({ block: "nearest" });
     };
     const abrir = () => {
-      $$(".seleccion.esta-abierta").forEach((otra) => otra !== caja && otra.dispatchEvent(new Event("cerrar")));
+      $$("[data-abierta]").forEach((otra) => otra !== caja && otra.dispatchEvent(new Event("cerrar")));
       armar();
       lista.hidden = false;
-      caja.classList.add("esta-abierta");
+      caja.setAttribute("data-abierta", "");
       boton.setAttribute("aria-expanded", "true");
       lista.focus({ preventScroll: true });
       marcar(Math.max(opciones.findIndex((opcion) => opcion.selected), 0));
@@ -341,7 +353,7 @@
     const cerrar = (enfocar = true) => {
       if (lista.hidden) return;
       lista.hidden = true;
-      caja.classList.remove("esta-abierta");
+      caja.removeAttribute("data-abierta");
       boton.setAttribute("aria-expanded", "false");
       lista.removeAttribute("aria-activedescendant");
       if (enfocar) boton.focus({ preventScroll: true });
@@ -409,7 +421,7 @@
   const mostrarCargando = (destino) => {
     const contenedor = typeof destino === "string" ? $(destino) : destino;
     if (!contenedor) return;
-    contenedor.classList.add("esta-buscando");
+    contenedor.setAttribute("data-buscando", "");
     contenedor.setAttribute("aria-busy", "true");
     const aviso = $("[data-cargando-resultados]", contenedor);
     if (aviso) $("[data-cargando-titulo]", aviso).textContent = aviso.dataset.texto;
@@ -449,7 +461,7 @@
       const error = $("template[data-cargando-error]", zona);
       contenido.replaceChildren(error ? error.content.cloneNode(true) : "");
     }
-    zona.classList.remove("esta-buscando");
+    zona.removeAttribute("data-buscando");
     zona.removeAttribute("aria-busy");
   };
 
@@ -463,8 +475,8 @@
 
   window.addEventListener("pageshow", (evento) => {
     if (!evento.persisted) return;
-    $$(".esta-buscando").forEach((contenedor) => {
-      contenedor.classList.remove("esta-buscando");
+    $$("[data-buscando]").forEach((contenedor) => {
+      contenedor.removeAttribute("data-buscando");
       contenedor.removeAttribute("aria-busy");
     });
     $$("[data-spinner-boton]").forEach((spinner) => quitarCargando(spinner.parentElement));
@@ -593,9 +605,9 @@
         const indice = anio * 12 + mes - 1;
         boton.disabled = !permitirFuturo && indice > mesActual;
         const esElegido = elegido && elegido.mes === mes && elegido.anio === anio;
-        boton.classList.toggle("esta-elegido", Boolean(esElegido));
         boton.setAttribute("aria-pressed", String(Boolean(esElegido)));
-        boton.classList.toggle("es-actual", indice === mesActual);
+        if (indice === mesActual) boton.setAttribute("aria-current", "date");
+        else boton.removeAttribute("aria-current");
       });
     };
 
@@ -610,7 +622,7 @@
       dibujar();
       panel.hidden = false;
       abrir.setAttribute("aria-expanded", "true");
-      (botonesMes.find((b) => b.classList.contains("esta-elegido")) || botonesMes.find((b) => !b.disabled))?.focus();
+      (botonesMes.find((b) => b.getAttribute("aria-pressed") === "true") || botonesMes.find((b) => !b.disabled))?.focus();
     });
     $("[data-selector-mes-anterior]", selector).addEventListener("click", () => { anio--; dibujar(); });
     siguiente.addEventListener("click", () => { if (anio < anioMaximo) { anio++; dibujar(); } });
@@ -657,7 +669,7 @@
         entrada.required = !casilla.checked;
         if (casilla.checked) {
           entrada.value = "";
-          entrada.closest(CAMPO)?.classList.remove("campo-error");
+          marcarError(entrada.closest(CAMPO), false);
         }
       });
     };
@@ -722,7 +734,7 @@
       const fin = aMes(valores.Fin);
       const campoFin = formulario.elements.Fin?.closest(CAMPO);
       if (fin !== null && inicio !== null && fin < inicio) {
-        campoFin?.classList.add("campo-error");
+        marcarError(campoFin, true);
         const mensaje = campoFin && $(".invalid-feedback", campoFin);
         if (mensaje) {
           [...mensaje.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).forEach((n) => n.remove());
@@ -841,7 +853,7 @@
       $$("[data-columna]", tablero).forEach((columna) => {
         const cantidad = $$("[data-postulacion]", columna).length;
         $("[data-columna-contador]", columna).textContent = String(cantidad);
-        columna.classList.toggle("esta-vacia", cantidad === 0);
+        $(".columna-gris-vacio", columna).hidden = cantidad !== 0;
       });
     };
 
@@ -888,14 +900,14 @@
       if (!tarjeta) return;
       arrastrando = tarjeta;
       origen = { columna: tarjeta.closest("[data-columna]"), siguiente: tarjeta.nextElementSibling };
-      tarjeta.classList.add("esta-arrastrando");
+      tarjeta.setAttribute("data-arrastrando", "");
       evento.dataTransfer.effectAllowed = "move";
       evento.dataTransfer.setData("text/plain", tarjeta.dataset.postulacion);
     });
     tablero.addEventListener("dragend", () => {
-      arrastrando?.classList.remove("esta-arrastrando");
+      arrastrando?.removeAttribute("data-arrastrando");
       arrastrando = null;
-      $$("[data-columna]", tablero).forEach((c) => c.classList.remove("es-destino"));
+      $$("[data-columna]", tablero).forEach((c) => c.removeAttribute("data-destino"));
     });
 
     $$("[data-columna]", tablero).forEach((columna) => {
@@ -903,8 +915,8 @@
       columna.addEventListener("dragover", (evento) => {
         if (!arrastrando) return;
         evento.preventDefault();
-        columna.classList.add("es-destino");
-        const despues = $$("[data-postulacion]:not(.esta-arrastrando)", lista).find((tarjeta) => {
+        columna.setAttribute("data-destino", "");
+        const despues = $$("[data-postulacion]:not([data-arrastrando])", lista).find((tarjeta) => {
           const caja = tarjeta.getBoundingClientRect();
           return evento.clientY < caja.top + caja.height / 2;
         });
@@ -912,11 +924,11 @@
         else lista.insertBefore(arrastrando, $(".columna-gris-vacio", lista));
       });
       columna.addEventListener("dragleave", (evento) => {
-        if (!columna.contains(evento.relatedTarget)) columna.classList.remove("es-destino");
+        if (!columna.contains(evento.relatedTarget)) columna.removeAttribute("data-destino");
       });
       columna.addEventListener("drop", (evento) => {
         evento.preventDefault();
-        columna.classList.remove("es-destino");
+        columna.removeAttribute("data-destino");
         if (!arrastrando || !origen) return;
         actualizarContadores();
         if (origen.columna !== columna) guardar(arrastrando, origen.columna, origen.siguiente);
@@ -1040,14 +1052,16 @@
       const datos = new FormData(formulario);
 
       const propio = document.createElement("li");
-      propio.className = "burbuja burbuja-azul burbuja-nueva";
+      propio.className = "burbuja-azul";
+      propio.setAttribute("data-nueva", "");
       propio.innerHTML = '<span class="visually-hidden">Vos:</span><p></p>';
       $("p", propio).textContent = texto;
       agregar(propio, "nearest");
       entrada.value = "";
 
       const escribiendo = document.createElement("li");
-      escribiendo.className = "burbuja burbuja-gris burbuja-puntos burbuja-nueva";
+      escribiendo.className = "burbuja-puntos";
+      escribiendo.setAttribute("data-nueva", "");
       escribiendo.setAttribute("role", "status");
       escribiendo.innerHTML = '<span class="visually-hidden">El asistente está escribiendo</span><span class="puntos-saltando" aria-hidden="true"><span></span><span></span><span></span></span>';
       agregar(escribiendo, "nearest");
@@ -1067,7 +1081,7 @@
         plantilla.innerHTML = (await respuesta.text()).trim();
         const nuevo = plantilla.content.firstElementChild;
         if (!nuevo) throw new Error("");
-        nuevo.classList.add("burbuja-nueva");
+        nuevo.setAttribute("data-nueva", "");
         escribiendo.replaceWith();
         agregar(nuevo, "start");
         $("[data-asistente-reiniciar]")?.removeAttribute("hidden");

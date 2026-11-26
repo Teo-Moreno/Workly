@@ -1,4 +1,4 @@
-<div class="campo @ViewBag.Errores.Clase(Model.Nombre)">
+<div class="campo" aria-invalid="@(ViewBag.Errores.Tiene(Model.Nombre) ? "true" : null)">
     <label class="form-label" for="@Model.Id">Teléfono <span class="campo-opcional">(opcional)</span></label>
     <div class="control-con-prefijo">
         <span class="control-prefijo" data-prefijo-telefono>@Model.Prefijo</span>

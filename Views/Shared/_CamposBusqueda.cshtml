@@ -1,6 +1,6 @@
 @if (Model.IncluirEstado)
 {
-    <fieldset class="grupo-campos @ViewBag.Errores.Clase("EstadoBusqueda")">
+    <fieldset class="grupo-campos" aria-invalid="@(ViewBag.Errores.Tiene("EstadoBusqueda") ? "true" : null)">
         <legend class="form-label">¿Estás buscando trabajo?</legend>
         <div class="grilla-tres-chica">
             @foreach (var estado in Catalogos.EstadosBusqueda)
@@ -16,7 +16,7 @@
 }
 
 <div class="columnas">
-    <div class="campo @ViewBag.Errores.Clase("PuestoBuscado")">
+    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("PuestoBuscado") ? "true" : null)">
         <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="campo-opcional">(opcional)</span></label>
         <div class="control-con-icono">
             <icono nombre="briefcase" />
@@ -39,7 +39,7 @@
 
 <fieldset class="grupo-campos">
     <legend class="form-label">Nivel de experiencia <span class="campo-opcional">(podés elegir más de uno)</span></legend>
-    <div class="fila-chapitas fila-chapitas-holgada">
+    <div class="fila-chapitas-holgada">
         @foreach (var nivel in Catalogos.Niveles)
         {
             <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Niveles" value="@nivel" checked="@Model.Niveles.Contains(nivel)" /><span class="btn btn-chip">@nivel</span></label>
@@ -49,7 +49,7 @@
 
 <fieldset class="grupo-campos">
     <legend class="form-label">Modalidad <span class="campo-opcional">(podés elegir más de una)</span></legend>
-    <div class="fila-chapitas fila-chapitas-holgada">
+    <div class="fila-chapitas-holgada">
         @foreach (var modalidad in Catalogos.Modalidades)
         {
             <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Modalidades" value="@modalidad" checked="@Model.Modalidades.Contains(modalidad)" /><span class="btn btn-chip">@modalidad</span></label>
@@ -91,7 +91,7 @@
             }
         </select>
     </div>
-    <div class="campo @ViewBag.Errores.Clase(ViewBag.Errores.Tiene("SalarioMaximo") ? "SalarioMaximo" : "SalarioMinimo")">
+    <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("SalarioMaximo") || ViewBag.Errores.Tiene("SalarioMinimo") ? "true" : null)">
         <span class="form-label">Expectativa salarial bruta por mes <span class="campo-opcional">(opcional)</span></span>
         <div class="fila-junta">
             <label class="visually-hidden" for="@(Model.Prefijo)-salario-min">Mínimo</label>
@@ -104,7 +104,7 @@
     </div>
 </div>
 
-<fieldset class="grupo-campos @ViewBag.Errores.Clase("Habilidades")" data-habilidades>
+<fieldset class="grupo-campos" aria-invalid="@(ViewBag.Errores.Tiene("Habilidades") ? "true" : null)" data-habilidades>
     <legend class="form-label">Habilidades <span class="campo-opcional">(elegí un sector y marcá las que tengas)</span></legend>
     @if (Model.Sectores.Count > 0)
     {
@@ -119,7 +119,7 @@
             </select>
         </div>
     }
-    <div class="fila-chapitas fila-chapitas-holgada" data-habilidades-lista>
+    <div class="fila-chapitas-holgada" data-habilidades-lista>
         @foreach (string habilidad in Model.HabilidadesPropias)
         {
             <label class="chip-seleccion" data-sector=""><input class="btn-check" type="checkbox" name="Habilidades" value="@habilidad" checked /><span class="btn btn-chip">@habilidad</span></label>
@@ -139,7 +139,7 @@
     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Habilidades", "Revisá las habilidades")</span>
 </fieldset>
 
-<fieldset class="grupo-campos @ViewBag.Errores.Clase("Idiomas")" data-idiomas>
+<fieldset class="grupo-campos" aria-invalid="@(ViewBag.Errores.Tiene("Idiomas") ? "true" : null)" data-idiomas>
     <legend class="form-label">Idiomas <span class="campo-opcional">(opcional)</span></legend>
     <ul class="lista-junta" role="list" data-idiomas-lista>
         @foreach ((int IDIdioma, string Nivel) fila in Model.Idiomas)

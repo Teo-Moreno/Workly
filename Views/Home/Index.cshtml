@@ -3,7 +3,7 @@
 }
 
 <section>
-    <div class="container hero-interior">
+    <div class="container hero">
         <div class="hero-texto">
             <h1 class="hero-titulo display-1">Encontrá el trabajo que <span class="text-secondary">encaja</span> con vos.</h1>
 
@@ -12,7 +12,7 @@
                 postulate y seguí cada proceso desde tu tablero.
             </p>
 
-            <form class="barra-sombra barra-sombra-ancha" action="/Empleos" method="get" role="search">
+            <form class="barra-sombra-ancha" action="/Empleos" method="get" role="search">
                 <label class="barra-sombra-campo">
                     <icono nombre="search" />
                     <span class="barra-sombra-textos">
@@ -31,13 +31,13 @@
     <div class="container">
         <header class="titulos-centrados">
             <span class="badge">Cómo funciona</span>
-            <h2 class="h1" id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
+            <h2 id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
         </header>
 
         <ol class="grilla-tres-ancha" role="list">
             <li class="tarjeta-grande">
                 <div class="tarjeta-grande-fila">
-                    <span class="caja-icono-principal caja-icono-52"><icono nombre="user-square" /></span>
+                    <span class="caja-icono-principal"><icono nombre="user-square" /></span>
                     <span class="numero-acento" aria-hidden="true">01</span>
                 </div>
                 <h3 class="tarjeta-grande-titulo">Creá tu perfil laboral</h3>
@@ -45,7 +45,7 @@
             </li>
             <li class="tarjeta-grande">
                 <div class="tarjeta-grande-fila">
-                    <span class="caja-icono-principal caja-icono-52"><icono nombre="search" /></span>
+                    <span class="caja-icono-principal"><icono nombre="search" /></span>
                     <span class="numero-acento" aria-hidden="true">02</span>
                 </div>
                 <h3 class="tarjeta-grande-titulo">Buscá en todos lados a la vez</h3>
@@ -53,7 +53,7 @@
             </li>
             <li class="tarjeta-grande">
                 <div class="tarjeta-grande-fila">
-                    <span class="caja-icono-principal caja-icono-52"><icono nombre="circle-check" /></span>
+                    <span class="caja-icono-principal"><icono nombre="circle-check" /></span>
                     <span class="numero-acento" aria-hidden="true">03</span>
                 </div>
                 <h3 class="tarjeta-grande-titulo">Postulate y hacé seguimiento</h3>
@@ -74,22 +74,22 @@
 
         <ul class="grilla-dos" role="list">
             <li class="tarjeta-transparente">
-                <span class="caja-icono-secundario caja-icono-44"><icono nombre="search" /></span>
+                <span class="caja-icono-secundario"><icono nombre="search" /></span>
                 <h3 class="tarjeta-transparente-titulo">Más ofertas</h3>
                 <p class="tarjeta-transparente-texto">Las búsquedas que publican empresas y personas en Workly, junto con las de otros sitios.</p>
             </li>
             <li class="tarjeta-transparente">
-                <span class="caja-icono-secundario caja-icono-44"><icono nombre="circle-check-outline" /></span>
+                <span class="caja-icono-secundario"><icono nombre="circle-check-outline" /></span>
                 <h3 class="tarjeta-transparente-titulo">Búsquedas revisadas</h3>
                 <p class="tarjeta-transparente-texto">Las empresas se registran con su CUIT y las búsquedas que publican las personas se revisan antes de salir.</p>
             </li>
             <li class="tarjeta-transparente">
-                <span class="caja-icono-secundario caja-icono-44"><icono nombre="settings" /></span>
+                <span class="caja-icono-secundario"><icono nombre="settings" /></span>
                 <h3 class="tarjeta-transparente-titulo">A tu medida</h3>
                 <p class="tarjeta-transparente-texto">Filtrá por modalidad, tipo de empleo, fecha y provincia, y guardá qué estás buscando en tu perfil.</p>
             </li>
             <li class="tarjeta-transparente">
-                <span class="caja-icono-secundario caja-icono-44"><icono nombre="checkbox-checked" /></span>
+                <span class="caja-icono-secundario"><icono nombre="checkbox-checked" /></span>
                 <h3 class="tarjeta-transparente-titulo">Más organizado</h3>
                 <p class="tarjeta-transparente-texto">Todas tus postulaciones en un tablero que movés vos, sin planillas ni mails perdidos.</p>
             </li>
@@ -107,7 +107,7 @@
                 {
                     <li>
                         <a class="texto-marca" href="/Empresas/Detalle/@empresa.ID">
-                            <span class="cuadro-sm cuadro-principal" aria-hidden="true"><partial name="_LogoEmpresa" model="empresa" /></span>
+                            <span class="cuadro-sm-principal" aria-hidden="true"><partial name="_LogoEmpresa" model="empresa" /></span>
                             @empresa.Nombre
                         </a>
                     </li>

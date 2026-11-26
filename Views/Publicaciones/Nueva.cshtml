@@ -22,19 +22,19 @@
 
     <form class="grilla-campos card" action="/Publicaciones/Nueva" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
         @Html.AntiForgeryToken()
-        <div class="campo @ViewBag.Errores.Clase("Titulo")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Titulo") ? "true" : null)">
             <label class="form-label" for="Titulo">Título de la búsqueda</label>
             <input class="form-control" id="Titulo" name="Titulo" value="@ViewBag.Formulario.Titulo" maxlength="150" required placeholder="Ej.: Cajero/a para supermercado en Palermo" />
             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Titulo", "Escribí el título de la búsqueda")</span>
         </div>
 
         <div class="columnas">
-            <div class="campo @ViewBag.Errores.Clase("Puesto")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Puesto") ? "true" : null)">
                 <label class="form-label" for="Puesto">Puesto</label>
                 <input class="form-control" id="Puesto" name="Puesto" value="@ViewBag.Formulario.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a" />
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Puesto", "Escribí el puesto")</span>
             </div>
-            <div class="campo @ViewBag.Errores.Clase("IDSector")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("IDSector") ? "true" : null)">
                 <label class="form-label" for="IDSector">Sector</label>
                 <select class="form-select" id="IDSector" name="IDSector" required data-seleccion>
                     <option value="">Elegí el sector</option>
@@ -58,7 +58,7 @@
             }
             else
             {
-                <div class="campo @ViewBag.Errores.Clase("EmpresaNombre")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("EmpresaNombre") ? "true" : null)">
                     <label class="form-label" for="EmpresaNombre">Empresa o negocio que contrata</label>
                     <input class="form-control" id="EmpresaNombre" name="EmpresaNombre" value="@ViewBag.Formulario.EmpresaNombre" maxlength="100" required placeholder="Ej.: Almacén Don Pedro" />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("EmpresaNombre", "Escribí el nombre de la empresa o el negocio")</span>
@@ -66,7 +66,7 @@
             }
         </div>
 
-        <div class="campo @ViewBag.Errores.Clase("Imagen")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Imagen") ? "true" : null)">
             <div class="fila-gris-clara">
                 <span class="cuadro-lg" data-vista-foto aria-hidden="true">
                     @if (!string.IsNullOrEmpty(ViewBag.Formulario.EmpresaLogo))
@@ -90,7 +90,7 @@
             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Imagen", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
         </div>
 
-        <div class="campo @ViewBag.Errores.Clase("Descripcion")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Descripcion") ? "true" : null)">
             <label class="form-label" for="Descripcion">Descripción</label>
             <textarea class="form-control" id="Descripcion" name="Descripcion" rows="8" minlength="40" maxlength="2000" required
                       placeholder="Qué tareas tiene el puesto, qué pedís (experiencia, estudios, horarios) y qué ofrecés.">@ViewBag.Formulario.Descripcion</textarea>
@@ -99,7 +99,7 @@
         </div>
 
         <div class="columnas">
-            <div class="campo @ViewBag.Errores.Clase("Modalidad")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Modalidad") ? "true" : null)">
                 <label class="form-label" for="Modalidad">Modalidad</label>
                 <select class="form-select" id="Modalidad" name="Modalidad" required>
                     <option value="">Elegí una opción</option>
@@ -110,7 +110,7 @@
                 </select>
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Modalidad", "Elegí la modalidad")</span>
             </div>
-            <div class="campo @ViewBag.Errores.Clase("TipoEmpleo")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("TipoEmpleo") ? "true" : null)">
                 <label class="form-label" for="TipoEmpleo">Tipo de empleo</label>
                 <select class="form-select" id="TipoEmpleo" name="TipoEmpleo" required>
                     <option value="">Elegí una opción</option>
@@ -125,24 +125,24 @@
 
         <partial name="_CampoUbicacion" model="ViewBag.Formulario.CampoUbicacion" />
 
-        <div class="campo @ViewBag.Errores.Clase("Ubicacion")">
+        <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Ubicacion") ? "true" : null)">
             <label class="form-label" for="Ubicacion">Localidad o barrio <span class="campo-opcional">(opcional)</span></label>
             <input class="form-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" maxlength="100" placeholder="Ej.: Palermo" />
             <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Ubicacion", "Usá hasta 100 caracteres")</span>
         </div>
 
-        <div class="columnas columnas-tres">
-            <div class="campo @ViewBag.Errores.Clase("Salario")">
+        <div class="columnas-tres">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Salario") ? "true" : null)">
                 <label class="form-label" for="Salario">Salario bruto por mes <span class="campo-opcional">(opcional)</span></label>
                 <input class="form-control" id="Salario" name="Salario" value="@ViewBag.Formulario.Salario" type="number" min="0" step="1000" placeholder="En pesos" />
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Salario", "Ingresá un monto válido")</span>
             </div>
-            <div class="campo @ViewBag.Errores.Clase("CantidadPuestos")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("CantidadPuestos") ? "true" : null)">
                 <label class="form-label" for="CantidadPuestos">Vacantes</label>
                 <input class="form-control" id="CantidadPuestos" name="CantidadPuestos" value="@ViewBag.Formulario.CantidadPuestos" type="number" min="1" max="999" required />
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("CantidadPuestos", "Ingresá entre 1 y 999")</span>
             </div>
-            <div class="campo @ViewBag.Errores.Clase("FechaCierre")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("FechaCierre") ? "true" : null)">
                 <label class="form-label" for="FechaCierre">Recibe postulaciones hasta <span class="campo-opcional">(opcional)</span></label>
                 <input class="form-control" id="FechaCierre" name="FechaCierre" value="@(ViewBag.Formulario.FechaCierre?.ToString("yyyy-MM-dd"))" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
                 <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("FechaCierre", "Elegí una fecha desde hoy")</span>

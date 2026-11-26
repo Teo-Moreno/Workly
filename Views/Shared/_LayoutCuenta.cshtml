@@ -9,7 +9,7 @@
 
     <div class="pantalla-dividida">
         <aside class="lateral-degradado">
-            <a class="logo logo-claro" href="/" aria-label="Workly, ir al inicio">
+            <a class="logo-claro" href="/" aria-label="Workly, ir al inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
@@ -19,15 +19,15 @@
                 <p class="lateral-degradado-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></p>
                 <ul class="lateral-degradado-lista" role="list">
                     <li>
-                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="circle-check-outline" /></span>
+                        <span class="caja-icono-secundario-chica"><icono nombre="circle-check-outline" /></span>
                         <span><strong>Todo en un lugar.</strong> Ofertas de Workly y de otros sitios en una sola búsqueda.</span>
                     </li>
                     <li>
-                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="settings" /></span>
+                        <span class="caja-icono-secundario-chica"><icono nombre="settings" /></span>
                         <span><strong>Tu perfil, tus reglas.</strong> Contá qué buscás y te mostramos ofertas acordes.</span>
                     </li>
                     <li>
-                        <span class="caja-icono-sm caja-icono-secundario"><icono nombre="checkbox-checked" /></span>
+                        <span class="caja-icono-secundario-chica"><icono nombre="checkbox-checked" /></span>
                         <span><strong>Más organizado.</strong> Seguí todas tus postulaciones desde un solo tablero.</span>
                     </li>
                 </ul>
@@ -37,7 +37,7 @@
 
         <main class="contenido-holgado" id="contenido">
             <div class="barra-superior-chica">
-                <a class="resaltado resaltado-principal" href="/"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
+                <a class="resaltado-principal" href="/"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
                 @if (ViewBag.BarraTexto != null)
                 {
                     <p class="text-body-secondary">@ViewBag.BarraTexto <a class="resaltado" href="@ViewBag.BarraUrl">@ViewBag.BarraLink</a></p>

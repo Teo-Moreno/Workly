@@ -12,12 +12,12 @@
         </div>
         <p class="modal-texto">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
 
-        <div class="campo @Model.Errores.Clase("Titulo")">
+        <div class="campo" aria-invalid="@(Model.Errores.Tiene("Titulo") ? "true" : null)">
             <label class="form-label" for="for-titulo">Título o curso</label>
             <input class="form-control" id="for-titulo" name="Titulo" value="@Model.Valores.Titulo" maxlength="150" required placeholder="Ej.: Bachiller en Economía, Técnico en Programación" />
             <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Titulo", "Completá el título o curso")</span>
         </div>
-        <div class="campo @Model.Errores.Clase("Institucion")">
+        <div class="campo" aria-invalid="@(Model.Errores.Tiene("Institucion") ? "true" : null)">
             <label class="form-label" for="for-institucion">Institución</label>
             <input class="form-control" id="for-institucion" name="Institucion" value="@Model.Valores.Institucion" maxlength="150" required list="lista-instituciones" placeholder="Escuela, universidad o academia" />
             <datalist id="lista-instituciones">

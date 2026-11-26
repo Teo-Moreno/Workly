@@ -12,12 +12,12 @@
         </div>
         <p class="modal-texto">Sumá tus trabajos, pasantías o proyectos freelance.</p>
 
-        <div class="campo @Model.Errores.Clase("Puesto")">
+        <div class="campo" aria-invalid="@(Model.Errores.Tiene("Puesto") ? "true" : null)">
             <label class="form-label" for="exp-puesto">Puesto</label>
             <input class="form-control" id="exp-puesto" name="Puesto" value="@Model.Valores.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a, Analista contable" />
             <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Puesto", "Completá el puesto")</span>
         </div>
-        <div class="campo @Model.Errores.Clase("Empresa")">
+        <div class="campo" aria-invalid="@(Model.Errores.Tiene("Empresa") ? "true" : null)">
             <label class="form-label" for="exp-empresa">Empresa</label>
             <input class="form-control" id="exp-empresa" name="Empresa" value="@Model.Valores.Empresa" maxlength="100" required placeholder="Nombre de la empresa" />
             <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Empresa", "Completá la empresa")</span>
@@ -35,7 +35,7 @@
             <span class="form-check-label">Trabajo actualmente acá</span>
         </label>
 
-        <div class="campo @Model.Errores.Clase("Descripcion")">
+        <div class="campo" aria-invalid="@(Model.Errores.Tiene("Descripcion") ? "true" : null)">
             <label class="form-label" for="exp-descripcion">Qué hacías <span class="campo-opcional">(opcional)</span></label>
             <textarea class="form-control" id="exp-descripcion" name="Descripcion" rows="3" maxlength="500" placeholder="Tus tareas y logros principales.">@Model.Valores.Descripcion</textarea>
             <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Descripcion", "Usá hasta 500 caracteres")</span>

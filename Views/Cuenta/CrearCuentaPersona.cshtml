@@ -2,7 +2,7 @@
     ViewData["Title"] = "Crear cuenta";
 }
 
-<div class="columna-angosta columna-media">
+<div class="columna-media">
     <h1 class="titulo-grande">Creá tu cuenta</h1>
     <p class="subtitulo-pegado">Solo te pedimos lo básico. El resto lo completás después desde tu perfil.</p>
 
@@ -17,26 +17,26 @@
 
     <form class="sin-grilla" action="/Cuenta/CrearCuentaPersona" method="post" novalidate data-formulario-real>
         @Html.AntiForgeryToken()
-        <fieldset class="grilla-campos paso-animado">
+        <fieldset class="paso-animado">
             <legend class="visually-hidden">Tus datos</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
                 <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
             <div class="columnas">
-                <div class="campo @ViewBag.Errores.Clase("Nombre")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Nombre") ? "true" : null)">
                     <label class="form-label" for="Nombre">Nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Nombre", "Completá tu nombre")</span>
                 </div>
-                <div class="campo @ViewBag.Errores.Clase("Apellido")">
+                <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Apellido") ? "true" : null)">
                     <label class="form-label" for="Apellido">Apellido</label>
                     <input class="form-control" id="Apellido" name="Apellido" value="@ViewBag.Formulario.Apellido" autocomplete="family-name" placeholder="Escribí acá" maxlength="50" required />
                     <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Apellido", "Completá tu apellido")</span>
                 </div>
             </div>
 
-            <div class="campo @ViewBag.Errores.Clase("Email")">
+            <div class="campo" aria-invalid="@(ViewBag.Errores.Tiene("Email") ? "true" : null)">
                 <label class="form-label" for="Email">Email</label>
                 <div class="control-con-icono">
                     <icono nombre="mail" />
