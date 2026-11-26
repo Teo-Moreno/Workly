@@ -2,11 +2,11 @@
     ViewData["Title"] = "Ayuda y soporte";
 }
 
-<section class="ayuda-hero">
-    <div class="container ayuda-hero-interior">
+<section class="hero-degradado">
+    <div class="container hero-degradado-centro">
         <span class="badge badge-acento">Centro de ayuda</span>
-        <h1 class="ayuda-hero-titulo">¿En qué te podemos ayudar?</h1>
-        <form class="ayuda-hero-buscador" role="search">
+        <h1 class="hero-degradado-titulo">¿En qué te podemos ayudar?</h1>
+        <form class="ancho-medio" role="search">
             <div class="control-con-icono">
                 <icono nombre="search" />
                 <label class="visually-hidden" for="buscar-ayuda">Buscar en la ayuda</label>
@@ -16,12 +16,12 @@
     </div>
 </section>
 
-<div class="container seccion-app">
-    <ul class="ayuda-categorias" role="list">
+<div class="container espacio-abajo">
+    <ul class="grilla-cuatro-flotante" role="list">
         @foreach (var categoria in Ayuda.Categorias)
         {
             <li>
-                <a class="ayuda-categoria" href="#@categoria.Id">
+                <a class="tarjeta-sombra" href="#@categoria.Id">
                     <span class="caja-icono"><icono nombre="@categoria.Icono" /></span>
                     <strong>@categoria.Nombre</strong>
                     <span>@categoria.Texto</span>
@@ -30,12 +30,12 @@
         }
     </ul>
 
-    <section class="ayuda-preguntas ayuda-preguntas-sola" id="preguntas" aria-labelledby="preguntas-titulo">
+    <section class="margen-scroll-titulo angosto" id="preguntas" aria-labelledby="preguntas-titulo">
         <h2 class="h4" id="preguntas-titulo">Preguntas frecuentes</h2>
         <div class="accordion" data-acordeon>
             @foreach (var categoria in Ayuda.Categorias)
             {
-                <h3 class="acordeon-grupo" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
+                <h3 class="subtitulo-mayusculas" id="@categoria.Id" data-acordeon-grupo>@categoria.Nombre</h3>
                 @foreach (var item in Ayuda.PreguntasDe(categoria.Id))
                 {
                     <div class="accordion-item" data-grupo="@categoria.Id">
@@ -49,6 +49,6 @@
                 }
             }
         </div>
-        <p class="estado-vacio" hidden data-acordeon-vacio>No encontramos preguntas con esas palabras. Probá con otras.</p>
+        <p class="recuadro-punteado" hidden data-acordeon-vacio>No encontramos preguntas con esas palabras. Probá con otras.</p>
     </section>
 </div>

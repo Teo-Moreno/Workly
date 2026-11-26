@@ -2,7 +2,7 @@
     ViewData["Title"] = "";
 }
 
-<section class="hero">
+<section>
     <div class="container hero-interior">
         <div class="hero-texto">
             <h1 class="hero-titulo display-1">Encontrá el trabajo que <span class="text-secondary">encaja</span> con vos.</h1>
@@ -12,86 +12,86 @@
                 postulate y seguí cada proceso desde tu tablero.
             </p>
 
-            <form class="buscador buscador-landing" asp-controller="Empleos" asp-action="Index" method="get" role="search">
-                <label class="buscador-campo">
+            <form class="barra-sombra barra-sombra-ancha" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+                <label class="barra-sombra-campo">
                     <icono nombre="search" />
-                    <span class="buscador-textos">
-                        <span class="buscador-etiqueta">Puesto o palabra clave</span>
-                        <input class="buscador-input" type="search" name="q" autocomplete="off" placeholder="¿Qué trabajo buscás?"
+                    <span class="barra-sombra-textos">
+                        <span class="barra-sombra-rotulo">Puesto o palabra clave</span>
+                        <input class="control-plano" type="search" name="q" autocomplete="off" placeholder="¿Qué trabajo buscás?"
                                data-animar-puestos="@string.Join("|", ViewBag.Puestos)" />
                     </span>
                 </label>
-                <button class="btn buscador-boton" type="submit">Buscar trabajo</button>
+                <button class="btn btn-fijo" type="submit">Buscar trabajo</button>
             </form>
         </div>
     </div>
 </section>
 
-<section class="como-funciona" id="como-funciona" aria-labelledby="como-funciona-titulo">
+<section class="bloque-alto" id="como-funciona" aria-labelledby="como-funciona-titulo">
     <div class="container">
-        <header class="seccion-encabezado">
+        <header class="titulos-centrados">
             <span class="badge">Cómo funciona</span>
             <h2 class="h1" id="como-funciona-titulo">Tres pasos para dejar de buscar a ciegas</h2>
         </header>
 
-        <ol class="pasos-landing" role="list">
-            <li class="paso-landing">
-                <div class="paso-landing-cabecera">
-                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="user-square" /></span>
-                    <span class="paso-landing-numero" aria-hidden="true">01</span>
+        <ol class="grilla-tres-ancha" role="list">
+            <li class="tarjeta-grande">
+                <div class="tarjeta-grande-fila">
+                    <span class="caja-icono-principal caja-icono-52"><icono nombre="user-square" /></span>
+                    <span class="numero-acento" aria-hidden="true">01</span>
                 </div>
-                <h3 class="paso-landing-titulo">Creá tu perfil laboral</h3>
-                <p class="paso-landing-texto">Cargá tu experiencia, estudios, habilidades, idiomas, tu CV y el tipo de trabajo que buscás.</p>
+                <h3 class="tarjeta-grande-titulo">Creá tu perfil laboral</h3>
+                <p class="texto-suave">Cargá tu experiencia, estudios, habilidades, idiomas, tu CV y el tipo de trabajo que buscás.</p>
             </li>
-            <li class="paso-landing">
-                <div class="paso-landing-cabecera">
-                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="search" /></span>
-                    <span class="paso-landing-numero" aria-hidden="true">02</span>
+            <li class="tarjeta-grande">
+                <div class="tarjeta-grande-fila">
+                    <span class="caja-icono-principal caja-icono-52"><icono nombre="search" /></span>
+                    <span class="numero-acento" aria-hidden="true">02</span>
                 </div>
-                <h3 class="paso-landing-titulo">Buscá en todos lados a la vez</h3>
-                <p class="paso-landing-texto">Juntamos las búsquedas de Workly con las de otros sitios, y en tu inicio te mostramos las que coinciden con lo que contaste que buscás.</p>
+                <h3 class="tarjeta-grande-titulo">Buscá en todos lados a la vez</h3>
+                <p class="texto-suave">Juntamos las búsquedas de Workly con las de otros sitios, y en tu inicio te mostramos las que coinciden con lo que contaste que buscás.</p>
             </li>
-            <li class="paso-landing">
-                <div class="paso-landing-cabecera">
-                    <span class="caja-icono-principal paso-landing-icono"><icono nombre="circle-check" /></span>
-                    <span class="paso-landing-numero" aria-hidden="true">03</span>
+            <li class="tarjeta-grande">
+                <div class="tarjeta-grande-fila">
+                    <span class="caja-icono-principal caja-icono-52"><icono nombre="circle-check" /></span>
+                    <span class="numero-acento" aria-hidden="true">03</span>
                 </div>
-                <h3 class="paso-landing-titulo">Postulate y hacé seguimiento</h3>
-                <p class="paso-landing-texto">Postulate a las búsquedas de Workly con tu perfil y tu CV, y anotá en tu tablero cada proceso: enviada, en revisión, pasaste o no.</p>
+                <h3 class="tarjeta-grande-titulo">Postulate y hacé seguimiento</h3>
+                <p class="texto-suave">Postulate a las búsquedas de Workly con tu perfil y tu CV, y anotá en tu tablero cada proceso: enviada, en revisión, pasaste o no.</p>
             </li>
         </ol>
     </div>
 </section>
 
-<section class="diferenciales" aria-labelledby="diferenciales-titulo">
-    <div class="container diferenciales-interior">
-        <div class="diferenciales-texto">
+<section class="bloque-azul" aria-labelledby="diferenciales-titulo">
+    <div class="container bloque-azul-fila">
+        <div class="bloque-azul-textos">
             <span class="badge badge-acento">Por qué Workly</span>
-            <h2 class="diferenciales-titulo" id="diferenciales-titulo">No es otra página de avisos.</h2>
-            <p class="diferenciales-bajada">Una sola búsqueda, un solo perfil y un solo tablero para toda tu búsqueda laboral.</p>
+            <h2 class="bloque-azul-titulo" id="diferenciales-titulo">No es otra página de avisos.</h2>
+            <p class="bloque-azul-subtitulo">Una sola búsqueda, un solo perfil y un solo tablero para toda tu búsqueda laboral.</p>
             <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil</a>
         </div>
 
-        <ul class="diferenciales-grilla" role="list">
-            <li class="diferencial">
-                <span class="caja-icono-secundario diferencial-icono"><icono nombre="search" /></span>
-                <h3 class="diferencial-titulo">Más ofertas</h3>
-                <p class="diferencial-texto">Las búsquedas que publican empresas y personas en Workly, junto con las de otros sitios.</p>
+        <ul class="grilla-dos" role="list">
+            <li class="tarjeta-transparente">
+                <span class="caja-icono-secundario caja-icono-44"><icono nombre="search" /></span>
+                <h3 class="tarjeta-transparente-titulo">Más ofertas</h3>
+                <p class="tarjeta-transparente-texto">Las búsquedas que publican empresas y personas en Workly, junto con las de otros sitios.</p>
             </li>
-            <li class="diferencial">
-                <span class="caja-icono-secundario diferencial-icono"><icono nombre="circle-check-outline" /></span>
-                <h3 class="diferencial-titulo">Búsquedas revisadas</h3>
-                <p class="diferencial-texto">Las empresas se registran con su CUIT y las búsquedas que publican las personas se revisan antes de salir.</p>
+            <li class="tarjeta-transparente">
+                <span class="caja-icono-secundario caja-icono-44"><icono nombre="circle-check-outline" /></span>
+                <h3 class="tarjeta-transparente-titulo">Búsquedas revisadas</h3>
+                <p class="tarjeta-transparente-texto">Las empresas se registran con su CUIT y las búsquedas que publican las personas se revisan antes de salir.</p>
             </li>
-            <li class="diferencial">
-                <span class="caja-icono-secundario diferencial-icono"><icono nombre="settings" /></span>
-                <h3 class="diferencial-titulo">A tu medida</h3>
-                <p class="diferencial-texto">Filtrá por modalidad, tipo de empleo, fecha y provincia, y guardá qué estás buscando en tu perfil.</p>
+            <li class="tarjeta-transparente">
+                <span class="caja-icono-secundario caja-icono-44"><icono nombre="settings" /></span>
+                <h3 class="tarjeta-transparente-titulo">A tu medida</h3>
+                <p class="tarjeta-transparente-texto">Filtrá por modalidad, tipo de empleo, fecha y provincia, y guardá qué estás buscando en tu perfil.</p>
             </li>
-            <li class="diferencial">
-                <span class="caja-icono-secundario diferencial-icono"><icono nombre="checkbox-checked" /></span>
-                <h3 class="diferencial-titulo">Más organizado</h3>
-                <p class="diferencial-texto">Todas tus postulaciones en un tablero que movés vos, sin planillas ni mails perdidos.</p>
+            <li class="tarjeta-transparente">
+                <span class="caja-icono-secundario caja-icono-44"><icono nombre="checkbox-checked" /></span>
+                <h3 class="tarjeta-transparente-titulo">Más organizado</h3>
+                <p class="tarjeta-transparente-texto">Todas tus postulaciones en un tablero que movés vos, sin planillas ni mails perdidos.</p>
             </li>
         </ul>
     </div>
@@ -99,15 +99,15 @@
 
 @if (ViewBag.Empresas.Count > 0)
 {
-    <section class="empresas-landing" aria-labelledby="empresas-landing-titulo">
+    <section class="bloque-centrado" aria-labelledby="empresas-landing-titulo">
         <div class="container">
-            <h2 class="empresas-landing-titulo" id="empresas-landing-titulo">Empresas con búsquedas abiertas en Workly</h2>
-            <ul class="empresas-landing-lista" role="list">
+            <h2 class="bloque-centrado-titulo" id="empresas-landing-titulo">Empresas con búsquedas abiertas en Workly</h2>
+            <ul class="fila-centrada-ancha" role="list">
                 @foreach (Empresa empresa in ViewBag.Empresas)
                 {
                     <li>
-                        <a class="empresas-landing-item" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">
-                            <partial name="_LogoEmpresa" model='new LogoEmpresa(empresa.Logo, empresa.Nombre, "logo-empresa-sm logo-empresa-principal")' />
+                        <a class="texto-marca" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">
+                            <partial name="_LogoEmpresa" model='new LogoEmpresa(empresa.Logo, empresa.Nombre, "cuadro-sm cuadro-principal")' />
                             @empresa.Nombre
                         </a>
                     </li>
@@ -117,13 +117,13 @@
     </section>
 }
 
-<section class="container cta" id="para-empresas" aria-labelledby="cta-titulo">
-    <div class="cta-tarjeta">
-        <div class="cta-texto">
-            <h2 class="cta-titulo" id="cta-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></h2>
-            <p class="cta-bajada">Creá tu perfil gratis. ¿Tenés una empresa? Registrala con su CUIT, publicá tus búsquedas y mirá quién se postula.</p>
+<section class="container espacio-final" id="para-empresas" aria-labelledby="cta-titulo">
+    <div class="banda-degradado">
+        <div class="banda-degradado-textos">
+            <h2 class="banda-degradado-titulo" id="cta-titulo">Tu próximo trabajo no debería ser una <span class="text-warning">aguja en un pajar.</span></h2>
+            <p class="banda-degradado-subtitulo">Creá tu perfil gratis. ¿Tenés una empresa? Registrala con su CUIT, publicá tus búsquedas y mirá quién se postula.</p>
         </div>
-        <div class="cta-acciones">
+        <div class="acciones">
             <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil gratis</a>
             <a class="btn btn-outline-light" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Soy empresa</a>
         </div>

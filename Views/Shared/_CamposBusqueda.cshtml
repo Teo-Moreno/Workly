@@ -1,13 +1,13 @@
 @if (Model.IncluirEstado)
 {
-    <fieldset class="formulario-grupo @Html.ClaseError("EstadoBusqueda")">
+    <fieldset class="grupo-campos @Html.ClaseError("EstadoBusqueda")">
         <legend class="form-label">¿Estás buscando trabajo?</legend>
-        <div class="opciones-tarjeta">
+        <div class="grilla-tres-chica">
             @foreach (var estado in Catalogos.EstadosBusqueda)
             {
-                <label class="opcion-tarjeta">
+                <label class="recuadro-elegible">
                     <input class="btn-check" type="radio" name="EstadoBusqueda" value="@estado" checked="@(Model.EstadoBusqueda == estado)" />
-                    <span><span class="opcion-tarjeta-titulo">@estado</span></span>
+                    <span><span class="recuadro-elegible-titulo">@estado</span></span>
                 </label>
             }
         </div>
@@ -15,7 +15,7 @@
     </fieldset>
 }
 
-<div class="formulario-fila">
+<div class="columnas">
     <div class="campo @Html.ClaseError("PuestoBuscado")">
         <label class="form-label" for="@(Model.Prefijo)-puesto">Puesto que buscás <span class="campo-opcional">(opcional)</span></label>
         <div class="control-con-icono">
@@ -37,9 +37,9 @@
     </div>
 </div>
 
-<fieldset class="formulario-grupo">
+<fieldset class="grupo-campos">
     <legend class="form-label">Nivel de experiencia <span class="campo-opcional">(podés elegir más de uno)</span></legend>
-    <div class="lista-tags lista-tags-holgada">
+    <div class="fila-chapitas fila-chapitas-holgada">
         @foreach (var nivel in Catalogos.Niveles)
         {
             <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Niveles" value="@nivel" checked="@Model.Niveles.Contains(nivel)" /><span class="btn btn-chip">@nivel</span></label>
@@ -47,9 +47,9 @@
     </div>
 </fieldset>
 
-<fieldset class="formulario-grupo">
+<fieldset class="grupo-campos">
     <legend class="form-label">Modalidad <span class="campo-opcional">(podés elegir más de una)</span></legend>
-    <div class="lista-tags lista-tags-holgada">
+    <div class="fila-chapitas fila-chapitas-holgada">
         @foreach (var modalidad in Catalogos.Modalidades)
         {
             <label class="chip-seleccion"><input class="btn-check" type="checkbox" name="Modalidades" value="@modalidad" checked="@Model.Modalidades.Contains(modalidad)" /><span class="btn btn-chip">@modalidad</span></label>
@@ -57,7 +57,7 @@
     </div>
 </fieldset>
 
-<div class="formulario-fila">
+<div class="columnas">
     <div class="campo">
         <label class="form-label" for="@(Model.Prefijo)-jornada">Jornada <span class="campo-opcional">(opcional)</span></label>
         <select class="form-select" id="@(Model.Prefijo)-jornada" name="Jornada">
@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<div class="formulario-fila">
+<div class="columnas">
     <div class="campo">
         <label class="form-label" for="@(Model.Prefijo)-donde">¿Dónde querés trabajar?</label>
         <select class="form-select" id="@(Model.Prefijo)-donde" name="IDProvinciaPreferida">
@@ -93,7 +93,7 @@
     </div>
     <div class="campo @(Html.ClaseError("SalarioMaximo") != "" ? "campo-error" : Html.ClaseError("SalarioMinimo"))">
         <span class="form-label">Expectativa salarial bruta por mes <span class="campo-opcional">(opcional)</span></span>
-        <div class="rango-campos">
+        <div class="fila-junta">
             <label class="visually-hidden" for="@(Model.Prefijo)-salario-min">Mínimo</label>
             <input class="form-control" id="@(Model.Prefijo)-salario-min" name="SalarioMinimo" value="@Model.SalarioMinimo" type="number" min="0" step="1000" placeholder="Mínimo" />
             <span aria-hidden="true">–</span>
@@ -104,7 +104,7 @@
     </div>
 </div>
 
-<fieldset class="formulario-grupo @Html.ClaseError("Habilidades")" data-habilidades>
+<fieldset class="grupo-campos @Html.ClaseError("Habilidades")" data-habilidades>
     <legend class="form-label">Habilidades <span class="campo-opcional">(elegí un sector y marcá las que tengas)</span></legend>
     @if (Model.Sectores.Count > 0)
     {
@@ -119,7 +119,7 @@
             </select>
         </div>
     }
-    <div class="lista-tags lista-tags-holgada" data-habilidades-lista>
+    <div class="fila-chapitas fila-chapitas-holgada" data-habilidades-lista>
         @foreach (string habilidad in Model.HabilidadesPropias)
         {
             <label class="chip-seleccion" data-sector=""><input class="btn-check" type="checkbox" name="Habilidades" value="@habilidad" checked /><span class="btn btn-chip">@habilidad</span></label>
@@ -130,7 +130,7 @@
         }
     </div>
     <p class="small text-body-secondary" data-habilidades-vacio hidden>Elegí un sector para ver sus habilidades.</p>
-    <div class="campo-agregar">
+    <div class="campo-con-accion">
         <label class="visually-hidden" for="@(Model.Prefijo)-nueva-habilidad">Agregar otra habilidad</label>
         <input class="form-control" id="@(Model.Prefijo)-nueva-habilidad" type="text" maxlength="60" placeholder="¿No está la tuya? Escribila acá" data-habilidad-nueva />
         <button class="btn btn-icono" type="button" data-habilidad-agregar><icono nombre="plus" etiqueta="Agregar habilidad" /></button>
@@ -139,12 +139,12 @@
     <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Habilidades", "Revisá las habilidades")</span>
 </fieldset>
 
-<fieldset class="formulario-grupo @Html.ClaseError("Idiomas")" data-idiomas>
+<fieldset class="grupo-campos @Html.ClaseError("Idiomas")" data-idiomas>
     <legend class="form-label">Idiomas <span class="campo-opcional">(opcional)</span></legend>
-    <ul class="filas-idioma" role="list" data-idiomas-lista>
+    <ul class="lista-junta" role="list" data-idiomas-lista>
         @foreach ((int IDIdioma, string Nivel) fila in Model.Idiomas)
         {
-            <li class="fila-idioma" data-idioma-fila>
+            <li class="fila-tres-campos" data-idioma-fila>
                 <select class="form-select" name="IdiomaIds" aria-label="Idioma">
                     @foreach (Idioma idioma in Model.CatalogoIdiomas)
                     {
@@ -162,7 +162,7 @@
         }
     </ul>
     <template data-idioma-plantilla>
-        <li class="fila-idioma" data-idioma-fila>
+        <li class="fila-tres-campos" data-idioma-fila>
             <select class="form-select" name="IdiomaIds" aria-label="Idioma">
                 @foreach (Idioma idioma in Model.CatalogoIdiomas)
                 {

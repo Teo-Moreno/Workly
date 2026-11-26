@@ -2,14 +2,14 @@
     ViewData["Title"] = "Guardadas";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
-        <div class="encabezado-pagina-fila">
+<div class="container espacio-abajo">
+    <header class="bloque-titulo">
+        <div class="fila-titulo">
             <div>
-                <h1 class="encabezado-pagina-titulo">Guardadas</h1>
-                <p class="encabezado-pagina-bajada">Las ofertas que guardaste para ver después o postularte más tarde.</p>
+                <h1 class="titulo">Guardadas</h1>
+                <p class="subtitulo">Las ofertas que guardaste para ver después o postularte más tarde.</p>
             </div>
-            <div class="encabezado-pagina-acciones">
+            <div class="acciones">
                 <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
             </div>
         </div>
@@ -17,27 +17,27 @@
 
     @if (ViewBag.Guardadas.Count == 0)
     {
-        <div class="estado-vacio">
+        <div class="recuadro-punteado">
             <span class="caja-icono-lg"><icono nombre="bookmark" /></span>
-            <h2 class="estado-vacio-titulo">Todavía no guardaste ofertas</h2>
+            <h2 class="recuadro-punteado-titulo">Todavía no guardaste ofertas</h2>
             <p>En Buscar trabajo, abrí una oferta y tocá "Guardar" para tenerla acá.</p>
             <a class="btn btn-primary" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
         </div>
     }
     else
     {
-        <ul class="lista-guardadas" role="list">
+        <ul class="lista-tarjetas-junta" role="list">
             @foreach (Oferta oferta in ViewBag.Guardadas)
             {
-                <li class="guardada">
-                    <partial name="_LogoEmpresa" model='new LogoEmpresa(oferta.Logo, oferta.Empresa, "logo-empresa-md")' />
-                    <div class="guardada-datos">
-                        <h2 class="guardada-titulo"><a href="@oferta.Enlace">@oferta.Titulo</a></h2>
-                        <p class="guardada-meta">@oferta.Resumen</p>
-                        <div class="lista-tags">
+                <li class="tarjeta-larga">
+                    <partial name="_LogoEmpresa" model='new LogoEmpresa(oferta.Logo, oferta.Empresa, "cuadro-md")' />
+                    <div class="tarjeta-larga-textos">
+                        <h2 class="titulo-chico"><a href="@oferta.Enlace">@oferta.Titulo</a></h2>
+                        <p class="tarjeta-larga-texto">@oferta.Resumen</p>
+                        <div class="fila-chapitas">
                             <partial name="_SelloOficial" model="oferta" />
-                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge tag-borde">@oferta.Modalidad</span> }
-                            <span class="badge @(oferta.EsExterna ? "tag" : "tag-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
+                            @if (!string.IsNullOrEmpty(oferta.Modalidad)) { <span class="badge chapita-borde">@oferta.Modalidad</span> }
+                            <span class="badge @(oferta.EsExterna ? "chapita" : "chapita-principal")">@(oferta.EsExterna ? "Vía " + oferta.Fuente : "En Workly")</span>
                             @if (oferta.YaPostulado) { <span class="badge badge-exito"><icono nombre="circle-check" tamano="16" />Ya te postulaste</span> }
                             @if (oferta.NoDisponible) { <span class="badge badge-error">Ya no recibe postulaciones</span> }
                         </div>
@@ -46,7 +46,7 @@
                             <p class="small text-body-secondary">Guardada el @Vistas.Fecha(oferta.Fecha_Guardado)</p>
                         }
                     </div>
-                    <div class="guardada-acciones">
+                    <div class="tarjeta-larga-acciones">
                         <a class="btn btn-sm" href="@oferta.Enlace">Ver oferta</a>
                         <form asp-controller="Guardadas" asp-action="Quitar" method="post">
                             <input type="hidden" name="id" value="@oferta.ID" />

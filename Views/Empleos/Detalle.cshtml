@@ -3,13 +3,13 @@
     ViewData["Title"] = $"{ViewBag.Oferta.Titulo} en {ViewBag.Oferta.Empresa}";
 }
 
-<div class="container seccion-app">
+<div class="container espacio-abajo">
     @if (ViewBag.EsRevision)
     {
-        <div class="barra-revision" role="region" aria-label="Revisión de la búsqueda">
+        <div class="barra-punteada" role="region" aria-label="Revisión de la búsqueda">
             <div>
                 <span class="badge badge-advertencia">@ViewBag.Oferta.Estado_Publicacion</span>
-                <p class="barra-revision-texto">Así la van a ver las personas si la aceptás.</p>
+                <p class="barra-punteada-texto">Así la van a ver las personas si la aceptás.</p>
             </div>
             @if (ViewBag.Oferta.Estado_Publicacion == "Pendiente")
             {
@@ -20,12 +20,12 @@
                     <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#modal-rechazar">Rechazar</button>
                 </div>
             }
-            <a class="enlace" asp-controller="Moderacion" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
+            <a class="resaltado" asp-controller="Moderacion" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver a moderación</a>
         </div>
     }
     else
     {
-        <div class="barra-volver">
+        <div class="barra-superior">
             <nav aria-label="Estás en">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a asp-controller="Empleos" asp-action="Index">Buscar trabajo</a></li>
@@ -45,15 +45,15 @@
         </p>
     }
 
-    <header class="oferta-cabecera">
-        <div class="oferta-cabecera-principal">
-            <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Oferta.Logo, ViewBag.Oferta.Empresa, "logo-empresa-lg")' />
-            <div class="oferta-cabecera-textos">
-                <h1 class="oferta-cabecera-titulo">@ViewBag.Oferta.Titulo</h1>
-                <p class="oferta-cabecera-meta">
+    <header class="recuadro-grande">
+        <div class="recuadro-grande-izquierda">
+            <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Oferta.Logo, ViewBag.Oferta.Empresa, "cuadro-lg")' />
+            <div class="recuadro-grande-textos">
+                <h1 class="titulo-mediano">@ViewBag.Oferta.Titulo</h1>
+                <p class="texto-suave">
                     @if (ViewBag.Empresa?.TieneCuenta == true)
                     {
-                        <a class="enlace enlace-principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">@ViewBag.Oferta.Empresa</a>
+                        <a class="resaltado resaltado-principal" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@ViewBag.Empresa.ID">@ViewBag.Oferta.Empresa</a>
                     }
                     else
                     {
@@ -64,25 +64,25 @@
                         <text> · @dato</text>
                     }
                 </p>
-                <div class="lista-tags">
+                <div class="fila-chapitas">
                     <partial name="_SelloOficial" model="ViewBag.Oferta" />
-                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Modalidad)) { <span class="badge tag-borde-lg">@ViewBag.Oferta.Modalidad</span> }
-                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Tipo_Contrato)) { <span class="badge tag-borde-lg">@ViewBag.Oferta.Tipo_Contrato</span> }
-                    <span class="badge @(ViewBag.Oferta.EsExterna ? "tag-lg" : "tag-principal-lg")">@(ViewBag.Oferta.EsExterna ? "Publicada en " + ViewBag.Oferta.Fuente : "Publicada en Workly")</span>
+                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Modalidad)) { <span class="badge chapita-borde-lg">@ViewBag.Oferta.Modalidad</span> }
+                    @if (!string.IsNullOrEmpty(ViewBag.Oferta.Tipo_Contrato)) { <span class="badge chapita-borde-lg">@ViewBag.Oferta.Tipo_Contrato</span> }
+                    <span class="badge @(ViewBag.Oferta.EsExterna ? "chapita-lg" : "chapita-principal-lg")">@(ViewBag.Oferta.EsExterna ? "Publicada en " + ViewBag.Oferta.Fuente : "Publicada en Workly")</span>
                 </div>
             </div>
         </div>
 
         @if (!ViewBag.EsRevision)
         {
-            <div class="oferta-cabecera-acciones">
+            <div class="recuadro-grande-acciones">
                 <div class="fila fila-envolver">
                     <partial name="_AccionesOferta" model="ViewBag.Oferta" />
                     <partial name="_BotonGuardar" model="ViewBag.Oferta" />
                 </div>
                 @if (ViewBag.PuedePostular && User.EsPersona() && !ViewBag.TieneCV)
                 {
-                    <p class="small text-body-secondary">Para postularte necesitás tu CV. <a class="enlace" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>
+                    <p class="small text-body-secondary">Para postularte necesitás tu CV. <a class="resaltado" asp-controller="Perfil" asp-action="Index">Subilo desde tu perfil</a>.</p>
                 }
                 @if (ViewBag.Oferta.EsExterna)
                 {
@@ -92,23 +92,23 @@
         }
     </header>
 
-    <div class="oferta-cuerpo">
-        <article class="oferta-principal">
+    <div class="grilla-principal">
+        <article class="recuadro-columna">
             @if (ViewBag.Oferta.Datos.Count > 0)
             {
-                <div class="cajas-dato cajas-dato-grande">
+                <div class="grilla-cajas grilla-cajas-grande">
                     @foreach (DatoOferta dato in ViewBag.Oferta.Datos)
                     {
-                        <div class="caja-dato">
-                            <span class="caja-dato-etiqueta">@dato.Etiqueta</span>
-                            <strong class="caja-dato-valor">@dato.Valor</strong>
+                        <div class="caja-gris">
+                            <span class="texto-mini">@dato.Etiqueta</span>
+                            <strong class="caja-gris-valor">@dato.Valor</strong>
                         </div>
                     }
                 </div>
             }
 
-            <section class="oferta-seccion">
-                <h2 class="oferta-seccion-titulo">Sobre el puesto</h2>
+            <section class="bloque-texto">
+                <h2 class="subtitulo-mediano">Sobre el puesto</h2>
                 @if (string.IsNullOrWhiteSpace(ViewBag.Oferta.Descripcion))
                 {
                     <p class="text-body-secondary">@(ViewBag.Oferta.EsExterna ? "El sitio original no mandó la descripción. Mirala en la publicación original." : "Sin descripción.")</p>
@@ -121,24 +121,24 @@
 
             @if (!string.IsNullOrEmpty(ViewBag.Oferta.Puestos))
             {
-                <section class="oferta-seccion">
-                    <h2 class="oferta-seccion-titulo">Puesto</h2>
-                    <ul class="lista-tags" role="list">
+                <section class="bloque-texto">
+                    <h2 class="subtitulo-mediano">Puesto</h2>
+                    <ul class="fila-chapitas" role="list">
                         @foreach (string puesto in ViewBag.Oferta.ListaPuestos)
                         {
-                            <li class="badge tag-borde">@puesto</li>
+                            <li class="badge chapita-borde">@puesto</li>
                         }
                     </ul>
                 </section>
             }
         </article>
 
-        <aside class="oferta-lateral">
+        <aside class="lateral-fijo">
             @if (ViewBag.Empresa != null && (ViewBag.Empresa.TieneCuenta || !string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion) || ViewBag.Empresa.UbicacionCompleta != null || ViewBag.Empresa.EnlaceSitio != null))
             {
                 <section class="card">
                     <div class="fila">
-                        <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "logo-empresa-md")' />
+                        <partial name="_LogoEmpresa" model='new LogoEmpresa(ViewBag.Empresa.Logo, ViewBag.Empresa.Nombre, "cuadro-md")' />
                         <div>
                             <h2 class="card-title">@ViewBag.Empresa.Nombre</h2>
                             @if (ViewBag.Empresa.Rubro != null) { <p class="small text-body-secondary">@ViewBag.Empresa.Rubro</p> }
@@ -146,11 +146,11 @@
                     </div>
                     @if (!string.IsNullOrWhiteSpace(ViewBag.Empresa.Descripcion))
                     {
-                        <p class="perfil-texto">@ViewBag.Empresa.Descripcion</p>
+                        <p class="texto-gris">@ViewBag.Empresa.Descripcion</p>
                     }
                     <dl class="lista-clave-valor">
                         @if (ViewBag.Empresa.UbicacionCompleta != null) { <div><dt>Ubicación</dt><dd>@ViewBag.Empresa.UbicacionCompleta</dd></div> }
-                        @if (ViewBag.Empresa.EnlaceSitio != null) { <div><dt>Sitio web</dt><dd><a class="enlace" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></dd></div> }
+                        @if (ViewBag.Empresa.EnlaceSitio != null) { <div><dt>Sitio web</dt><dd><a class="resaltado" href="@ViewBag.Empresa.EnlaceSitio" target="_blank" rel="noopener noreferrer">@ViewBag.Empresa.Sitio_Web</a></dd></div> }
                     </dl>
                     @if (ViewBag.Empresa.TieneCuenta && !ViewBag.EsRevision)
                     {
@@ -172,12 +172,12 @@
 @if (ViewBag.EsRevision && ViewBag.Oferta.Estado_Publicacion == "Pendiente")
 {
     <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-rechazar" aria-labelledby="modal-rechazar-titulo"><div class="modal-dialog"><div class="modal-content">
-        <form class="modal-body formulario" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@ViewBag.Oferta.ID" method="post" novalidate data-formulario-real>
+        <form class="modal-body grilla-campos" asp-controller="Moderacion" asp-action="Rechazar" asp-route-id="@ViewBag.Oferta.ID" method="post" novalidate data-formulario-real>
             <div class="modal-header">
                 <h2 class="modal-title" id="modal-rechazar-titulo">Rechazar la búsqueda</h2>
                 <button class="modal-cerrar" type="button" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
             </div>
-            <p class="modal-descripcion">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
+            <p class="modal-texto">Contale a quien la publicó por qué no se puede publicar. Lo va a ver en Mis publicaciones@(Mail.Configurado ? " y le llega por mail" : "").</p>
             <div class="campo @Html.ClaseError("motivo")">
                 <label class="form-label" for="motivo-rechazo">Motivo</label>
                 <textarea class="form-control" id="motivo-rechazo" name="motivo" rows="4" minlength="10" maxlength="500" required placeholder="Ej.: La descripción no explica el puesto ni las tareas."></textarea>

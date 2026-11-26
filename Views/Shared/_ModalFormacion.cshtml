@@ -1,5 +1,5 @@
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-formacion" aria-labelledby="modal-formacion-titulo" data-abrir-al-cargar="@(Model.Abierto ? "true" : null)"><div class="modal-dialog"><div class="modal-content">
-    <form class="modal-body formulario" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
+    <form class="modal-body grilla-campos" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
           action="@(Model.EnServidor ? Url.Action("AgregarFormacion", "Perfil") : null)"
           data-modal-local="@(Model.EnServidor ? null : "formacion")" data-formulario-real="@(Model.EnServidor ? "" : null)">
         @if (Model.EnServidor)
@@ -10,7 +10,7 @@
             <h2 class="modal-title" id="modal-formacion-titulo">Agregar formación</h2>
             <button class="modal-cerrar" type="button" value="cancelar" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
         </div>
-        <p class="modal-descripcion">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
+        <p class="modal-texto">Sumá tus estudios: secundario, terciario, universidad o cursos.</p>
 
         <div class="campo @(Model.Abierto ? Html.ClaseError("Titulo") : "")">
             <label class="form-label" for="for-titulo">Título o curso</label>
@@ -29,7 +29,7 @@
             <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Institucion", "Completá la institución") : "Completá la institución")</span>
         </div>
 
-        <div class="formulario-fila">
+        <div class="columnas">
             <partial name="_CampoMes" model='new CampoMes { Nombre = "Inicio", Id = "for-inicio", Etiqueta = "Inicio", Valor = Model.Valores.Inicio, Requerido = true, Error = Model.Abierto && Html.ClaseError("Inicio").Length > 0 ? Html.MensajeError("Inicio", "") : null }' />
             <div data-fin-de="for-en-curso" hidden="@Model.Valores.EnCurso">
                 <partial name="_CampoMes" model='new CampoMes { Nombre = "Fin", Id = "for-fin", Etiqueta = "Finalización", Valor = Model.Valores.Fin, Requerido = !Model.Valores.EnCurso, PermitirFuturo = true, Error = Model.Abierto && Html.ClaseError("Fin").Length > 0 ? Html.MensajeError("Fin", "") : null }' />

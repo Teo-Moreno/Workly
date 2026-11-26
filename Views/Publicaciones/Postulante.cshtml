@@ -2,7 +2,7 @@
     ViewData["Title"] = ViewBag.Perfil.Usuario.NombreCompleto;
 }
 
-<div class="container seccion-app">
+<div class="container espacio-abajo">
     <nav aria-label="Estás en">
         <ol class="breadcrumb breadcrumb-chica">
             <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
@@ -11,14 +11,14 @@
         </ol>
     </nav>
 
-    <section class="perfil-cabecera" aria-label="Datos principales">
-        <span class="avatar-xl" aria-hidden="true">
+    <section class="recuadro-degradado" aria-label="Datos principales">
+        <span class="circulo-xl" aria-hidden="true">
             @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto)) { <img src="@ViewBag.Perfil.Perfil.Foto" alt="" /> } else { @ViewBag.Perfil.Iniciales }
         </span>
-        <div class="perfil-cabecera-datos">
-            <h1 class="perfil-cabecera-nombre">@ViewBag.Perfil.Usuario.NombreCompleto</h1>
-            @if (!string.IsNullOrWhiteSpace(ViewBag.Perfil.Preferencia.Puesto_Buscado)) { <p class="perfil-cabecera-rol">Busca trabajo de @ViewBag.Perfil.Preferencia.Puesto_Buscado</p> }
-            <ul class="perfil-cabecera-contacto" role="list">
+        <div class="recuadro-degradado-textos">
+            <h1 class="recuadro-degradado-titulo">@ViewBag.Perfil.Usuario.NombreCompleto</h1>
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Perfil.Preferencia.Puesto_Buscado)) { <p class="recuadro-degradado-subtitulo">Busca trabajo de @ViewBag.Perfil.Preferencia.Puesto_Buscado</p> }
+            <ul class="recuadro-degradado-datos" role="list">
                 @if (ViewBag.Perfil.Perfil.Ubicacion != null) { <li><icono nombre="near-me" tamano="18" />@ViewBag.Perfil.Perfil.Ubicacion</li> }
                 <li><icono nombre="mail" tamano="18" /><a href="mailto:@ViewBag.Perfil.Usuario.Email">@ViewBag.Perfil.Usuario.Email</a></li>
                 @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Telefono)) { <li><icono nombre="message-writing" tamano="18" /><a href="tel:@ViewBag.Perfil.Perfil.TelefonoLink">@ViewBag.Perfil.Perfil.Telefono</a></li> }
@@ -26,7 +26,7 @@
             </ul>
             @if (ViewBag.Perfil.Perfil.Estado_Busqueda != null) { <span class="badge badge-info">@ViewBag.Perfil.Perfil.Estado_Busqueda</span> }
         </div>
-        <div class="perfil-cabecera-acciones">
+        <div class="recuadro-degradado-acciones">
             @if (ViewBag.Perfil.TieneCV)
             {
                 <a class="btn btn-primary" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@ViewBag.IDPostulacion"><icono nombre="download" />Descargar CV</a>
@@ -38,13 +38,13 @@
         </div>
     </section>
 
-    <div class="perfil-cuerpo">
-        <div class="perfil-columna">
+    <div class="grilla-lateral-izquierda">
+        <div class="columna-ancha">
             <section class="card">
                 <h2 class="card-title">Qué busca</h2>
                 @if (ViewBag.Perfil.Preferencia.TieneDatos)
                 {
-                    <dl class="lista-clave-valor lista-clave-valor-perfil">
+                    <dl class="lista-clave-valor lista-clave-valor-lineas">
                         @if (ViewBag.Perfil.Preferencia.ListaNiveles.Count > 0) { <div><dt>Nivel</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaNiveles)</dd></div> }
                         @if (ViewBag.Perfil.Preferencia.ListaModalidades.Count > 0) { <div><dt>Modalidad</dt><dd>@string.Join(", ", ViewBag.Perfil.Preferencia.ListaModalidades)</dd></div> }
                         @if (ViewBag.Perfil.Preferencia.Jornada != null) { <div><dt>Jornada</dt><dd>@ViewBag.Perfil.Preferencia.Jornada</dd></div> }
@@ -54,46 +54,46 @@
                 }
                 else
                 {
-                    <p class="perfil-vacio">No lo completó.</p>
+                    <p class="recuadro-punteado-mini">No lo completó.</p>
                 }
             </section>
             <section class="card">
                 <h2 class="card-title">Habilidades</h2>
-                @if (ViewBag.Perfil.Habilidades.Count == 0) { <p class="perfil-vacio">No cargó habilidades.</p> }
+                @if (ViewBag.Perfil.Habilidades.Count == 0) { <p class="recuadro-punteado-mini">No cargó habilidades.</p> }
                 else
                 {
-                    <ul class="lista-tags" role="list">@foreach (string h in ViewBag.Perfil.Habilidades) { <li class="badge tag">@h</li> }</ul>
+                    <ul class="fila-chapitas" role="list">@foreach (string h in ViewBag.Perfil.Habilidades) { <li class="badge chapita">@h</li> }</ul>
                 }
             </section>
             <section class="card">
                 <h2 class="card-title">Idiomas</h2>
-                @if (ViewBag.Perfil.Idiomas.Count == 0) { <p class="perfil-vacio">No cargó idiomas.</p> }
+                @if (ViewBag.Perfil.Idiomas.Count == 0) { <p class="recuadro-punteado-mini">No cargó idiomas.</p> }
                 else
                 {
                     <dl class="lista-clave-valor">@foreach (IdiomaElegido i in ViewBag.Perfil.Idiomas) { <div><dt>@i.Idioma</dt><dd>@i.Nivel</dd></div> }</dl>
                 }
             </section>
         </div>
-        <div class="perfil-columna">
+        <div class="columna-ancha">
             <section class="card">
                 <h2 class="card-title">Sobre mí</h2>
-                @if (string.IsNullOrWhiteSpace(ViewBag.Perfil.Perfil.Descripcion)) { <p class="perfil-vacio">No escribió nada.</p> }
-                else { <p class="perfil-texto">@ViewBag.Perfil.Perfil.Descripcion</p> }
+                @if (string.IsNullOrWhiteSpace(ViewBag.Perfil.Perfil.Descripcion)) { <p class="recuadro-punteado-mini">No escribió nada.</p> }
+                else { <p class="texto-gris">@ViewBag.Perfil.Perfil.Descripcion</p> }
             </section>
             <section class="card">
                 <h2 class="card-title">Experiencia</h2>
-                @if (ViewBag.Perfil.Experiencias.Count == 0) { <p class="perfil-vacio">No cargó experiencia laboral.</p> }
+                @if (ViewBag.Perfil.Experiencias.Count == 0) { <p class="recuadro-punteado-mini">No cargó experiencia laboral.</p> }
                 else
                 {
                     <ol class="linea-tiempo" role="list">
                         @foreach (ExperienciaItem e in ViewBag.Perfil.Experiencias)
                         {
                             <li class="linea-tiempo-item">
-                                <span class="logo-empresa-md logo-empresa-principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
+                                <span class="cuadro-md cuadro-principal" aria-hidden="true">@Textos.Iniciales(e.Empresa)</span>
                                 <div class="linea-tiempo-contenido">
                                     <h3 class="linea-tiempo-titulo">@e.Puesto</h3>
-                                    <p class="linea-tiempo-lugar">@e.Empresa</p>
-                                    <p class="linea-tiempo-fecha">@e.Periodo</p>
+                                    <p class="texto-fuerte">@e.Empresa</p>
+                                    <p class="texto-chico">@e.Periodo</p>
                                     @if (!string.IsNullOrWhiteSpace(e.Descripcion)) { <p class="linea-tiempo-texto">@e.Descripcion</p> }
                                 </div>
                             </li>
@@ -103,18 +103,18 @@
             </section>
             <section class="card">
                 <h2 class="card-title">Formación</h2>
-                @if (ViewBag.Perfil.Formaciones.Count == 0) { <p class="perfil-vacio">No cargó formación.</p> }
+                @if (ViewBag.Perfil.Formaciones.Count == 0) { <p class="recuadro-punteado-mini">No cargó formación.</p> }
                 else
                 {
                     <ol class="linea-tiempo" role="list">
                         @foreach (FormacionItem f in ViewBag.Perfil.Formaciones)
                         {
                             <li class="linea-tiempo-item">
-                                <span class="logo-empresa-md" aria-hidden="true"><icono nombre="book" /></span>
+                                <span class="cuadro-md" aria-hidden="true"><icono nombre="book" /></span>
                                 <div class="linea-tiempo-contenido">
                                     <h3 class="linea-tiempo-titulo">@f.Titulo</h3>
-                                    <p class="linea-tiempo-lugar">@f.Institucion</p>
-                                    <p class="linea-tiempo-fecha">@f.Periodo</p>
+                                    <p class="texto-fuerte">@f.Institucion</p>
+                                    <p class="texto-chico">@f.Periodo</p>
                                 </div>
                             </li>
                         }

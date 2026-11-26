@@ -2,8 +2,8 @@
     ViewData["Title"] = "Configuración";
 }
 
-<div class="container seccion-app">
-    <header class="encabezado-pagina">
+<div class="container espacio-abajo">
+    <header class="bloque-titulo">
         <nav aria-label="Estás en">
             <ol class="breadcrumb breadcrumb-chica">
                 <li class="breadcrumb-item">
@@ -19,12 +19,12 @@
                 <li class="breadcrumb-item active" aria-current="page">Configuración</li>
             </ol>
         </nav>
-        <h1 class="encabezado-pagina-titulo">Configuración</h1>
-        <p class="encabezado-pagina-bajada">@(ViewBag.EsEmpresa ? "Actualizá los datos de la empresa y de tu cuenta." : "Actualizá tus datos, lo que estás buscando y tu contraseña.")</p>
+        <h1 class="titulo">Configuración</h1>
+        <p class="subtitulo">@(ViewBag.EsEmpresa ? "Actualizá los datos de la empresa y de tu cuenta." : "Actualizá tus datos, lo que estás buscando y tu contraseña.")</p>
     </header>
 
-    <div class="configuracion" data-pestanas-hash>
-        <nav class="nav configuracion-menu" aria-label="Secciones de configuración">
+    <div class="grilla-lateral-junta" data-pestanas-hash>
+        <nav class="nav panel-fijo" aria-label="Secciones de configuración">
             <a class="nav-link @(ViewBag.Activa == "cuenta" ? "active" : "")" href="#cuenta" data-bs-toggle="pill" data-bs-target="#panel-cuenta"><icono nombre="@(ViewBag.EsEmpresa ? "building" : "user-square")" />@(ViewBag.EsEmpresa ? "Empresa" : "Cuenta")</a>
             @if (!ViewBag.EsEmpresa)
             {
@@ -38,15 +38,15 @@
         <section class="tab-pane @(ViewBag.Activa == "cuenta" ? "active" : "")" id="panel-cuenta" aria-labelledby="titulo-cuenta">
             @if (!ViewBag.EsEmpresa)
             {
-                <form class="formulario" asp-controller="Perfil" asp-action="GuardarCuenta" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
-                    <div class="configuracion-cabecera">
-                        <h2 class="formulario-subtitulo" id="titulo-cuenta">Datos personales</h2>
+                <form class="grilla-campos" asp-controller="Perfil" asp-action="GuardarCuenta" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+                    <div class="titulos-juntos">
+                        <h2 class="subtitulo-chico" id="titulo-cuenta">Datos personales</h2>
                         <p class="text-body-secondary">Estos datos los ven quienes publican una búsqueda cuando te postulás.</p>
                     </div>
 
                     <div class="campo @Html.ClaseError("Foto")">
-                        <div class="configuracion-foto">
-                            <span class="avatar-xl" data-vista-foto aria-hidden="true">
+                        <div class="fila-gris-clara">
+                            <span class="circulo-xl" data-vista-foto aria-hidden="true">
                                 @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto))
                                 {
                                     <img src="@ViewBag.Perfil.Perfil.Foto" alt="" />
@@ -68,7 +68,7 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Foto", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
                     </div>
 
-                    <div class="formulario-fila">
+                    <div class="columnas">
                         <div class="campo @Html.ClaseError("Nombre")">
                             <label class="form-label" for="cfg-nombre">Nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioCuenta?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required autocomplete="given-name" />
@@ -81,7 +81,7 @@
                         </div>
                     </div>
 
-                    <div class="formulario-fila">
+                    <div class="columnas">
                         <div class="campo @Html.ClaseError("Email")">
                             <label class="form-label" for="cfg-email">Email</label>
                             <div class="control-con-icono">
@@ -108,11 +108,11 @@
                         <span class="form-label">CV</span>
                         @if (ViewBag.Perfil.TieneCV)
                         {
-                            <p class="small">Tu CV actual: <a class="enlace" asp-controller="Perfil" asp-action="DescargarCV">@ViewBag.Perfil.CV.NombreOriginal</a>. Si elegís otro, lo reemplaza.</p>
+                            <p class="small">Tu CV actual: <a class="resaltado" asp-controller="Perfil" asp-action="DescargarCV">@ViewBag.Perfil.CV.NombreOriginal</a>. Si elegís otro, lo reemplaza.</p>
                         }
-                        <label class="zona-archivo" data-zona-archivo>
+                        <label class="zona-punteada" data-zona-archivo>
                             <span class="caja-icono"><icono nombre="upload" /></span>
-                            <strong class="zona-archivo-nombre" data-zona-archivo-nombre>@(ViewBag.Perfil.TieneCV ? "Elegí otro CV" : "Arrastrá tu CV acá o hacé clic para subirlo")</strong>
+                            <strong class="texto-fuerte" data-zona-archivo-nombre>@(ViewBag.Perfil.TieneCV ? "Elegí otro CV" : "Arrastrá tu CV acá o hacé clic para subirlo")</strong>
                             <span class="small">PDF, DOC o DOCX de hasta 5 MB</span>
                             <input type="file" name="ArchivoCV" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                    data-tamano-maximo="@Archivos.TamanoMaximo" data-error-formato="Subí un archivo PDF, DOC o DOCX" />
@@ -120,22 +120,22 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("ArchivoCV", "Subí un archivo PDF, DOC o DOCX de hasta 5 MB")</span>
                     </div>
 
-                    <div class="formulario-acciones">
+                    <div class="acciones-derecha">
                         <button class="btn btn-primary" type="submit">Guardar cambios</button>
                     </div>
                 </form>
             }
             else if (ViewBag.Perfil.Empresa != null)
             {
-                <form class="formulario" asp-controller="Perfil" asp-action="GuardarEmpresa" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
-                    <div class="configuracion-cabecera">
-                        <h2 class="formulario-subtitulo" id="titulo-cuenta">Datos de la empresa</h2>
+                <form class="grilla-campos" asp-controller="Perfil" asp-action="GuardarEmpresa" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+                    <div class="titulos-juntos">
+                        <h2 class="subtitulo-chico" id="titulo-cuenta">Datos de la empresa</h2>
                         <p class="text-body-secondary">Se muestran en la página de la empresa y en sus búsquedas. El CUIT (@VerificacionEmpresa.Formatear(ViewBag.Perfil.Empresa.CUIT ?? "")) y la razón social (@ViewBag.Perfil.Empresa.Razon_Social) no se pueden cambiar.</p>
                     </div>
 
                     <div class="campo @Html.ClaseError("Logo")">
-                        <div class="configuracion-foto">
-                            <span class="logo-empresa-lg" data-vista-foto aria-hidden="true">
+                        <div class="fila-gris-clara">
+                            <span class="cuadro-lg" data-vista-foto aria-hidden="true">
                                 @if (!string.IsNullOrEmpty(ViewBag.Perfil.Empresa.Logo))
                                 {
                                     <img src="@ViewBag.Perfil.Empresa.Logo" alt="" />
@@ -157,7 +157,7 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Logo", "Subí una imagen JPG, PNG o WEBP de hasta 5 MB")</span>
                     </div>
 
-                    <div class="formulario-fila">
+                    <div class="columnas">
                         <div class="campo @Html.ClaseError("NombreEmpresa")">
                             <label class="form-label" for="cfg-empresa">Nombre de la empresa</label>
                             <input class="form-control" id="cfg-empresa" name="NombreEmpresa" value="@(ViewBag.FormularioEmpresa?.NombreEmpresa ?? ViewBag.Perfil.Empresa.Nombre)" maxlength="100" required />
@@ -188,7 +188,7 @@
 
                     <partial name="_CampoUbicacion" model='new CampoUbicacion { Prefijo = "cfg-", Paises = ViewBag.Perfil.Paises, Provincias = ViewBag.Perfil.Provincias, IDPais = ViewBag.IDPais, IDProvincia = ViewBag.FormularioEmpresa?.IDProvincia ?? ViewBag.Perfil.Empresa.IDProvincia, EtiquetaProvincia = "Provincia de la sede" }' />
 
-                    <div class="formulario-fila">
+                    <div class="columnas">
                         <div class="campo @Html.ClaseError("Ubicacion")">
                             <label class="form-label" for="cfg-ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                             <input class="form-control" id="cfg-ubicacion" name="Ubicacion" value="@(ViewBag.FormularioEmpresa?.Ubicacion ?? ViewBag.Perfil.Empresa.Ubicacion)" maxlength="100" placeholder="Ej.: Palermo, CABA" />
@@ -203,8 +203,8 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Descripcion", "Contá en pocas líneas qué hace la empresa")</span>
                     </div>
 
-                    <h3 class="formulario-subtitulo">Quién maneja la cuenta</h3>
-                    <div class="formulario-fila">
+                    <h3 class="subtitulo-chico">Quién maneja la cuenta</h3>
+                    <div class="columnas">
                         <div class="campo @Html.ClaseError("Nombre")">
                             <label class="form-label" for="cfg-nombre">Tu nombre</label>
                             <input class="form-control" id="cfg-nombre" name="Nombre" value="@(ViewBag.FormularioEmpresa?.Nombre ?? ViewBag.Perfil.Usuario.Nombre)" maxlength="50" required />
@@ -218,7 +218,7 @@
                     </div>
                     <p class="small text-body-secondary">Email de la cuenta: @ViewBag.Perfil.Usuario.Email (es el que verifica la empresa, no se puede cambiar).</p>
 
-                    <div class="formulario-acciones">
+                    <div class="acciones-derecha">
                         <button class="btn btn-primary" type="submit">Guardar cambios</button>
                     </div>
                 </form>
@@ -228,13 +228,13 @@
         @if (!ViewBag.EsEmpresa)
         {
             <section class="tab-pane @(ViewBag.Activa == "busqueda" ? "active" : "")" id="panel-busqueda" aria-labelledby="titulo-busqueda">
-                <form class="formulario" asp-controller="Perfil" asp-action="GuardarBusqueda" method="post" novalidate data-formulario-real>
-                    <div class="configuracion-cabecera">
-                        <h2 class="formulario-subtitulo" id="titulo-busqueda">Qué busco</h2>
+                <form class="grilla-campos" asp-controller="Perfil" asp-action="GuardarBusqueda" method="post" novalidate data-formulario-real>
+                    <div class="titulos-juntos">
+                        <h2 class="subtitulo-chico" id="titulo-busqueda">Qué busco</h2>
                         <p class="text-body-secondary">Con esto armamos las ofertas de tu inicio. Completá solo lo que tengas claro.</p>
                     </div>
                     <partial name="_CamposBusqueda" model="ViewBag.CamposBusqueda" />
-                    <div class="formulario-acciones">
+                    <div class="acciones-derecha">
                         <button class="btn btn-primary" type="submit">Guardar</button>
                     </div>
                 </form>
@@ -242,9 +242,9 @@
         }
 
         <section class="tab-pane @(ViewBag.Activa == "seguridad" ? "active" : "")" id="panel-seguridad" aria-labelledby="titulo-seguridad">
-            <form class="formulario" asp-controller="Perfil" asp-action="CambiarClave" method="post" novalidate data-formulario-real>
-                <div class="configuracion-cabecera">
-                    <h2 class="formulario-subtitulo" id="titulo-seguridad">@(ViewBag.Perfil.Usuario.TieneContrasena ? "Cambiar contraseña" : "Crear una contraseña")</h2>
+            <form class="grilla-campos" asp-controller="Perfil" asp-action="CambiarClave" method="post" novalidate data-formulario-real>
+                <div class="titulos-juntos">
+                    <h2 class="subtitulo-chico" id="titulo-seguridad">@(ViewBag.Perfil.Usuario.TieneContrasena ? "Cambiar contraseña" : "Crear una contraseña")</h2>
                     @if (!ViewBag.Perfil.Usuario.TieneContrasena)
                     {
                         <p class="text-body-secondary">Entrás con @string.Join(" y ", ViewBag.Perfil.ProveedoresVinculados). Si creás una contraseña, también vas a poder entrar con tu email.</p>
@@ -262,19 +262,19 @@
                         <div class="control-con-icono">
                             <icono nombre="lock" />
                             <input class="form-control" id="clave-actual" name="Actual" type="password" autocomplete="current-password" required />
-                            <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
                         </div>
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Actual", "Ingresá tu contraseña actual")</span>
                     </div>
                 }
-                <div class="formulario-fila">
+                <div class="columnas">
                     <div class="campo @Html.ClaseError("Nueva")">
                         <label class="form-label" for="clave-nueva">Contraseña nueva</label>
                         <div class="control-con-icono">
                             <icono nombre="lock" />
                             <input class="form-control" id="clave-nueva" name="Nueva" type="password" autocomplete="new-password" minlength="8" maxlength="100"
                                    pattern="(?=.*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?=.*\d).{8,}" required />
-                            <button class="control-con-icono-boton" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
+                            <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
                         </div>
                         <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Nueva", "Usá al menos 8 caracteres, con una letra y un número")</span>
@@ -288,14 +288,14 @@
                         <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Repetir", "Las contraseñas no coinciden")</span>
                     </div>
                 </div>
-                <div class="formulario-acciones">
+                <div class="acciones-derecha">
                     <button class="btn btn-primary" type="submit">@(ViewBag.Perfil.Usuario.TieneContrasena ? "Cambiar contraseña" : "Crear contraseña")</button>
                 </div>
             </form>
 
-            <form class="formulario zona-peligro" asp-controller="Perfil" asp-action="EliminarCuenta" method="post" novalidate>
-                <div class="configuracion-cabecera">
-                    <h2 class="formulario-subtitulo">Eliminar la cuenta</h2>
+            <form class="grilla-campos recuadro-rojo" asp-controller="Perfil" asp-action="EliminarCuenta" method="post" novalidate>
+                <div class="titulos-juntos">
+                    <h2 class="subtitulo-chico">Eliminar la cuenta</h2>
                     <p class="text-body-secondary">
                         @(ViewBag.EsEmpresa
                             ? "Se borran tu cuenta, las búsquedas de la empresa y sus postulaciones. No se puede deshacer."
@@ -307,7 +307,7 @@
                     <input class="form-control" id="confirmar-eliminar" name="confirmacion" autocomplete="off" required pattern="ELIMINAR" />
                     <span class="invalid-feedback"><icono nombre="warning" />Escribí ELIMINAR en mayúsculas</span>
                 </div>
-                <div class="formulario-acciones">
+                <div class="acciones-derecha">
                     <button class="btn btn-danger" type="submit">Eliminar mi cuenta</button>
                 </div>
             </form>

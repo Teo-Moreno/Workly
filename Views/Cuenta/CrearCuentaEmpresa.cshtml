@@ -2,16 +2,16 @@
     ViewData["Title"] = "Crear cuenta de empresa";
 }
 @section Barra {
-    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="enlace" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
+    <p class="text-body-secondary">¿Ya tenés cuenta? <a class="resaltado" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a></p>
 }
 
-<div class="cuenta-tarjeta cuenta-tarjeta-ancha">
-    <h1 class="cuenta-tarjeta-titulo">Registrá tu empresa</h1>
-    <p class="cuenta-tarjeta-bajada">Paso <strong data-paso-actual>1</strong> de @RegistroEmpresaViewModel.Pasos.Length. Con la cuenta de empresa publicás búsquedas y ves quién se postula.</p>
+<div class="columna-angosta columna-media">
+    <h1 class="titulo-grande">Registrá tu empresa</h1>
+    <p class="subtitulo-pegado">Paso <strong data-paso-actual>1</strong> de @RegistroEmpresaViewModel.Pasos.Length. Con la cuenta de empresa publicás búsquedas y ves quién se postula.</p>
 
     <partial name="_TipoCuenta" model='"empresa"' />
 
-    <ol class="pasos registro-pasos" aria-label="Progreso del registro">
+    <ol class="pasos pasos-espaciados" aria-label="Progreso del registro">
         @for (var i = 0; i < RegistroEmpresaViewModel.Pasos.Length; i++)
         {
             <li class="pasos-item @(i == 0 ? "esta-actual" : "")" data-paso-indicador>
@@ -28,14 +28,14 @@
         <partial name="_BotonesExternos" model='new BotonesExternos("Registrarte", "empresa", null)' />
     }
 
-    <form class="registro" asp-controller="Cuenta" asp-action="CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
-        <fieldset class="formulario registro-paso" data-paso>
+    <form class="sin-grilla" asp-controller="Cuenta" asp-action="CrearCuentaEmpresa" method="post" enctype="multipart/form-data" novalidate data-pasos-form data-formulario-real>
+        <fieldset class="grilla-campos paso-animado" data-paso>
             <legend class="visually-hidden">Paso 1: quién maneja la cuenta</legend>
             @if (ViewBag.Formulario.EsExterno)
             {
-                <p class="aviso-externo"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
+                <p class="nota-turquesa"><icono nombre="circle-check" />Te vas a registrar con tu cuenta de @ViewBag.Formulario.ProveedorExterno. No necesitás contraseña.</p>
             }
-            <div class="formulario-fila">
+            <div class="columnas">
                 <div class="campo @Html.ClaseError("Nombre")">
                     <label class="form-label" for="Nombre">Tu nombre</label>
                     <input class="form-control" id="Nombre" name="Nombre" value="@ViewBag.Formulario.Nombre" autocomplete="given-name" placeholder="Escribí acá" maxlength="50" required />
@@ -65,17 +65,17 @@
 
             <partial name="_AceptaTerminos" />
 
-            <div class="registro-acciones">
+            <div class="acciones-entre">
                 <span></span>
                 <button class="btn btn-lg" type="button" data-paso-siguiente>Siguiente<icono nombre="arrow-right" /></button>
             </div>
         </fieldset>
 
-        <fieldset class="formulario registro-paso" data-paso hidden>
+        <fieldset class="grilla-campos paso-animado" data-paso hidden>
             <legend class="visually-hidden">Paso 2: datos de la empresa</legend>
             <p class="text-body-secondary">Con estos datos comprobamos que la empresa existe: el CUIT tiene que ser válido y el email, del dominio de su sitio web.</p>
 
-            <div class="formulario-fila">
+            <div class="columnas">
                 <div class="campo @Html.ClaseError("NombreEmpresa")">
                     <label class="form-label" for="NombreEmpresa">Nombre de la empresa</label>
                     <input class="form-control" id="NombreEmpresa" name="NombreEmpresa" value="@ViewBag.Formulario.NombreEmpresa" autocomplete="organization" placeholder="Como la conoce la gente" maxlength="100" required />
@@ -88,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="formulario-fila">
+            <div class="columnas">
                 <div class="campo @Html.ClaseError("CUIT")">
                     <label class="form-label" for="CUIT">CUIT</label>
                     <input class="form-control" id="CUIT" name="CUIT" value="@ViewBag.Formulario.CUIT" inputmode="numeric" placeholder="30-12345678-9" maxlength="13" required
@@ -120,7 +120,7 @@
 
             <partial name="_CampoUbicacion" model='new CampoUbicacion { Paises = ViewBag.Formulario.Paises, Provincias = ViewBag.Formulario.Provincias, IDPais = ViewBag.Formulario.IDPais, IDProvincia = ViewBag.Formulario.IDProvincia, EtiquetaProvincia = "Provincia de la sede" }' />
 
-            <div class="formulario-fila">
+            <div class="columnas">
                 <div class="campo @Html.ClaseError("Ubicacion")">
                     <label class="form-label" for="Ubicacion">Localidad o dirección <span class="campo-opcional">(opcional)</span></label>
                     <input class="form-control" id="Ubicacion" name="Ubicacion" value="@ViewBag.Formulario.Ubicacion" placeholder="Ej.: Palermo, CABA" maxlength="100" />
@@ -138,8 +138,8 @@
 
             <div class="campo @Html.ClaseError("Logo")">
                 <span class="form-label">Logo <span class="campo-opcional">(opcional)</span></span>
-                <div class="subir-foto">
-                    <span class="logo-empresa-lg subir-foto-vista" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
+                <div class="fila-imagen">
+                    <span class="cuadro-lg vista-previa" data-vista-foto aria-hidden="true"><icono nombre="building" tamano="32" /></span>
                     <div class="pila" style="--pila-espacio: 8px">
                         <label class="btn btn-archivo">
                             <icono nombre="upload" />Elegir logo
@@ -157,7 +157,7 @@
                 <p class="small text-body-secondary">Por seguridad, si hubo un error tenés que volver a elegir el logo.</p>
             }
 
-            <div class="registro-acciones">
+            <div class="acciones-entre">
                 <button class="btn btn-outline-lg" type="button" data-paso-anterior><icono nombre="arrow-left" />Atrás</button>
                 <button class="btn btn-warning-lg" type="submit">Crear cuenta de empresa</button>
             </div>

@@ -1,13 +1,13 @@
-<div class="descripcion-oferta">
+<div class="parrafos">
     @foreach (BloqueDescripcion bloque in Descripciones.Armar(Model))
     {
         if (bloque.EsTitulo)
         {
-            <h3 class="descripcion-oferta-titulo">@bloque.Texto</h3>
+            <h3 class="parrafos-titulo">@bloque.Texto</h3>
         }
         else if (bloque.EsLista)
         {
-            <ul class="descripcion-oferta-lista">
+            <ul class="parrafos-lista">
                 @foreach (var item in bloque.Items)
                 {
                     <li>@item</li>
