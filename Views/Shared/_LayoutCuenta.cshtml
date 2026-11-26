@@ -2,15 +2,14 @@
 <html lang="es-AR">
 <head>
     <partial name="_Head" />
-    <link rel="stylesheet" href="~/css/estilo.css" asp-append-version="true" />
-    @await RenderSectionAsync("Head", required: false)
+    <link rel="stylesheet" href="/css/estilo.css" />
 </head>
 <body class="fondo-blanco">
     <a class="oculto-hasta-foco" href="#contenido">Saltar al contenido</a>
 
     <div class="pantalla-dividida">
         <aside class="lateral-degradado">
-            <a class="logo logo-claro" asp-controller="Home" asp-action="Index" aria-label="Workly, ir al inicio">
+            <a class="logo logo-claro" href="/" aria-label="Workly, ir al inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
@@ -38,8 +37,11 @@
 
         <main class="contenido-holgado" id="contenido">
             <div class="barra-superior-chica">
-                <a class="resaltado resaltado-principal" asp-controller="Home" asp-action="Index"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
-                @await RenderSectionAsync("Barra", required: false)
+                <a class="resaltado resaltado-principal" href="/"><icono nombre="arrow-left" tamano="18" />Volver al inicio</a>
+                @if (ViewBag.BarraTexto != null)
+                {
+                    <p class="text-body-secondary">@ViewBag.BarraTexto <a class="resaltado" href="@ViewBag.BarraUrl">@ViewBag.BarraLink</a></p>
+                }
             </div>
             <div class="centro-vertical">
                 @RenderBody()
@@ -51,7 +53,6 @@
     <div class="toast-container" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="/js/site.js"></script>
 </body>
 </html>

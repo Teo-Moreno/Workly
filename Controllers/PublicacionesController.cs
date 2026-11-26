@@ -5,11 +5,11 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class PublicacionesController : Controller
+public class PublicacionesController : Controlador
 {
     private readonly IWebHostEnvironment _entorno;
 
-    public PublicacionesController(IWebHostEnvironment entorno)
+    public PublicacionesController(IWebHostEnvironment entorno) : base("_LayoutApp")
     {
         _entorno = entorno;
     }

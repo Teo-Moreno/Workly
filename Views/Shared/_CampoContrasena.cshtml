@@ -1,4 +1,4 @@
-<div class="campo @Html.ClaseError("Contrasena")">
+<div class="campo @ViewBag.Errores.Clase("Contrasena")">
     <label class="form-label" for="Contrasena">Contraseña</label>
     <div class="control-con-icono">
         <icono nombre="lock" />
@@ -7,5 +7,5 @@
         <button class="control-icono-derecha" type="button" aria-label="Mostrar contraseña" aria-pressed="false" data-ver-clave><icono nombre="eye" /></button>
     </div>
     <span class="form-text">Al menos 8 caracteres, con letras y números.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError("Contrasena", "Usá al menos 8 caracteres, con una letra y un número")</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje("Contrasena", "Usá al menos 8 caracteres, con una letra y un número")</span>
 </div>

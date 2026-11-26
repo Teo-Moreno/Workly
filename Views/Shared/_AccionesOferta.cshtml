@@ -1,12 +1,12 @@
 @if (!Model.EsExterna)
 {
-    if (User.EsPropia((int?)Model.IDUsuario_Publicador))
+    if (ViewBag.EsPropia)
     {
-        <a class="btn btn-lg" asp-controller="Publicaciones" asp-action="Detalle" asp-route-id="@Model.ID">Ver postulantes</a>
+        <a class="btn btn-lg" href="/Publicaciones/Detalle/@Model.ID">Ver postulantes</a>
     }
     else if (Model.YaPostulado)
     {
-        <a class="btn btn-outline-lg" asp-controller="Postulaciones" asp-action="Index"><icono nombre="circle-check" />Ya te postulaste</a>
+        <a class="btn btn-outline-lg" href="/Postulaciones"><icono nombre="circle-check" />Ya te postulaste</a>
     }
     else if (Model.EstaCerrada)
     {
@@ -14,12 +14,13 @@
     }
     else if (!User.EstaLogueado())
     {
-        <a class="btn btn-lg" href="@Url.Action("IniciarSesion", "Cuenta", new { returnUrl = ViewContext.Volver() })">Iniciá sesión para postularte</a>
+        <a class="btn btn-lg" href="@ViewBag.UrlIngresar">Iniciá sesión para postularte</a>
     }
     else if (User.EsPersona())
     {
-        <form asp-controller="Empleos" asp-action="Postular" asp-route-id="@Model.ID" method="post">
-            <input type="hidden" name="volver" value="@ViewContext.Volver()" />
+        <form action="/Empleos/Postular/@Model.ID" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="volver" value="@ViewBag.Volver" />
             <button class="btn btn-lg" type="submit">Postularme</button>
         </form>
     }
@@ -32,12 +33,13 @@ else
     }
     if (Model.YaPostulado)
     {
-        <a class="btn btn-outline-lg" asp-controller="Postulaciones" asp-action="Index"><icono nombre="circle-check" />Está en tu tablero</a>
+        <a class="btn btn-outline-lg" href="/Postulaciones"><icono nombre="circle-check" />Está en tu tablero</a>
     }
     else if (User.EsPersona())
     {
-        <form asp-controller="Empleos" asp-action="RegistrarExterna" asp-route-id="@Model.ID" method="post">
-            <input type="hidden" name="volver" value="@ViewContext.Volver()" />
+        <form action="/Empleos/RegistrarExterna/@Model.ID" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="volver" value="@ViewBag.Volver" />
             <button class="btn btn-outline-lg" type="submit" title="Sumala a tu tablero para hacerle el seguimiento">Ya me postulé</button>
         </form>
     }

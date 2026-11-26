@@ -41,7 +41,8 @@
                 }
             </ul>
 
-            <form class="fila-chica" asp-controller="Perfil" asp-action="GuardarEstado" method="post" data-enviar-al-cambiar>
+            <form class="fila-chica" action="/Perfil/GuardarEstado" method="post" data-enviar-al-cambiar>
+                @Html.AntiForgeryToken()
                 <label class="fila-chica-rotulo" for="estado-busqueda">Estado</label>
                 <select class="form-select @(ViewBag.Perfil.Perfil.Estado_Busqueda == "Buscando activamente" ? "control-pildora-activo" : "control-pildora")" id="estado-busqueda" name="estado">
                     @if (ViewBag.Perfil.Perfil.Estado_Busqueda == null)
@@ -60,13 +61,13 @@
         <div class="recuadro-degradado-acciones">
             @if (ViewBag.Perfil.TieneCV)
             {
-                <a class="btn btn-outline-primary" asp-controller="Perfil" asp-action="DescargarCV"><icono nombre="download" />Descargar CV</a>
+                <a class="btn btn-outline-primary" href="/Perfil/DescargarCV"><icono nombre="download" />Descargar CV</a>
             }
             else
             {
                 <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-cv"><icono nombre="upload" />Subir CV</button>
             }
-            <a class="btn btn-primary" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="pen" />Editar perfil</a>
+            <a class="btn btn-primary" href="/Perfil/Configuracion"><icono nombre="pen" />Editar perfil</a>
         </div>
     </section>
 
@@ -91,7 +92,7 @@
                     {
                         <a class="btn btn-warning-lg" href="@ViewBag.Perfil.SiguientePaso.Enlace">@ViewBag.Perfil.SiguientePaso.Accion<icono nombre="arrow-right" /></a>
                     }
-                    <a class="btn btn-outline-lg" asp-controller="Perfil" asp-action="Completar">Completar todo</a>
+                    <a class="btn btn-outline-lg" href="/Perfil/Completar">Completar todo</a>
                 </div>
             </div>
             @if (ViewBag.Perfil.OtrosPendientes.Count > 0)
@@ -123,7 +124,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2 class="card-title">Qué busco</h2>
-                    <a class="resaltado" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />Editar</a>
+                    <a class="resaltado" href="/Perfil/Configuracion?pestana=busqueda"><icono nombre="pen" tamano="16" />Editar</a>
                 </div>
                 @if (ViewBag.Perfil.Preferencia.TieneDatos || ViewBag.Perfil.Preferencia.Provincia != null)
                 {
@@ -142,7 +143,7 @@
                 {
                     <div class="recuadro-punteado recuadro-punteado-chico">
                         <p>Contanos qué puesto buscás, en qué modalidad y tu expectativa salarial. Con eso armamos las ofertas de tu inicio.</p>
-                        <a class="btn btn-outline-sm" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="plus" />Completar qué busco</a>
+                        <a class="btn btn-outline-sm" href="/Perfil/Configuracion?pestana=busqueda"><icono nombre="plus" />Completar qué busco</a>
                     </div>
                 }
             </section>
@@ -152,14 +153,14 @@
                     <h2 class="card-title">Mis postulaciones</h2>
                     @if (ViewBag.Perfil.TotalPostulaciones > 0)
                     {
-                        <a class="resaltado" asp-controller="Postulaciones" asp-action="Index">Ver tablero</a>
+                        <a class="resaltado" href="/Postulaciones">Ver tablero</a>
                     }
                 </div>
                 @if (ViewBag.Perfil.TotalPostulaciones == 0)
                 {
                     <div class="recuadro-punteado recuadro-punteado-chico">
                         <p>Todavía no te postulaste a ninguna búsqueda.</p>
-                        <a class="btn btn-outline-sm" asp-controller="Empleos" asp-action="Index"><icono nombre="search" />Buscar trabajo</a>
+                        <a class="btn btn-outline-sm" href="/Empleos"><icono nombre="search" />Buscar trabajo</a>
                     </div>
                 }
                 else
@@ -184,13 +185,14 @@
                     <div class="fila-icono">
                         <span class="caja-icono-sm"><icono nombre="file-blank" /></span>
                         <div class="fila-icono-textos">
-                            <a class="resaltado" asp-controller="Perfil" asp-action="DescargarCV">@ViewBag.Perfil.CV.NombreOriginal</a>
+                            <a class="resaltado" href="/Perfil/DescargarCV">@ViewBag.Perfil.CV.NombreOriginal</a>
                             <span class="small text-body-secondary">Actualizado el @ViewBag.Perfil.FechaCV</span>
                         </div>
                     </div>
                     <div class="fila fila-envolver">
                         <button class="btn btn-outline-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-cv"><icono nombre="upload" />Cambiar</button>
-                        <form asp-controller="Perfil" asp-action="QuitarCV" method="post" data-confirmar="¿Quitamos tu CV?">
+                        <form action="/Perfil/QuitarCV" method="post" data-confirmar="¿Quitamos tu CV?">
+                            @Html.AntiForgeryToken()
                             <button class="btn btn-link-sm" type="submit">Quitar</button>
                         </form>
                     </div>
@@ -258,7 +260,8 @@
                                         <p class="linea-tiempo-texto">@experiencia.Descripcion</p>
                                     }
                                 </div>
-                                <form asp-controller="Perfil" asp-action="EliminarExperiencia" asp-route-id="@experiencia.ID" method="post" data-confirmar="¿Borramos esta experiencia?">
+                                <form action="/Perfil/EliminarExperiencia/@experiencia.ID" method="post" data-confirmar="¿Borramos esta experiencia?">
+                                    @Html.AntiForgeryToken()
                                     <button class="btn btn-icono-borde" type="submit"><icono nombre="trash-full" etiqueta="Borrar experiencia" /></button>
                                 </form>
                             </li>
@@ -294,7 +297,8 @@
                                     <p class="texto-fuerte">@formacion.Institucion</p>
                                     <p class="texto-chico">@formacion.Periodo</p>
                                 </div>
-                                <form asp-controller="Perfil" asp-action="EliminarFormacion" asp-route-id="@formacion.ID" method="post" data-confirmar="¿Borramos esta formación?">
+                                <form action="/Perfil/EliminarFormacion/@formacion.ID" method="post" data-confirmar="¿Borramos esta formación?">
+                                    @Html.AntiForgeryToken()
                                     <button class="btn btn-icono-borde" type="submit"><icono nombre="trash-full" etiqueta="Borrar formación" /></button>
                                 </form>
                             </li>
@@ -307,7 +311,7 @@
                 <section class="card">
                     <div class="card-header">
                         <h2 class="card-title">Habilidades</h2>
-                        <a class="resaltado" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />@(ViewBag.Perfil.Habilidades.Count > 0 ? "Editar" : "Agregar")</a>
+                        <a class="resaltado" href="/Perfil/Configuracion?pestana=busqueda"><icono nombre="pen" tamano="16" />@(ViewBag.Perfil.Habilidades.Count > 0 ? "Editar" : "Agregar")</a>
                     </div>
                     @if (ViewBag.Perfil.Habilidades.Count == 0)
                     {
@@ -327,7 +331,7 @@
                 <section class="card">
                     <div class="card-header">
                         <h2 class="card-title">Idiomas</h2>
-                        <a class="resaltado" asp-controller="Perfil" asp-action="Configuracion" asp-route-pestana="busqueda"><icono nombre="pen" tamano="16" />@(ViewBag.Perfil.Idiomas.Count > 0 ? "Editar" : "Agregar")</a>
+                        <a class="resaltado" href="/Perfil/Configuracion?pestana=busqueda"><icono nombre="pen" tamano="16" />@(ViewBag.Perfil.Idiomas.Count > 0 ? "Editar" : "Agregar")</a>
                     </div>
                     @if (ViewBag.Perfil.Idiomas.Count == 0)
                     {
@@ -350,8 +354,9 @@
 
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-foto" aria-labelledby="modal-foto-titulo"><div class="modal-dialog modal-sm"><div class="modal-content">
     <div class="modal-body">
-        <form class="grilla-campos" asp-controller="Perfil" asp-action="SubirFoto" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
-            <input type="hidden" name="volver" value="@Url.Action("Index", "Perfil")" />
+        <form class="grilla-campos" action="/Perfil/SubirFoto" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="volver" value="/Perfil" />
             <div class="modal-header">
                 <h2 class="modal-title" id="modal-foto-titulo">@(string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto) ? "Subí tu foto de perfil" : "Cambiá tu foto de perfil")</h2>
                 <button class="modal-cerrar" type="button" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
@@ -384,8 +389,9 @@
         </form>
         @if (!string.IsNullOrEmpty(ViewBag.Perfil.Perfil.Foto))
         {
-            <form class="fila-centrada" asp-controller="Perfil" asp-action="QuitarFoto" method="post">
-                <input type="hidden" name="volver" value="@Url.Action("Index", "Perfil")" />
+            <form class="fila-centrada" action="/Perfil/QuitarFoto" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="volver" value="/Perfil" />
                 <button class="btn btn-link-sm" type="submit"><icono nombre="trash-full" />Quitar la foto</button>
             </form>
         }
@@ -393,7 +399,8 @@
 </div></div></div>
 
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-sobre-mi" aria-labelledby="modal-sobre-mi-titulo"><div class="modal-dialog"><div class="modal-content">
-    <form class="modal-body grilla-campos" asp-controller="Perfil" asp-action="GuardarSobreMi" method="post" novalidate data-formulario-real>
+    <form class="modal-body grilla-campos" action="/Perfil/GuardarSobreMi" method="post" novalidate data-formulario-real>
+        @Html.AntiForgeryToken()
         <div class="modal-header">
             <h2 class="modal-title" id="modal-sobre-mi-titulo">Sobre mí</h2>
             <button class="modal-cerrar" type="button" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
@@ -412,8 +419,9 @@
 </div></div></div>
 
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-cv" aria-labelledby="modal-cv-titulo"><div class="modal-dialog"><div class="modal-content">
-    <form class="modal-body grilla-campos" asp-controller="Perfil" asp-action="SubirCV" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
-        <input type="hidden" name="volver" value="@Url.Action("Index", "Perfil")" />
+    <form class="modal-body grilla-campos" action="/Perfil/SubirCV" method="post" enctype="multipart/form-data" novalidate data-formulario-real>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="volver" value="/Perfil" />
         <div class="modal-header">
             <h2 class="modal-title" id="modal-cv-titulo">@(ViewBag.Perfil.TieneCV ? "Cambiar tu CV" : "Subir tu CV")</h2>
             <button class="modal-cerrar" type="button" aria-label="Cerrar" data-bs-dismiss="modal"><icono nombre="close-big" /></button>
@@ -435,5 +443,5 @@
     </form>
 </div></div></div>
 
-<partial name="_ModalExperiencia" model="new ModalExperiencia(true, ViewBag.Formulario as ExperienciaFormulario, ViewBag.ModalAbierto as string)" />
-<partial name="_ModalFormacion" model="new ModalFormacion(true, ViewBag.Formulario as FormacionFormulario, ViewBag.Perfil.Instituciones, ViewBag.ModalAbierto as string)" />
+<partial name="_ModalExperiencia" model="ViewBag.ModalExperiencia" />
+<partial name="_ModalFormacion" model="ViewBag.ModalFormacion" />

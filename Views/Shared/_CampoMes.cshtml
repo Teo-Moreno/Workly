@@ -1,4 +1,4 @@
-<div class="campo @(Model.Error != null ? "campo-error" : Html.ClaseError((string)Model.Nombre))">
+<div class="campo @(Model.Error != null ? "campo-error" : "")">
     <label class="form-label" for="@Model.Id">@Model.Etiqueta</label>
     <div class="selector" data-selector-mes data-permitir-futuro="@(Model.PermitirFuturo ? "true" : "false")">
         <input class="form-control selector-entrada" id="@Model.Id" name="@Model.Nombre" value="@Model.Valor" placeholder="MM/AAAA"
@@ -23,5 +23,5 @@
             </div>
         </div>
     </div>
-    <span class="invalid-feedback"><icono nombre="warning" />@(Model.Error ?? Html.MensajeError((string)Model.Nombre, "Elegí el mes y el año (MM/AAAA)"))</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@(Model.Error ?? "Elegí el mes y el año (MM/AAAA)")</span>
 </div>

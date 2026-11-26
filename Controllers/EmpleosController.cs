@@ -5,20 +5,25 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-public class EmpleosController : Controller
+public class EmpleosController : Controlador
 {
     private readonly JSearch _jsearch;
     private readonly IMemoryCache _cache;
+    private readonly Correo _correo;
 
-    public EmpleosController(JSearch jsearch, IMemoryCache cache)
+    public EmpleosController(JSearch jsearch, IMemoryCache cache, Correo correo) : base("_LayoutApp")
     {
         _jsearch = jsearch;
         _cache = cache;
+        _correo = correo;
     }
 
     public IActionResult Index(BuscarTrabajoViewModel filtros)
     {
-        ViewBag.Busqueda = Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
+        var busqueda = Empleos.Buscar(filtros, Request.Query, User.IdUsuario(), _jsearch, _cache);
+        ViewBag.Busqueda = busqueda;
+        ViewBag.UrlLimpiar = Vistas.Url("/Empleos", ("Q", busqueda.Q), ("IDPais", busqueda.IDPais), ("IDProvincia", busqueda.IDProvincia));
+        ViewBag.UrlSinFiltros = Vistas.Url("/Empleos", ("Q", busqueda.Q));
         return View();
     }
 
@@ -58,6 +63,7 @@ public class EmpleosController : Controller
 
     private void MostrarDetalle(DetalleOferta detalle)
     {
+        ViewBag.MailConfigurado = _correo.Configurado;
         ViewBag.Oferta = detalle.Oferta;
         ViewBag.Empresa = detalle.Empresa;
         ViewBag.EsPropia = detalle.EsPropia;

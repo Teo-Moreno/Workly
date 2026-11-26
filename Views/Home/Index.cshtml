@@ -12,7 +12,7 @@
                 postulate y seguí cada proceso desde tu tablero.
             </p>
 
-            <form class="barra-sombra barra-sombra-ancha" asp-controller="Empleos" asp-action="Index" method="get" role="search">
+            <form class="barra-sombra barra-sombra-ancha" action="/Empleos" method="get" role="search">
                 <label class="barra-sombra-campo">
                     <icono nombre="search" />
                     <span class="barra-sombra-textos">
@@ -69,7 +69,7 @@
             <span class="badge badge-acento">Por qué Workly</span>
             <h2 class="bloque-azul-titulo" id="diferenciales-titulo">No es otra página de avisos.</h2>
             <p class="bloque-azul-subtitulo">Una sola búsqueda, un solo perfil y un solo tablero para toda tu búsqueda laboral.</p>
-            <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil</a>
+            <a class="btn btn-warning" href="/Cuenta/CrearCuenta">Crear mi perfil</a>
         </div>
 
         <ul class="grilla-dos" role="list">
@@ -106,8 +106,8 @@
                 @foreach (Empresa empresa in ViewBag.Empresas)
                 {
                     <li>
-                        <a class="texto-marca" asp-controller="Empresas" asp-action="Detalle" asp-route-id="@empresa.ID">
-                            <partial name="_LogoEmpresa" model='new LogoEmpresa(empresa.Logo, empresa.Nombre, "cuadro-sm cuadro-principal")' />
+                        <a class="texto-marca" href="/Empresas/Detalle/@empresa.ID">
+                            <span class="cuadro-sm cuadro-principal" aria-hidden="true"><partial name="_LogoEmpresa" model="empresa" /></span>
                             @empresa.Nombre
                         </a>
                     </li>
@@ -124,8 +124,8 @@
             <p class="banda-degradado-subtitulo">Creá tu perfil gratis. ¿Tenés una empresa? Registrala con su CUIT, publicá tus búsquedas y mirá quién se postula.</p>
         </div>
         <div class="acciones">
-            <a class="btn btn-warning" asp-controller="Cuenta" asp-action="CrearCuenta">Crear mi perfil gratis</a>
-            <a class="btn btn-outline-light" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Soy empresa</a>
+            <a class="btn btn-warning" href="/Cuenta/CrearCuenta">Crear mi perfil gratis</a>
+            <a class="btn btn-outline-light" href="/Cuenta/CrearCuenta?tipo=empresa">Soy empresa</a>
         </div>
     </div>
 </section>

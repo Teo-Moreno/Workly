@@ -2,15 +2,14 @@
 <html lang="es-AR">
 <head>
     <partial name="_Head" />
-    <link rel="stylesheet" href="~/css/estilo.css" asp-append-version="true" />
-    @await RenderSectionAsync("Head", required: false)
+    <link rel="stylesheet" href="/css/estilo.css" />
 </head>
 <body>
     <a class="oculto-hasta-foco" href="#contenido">Saltar al contenido</a>
 
     <header class="navbar navbar-app" data-navbar>
         <div class="container navbar-interior">
-            <a class="navbar-brand logo" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
+            <a class="navbar-brand logo" href="@ViewBag.Inicio" aria-label="Workly, ir a tu inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
@@ -49,20 +48,21 @@
                         <ul role="list">
                             @if (User.EsEmpresa())
                             {
-                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Index"><icono nombre="building" />Perfil de la empresa</a></li>
-                                <li><a class="dropdown-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar una búsqueda</a></li>
+                                <li><a class="dropdown-item" href="/Perfil"><icono nombre="building" />Perfil de la empresa</a></li>
+                                <li><a class="dropdown-item" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar una búsqueda</a></li>
                             }
                             else
                             {
-                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Index"><icono nombre="user-square" />Mi perfil</a></li>
-                                <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Configuracion" asp-fragment="busqueda"><icono nombre="slider-03" />Qué estoy buscando</a></li>
-                                <li><a class="dropdown-item" asp-controller="Publicaciones" asp-action="Nueva"><icono nombre="plus" />Publicar un trabajo</a></li>
+                                <li><a class="dropdown-item" href="/Perfil"><icono nombre="user-square" />Mi perfil</a></li>
+                                <li><a class="dropdown-item" href="/Perfil/Configuracion#busqueda"><icono nombre="slider-03" />Qué estoy buscando</a></li>
+                                <li><a class="dropdown-item" href="/Publicaciones/Nueva"><icono nombre="plus" />Publicar un trabajo</a></li>
                             }
-                            <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Configuracion"><icono nombre="settings" />Configuración</a></li>
-                            <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Ayuda"><icono nombre="help-circle-outline" />Ayuda</a></li>
+                            <li><a class="dropdown-item" href="/Perfil/Configuracion"><icono nombre="settings" />Configuración</a></li>
+                            <li><a class="dropdown-item" href="/Perfil/Ayuda"><icono nombre="help-circle-outline" />Ayuda</a></li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
-                                <form asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
+                                <form action="/Cuenta/CerrarSesion" method="post">
+                                    @Html.AntiForgeryToken()
                                     <button class="dropdown-item text-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
                                 </form>
                             </li>
@@ -72,8 +72,8 @@
                 }
                 else
                 {
-                    <a class="btn btn-outline-primary" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                    <a class="btn btn-outline-primary" href="/Cuenta/IniciarSesion">Iniciar sesión</a>
+                    <a class="btn btn-primary" href="/Cuenta/CrearCuenta">Crear cuenta</a>
                 }
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-movil" aria-expanded="false" aria-controls="menu-movil" data-menu-movil>
@@ -86,16 +86,17 @@
             <partial name="_LinksApp" />
             @if (User.EstaLogueado())
             {
-                <a class="nav-link" asp-controller="Perfil" asp-action="Configuracion">Configuración</a>
-                <form class="navbar-movil-final" asp-controller="Cuenta" asp-action="CerrarSesion" method="post">
+                <a class="nav-link" href="/Perfil/Configuracion">Configuración</a>
+                <form class="navbar-movil-final" action="/Cuenta/CerrarSesion" method="post">
+                    @Html.AntiForgeryToken()
                     <button class="btn btn-outline-danger" type="submit"><icono nombre="log-out" />Cerrar sesión</button>
                 </form>
             }
             else
             {
                 <div class="navbar-movil-acciones">
-                    <a class="btn btn-outline-primary" asp-controller="Cuenta" asp-action="IniciarSesion">Iniciar sesión</a>
-                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta">Crear cuenta</a>
+                    <a class="btn btn-outline-primary" href="/Cuenta/IniciarSesion">Iniciar sesión</a>
+                    <a class="btn btn-primary" href="/Cuenta/CrearCuenta">Crear cuenta</a>
                 </div>
             }
         </nav>
@@ -107,16 +108,16 @@
 
     <footer class="fondo-claro">
         <div class="container fila-separada">
-            <a class="logo logo-chico" href="@Url.Inicio(User)" aria-label="Workly, ir a tu inicio">
+            <a class="logo logo-chico" href="@ViewBag.Inicio" aria-label="Workly, ir a tu inicio">
                 <span class="logo-isotipo" aria-hidden="true">W<span class="logo-acento"></span></span>
                 <span class="logo-texto">Workly</span>
             </a>
             <p class="texto-tenue">© @DateTime.Today.Year Workly · Hecho en Buenos Aires, Argentina</p>
             <nav class="fila-espaciada" aria-label="Legales y ayuda">
-                <a asp-controller="Home" asp-action="Terminos">Términos</a>
-                <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
-                <a asp-controller="Home" asp-action="Cookies">Cookies</a>
-                <a asp-controller="Perfil" asp-action="Ayuda">Ayuda</a>
+                <a href="/Home/Terminos">Términos</a>
+                <a href="/Home/Privacy">Privacidad</a>
+                <a href="/Home/Cookies">Cookies</a>
+                <a href="/Perfil/Ayuda">Ayuda</a>
             </nav>
         </div>
     </footer>
@@ -125,7 +126,6 @@
     <div class="toast-container" aria-live="polite" data-snackbars data-mensaje="@TempData["Mensaje"]" data-mensaje-tipo="@TempData["MensajeTipo"]"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="/js/site.js"></script>
 </body>
 </html>

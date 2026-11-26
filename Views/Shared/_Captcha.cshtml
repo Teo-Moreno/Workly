@@ -1,4 +1,4 @@
-<div class="campo @Html.ClaseError(Captcha.CampoRespuesta)" data-captcha data-captcha-url="@Url.Action("NuevoCaptcha", "Cuenta")">
+<div class="campo @ViewBag.Errores.Clase(Captcha.CampoRespuesta)" data-captcha data-captcha-url="/Cuenta/NuevoCaptcha">
     <label class="form-label" for="captcha-respuesta">Escribí las letras de la imagen</label>
     <div class="fila-envuelta">
         <img class="imagen-borde" src="@Model.Imagen" width="200" height="64" alt="Letras para comprobar que sos una persona" data-captcha-imagen />
@@ -8,5 +8,5 @@
     <input class="form-control entrada-espaciada" id="captcha-respuesta" name="@Captcha.CampoRespuesta" autocomplete="off" autocapitalize="characters"
            spellcheck="false" maxlength="10" required placeholder="Ej.: K7P3Q" />
     <span class="form-text">No distingue mayúsculas de minúsculas.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Captcha.CampoRespuesta, "Escribí las letras de la imagen")</span>
 </div>

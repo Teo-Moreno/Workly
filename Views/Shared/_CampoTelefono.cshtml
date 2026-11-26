@@ -1,4 +1,4 @@
-<div class="campo @Html.ClaseError((string)Model.Nombre)">
+<div class="campo @ViewBag.Errores.Clase(Model.Nombre)">
     <label class="form-label" for="@Model.Id">Teléfono <span class="campo-opcional">(opcional)</span></label>
     <div class="control-con-prefijo">
         <span class="control-prefijo" data-prefijo-telefono>@Model.Prefijo</span>
@@ -7,5 +7,5 @@
                data-telefono data-codigos-area="@string.Join(",", Telefonos.CodigosDeArea3)" />
     </div>
     <span class="form-text">Código de área y número, sin el 0 ni el 15. Los espacios y el guion se ponen solos.</span>
-    <span class="invalid-feedback"><icono nombre="warning" />@Html.MensajeError((string)Model.Nombre, "Ingresá el código de área y el número: 10 números")</span>
+    <span class="invalid-feedback"><icono nombre="warning" />@ViewBag.Errores.Mensaje(Model.Nombre, "Ingresá el código de área y el número: 10 números")</span>
 </div>

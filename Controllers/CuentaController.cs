@@ -6,7 +6,7 @@ using Workly.Models;
 
 namespace Workly.Controllers;
 
-public class CuentaController : Controller
+public class CuentaController : Controlador
 {
     private readonly IWebHostEnvironment _entorno;
     private readonly ILogger<CuentaController> _logger;
@@ -17,7 +17,7 @@ public class CuentaController : Controller
     private readonly VerificacionEmail _verificacion;
 
     public CuentaController(IWebHostEnvironment entorno, ILogger<CuentaController> logger, IAuthenticationSchemeProvider esquemas,
-                            Captcha captcha, IntentosLogin intentos, Correo correo, VerificacionEmail verificacion)
+                            Captcha captcha, IntentosLogin intentos, Correo correo, VerificacionEmail verificacion) : base("_LayoutCuenta")
     {
         _correo = correo;
         _verificacion = verificacion;
@@ -413,7 +413,41 @@ public class CuentaController : Controller
     private IActionResult Formulario(object modelo, string? vista = null)
     {
         ViewBag.Formulario = modelo;
+        ViewBag.MailConfigurado = _correo.Configurado;
+        ViewBag.EsDesarrollo = _entorno.IsDevelopment();
+        if (modelo is LoginViewModel login)
+        {
+            ViewBag.BotonesExternos = new BotonesExternos("Iniciar sesión", null, login.ReturnUrl);
+            Barra("¿No tenés cuenta?", "/Cuenta/CrearCuenta", "Crear cuenta");
+        }
+        else if (modelo is RegistroPersonaViewModel)
+        {
+            ViewBag.TipoCuenta = "persona";
+            ViewBag.BotonesExternos = new BotonesExternos("Registrarte", "persona", null);
+            Barra("¿Ya tenés cuenta?", "/Cuenta/IniciarSesion", "Iniciar sesión");
+        }
+        else if (modelo is RegistroEmpresaViewModel)
+        {
+            ViewBag.TipoCuenta = "empresa";
+            ViewBag.BotonesExternos = new BotonesExternos("Registrarte", "empresa", null);
+            Barra("¿Ya tenés cuenta?", "/Cuenta/IniciarSesion", "Iniciar sesión");
+        }
+        else if (modelo is RecuperarClaveViewModel)
+        {
+            Barra("¿Te acordaste?", "/Cuenta/IniciarSesion", "Iniciar sesión");
+        }
+        if (modelo is RecuperarClaveViewModel || ViewBag.PideCaptcha == true)
+        {
+            ViewBag.Captcha = _captcha.Nuevo();
+        }
         return vista == null ? View() : View(vista);
+    }
+
+    private void Barra(string texto, string url, string link)
+    {
+        ViewBag.BarraTexto = texto;
+        ViewBag.BarraUrl = url;
+        ViewBag.BarraLink = link;
     }
 
     private IActionResult RedirigirDespuesDeIngresar(string? returnUrl) =>

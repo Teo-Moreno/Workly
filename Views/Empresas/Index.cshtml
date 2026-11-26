@@ -8,7 +8,7 @@
         <p class="subtitulo">Conocé las empresas que buscan gente en Workly y mirá sus búsquedas abiertas.</p>
     </header>
 
-    <form class="grilla-cinco" asp-controller="Empresas" asp-action="Index" method="get" role="search" data-cargando="#empresas-resultados">
+    <form class="grilla-cinco" action="/Empresas" method="get" role="search" data-cargando="#empresas-resultados">
         <div class="campo">
             <label class="visually-hidden" for="buscar-empresa">Buscar empresa</label>
             <div class="control-con-icono">
@@ -48,7 +48,7 @@
     </form>
 
     <div id="empresas-resultados">
-        <partial name="_CargandoResultados" model='"Buscando empresas…"' />
+        <partial name="_CargandoResultados" />
 
         <p class="titulo-oscuro">@(ViewBag.Empresas.Count == 1 ? "1 empresa" : $"{ViewBag.Empresas.Count} empresas")</p>
 
@@ -60,7 +60,7 @@
                 {
                     <h2 class="recuadro-punteado-titulo">No encontramos empresas con esa búsqueda</h2>
                     <p>Probá con otro nombre o buscá en todo el país.</p>
-                    <a class="btn btn-outline-primary" asp-controller="Empresas" asp-action="Index" asp-route-IDPais="@ViewBag.IDPais" asp-route-IDProvincia="" data-cargando="#empresas-resultados">Ver todo el país</a>
+                    <a class="btn btn-outline-primary" href="/Empresas?IDPais=@ViewBag.IDPais&amp;IDProvincia=" data-cargando="#empresas-resultados">Ver todo el país</a>
                 }
                 else
                 {
@@ -69,7 +69,7 @@
                 }
                 @if (!User.EstaLogueado())
                 {
-                    <a class="btn btn-primary" asp-controller="Cuenta" asp-action="CrearCuenta" asp-route-tipo="empresa">Registrar mi empresa</a>
+                    <a class="btn btn-primary" href="/Cuenta/CrearCuenta?tipo=empresa">Registrar mi empresa</a>
                 }
             </div>
         }

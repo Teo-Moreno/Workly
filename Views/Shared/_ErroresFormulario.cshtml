@@ -1,7 +1,7 @@
-@if (Html.ErroresGenerales().Any())
+@if (ViewBag.Errores.HayGenerales)
 {
     <div class="toast toast-error" role="alert" data-error-formulario>
         <icono nombre="error" />
-        <span class="toast-body">@string.Join(" ", Html.ErroresGenerales())</span>
+        <span class="toast-body">@string.Join(" ", ViewBag.Errores.Generales)</span>
     </div>
 }

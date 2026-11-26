@@ -1,13 +1,14 @@
 @if (!User.EstaLogueado())
 {
-    <a class="btn btn-outline-lg" href="@Url.Action("IniciarSesion", "Cuenta", new { returnUrl = ViewContext.Volver() })"><icono nombre="bookmark" />Guardar</a>
+    <a class="btn btn-outline-lg" href="@ViewBag.UrlIngresar"><icono nombre="bookmark" />Guardar</a>
 }
-else if (User.EsPersona() && !User.EsPropia((int?)Model.IDUsuario_Publicador))
+else if (User.EsPersona() && !ViewBag.EsPropia)
 {
-    <form asp-controller="Guardadas" asp-action="@(Model.Guardada ? "Quitar" : "Guardar")" method="post">
+    <form action="/Guardadas/@(Model.Guardada ? "Quitar" : "Guardar")" method="post">
+        @Html.AntiForgeryToken()
         <input type="hidden" name="id" value="@Model.ID" />
         <input type="hidden" name="externa" value="@(Model.EsExterna ? "true" : "false")" />
-        <input type="hidden" name="volver" value="@ViewContext.Volver()" />
+        <input type="hidden" name="volver" value="@ViewBag.Volver" />
         <button class="@(Model.Guardada ? "btn btn-turquesa" : "btn btn-outline-lg")" type="submit" aria-pressed="@(Model.Guardada ? "true" : "false")"
                 title="@(Model.Guardada ? "Sacar de Guardadas" : "Guardar para verla después")">
             <icono nombre="@(Model.Guardada ? "bookmark-fill" : "bookmark")" />@(Model.Guardada ? "Guardada" : "Guardar")

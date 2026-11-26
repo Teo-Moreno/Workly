@@ -318,6 +318,8 @@ public static class Perfiles
         var cuenta = formulario as CuentaFormulario;
         var empresa = formulario as EmpresaFormulario;
         var idPais = cuenta?.IDPais ?? empresa?.IDPais ?? (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais) ?? modelo.Paises.FirstOrDefault()?.ID;
+        var codigoPais = modelo.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54";
+        var codigoGuardado = modelo.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais))?.Codigo_Telefono;
         return new PantallaConfiguracion
         {
             Perfil = modelo,
@@ -325,10 +327,24 @@ public static class Perfiles
             Activa = pestanas.Contains(pestana) ? pestana! : "cuenta",
             FormularioCuenta = cuenta,
             FormularioEmpresa = empresa,
-            IDPais = idPais,
-            CodigoPais = modelo.Paises.FirstOrDefault(p => p.ID == idPais)?.Codigo_Telefono ?? "+54",
-            CodigoGuardado = modelo.Paises.FirstOrDefault(p => p.ID == (esEmpresa ? modelo.Empresa?.IDPais : modelo.Perfil.IDPais))?.Codigo_Telefono,
-            CamposBusqueda = esEmpresa ? null : CamposBusqueda.Desde(modelo, formulario as BusquedaFormulario)
+            CamposBusqueda = esEmpresa ? null : CamposBusqueda.Desde(modelo, formulario as BusquedaFormulario),
+            Telefono = new CampoTelefono
+            {
+                Id = "cfg-telefono",
+                Valor = esEmpresa
+                    ? empresa?.Telefono ?? Telefonos.ParteLocal(modelo.Empresa?.Telefono, codigoGuardado)
+                    : cuenta?.Telefono ?? Telefonos.ParteLocal(modelo.Perfil.Telefono, modelo.Perfil.Codigo_Telefono),
+                Prefijo = codigoPais
+            },
+            Ubicacion = new CampoUbicacion
+            {
+                Prefijo = "cfg-",
+                Paises = modelo.Paises,
+                Provincias = modelo.Provincias,
+                IDPais = idPais,
+                IDProvincia = esEmpresa ? empresa?.IDProvincia ?? modelo.Empresa?.IDProvincia : cuenta?.IDProvincia ?? modelo.Perfil.IDProvincia,
+                EtiquetaProvincia = esEmpresa ? "Provincia de la sede" : "Provincia donde vivís"
+            }
         };
     }
 
@@ -464,8 +480,7 @@ public class PantallaConfiguracion
     public string Activa { get; set; } = "cuenta";
     public CuentaFormulario? FormularioCuenta { get; set; }
     public EmpresaFormulario? FormularioEmpresa { get; set; }
-    public int? IDPais { get; set; }
-    public string CodigoPais { get; set; } = "+54";
-    public string? CodigoGuardado { get; set; }
     public CamposBusqueda? CamposBusqueda { get; set; }
+    public CampoTelefono Telefono { get; set; } = new();
+    public CampoUbicacion Ubicacion { get; set; } = new();
 }

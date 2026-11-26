@@ -1,6 +1,6 @@
 <div class="modal fade" tabindex="-1" aria-hidden="true" id="modal-experiencia" aria-labelledby="modal-experiencia-titulo" data-abrir-al-cargar="@(Model.Abierto ? "true" : null)"><div class="modal-dialog"><div class="modal-content">
     <form class="modal-body grilla-campos" method="@(Model.EnServidor ? "post" : "dialog")" novalidate
-          action="@(Model.EnServidor ? Url.Action("AgregarExperiencia", "Perfil") : null)"
+          action="@(Model.EnServidor ? "/Perfil/AgregarExperiencia" : null)"
           data-modal-local="@(Model.EnServidor ? null : "experiencia")" data-formulario-real="@(Model.EnServidor ? "" : null)">
         @if (Model.EnServidor)
         {
@@ -12,21 +12,21 @@
         </div>
         <p class="modal-texto">Sumá tus trabajos, pasantías o proyectos freelance.</p>
 
-        <div class="campo @(Model.Abierto ? Html.ClaseError("Puesto") : "")">
+        <div class="campo @Model.Errores.Clase("Puesto")">
             <label class="form-label" for="exp-puesto">Puesto</label>
             <input class="form-control" id="exp-puesto" name="Puesto" value="@Model.Valores.Puesto" maxlength="100" required placeholder="Ej.: Cajero/a, Analista contable" />
-            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Puesto", "Completá el puesto") : "Completá el puesto")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Puesto", "Completá el puesto")</span>
         </div>
-        <div class="campo @(Model.Abierto ? Html.ClaseError("Empresa") : "")">
+        <div class="campo @Model.Errores.Clase("Empresa")">
             <label class="form-label" for="exp-empresa">Empresa</label>
             <input class="form-control" id="exp-empresa" name="Empresa" value="@Model.Valores.Empresa" maxlength="100" required placeholder="Nombre de la empresa" />
-            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Empresa", "Completá la empresa") : "Completá la empresa")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Empresa", "Completá la empresa")</span>
         </div>
 
         <div class="columnas">
-            <partial name="_CampoMes" model='new CampoMes { Nombre = "Inicio", Id = "exp-inicio", Etiqueta = "Inicio", Valor = Model.Valores.Inicio, Requerido = true, Error = Model.Abierto && Html.ClaseError("Inicio").Length > 0 ? Html.MensajeError("Inicio", "") : null }' />
+            <partial name="_CampoMes" model="Model.Inicio" />
             <div data-fin-de="exp-actual" hidden="@Model.Valores.Actual">
-                <partial name="_CampoMes" model='new CampoMes { Nombre = "Fin", Id = "exp-fin", Etiqueta = "Finalización", Valor = Model.Valores.Fin, Requerido = !Model.Valores.Actual, Error = Model.Abierto && Html.ClaseError("Fin").Length > 0 ? Html.MensajeError("Fin", "") : null }' />
+                <partial name="_CampoMes" model="Model.Fin" />
             </div>
         </div>
 
@@ -35,10 +35,10 @@
             <span class="form-check-label">Trabajo actualmente acá</span>
         </label>
 
-        <div class="campo @(Model.Abierto ? Html.ClaseError("Descripcion") : "")">
+        <div class="campo @Model.Errores.Clase("Descripcion")">
             <label class="form-label" for="exp-descripcion">Qué hacías <span class="campo-opcional">(opcional)</span></label>
             <textarea class="form-control" id="exp-descripcion" name="Descripcion" rows="3" maxlength="500" placeholder="Tus tareas y logros principales.">@Model.Valores.Descripcion</textarea>
-            <span class="invalid-feedback"><icono nombre="warning" />@(Model.Abierto ? Html.MensajeError("Descripcion", "Usá hasta 500 caracteres") : "Usá hasta 500 caracteres")</span>
+            <span class="invalid-feedback"><icono nombre="warning" />@Model.Errores.Mensaje("Descripcion", "Usá hasta 500 caracteres")</span>
         </div>
 
         <div class="modal-footer">

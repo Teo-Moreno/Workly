@@ -5,8 +5,12 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class GuardadasController : Controller
+public class GuardadasController : Controlador
 {
+    public GuardadasController() : base("_LayoutApp")
+    {
+    }
+
     public IActionResult Index()
     {
         if (User.EsEmpresa())

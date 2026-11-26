@@ -1,9 +1,9 @@
 <article class="tarjeta" data-oferta="@Model.Clave">
     <div class="tarjeta-fila">
-        <partial name="_LogoEmpresa" model='new LogoEmpresa(Model.Logo, Model.Empresa, Model.EsExterna ? "" : "cuadro-principal")' />
+        <span class="@(Model.EsExterna ? "cuadro" : "cuadro-principal")" aria-hidden="true"><partial name="_LogoEmpresa" model="Model" /></span>
         <div class="tarjeta-textos">
             <h3 class="tarjeta-titulo">
-                <a href="@(ViewData["Enlace"] as string ?? Model.Enlace)" data-oferta-enlace>@Model.Titulo</a>
+                <a href="@Model.Enlace" data-oferta-enlace>@Model.Titulo</a>
             </h3>
             <p class="tarjeta-texto">@Model.Empresa@(Model.UbicacionVisible != null ? " · " + Model.UbicacionVisible : "")</p>
         </div>

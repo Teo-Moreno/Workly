@@ -6,7 +6,7 @@
     <header class="bloque-titulo">
         <nav aria-label="Estás en">
             <ol class="breadcrumb breadcrumb-chica">
-                <li class="breadcrumb-item"><a asp-controller="Publicaciones" asp-action="Index">Mis publicaciones</a></li>
+                <li class="breadcrumb-item"><a href="/Publicaciones">Mis publicaciones</a></li>
                 <li class="breadcrumb-item active" aria-current="page">@ViewBag.Oferta.Titulo</li>
             </ol>
         </nav>
@@ -16,14 +16,16 @@
                 <p class="subtitulo">@ViewBag.Oferta.Empresa@(ViewBag.Oferta.UbicacionVisible != null ? " · " + ViewBag.Oferta.UbicacionVisible : "") · @ViewBag.Oferta.PublicadaTexto</p>
             </div>
             <div class="acciones">
-                <a class="btn btn-outline-primary" asp-controller="Empleos" asp-action="Detalle" asp-route-id="@ViewBag.Oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
+                <a class="btn btn-outline-primary" href="/Empleos/Detalle/@ViewBag.Oferta.ID"><icono nombre="eye" />Ver como la ven los demás</a>
                 @if (ViewBag.Oferta.Estado_Publicacion == "Aprobada" && !ViewBag.Oferta.EstaCerrada)
                 {
-                    <form asp-controller="Publicaciones" asp-action="Cerrar" asp-route-id="@ViewBag.Oferta.ID" method="post" data-confirmar="¿Cerramos la búsqueda? Deja de aparecer y de recibir postulaciones.">
+                    <form action="/Publicaciones/Cerrar/@ViewBag.Oferta.ID" method="post" data-confirmar="¿Cerramos la búsqueda? Deja de aparecer y de recibir postulaciones.">
+                        @Html.AntiForgeryToken()
                         <button class="btn btn-outline-primary" type="submit">Cerrar búsqueda</button>
                     </form>
                 }
-                <form asp-controller="Publicaciones" asp-action="Eliminar" asp-route-id="@ViewBag.Oferta.ID" method="post" data-confirmar="¿Eliminamos la búsqueda y sus postulaciones? No se puede deshacer.">
+                <form action="/Publicaciones/Eliminar/@ViewBag.Oferta.ID" method="post" data-confirmar="¿Eliminamos la búsqueda y sus postulaciones? No se puede deshacer.">
+                    @Html.AntiForgeryToken()
                     <button class="btn btn-outline-danger" type="submit"><icono nombre="trash-full" />Eliminar</button>
                 </form>
             </div>
@@ -72,7 +74,7 @@
                                         @if (!string.IsNullOrEmpty(p.Foto)) { <img src="@p.Foto" alt="" /> } else { @p.Iniciales }
                                     </span>
                                     <div class="flexible">
-                                        <h4 class="titulo-chico"><a asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">@p.NombreCompleto</a></h4>
+                                        <h4 class="titulo-chico"><a href="/Publicaciones/Postulante/@p.IDPostulacion">@p.NombreCompleto</a></h4>
                                         <p class="texto-chico-separado"><span class="badge @(p.Puntaje >= 60 ? "badge-exito" : p.Puntaje >= 30 ? "badge-advertencia" : "badge-neutra")">Coincide @p.Puntaje%</span>@(p.Motivos.Count > 0 ? " " + string.Join(" · ", p.Motivos) : "")</p>
                                         <p class="texto-chico-separado">@p.Resumen</p>
                                         <p class="texto-chico-separado">
@@ -86,7 +88,8 @@
                                         {
                                             if (otraEtapa != etapa)
                                             {
-                                                <form asp-controller="Publicaciones" asp-action="CambiarEstado" asp-route-id="@ViewBag.Oferta.ID" method="post">
+                                                <form action="/Publicaciones/CambiarEstado/@ViewBag.Oferta.ID" method="post">
+                                                    @Html.AntiForgeryToken()
                                                     <input type="hidden" name="idPostulacion" value="@p.IDPostulacion" />
                                                     <input type="hidden" name="estado" value="@estado" />
                                                     <button class="btn btn-outline-sm" type="submit">@boton</button>
@@ -95,9 +98,9 @@
                                         }
                                         @if (p.TieneCV)
                                         {
-                                            <a class="btn btn-outline-sm" asp-controller="Publicaciones" asp-action="CV" asp-route-id="@p.IDPostulacion"><icono nombre="download" />CV</a>
+                                            <a class="btn btn-outline-sm" href="/Publicaciones/CV/@p.IDPostulacion"><icono nombre="download" />CV</a>
                                         }
-                                        <a class="btn btn-sm" asp-controller="Publicaciones" asp-action="Postulante" asp-route-id="@p.IDPostulacion">Ver perfil</a>
+                                        <a class="btn btn-sm" href="/Publicaciones/Postulante/@p.IDPostulacion">Ver perfil</a>
                                     </div>
                                 </li>
                             }

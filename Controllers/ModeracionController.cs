@@ -6,11 +6,11 @@ using Workly.Models;
 namespace Workly.Controllers;
 
 [Authorize]
-public class ModeracionController : Controller
+public class ModeracionController : Controlador
 {
     private readonly Correo _correo;
 
-    public ModeracionController(Correo correo)
+    public ModeracionController(Correo correo) : base("_LayoutApp")
     {
         _correo = correo;
     }
@@ -21,6 +21,7 @@ public class ModeracionController : Controller
         {
             context.Result = NotFound();
         }
+        base.OnActionExecuting(context);
     }
 
     public IActionResult Index()
@@ -43,6 +44,7 @@ public class ModeracionController : Controller
         ViewBag.EsRevision = detalle.EsRevision;
         ViewBag.PuedePostular = detalle.PuedePostular;
         ViewBag.TieneCV = detalle.TieneCV;
+        ViewBag.MailConfigurado = _correo.Configurado;
         return View("~/Views/Empleos/Detalle.cshtml");
     }
 
